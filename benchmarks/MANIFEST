@@ -1,0 +1,5 @@
+[benchmarks]
+
+name	metafile
+pyflate	<local>
+nbody	<local>
