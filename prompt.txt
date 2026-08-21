@@ -1,0 +1,40 @@
+AI Tool Prompt Log — HWSW Final Project (Matan Cohen & Yuval)
+Tool: Claude Code (Anthropic), model Claude Fable 5
+Per course requirement §10: prompts/instructions used with AI tools.
+================================================================
+
+2026-08-21 — Project kickoff & benchmark research
+-------------------------------------------------
+Prompt: "I want you to help me with final project in a course about Hardware
+and software integrations. The project is described here [Project.pdf].
+... create a workflow (deep-research style) after setting up the initial
+system exploring the different benchmarks deep-researching which can be
+accelerated and how. I thought about trying to use Rust to accelerate and
+then just like the task requires a hardware accelerator, try to give me also
+exotic ideas. For now I want mainly to research all the ways we can go about
+it, possibilities and which benchmarks to select"
+
+Result: environment set up (fresh course VM image on naranja14, QEMU + SSH);
+a 10-agent research workflow profiled all 12 candidate benchmarks with
+perf/pyperf on the VM and researched software-optimization routes, Rust/PyO3
+fit, and hardware-accelerator ideas (realistic + exotic) per benchmark;
+findings compiled into a selection report ("The Seven Percent Dossier",
+saved in the project research/ folder).
+
+2026-08-21 — Follow-ups
+-----------------------
+Prompt: "did the setup work?"
+Prompt: "can you extract the report locally as a file"
+Prompt: "what is the hardware accelerator you suggest for each example"
+
+2026-08-21 — Selection & repo skeleton
+--------------------------------------
+Prompt: "go with pyflate + nbody, set up the git repo skeleton"
+
+Result: this repository — stock copies of bm_pyflate/bm_nbody imported as
+the baseline, pyperformance custom MANIFEST, script_pyflate.sh /
+script_nbody.sh runners (setup/baseline/profile/optimized/compare stages),
+report stubs, and hw/ + rust/ placeholders.
+
+(Log continues below as the project progresses; every substantive AI prompt
+is recorded here.)

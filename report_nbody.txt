@@ -1,0 +1,56 @@
+HWSW Final Project — Benchmark Report: nbody
+Matan Cohen & Yuval
+================================================================
+
+1. OVERVIEW
+-----------
+[TODO] N-body: symplectic-Euler integration of the Sun + 4 gas giants
+(5 bodies, 10 precomputed pairs) under Newtonian gravity. Per pyperf loop:
+report_energy(); advance(dt=0.01, n=20000); report_energy(). advance() is
+a doubly nested loop: 20,000 timesteps x 10 pairs, ~18 float ops + list
+subscript stores per pair. Libraries: stdlib only. Data structures:
+lists of [position, velocity, mass].
+Energy conservation across runs is the correctness oracle.
+
+2. INITIAL ANALYSIS
+-------------------
+[TODO — paste perf report excerpts + flame_nbody.svg reference]
+Preliminary (research phase, course VM): mean 230 ms ± 2 ms; IPC 3.07.
+Profile: one wide advance() plateau; float_mul / float_add /
+PyFloat_FromDouble / float_dealloc — CPython float boxing churn; d**-1.5
+goes through libm pow.
+
+3. OPTIMIZATIONS
+----------------
+[TODO — implemented tiers, each measured separately]
+Planned ladder:
+  a) Pure-Python micro-opts: dt/(dsq*sqrt(dsq)) instead of d**-1.5,
+     direct indexing, locals binding.                       (est. 10-30% on 3.10)
+  b) SoA data layout: flat float lists + precomputed pair indices. (est. 15-40%)
+  c) Rust/PyO3 advance() kernel — one FFI call per 20,000 steps,
+     identical energy trace as proof.                       (est. 50-100x kernel)
+  d) Documented anti-result: NumPy vectorization at N=5 (expected loss).
+
+4. PERFORMANCE COMPARISON
+-------------------------
+[TODO — pyperf compare_to output; see results/compare_nbody.txt]
+
+5. HARDWARE ACCELERATION PROPOSAL
+---------------------------------
+[TODO — full proposal per course rubric]
+Primary design: GRAPE-style pairwise gravity pipeline (precedent: U. Tokyo
+GRAPE-1..8 special-purpose N-body machines). Body state in an internal
+register file; pipelined datapath: dx,dy,dz -> d^2 -> d^-1.5 (rsqrt LUT
+seed + 2 Newton-Raphson iterations) -> 6 velocity FMAs; position
+integrator; STEP-COUNT register so software writes dt and n=20000 once
+and rings one doorbell. MMIO: state load window, DT, NSTEPS, START,
+STATUS/IRQ, read-back window.
+ISA-extension contrast: fused rsqrtstep (x -> x^-1.5) + vec3 FMA custom
+instructions emitted from the compiled kernel. Verilog sources in hw/.
+Include: I/O spec + operating frequency, datapath/control description,
+HW/SW interface, FP32-vs-FP64 precision vs energy-check trade-off,
+block diagram, performance/area/power trade-offs.
+
+6. CONCLUSION
+-------------
+[TODO]

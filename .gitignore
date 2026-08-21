@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+# perf raw data is large; committed evidence is the derived reports/SVGs/JSONs
+results/*.perf.data
+results/*.perf.data.old
+# build artifacts
+rust/**/target/
+venv/
+.venv/

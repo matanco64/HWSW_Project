@@ -1,0 +1,54 @@
+HWSW Final Project — Benchmark Report: pyflate
+Matan Cohen & Yuval
+================================================================
+
+1. OVERVIEW
+-----------
+[TODO] pyflate is a pure-Python bzip2/DEFLATE decompressor (the shipped input
+data/interpreter.tar.bz2 is bzip2, magic 0x425a). Pipeline per block:
+RBitfield bit reader -> per-symbol Huffman decode (linear scan, tables
+switched every 50 symbols via selectors) -> move-to-front -> run-length
+decode -> inverse Burrows-Wheeler transform -> RLE4 expansion.
+Libraries: stdlib only (pyperf harness). Data structures: Python big-int
+bit buffer, list-based Huffman tables, lists for MTF/BWT.
+Output is MD5-verified every run — built-in correctness oracle.
+
+2. INITIAL ANALYSIS
+-------------------
+[TODO — paste perf report excerpts + flame_pyflate.svg reference]
+Preliminary (research phase, course VM): mean 1.11 s ± 0.01 s; IPC 2.69.
+cProfile of one decode: find_next_symbol ~44% cumulative (linear Huffman
+scan), bit-buffer arithmetic (~20%), inverse BWT (~17%), move_to_front (~11%).
+
+3. OPTIMIZATIONS
+----------------
+[TODO — implemented tiers, each measured separately]
+Planned ladder:
+  a) Low-effort: bulk input read + wide bit-buffer refills; MTF via
+     l.insert(0, l.pop(c)); locals binding; bytearray BWT.   (est. 8-15%)
+  b) Canonical-Huffman table decode replacing the linear scan (est. 25-45%)
+  c) Rust/PyO3 block-decode kernel (stretch).                (est. 50-80%)
+
+4. PERFORMANCE COMPARISON
+-------------------------
+[TODO — pyperf compare_to output: mean ± std dev, speedup factor,
+significance verdict; see results/compare_pyflate.txt]
+
+5. HARDWARE ACCELERATION PROPOSAL
+---------------------------------
+[TODO — full proposal per course rubric]
+Primary design: fixed-function Huffman-decode engine (Intel IAA/QAT
+analogue): DMA descriptor (bitstream addr + bit offset, code-length
+tables, output buffer), barrel-shifter bit aligner -> canonical-code
+comparator cascade -> symbol RAM, 1 symbol/cycle, FSM table swap per
+50-symbol group. Register map: CTRL, STATUS, SRC_ADDR, SRC_BITOFF,
+TBL_ADDR, DST_ADDR, LEN, DOORBELL.
+Secondary block: 256-entry move-to-front shift-register CAM (fused
+pipeline stage). Verilog sources in hw/.
+Include: I/O spec + operating frequency, datapath/control description,
+HW/SW interface (driver, MMIO, DMA), Amdahl-based justification from
+the perf data, block diagram, performance/area/power trade-offs.
+
+6. CONCLUSION
+-------------
+[TODO]
