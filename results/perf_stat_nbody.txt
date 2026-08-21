@@ -1,0 +1,40 @@
+* Not enough samples to get a stable result (95% certainly of less than 1% variation)
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python3 -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+
+nbody: Mean +- std dev: 232 ms +- 5 ms
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
+
+       21128531240      cycles:u                                                    
+       60203495142      instructions:u            #    2.85  insn per cycle         
+
+       9.140430192 seconds time elapsed
+
+       8.893305000 seconds user
+       0.207849000 seconds sys
+
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python3 -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+
+nbody: Mean +- std dev: 231 ms +- 2 ms
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
+
+          72787323      cache-references                                            
+           1151491      cache-misses              #    1.582 % of all cache refs    
+       10347778905      branches                                                    
+          63610017      branch-misses             #    0.61% of all branches        
+
+       9.124023299 seconds time elapsed
+
+       8.883926000 seconds user
+       0.204201000 seconds sys
+
+

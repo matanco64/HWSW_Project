@@ -1,0 +1,1233 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 6K of event 'cpu-clock'
+# Event count (approx.): 6010010004
+#
+# Children      Self  Command      Shared Object     Symbol                                    
+# ........  ........  ...........  ................  ..........................................
+#
+    44.49%    44.49%  python3-dbg  python3.10d       [.] _PyEval_EvalFrameDefault
+            |          
+            |--1.30%--0x300370014137c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--1.03%--0x300380014147c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.93%--0x3c000300370014
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.85%--0x180a7c057c0e7d
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.83%--0xa7d035c035c097d
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.80%--0x16400170014117c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.75%--0x3c000300380014
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.70%--0xa7c057c0e7d0d7d
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.68%--0x137c107c00190005
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.68%--0x127d001400130164
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.67%--0x147c0f7c00190005
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.60%--0x35c035c097d087d
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.60%--0x14117c117c0017
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.58%--0xe7c137d0014127c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.58%--0x502640d7c003c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.57%--0x50464087c003c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.55%--0x147c107c00190005
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.55%--0x137c117c00190005
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.55%--0x35c097d087d077d
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.53%--0x157d035c265d0044
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.53%--0xd7c003c00030037
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.53%--0x380014147c117c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.53%--0x503640d7c003c
+            |          _PyEval_EvalFrameDefault
+            |          
+            |--0.52%--0x97c127d00140013
+            |          _PyEval_EvalFrameDefault
+            |          
+             --0.52%--0x370014137c117c
+                       _PyEval_EvalFrameDefault
+
+    26.35%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009ad3c0
+            |
+            ---0x9ad3c0
+               |          
+               |--5.58%--binary_op1
+               |          
+               |--3.66%--float_mul.lto_priv.0
+               |          
+               |--2.83%--list_ass_item.lto_priv.0
+               |          
+               |--1.80%--float_add.lto_priv.0
+               |          
+               |--1.70%--float_sub.lto_priv.0
+               |          
+               |--1.68%--_Py_CheckSlotResult
+               |          
+               |--1.38%--binary_iop1
+               |          
+               |--1.33%--list_ass_subscript.lto_priv.0
+               |          
+               |--0.87%--PyObject_SetItem
+               |          
+               |--0.77%--float_dealloc.lto_priv.0
+               |          
+               |--0.72%--_PyNumber_Index
+               |          
+               |--0.67%--PyLong_AsSsize_t
+               |          
+               |--0.63%--PyNumber_AsSsize_t
+               |          
+               |--0.60%--PyFloat_FromDouble
+               |          
+                --0.53%--PyNumber_Multiply
+
+     5.75%     5.75%  python3-dbg  python3.10d       [.] binary_op1
+            |          
+             --5.58%--0x9ad3c0
+                       binary_op1
+
+     3.90%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009af720
+            |
+            ---0x9af720
+               |          
+               |--1.15%--_PyNumber_Index
+               |          
+               |--0.77%--PyLong_AsSsize_t
+               |          
+               |--0.70%--PyNumber_AsSsize_t
+               |          
+               |--0.60%--list_subscript.lto_priv.0
+               |          
+                --0.58%--PyObject_GetItem
+
+     3.78%     3.78%  python3-dbg  python3.10d       [.] PyFloat_FromDouble
+            |          
+            |--3.18%--PyFloat_FromDouble
+            |          
+             --0.60%--0x9ad3c0
+                       PyFloat_FromDouble
+
+     3.66%     3.66%  python3-dbg  python3.10d       [.] float_mul.lto_priv.0
+            |
+            ---0x9ad3c0
+               float_mul.lto_priv.0
+
+     2.83%     2.83%  python3-dbg  python3.10d       [.] list_ass_item.lto_priv.0
+            |
+            ---0x9ad3c0
+               list_ass_item.lto_priv.0
+
+     2.76%     2.76%  python3-dbg  python3.10d       [.] float_dealloc.lto_priv.0
+            |          
+             --0.77%--0x9ad3c0
+                       float_dealloc.lto_priv.0
+
+     2.22%     2.22%  python3-dbg  python3.10d       [.] _Py_CheckSlotResult
+            |          
+            |--1.68%--0x9ad3c0
+            |          _Py_CheckSlotResult
+            |          
+             --0.53%--_Py_CheckSlotResult
+
+     2.12%     2.12%  python3-dbg  python3.10d       [.] PyNumber_AsSsize_t
+            |          
+            |--0.78%--PyNumber_AsSsize_t
+            |          
+            |--0.70%--0x9af720
+            |          PyNumber_AsSsize_t
+            |          
+             --0.63%--0x9ad3c0
+                       PyNumber_AsSsize_t
+
+     1.87%     1.87%  python3-dbg  python3.10d       [.] _PyNumber_Index
+            |          
+            |--1.15%--0x9af720
+            |          _PyNumber_Index
+            |          
+             --0.72%--0x9ad3c0
+                       _PyNumber_Index
+
+     1.80%     1.80%  python3-dbg  python3.10d       [.] float_add.lto_priv.0
+            |
+            ---0x9ad3c0
+               float_add.lto_priv.0
+
+     1.70%     1.70%  python3-dbg  python3.10d       [.] float_sub.lto_priv.0
+            |
+            ---0x9ad3c0
+               float_sub.lto_priv.0
+
+     1.65%     1.65%  python3-dbg  python3.10d       [.] PyObject_GetItem
+            |          
+             --0.58%--0x9af720
+                       PyObject_GetItem
+
+     1.65%     1.65%  python3-dbg  python3.10d       [.] list_item.lto_priv.0
+            |
+            ---list_item.lto_priv.0
+
+     1.57%     1.57%  python3-dbg  python3.10d       [.] _Py_NewReference
+            |          
+             --1.55%--_Py_NewReference
+
+     1.48%     1.48%  python3-dbg  libm.so.6         [.] __ieee754_pow_fma
+            |
+            ---__ieee754_pow_fma
+
+     1.47%     1.47%  python3-dbg  python3.10d       [.] PyObject_SetItem
+            |          
+             --0.87%--0x9ad3c0
+                       PyObject_SetItem
+
+     1.43%     1.43%  python3-dbg  python3.10d       [.] PyLong_AsSsize_t
+            |          
+            |--0.77%--0x9af720
+            |          PyLong_AsSsize_t
+            |          
+             --0.67%--0x9ad3c0
+                       PyLong_AsSsize_t
+
+     1.42%     0.00%  python3-dbg  [unknown]         [.] 0x003c000300370014
+            |
+            ---0x3c000300370014
+               |          
+                --0.93%--_PyEval_EvalFrameDefault
+
+     1.38%     1.38%  python3-dbg  python3.10d       [.] binary_iop1
+            |
+            ---0x9ad3c0
+               binary_iop1
+
+     1.35%     1.35%  python3-dbg  python3.10d       [.] get_float_state
+            |          
+             --0.57%--get_float_state
+
+     1.33%     1.33%  python3-dbg  python3.10d       [.] list_ass_subscript.lto_priv.0
+            |
+            ---0x9ad3c0
+               list_ass_subscript.lto_priv.0
+
+     1.32%     1.32%  python3-dbg  python3.10d       [.] _Py_Dealloc
+     1.30%     0.00%  python3-dbg  [unknown]         [.] 0x000300370014137c
+            |
+            ---0x300370014137c
+               _PyEval_EvalFrameDefault
+
+     1.25%     1.25%  python3-dbg  python3.10d       [.] PyNumber_Multiply
+            |          
+             --0.53%--0x9ad3c0
+                       PyNumber_Multiply
+
+     1.15%     0.00%  python3-dbg  [unknown]         [.] 0x127d001400130164
+            |
+            ---0x127d001400130164
+               |          
+                --0.68%--_PyEval_EvalFrameDefault
+
+     1.13%     1.13%  python3-dbg  python3.10d       [.] PyTuple_GetItem
+     1.13%     0.00%  python3-dbg  [unknown]         [.] 0x003c000300380014
+            |
+            ---0x3c000300380014
+               |          
+                --0.75%--_PyEval_EvalFrameDefault
+
+     1.07%     0.00%  python3-dbg  [unknown]         [.] 0x147c107c00190005
+            |
+            ---0x147c107c00190005
+               |          
+                --0.55%--_PyEval_EvalFrameDefault
+
+     1.03%     0.00%  python3-dbg  [unknown]         [.] 0x000300380014147c
+            |
+            ---0x300380014147c
+               _PyEval_EvalFrameDefault
+
+     1.03%     0.00%  python3-dbg  [unknown]         [.] 0x137c107c00190005
+            |
+            ---0x137c107c00190005
+               |          
+                --0.68%--_PyEval_EvalFrameDefault
+
+     0.85%     0.00%  python3-dbg  [unknown]         [.] 0x00180a7c057c0e7d
+            |
+            ---0x180a7c057c0e7d
+               _PyEval_EvalFrameDefault
+
+     0.85%     0.00%  python3-dbg  [unknown]         [.] 0x0e7c137d0014127c
+            |
+            ---0xe7c137d0014127c
+               |          
+                --0.58%--_PyEval_EvalFrameDefault
+
+     0.83%     0.00%  python3-dbg  [unknown]         [.] 0x0a7d035c035c097d
+            |
+            ---0xa7d035c035c097d
+               _PyEval_EvalFrameDefault
+
+     0.82%     0.00%  python3-dbg  [unknown]         [.] 0x097d087d077d067d
+            |
+            ---0x97d087d077d067d
+               |          
+                --0.52%--listiter_next.lto_priv.0
+
+     0.82%     0.00%  python3-dbg  [unknown]         [.] 0x137c117c00190005
+            |
+            ---0x137c117c00190005
+               |          
+                --0.55%--_PyEval_EvalFrameDefault
+
+     0.80%     0.80%  python3-dbg  python3.10d       [.] listiter_next.lto_priv.0
+            |          
+             --0.52%--0x97d087d077d067d
+                       listiter_next.lto_priv.0
+
+     0.80%     0.00%  python3-dbg  [unknown]         [.] 0x016400170014117c
+            |
+            ---0x16400170014117c
+               _PyEval_EvalFrameDefault
+
+     0.78%     0.78%  python3-dbg  python3.10d       [.] list_subscript.lto_priv.0
+            |          
+             --0.60%--0x9af720
+                       list_subscript.lto_priv.0
+
+     0.78%     0.00%  python3-dbg  [unknown]         [.] 0x157d035c265d0044
+            |
+            ---0x157d035c265d0044
+               |          
+                --0.53%--_PyEval_EvalFrameDefault
+
+     0.77%     0.00%  python3-dbg  [unknown]         [.] 0x127c0e7c137d0014
+            |
+            ---0x127c0e7c137d0014
+
+     0.75%     0.75%  python3-dbg  python3.10d       [.] float_pow.lto_priv.0
+     0.70%     0.00%  python3-dbg  [unknown]         [.] 0x0a7c057c0e7d0d7d
+            |
+            ---0xa7c057c0e7d0d7d
+               _PyEval_EvalFrameDefault
+
+     0.68%     0.00%  python3-dbg  [unknown]         [.] 0x137c0f7c00190005
+            |
+            ---0x137c0f7c00190005
+
+     0.67%     0.00%  python3-dbg  [unknown]         [.] 0x147c0f7c00190005
+            |
+            ---0x147c0f7c00190005
+               _PyEval_EvalFrameDefault
+
+     0.63%     0.00%  python3-dbg  [unknown]         [.] 0x117d00180c7c077c
+            |
+            ---0x117d00180c7c077c
+
+     0.60%     0.00%  python3-dbg  [unknown]         [.] 0x0014117c117c0017
+            |
+            ---0x14117c117c0017
+               _PyEval_EvalFrameDefault
+
+     0.60%     0.00%  python3-dbg  [unknown]         [.] 0x035c035c097d087d
+            |
+            ---0x35c035c097d087d
+               _PyEval_EvalFrameDefault
+
+     0.58%     0.00%  python3-dbg  [unknown]         [.] 0x000502640d7c003c
+            |
+            ---0x502640d7c003c
+               _PyEval_EvalFrameDefault
+
+     0.57%     0.00%  python3-dbg  [unknown]         [.] 0x00050464087c003c
+            |
+            ---0x50464087c003c
+               _PyEval_EvalFrameDefault
+
+     0.55%     0.00%  python3-dbg  [unknown]         [.] 0x00380014147c117c
+            |
+            ---0x380014147c117c
+               |          
+                --0.53%--_PyEval_EvalFrameDefault
+
+     0.55%     0.00%  python3-dbg  [unknown]         [.] 0x035c097d087d077d
+            |
+            ---0x35c097d087d077d
+               _PyEval_EvalFrameDefault
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x000503640d7c003c
+            |
+            ---0x503640d7c003c
+               _PyEval_EvalFrameDefault
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x00370014137c0f7c
+            |
+            ---0x370014137c0f7c
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x00370014137c117c
+            |
+            ---0x370014137c117c
+               |          
+                --0.52%--_PyEval_EvalFrameDefault
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x00380014147c107c
+            |
+            ---0x380014147c107c
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x0d7c003c00030037
+            |
+            ---0xd7c003c00030037
+               _PyEval_EvalFrameDefault
+
+     0.53%     0.00%  python3-dbg  [unknown]         [.] 0x137d0014127c097c
+            |
+            ---0x137d0014127c097c
+
+     0.52%     0.52%  python3-dbg  python3.10d       [.] ternary_op
+     0.52%     0.00%  python3-dbg  [unknown]         [.] 0x02640d7c003c0003
+            |
+            ---0x2640d7c003c0003
+
+     0.52%     0.00%  python3-dbg  [unknown]         [.] 0x097c127d00140013
+            |
+            ---0x97c127d00140013
+               _PyEval_EvalFrameDefault
+
+     0.52%     0.00%  python3-dbg  [unknown]         [.] 0x117c001900050464
+            |
+            ---0x117c001900050464
+
+     0.50%     0.00%  python3-dbg  [unknown]         [.] 0x0014127c0e7c137d
+     0.50%     0.00%  python3-dbg  [unknown]         [.] 0x4677615267756265
+     0.48%     0.00%  python3-dbg  [unknown]         [.] 0x00380014147c0f7c
+     0.48%     0.00%  python3-dbg  [unknown]         [.] 0x03640d7c003c0003
+     0.48%     0.00%  python3-dbg  [unknown]         [.] 0x067c0f7d00180a7c
+     0.48%     0.00%  python3-dbg  [unknown]         [.] 0x077c107d00180b7c
+     0.48%     0.00%  python3-dbg  [unknown]         [.] 0x0f7c001900050264
+     0.47%     0.00%  python3-dbg  [unknown]         [.] 0x00140f7c0f7c007c
+     0.47%     0.00%  python3-dbg  [unknown]         [.] 0x167d035c157d035c
+     0.43%     0.00%  python3-dbg  [unknown]         [.] 0x0464087c003c0003
+     0.43%     0.00%  python3-dbg  [unknown]         [.] 0x04640d7c003c0003
+     0.43%     0.00%  python3-dbg  [unknown]         [.] 0x107c001900050364
+     0.43%     0.00%  python3-dbg  [unknown]         [.] 0x147c117c00190005
+     0.42%     0.00%  python3-dbg  [unknown]         [.] 0x00370014137c107c
+     0.42%     0.00%  python3-dbg  [unknown]         [.] 0x0264157c197d187d
+     0.40%     0.00%  python3-dbg  [unknown]         [.] 0x00050364087c003c
+     0.40%     0.00%  python3-dbg  [unknown]         [.] 0x00170014107c107c
+     0.40%     0.00%  python3-dbg  [unknown]         [.] 0x0364087c003c0003
+     0.40%     0.00%  python3-dbg  [unknown]         [.] 0x157c197d187d177d
+     0.38%     0.00%  python3-dbg  [unknown]         [.] 0000000000000000
+     0.38%     0.38%  python3-dbg  python3.10d       [.] _PyMem_DebugCheckAddress
+     0.38%     0.00%  python3-dbg  [unknown]         [.] 0x000504640d7c003c
+     0.38%     0.00%  python3-dbg  [unknown]         [.] 0x087c003c00030038
+     0.37%     0.00%  python3-dbg  [unknown]         [.] 0x0014147c0f7c0019
+     0.35%     0.35%  python3-dbg  python3.10d       [.] PyNumber_InPlaceAdd
+     0.35%     0.00%  python3-dbg  [unknown]         [.] 0x0f7c0f7c007c117d
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0xdddddddddddddddd
+     0.33%     0.30%  python3-dbg  libc.so.6         [.] __memset_avx2_unaligned_erms
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x000300370014177c
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x00050264087c147d
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x0014107c107c0014
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x00170014117c117c
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x001900050264157c
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x0b7c067c0f7d0018
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x107c00140f7c0f7c
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x107c107c00140f7c
+     0.33%     0.00%  python3-dbg  [unknown]         [.] 0x157c003c00030037
+     0.32%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a7640
+     0.32%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfdfdfdfdfd6f
+     0.32%     0.00%  python3-dbg  [unknown]         [.] 0x00180c7c077c107d
+     0.32%     0.00%  python3-dbg  [unknown]         [.] 0x001900050264087c
+     0.32%     0.00%  python3-dbg  [unknown]         [.] 0x127c097c127d0014
+     0.30%     0.00%  python3-dbg  [unknown]         [.] 0x000300370014167c
+     0.30%     0.00%  python3-dbg  [unknown]         [.] 0x00180b7c067c0f7d
+     0.30%     0.00%  python3-dbg  [unknown]         [.] 0x0019000503640d7c
+     0.30%     0.00%  python3-dbg  [unknown]         [.] 0x0f7c007c117d0018
+     0.30%     0.00%  python3-dbg  [unknown]         [.] 0x187c007c00190005
+     0.28%     0.28%  python3-dbg  python3.10d       [.] binary_iop
+     0.28%     0.00%  python3-dbg  [unknown]         [.] 0x001900050464087c
+     0.28%     0.00%  python3-dbg  [unknown]         [.] 0x035c265d0044027c
+     0.28%     0.00%  python3-dbg  [unknown]         [.] 0x147d0014127c0e7c
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x0014001301640017
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x0044027c0871003c
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x027c0871003c0003
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x057c0e7d0d7d0c7d
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x0b7d0a7d035c035c
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x0d7d0c7d0b7d0a7d
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x0e7d0d7d0c7d0b7d
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x107d00180b7c067c
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x117c00170014107c
+     0.27%     0.00%  python3-dbg  [unknown]         [.] 0x177d167d035c157d
+     0.25%     0.25%  python3-dbg  python3.10d       [.] read_size_t
+     0.25%     0.00%  python3-dbg  [unknown]         [.] 0x001900050364087c
+     0.25%     0.00%  python3-dbg  [unknown]         [.] 0x007c117d00180c7c
+     0.25%     0.00%  python3-dbg  [unknown]         [.] 0x087d077d067d057d
+     0.25%     0.00%  python3-dbg  [unknown]         [.] 0x0c7c077c107d0018
+     0.25%     0.00%  python3-dbg  [unknown]         [.] 0x0d7c003c00030038
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfd0000530064
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0x0014127c097c127d
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0x0014137c117c0019
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0x0264087c147d0014
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0x0c7d0b7d0a7d035c
+     0.23%     0.00%  python3-dbg  [unknown]         [.] 0x0f7d00180a7c057c
+     0.22%     0.22%  python3-dbg  python3.10d       [.] lookdict_unicode_nodummy
+     0.22%     0.00%  python3-dbg  [unknown]         [.] 0x0019000502640d7c
+     0.22%     0.00%  python3-dbg  [unknown]         [.] 0x0019000504640d7c
+     0.20%     0.20%  python3-dbg  python3.10d       [.] _PyObject_Malloc
+     0.20%     0.20%  python3-dbg  python3.10d       [.] binary_op
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfdfdfd000053
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0x000300370014187c
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0x00050464157c003c
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0x0014177c007c0019
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0x00370014177c007c
+     0.20%     0.00%  python3-dbg  [unknown]         [.] 0x00370014187c007c
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffab200c04
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffab15258b
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a7b20
+     0.18%     0.18%  python3-dbg  libc.so.6         [.] pthread_getspecific@@GLIBC_2.34
+     0.18%     0.18%  python3-dbg  python3.10d       [.] PyNumber_InPlaceSubtract
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0x00050264157c197d
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0x0013016400170014
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0x006404717b71003c
+     0.18%     0.00%  python3-dbg  [unknown]         [.] 0x117c117c00170014
+     0.18%     0.18%  python3-dbg  python3.10d       [.] validate_list
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfdfdfdfdfd00
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x001900050364157c
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x007c001900050264
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x087c147d0014127c
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x177c007c00190005
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x187d177d167d035c
+     0.17%     0.00%  python3-dbg  [unknown]         [.] 0x265d0044027c0871
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x00050364157c003c
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x0014167c007c0019
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x001900050464157c
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x035c157d035c265d
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x04717b71003c0003
+     0.15%     0.00%  python3-dbg  [unknown]         [.] 0x197d187d177d167d
+     0.15%     0.15%  python3-dbg  libm.so.6         [.] pow@@GLIBC_2.29
+     0.13%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffab200124
+     0.13%     0.13%  python3-dbg  python3.10d       [.] PyNumber_Subtract
+     0.13%     0.00%  python3-dbg  [unknown]         [.] 0x00370014167c007c
+     0.13%     0.00%  python3-dbg  [unknown]         [.] 0x007c001900050364
+     0.13%     0.00%  python3-dbg  [unknown]         [.] 0x0871003c00030037
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffab15004e
+     0.12%     0.03%  python3-dbg  python3.10d       [.] pymalloc_pool_extend
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaa8c435d
+     0.12%     0.12%  python3-dbg  python3.10d       [.] PyGILState_Check
+     0.12%     0.12%  python3-dbg  python3.10d       [.] arena_map_get
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0xfd00005300640471
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009aeb40
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x0014147c107c0019
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x0053006404717b71
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x007c001900050464
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x0364157c003c0003
+     0.12%     0.00%  python3-dbg  [unknown]         [.] 0x167c007c00190005
+     0.10%     0.00%  python3-dbg  libc.so.6         [.] __GI___fstatat64
+     0.10%     0.00%  python3-dbg  [unknown]         [.] 0x000000000099f740
+     0.10%     0.00%  python3-dbg  [unknown]         [.] 0x0014137c107c0019
+     0.10%     0.00%  python3-dbg  [unknown]         [.] 0x0014187c007c0019
+     0.10%     0.00%  python3-dbg  [unknown]         [.] 0x0464157c003c0003
+     0.10%     0.10%  python3-dbg  python3.10d       [.] lookdict_unicode
+     0.08%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaa803609
+     0.08%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf6457
+     0.08%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf5f26
+     0.08%     0.08%  python3-dbg  python3.10d       [.] _PyUnicode_CheckConsistency
+     0.08%     0.08%  python3-dbg  python3.10d       [.] PyNumber_Add
+     0.08%     0.08%  python3-dbg  python3.10d       [.] _PyObject_Free
+     0.08%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009aaf60
+     0.08%     0.00%  python3-dbg  [unknown]         [.] 0x7b71003c00030037
+     0.07%     0.07%  python3-dbg  python3.10d       [.] visit_reachable
+     0.07%     0.07%  python3-dbg  python3.10d       [.] write_size_t
+     0.07%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa8fd26
+     0.07%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa8fbe4
+     0.07%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfdfdfdfdfd72
+     0.07%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa8f6c7
+     0.07%     0.07%  python3-dbg  python3.10d       [.] PyThread_tss_get
+     0.07%     0.07%  python3-dbg  python3.10d       [.] _PyGILState_GetThisThreadState
+     0.07%     0.07%  python3-dbg  python3.10d       [.] _PyMem_DebugRawAlloc
+     0.07%     0.07%  python3-dbg  python3.10d       [.] list_iter.lto_priv.0
+     0.07%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfdfdfdfdfdfd
+     0.05%     0.05%  python3-dbg  python3.10d       [.] _PyTuple_MaybeUntrack
+     0.05%     0.05%  python3-dbg  python3.10d       [.] dict_traverse.lto_priv.0
+     0.05%     0.05%  python3-dbg  [unknown]         [k] 0xffffffffaaa8fcda
+     0.05%     0.05%  python3-dbg  [unknown]         [k] 0xffffffffaa8c428a
+     0.05%     0.05%  python3-dbg  python3.10d       [.] call_function.lto_priv.0
+     0.05%     0.05%  python3-dbg  libc.so.6         [.] __memcmp_avx2_movbe
+     0.05%     0.05%  python3-dbg  python3.10d       [.] PyNumber_Power
+     0.05%     0.05%  python3-dbg  python3.10d       [.] _PyObject_GenericGetAttrWithDict
+     0.05%     0.05%  python3-dbg  python3.10d       [.] _PyObject_IsFreed
+     0.05%     0.05%  python3-dbg  python3.10d       [.] listiter_dealloc.lto_priv.0
+     0.05%     0.05%  python3-dbg  python3.10d       [.] resolve_slotdups
+     0.05%     0.05%  python3-dbg  python3.10d       [.] tupledealloc.lto_priv.0
+     0.05%     0.05%  python3-dbg  python3.10d       [.] visit_decref
+     0.05%     0.03%  python3-dbg  python3.10d       [.] _PyFrame_New_NoTrack
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a2fc0
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a9a60
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009acec0
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x0014137c0f7c0019
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x0014147c117c0019
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x057d035c035c025c
+     0.05%     0.00%  python3-dbg  [unknown]         [.] 0x077d067d057d035c
+     0.03%     0.03%  python3-dbg  python3.10d       [.] move_unreachable
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000000002
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d52a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d51e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d5120
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d5060
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4fa0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4ee0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4e20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4dc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4d60
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4d00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4ca0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4c40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4be0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4b80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4b20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4ac0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4a60
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4a00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d49a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4940
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d48e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4880
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4820
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d47c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4760
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4700
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d46a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4640
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d45e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4580
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4520
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d44c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4460
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4400
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d43a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4340
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d42e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4280
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4220
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d41c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4160
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4100
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d40a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8d4040
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3fa0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3f40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3ee0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3e80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3e20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3dc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3d00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3c40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3b80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3b20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3ac0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3a60
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c39a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c38e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3820
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c37c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3760
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3700
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c36a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3640
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c35e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3580
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c34c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3460
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3340
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3280
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3220
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3160
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c30a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2fe0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2f20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2e60
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2da0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2d40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2c80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2bc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2b00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2a40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2980
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c28c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2860
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2800
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2740
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2680
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c25c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2500
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c24a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2440
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c23e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2380
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2320
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c22c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2260
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2200
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c21a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c20e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c2020
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1fc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1f00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1e40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1d80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1cc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1c00
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1b40
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1ae0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1a80
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1a20
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c19c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1960
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1900
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c18a0
+     0.03%     0.00%  python3-dbg  [unknown]         [k] 0x00000000009c2860
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1840
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c17e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1780
+     0.03%     0.00%  python3-dbg  libc.so.6         [.] _int_malloc
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1720
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf5b45
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c16c0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaab033ea
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c1660
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaab031ca
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c15a0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf5b68
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8bc0e0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf52a7
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8bc090
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaabc0217
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00000000177fddf0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00000000177fde20
+     0.03%     0.03%  python3-dbg  libc.so.6         [.] __memmove_avx_unaligned_erms
+     0.03%     0.03%  python3-dbg  python3.10d       [.] PyObject_Free
+     0.03%     0.03%  python3-dbg  python3.10d       [.] PyObject_GetIter
+     0.03%     0.03%  python3-dbg  python3.10d       [.] PyType_IsSubtype
+     0.03%     0.03%  python3-dbg  python3.10d       [.] PyUnicode_New
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyLong_New
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyObject_GC_Alloc
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyType_Lookup
+     0.03%     0.03%  python3-dbg  python3.10d       [.] address_in_range
+     0.03%     0.03%  python3-dbg  python3.10d       [.] dictiter_iternextitem.lto_priv.0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xf58948fb894808ec
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xfdfdfd000053017c
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa8b77b
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000000001
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a4ca0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009ab440
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000fdfdfd
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdf0baa0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdf0bdc0
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8c3040
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x035c035c025c705d
+     0.03%     0.00%  python3-dbg  [unknown]         [.] 0x067d057d035c035c
+     0.03%     0.03%  python3-dbg  libc.so.6         [.] __errno_location
+     0.03%     0.03%  python3-dbg  python3.10d       [.] PyType_GenericAlloc
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyDict_CheckConsistency
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyFunction_Vectorcall
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyMem_DebugMalloc
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _PyObject_MakeTpCall
+     0.03%     0.03%  python3-dbg  python3.10d       [.] _Py_HashBytes
+     0.03%     0.03%  python3-dbg  python3.10d       [.] cfunction_vectorcall_NOARGS.lto_priv.0
+     0.03%     0.03%  python3-dbg  python3.10d       [.] find_name_in_mro.lto_priv.0
+     0.03%     0.03%  python3-dbg  python3.10d       [.] r_object
+     0.03%     0.03%  python3-dbg  python3.10d       [.] r_string
+     0.03%     0.03%  python3-dbg  python3.10d       [.] 0x00000000000223d0
+     0.03%     0.00%  python3-dbg  python3.10d       [.] 0x00000000004223d0
+     0.02%     0.02%  file         [unknown]         [k] 0xffffffffaa8c428a
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f950
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6556c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f8a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6af0d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f7f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c8950
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce177ab0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e4b20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce16cc40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c3010
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f740
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce83e140
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3df640
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce7ca080
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce223700
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce69eb60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f690
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e4700
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce206c20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2f70
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f5e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c8b80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000000006
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f530
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce64e190
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f480
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2fc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f3d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2f40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f270
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e8350
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce212880
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2f20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2232e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2ed0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2233a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c8c20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a27c00
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e4400
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20f1c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c8cc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce216570
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2e80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2128f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce7d7ac0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce198260
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2e40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f18f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce83da60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1bb440
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2d90
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce17dc00
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2de0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce192440
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e42e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2cc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce7c60c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3dfbe0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e4220
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce222080
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6e41c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a27500
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6afe60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2222c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2e30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce221ba0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2d40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a265e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d97e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20e560
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6afca0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20ce00
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6afc30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce222500
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2cf0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fe750
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2ca0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a25b50
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2c50
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce172160
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9120
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2224a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c91c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce222380
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9210
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a25050
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6afbc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce222200
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2c40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fe980
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2c00
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a24c60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2bb0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce221cc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6b2bc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1febb0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c92b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a23b50
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d9720
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20d0c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9300
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20d010
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c93a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x000000000000000e
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce16d040
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6afae0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce15d700
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8f2a40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x000000000000000a
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce160ac0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce83d590
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce215c60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2b60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce215ad0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2b10
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce215a80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2ac0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000000012
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1722f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6bf5e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2214e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6bf220
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce220b20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6db400
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fe2f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6af920
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000178d26c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1bb040
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce207c40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6dada0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3fcfa0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6af7d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000178f8f20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2075e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1bad40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6da8c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3fd900
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6da800
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000178cf1b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fee30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce17d780
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6da020
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1923e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d9f60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000178f7be0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20cca0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20cbf0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d9960
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20cb40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d9840
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1b0490
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d98a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20ca90
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2750
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000178ceb40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c9e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c930
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c3d80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c880
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2570
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c7d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9ad0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c720
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2520
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c670
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9b20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c5c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9bc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c510
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9c10
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce20c300
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9c60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3eddd0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9cb0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3edc70
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9d00
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ede80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9d50
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3edf30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9da0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3edd20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9df0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3edfe0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9e40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f99b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9e90
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce19c9e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9ee0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1be740
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6d8be0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce16ca40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9f30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3fdf60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9f80
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce401300
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c9fd0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017a1f2c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca070
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f9a60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6bf340
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f9b10
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca110
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f9bc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca1b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1f5bc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca200
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1f8b20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c24d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3f9c70
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca250
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3fa980
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2480
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3faa30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca2a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3faae0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca340
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3facf0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca390
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3e3510
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca3e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1ba7c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca430
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce408040
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca480
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1f9540
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca4d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fa1a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca520
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ff880
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca5c0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaa96db5a
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaab0f634
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3cebc0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2430
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000179a1850
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca6b0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaaaf510d
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaad869b7
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ff8e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca700
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyObject_Calloc
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaaaf50e0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaaafd2a7
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaa801f44
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3cef40
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca750
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaa9001f2
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaa8928fe
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000179a8370
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca7a0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaaab9a50
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaab0de7a
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa97582
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ff940
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca7f0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaaa8ba70
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa76d05
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ceec0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca840
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaabc66b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa99eaa
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000179a89e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca890
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa99b12
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3ff9a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca8e0
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffaa94369c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa8b735
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa9995e
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaff949
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce59a2c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6c2a70
+     0.02%     0.00%  python3-dbg  python3.10d       [.] allocate_from_new_pool
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaa773b5
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaac6228
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaff33a
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000179aa3a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6ca930
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyStack_AsDict
+     0.02%     0.02%  python3-dbg  python3.10d       [.] fill_number
+     0.02%     0.02%  python3-dbg  python3.10d       [.] method_dealloc.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] tok_nextc
+     0.02%     0.02%  python3-dbg  python3.10d       [.] tok_underflow_string
+     0.02%     0.02%  python3-dbg  [unknown]         [k] 0xffffffffab15299d
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaa8039e7
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaade8a
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaf5b9d
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaafe57e
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaabad377
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a51c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x616572202c736c63
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x68636e65622e7265
+     0.02%     0.02%  python3-dbg  libc.so.6         [.] __strchr_avx2
+     0.02%     0.02%  python3-dbg  libc.so.6         [.] __strncpy_avx2
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyArg_UnpackTuple
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyDict_Copy
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyDict_GetItemWithError
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyFunction_NewWithQualName
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyIter_Check
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyLong_FromLong
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyObject_GetAttr
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyObject_IS_GC
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyRun_StringFlags
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyUnicode_InternInPlace
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyDict_LoadGlobal
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyErr_SetObject
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyMem_DebugFree
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyMem_DebugRawFree
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyObject_GC_New
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyObject_GetMethod
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyObject_VectorcallTstate.lto_priv.22
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyStack_UnpackDict_Free
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyTraceMalloc_Init
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyTrash_end
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyUnicodeWriter_Finish
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyUnicode_FindMaxChar
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyUnicode_FromUCS1.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] abc_data_traverse.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] arena_map_is_used
+     0.02%     0.02%  python3-dbg  python3.10d       [.] clone_combined_dict_keys
+     0.02%     0.02%  python3-dbg  python3.10d       [.] code_dealloc.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] dict_merge
+     0.02%     0.02%  python3-dbg  python3.10d       [.] dict_subscript.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] do_call_core.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] find_empty_slot
+     0.02%     0.02%  python3-dbg  python3.10d       [.] frame_alloc
+     0.02%     0.02%  python3-dbg  python3.10d       [.] free_keys_object.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] get_small_int.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] get_tuple_state
+     0.02%     0.02%  python3-dbg  python3.10d       [.] get_type_cache.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] handle_weakrefs
+     0.02%     0.02%  python3-dbg  python3.10d       [.] insertdict
+     0.02%     0.02%  python3-dbg  python3.10d       [.] intern_strings
+     0.02%     0.02%  python3-dbg  python3.10d       [.] is_tstate_valid.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] list_length.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] long_richcompare.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] lookup_maybe_method.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] meth_hash.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] method_get.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] module_getattro.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] mro_check
+     0.02%     0.02%  python3-dbg  python3.10d       [.] new_dict
+     0.02%     0.02%  python3-dbg  python3.10d       [.] new_keys_object.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] object_recursive_isinstance
+     0.02%     0.02%  python3-dbg  python3.10d       [.] operator_traverse
+     0.02%     0.02%  python3-dbg  python3.10d       [.] os_fspath.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] rangeiter_next.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] tuple_alloc
+     0.02%     0.02%  python3-dbg  python3.10d       [.] type_call.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] unicode_compare_eq
+     0.02%     0.02%  python3-dbg  python3.10d       [.] 0x0000000000022b00
+     0.02%     0.02%  uname        libc.so.6         [.] __open64_nocancel
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xa0720190097ca472
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xce18716000000000
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xddddddddddfdfdfd
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xfd000053016a007c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xfdfd0079702e7373
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaad1ed
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaafbb71
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaafd043
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaaaff9ad
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaab07d60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaab1342e
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0xffffffffaabc01d6
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000000000008
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a24e0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009a3400
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009ac380
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009ae080
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000009afae0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017819cf0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x000000001782bb60
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x000000001788e575
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0000000017914710
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00000000179700f0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdeeb1b0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdf03cf0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdf03db0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdf0dc30
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77cdfb7840
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1a4940
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce1fe9d0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce2c1620
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce3de740
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce40816f
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce6f4d50
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce840590
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8b41c0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8be570
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce8cbe20
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00007f77ce9a2840
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x00190564097c0374
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x006a007c1a7a003c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x007c056407743972
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x017c07a0066a007c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0183004400a103a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0183004401a1017c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x01830c7c0f740c7d
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x026b0b7c066a007c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x027201a1006400a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x027c04a0047c047d
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x03661b7c197c187c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x056a018300a104a0
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x05740c7d01830664
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x067c0a6a067c0864
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x0c0000000af30000
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x14a01374bb72037c
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x4e434645525f7950
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x66202c65646f6d28
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x697461746e656d65
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x6e616e06da382d46
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x737973202c736c63
+     0.02%     0.00%  python3-dbg  [unknown]         [.] 0x7708da0000009c72
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyArg_ParseTupleAndKeywords
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyCode_NewWithPosOnlyArgs
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyErr_Occurred
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyList_Append
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyLong_FromLongLong
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyObject_RichCompare
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyThread_tss_is_created
+     0.02%     0.02%  python3-dbg  python3.10d       [.] PyTuple_New
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _PyEval_MakeFrameVector
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _imp_create_builtin
+     0.02%     0.02%  python3-dbg  python3.10d       [.] _tmp_188_rule.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] compiler_add_const
+     0.02%     0.02%  python3-dbg  python3.10d       [.] gc_list_size
+     0.02%     0.02%  python3-dbg  python3.10d       [.] multadd
+     0.02%     0.02%  python3-dbg  python3.10d       [.] pysiphash
+     0.02%     0.02%  python3-dbg  python3.10d       [.] r_long
+     0.02%     0.02%  python3-dbg  python3.10d       [.] siphash24
+     0.02%     0.02%  python3-dbg  python3.10d       [.] tuplerichcompare.lto_priv.0
+     0.02%     0.02%  python3-dbg  python3.10d       [.] update_refs
+     0.02%     0.02%  python3-dbg  python3.10d       [.] 0x0000000000022670
+     0.02%     0.02%  python3-dbg  python3.10d       [.] 0x0000000000022c40
+     0.02%     0.00%  file         [unknown]         [k] 0x9716b3229ad50e00
+     0.02%     0.02%  file         [unknown]         [k] 0xffffffffab15299d
+     0.02%     0.00%  file         libc.so.6         [.] __memset_avx2_unaligned_erms
+     0.02%     0.00%  file         [unknown]         [k] 0000000000000000
+     0.02%     0.00%  file         libc.so.6         [.] __brk
+     0.02%     0.00%  file         [unknown]         [.] 0xffffffffab200c04
+     0.02%     0.00%  file         [unknown]         [.] 0xffffffffab15258b
+     0.02%     0.00%  file         [unknown]         [.] 0xffffffffab200124
+     0.02%     0.00%  python3-dbg  libc.so.6         [.] __mmap
+     0.02%     0.00%  python3-dbg  libc.so.6         [.] sysmalloc
+     0.02%     0.00%  python3-dbg  libc.so.6         [.] __GI___tcgetattr
+     0.02%     0.00%  python3-dbg  python3.10d       [.] 0x0000000000422670
+     0.02%     0.00%  python3-dbg  python3.10d       [.] 0x0000000000422b00
+     0.02%     0.00%  python3-dbg  python3.10d       [.] 0x0000000000422c40
+     0.02%     0.00%  uname        [unknown]         [.] 0x0000000100000001
+     0.02%     0.00%  uname        libc.so.6         [.] setlocale
+     0.02%     0.00%  uname        libc.so.6         [.] _nl_find_locale
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
