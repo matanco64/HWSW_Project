@@ -26,6 +26,10 @@ baseline() {
 profile() {
     # Profile shape with python3-dbg (symbols); timings from this stage are NOT quotable.
     # KVM guest: the 'cycles' PMU event records zero samples — MUST use -e cpu-clock.
+    # NOTE: 'pyperf system tune' (setup) sets perf_event_max_sample_rate=1, which
+    # throttles perf record to 1 Hz — restore a usable rate before profiling.
+    sudo sysctl -w kernel.perf_event_max_sample_rate=100000 \
+                  kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
     perf record -F 999 -g -e cpu-clock -o "$RES/$BENCH.perf.data" -- \
         python3-dbg "$ROOT/benchmarks/bm_$BENCH/run_benchmark.py" --worker -l1 -w0 -n3
     perf report --stdio -i "$RES/$BENCH.perf.data" > "$RES/perf_report_$BENCH.txt"
