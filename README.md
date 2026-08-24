@@ -11,6 +11,9 @@ Technion.
 report_pyflate.txt / report_nbody.txt   Benchmark reports (course deliverable)
 script_pyflate.sh  / script_nbody.sh    End-to-end runners (course deliverable)
 prompt.txt                              AI-tool prompt log (course deliverable)
+project_instructions.pdf / .md          Course assignment handout (+ text transcription)
+tools/log_prompt_hook.py                Claude Code hook: auto-appends session prompts to prompt.txt
+.claude/                                Claude Code project config: the hook wiring + /log-prompt skill
 benchmarks/
   MANIFEST                              pyperformance custom-benchmark manifest
   bm_pyflate/                           Benchmark copy — optimizations land here

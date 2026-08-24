@@ -36,5 +36,8 @@ the baseline, pyperformance custom MANIFEST, script_pyflate.sh /
 script_nbody.sh runners (setup/baseline/profile/optimized/compare stages),
 report stubs, and hw/ + rust/ placeholders.
 
-(Log continues below as the project progresses; every substantive AI prompt
-is recorded here.)
+(Log continues below. From 2026-08-24 on, every prompt sent in a Claude Code
+session rooted in this repo is appended automatically by a UserPromptSubmit
+hook — .claude/settings.json -> tools/log_prompt_hook.py. Prompts issued to
+other tools are added manually with the /log-prompt skill and tagged with
+their source.)
