@@ -41,3 +41,11 @@ session rooted in this repo is appended automatically by a UserPromptSubmit
 hook — .claude/settings.json -> tools/log_prompt_hook.py. Prompts issued to
 other tools are added manually with the /log-prompt skill and tagged with
 their source.)
+
+2026-08-24T19:58:54Z — Claude Code session (auto-logged)
+Prompt: "restarted"
+
+2026-08-24T20:06:06Z — Claude Code session (auto-logged)
+Prompt: "one more preperation. I want some of https://github.com/mattpocock skills - the relevant ones.
+and also superpowers.
+maynly grilling, teaching and maybe others relevant for engineering work."
