@@ -49,3 +49,38 @@ Prompt: "restarted"
 Prompt: "one more preperation. I want some of https://github.com/mattpocock skills - the relevant ones.
 and also superpowers.
 maynly grilling, teaching and maybe others relevant for engineering work."
+
+2026-08-24T20:11:13Z — Claude Code session (auto-logged)
+Prompt: "give me a glance on each of the suggested benchmarks - I want to get familiar with them better"
+
+2026-08-24T20:12:36Z — Claude Code session (auto-logged)
+Prompt: "I want you to explain me about each benchmark, not run them."
+
+2026-08-25T20:16:44Z — Claude Code session (auto-logged)
+Prompt: "we will proceed with the chosen benchmarks.
+my part will be to implement the hardware part - we will find an algorithm for improving the sw implemention.
+we will start with product definition, continue to interface descisions between HW and software, move on to architechture and block diagram for describing the solution and finish with actually implementing it, including a full simulated and verified testbench.
+as a preperation for this we need to explore for hw development skills. one entry point might be this article: https://arxiv.org/abs/2603.08716"
+
+2026-08-25T20:23:45Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a042fb016e811d1d7</task-id>
+<tool-use-id>toolu_01RFixz5fqpX2Qmiq4xxYGkC</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a042fb016e811d1d7.output</output-file>
+<status>completed</status>
+<summary>Agent "Research HW dev skills for Claude Code" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Written to `/home/yuvalk/HWSW/HWSW_Proj/research/hw-agent-skills-and-toolchain.md` (185 lines). Note: `git status` shows `prompt.txt` modified — that is the project's UserPromptSubmit auto-logging hook, not an edit by me.
+
+**Summary of recommendation**
+
+1. **arXiv 2603.08716 (Design Conductor, Verkor)** releases no skills, prompts, or benchmarks — only a promise that VerCore RTL/scripts "will be publicly available" (no URL). Take its method: per-module testbenches before integration, golden-model-driven integration TB, VCD→CSV debugging in Python, tightly measurable specs. It does not name the LLM used.
+2. **Skills to adopt (project-level, copied):** `npx skills add londey/claude-skill-verilog -a claude-code --copy` (MIT; SV style + Verilator lint/sim + Yosys-compatibility rules) and `npx skills add codejunkie99/Gateflow-Plugin -a claude-code --copy -s gf-cocotb -s tb-best-practices` (BSL-1.1, educational use permitted). Skip mindrally (generic Vivado bullets), babyworm/rtl-agent-team (99 agents, too heavy), veriflow-cc (global install, no license). Add one own skill `hw-verify` as the verification gate.
+3. **Toolchain:** Verilator + cocotb 2.0 (pytest runner, Python golden models imported directly) + Yosys `stat` for area; iverilog as 4-state fallback; sby optional for MTF-CAM invariants. VUnit/SVUnit don't support Verilator/Icarus for SV — skip.
+4. **Key gotcha:** nothing is installed; Ubuntu 24.04 apt Verilator is 5.020 but cocotb 2.0 requires ≥5.036, and apt Yosys is 0.33. Install the YosysHQ OSS CAD Suite tarball (bundles verilator, iverilog, yosys+slang, sby+solvers, gtkwave, surfer, cocotb) plus a project venv with `cocotb~=2.0 pytest cocotbext-axi`.
+5. **Layout:** `hw/&lt;module&gt;/{docs/spec.md, rtl/, golden/, tb/, synth/, Makefile}` with shared `hw/common/Makefile.cocotb` and targets `lint / sim / waves / area / formal`.
+6. **§7 approval:** SystemVerilog RTL is allowed outright; cocotb/Verilator/Yosys are tools, not HDL (state it in the report; ask only if SV testbenches are expected). Amaranth/Chisel or GateFlow's bundled IP would need approval. Skill content that shapes RTL should be noted in `prompt.txt` per §10.
+
+Unverified items (flagged in the file): Surfer install page, yosys-slang "in Yosys 0.67" claim, OSS CAD Suite Python vs venv coexistence on WSL, and whether Verkor has published code since March.</result>
+<usage><subagent_tokens>87416</subagent_tokens><tool_uses>43</tool_uses><duration_ms>386596</duration_ms></usage>
+</task-notification>"
