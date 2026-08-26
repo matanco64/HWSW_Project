@@ -117,7 +117,7 @@ PAIRS = combinations(SYSTEM)
 # at ~1e-14 relative divergence in the reported energy.
 # ---------------------------------------------------------------------------
 
-_BIT_EXACT = True
+_BIT_EXACT = False
 
 
 def _advance_source(bodies, pairs, bit_exact=_BIT_EXACT):
