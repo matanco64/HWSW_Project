@@ -1,0 +1,111 @@
+# Shared make rules for every hardware module (see hw/FLOW.md "Make targets").
+# Include from a module Makefile after setting:
+#   TOPLEVEL        RTL top module name
+#   VERILOG_SOURCES RTL files (space separated)
+#   MODULE          Python cocotb test module (under $(TEST_DIR))
+# Optional: SIM (verilator|icarus), WAVES=1, COV=1, TEST_DIR (default tb/tests),
+#           LINT_SOURCES (default VERILOG_SOURCES), FORMAL_SBY (default synth/formal.sby).
+# Requires `source hw/env.sh` (venv python first on PATH, OSS CAD Suite bins after).
+
+COMMON_DIR   := $(dir $(lastword $(MAKEFILE_LIST)))
+COMMON_DIR   := $(patsubst %/,%,$(abspath $(COMMON_DIR)))
+HW_ROOT      ?= $(abspath $(COMMON_DIR)/..)
+PROJ_ROOT    ?= $(abspath $(HW_ROOT)/..)
+PDK_LIB      ?= $(HW_ROOT)/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+SIM          ?= verilator
+WAVES        ?= 0
+COV          ?= 0
+TEST_DIR     ?= tb/tests
+LINT_SOURCES ?= $(VERILOG_SOURCES)
+FORMAL_SBY   ?= synth/formal.sby
+SIM_BUILD    ?= sim_build
+INCLUDE_DIRS ?= $(COMMON_DIR)/rtl rtl
+PYTHON       ?= python3
+TESTCASE     ?=
+SEED         ?=
+
+VERILATOR    ?= verilator
+YOSYS        ?= yosys
+SBY          ?= sby
+VERILATOR_COVERAGE ?= verilator_coverage
+
+ABS_SOURCES  := $(abspath $(VERILOG_SOURCES))
+ABS_LINT     := $(abspath $(LINT_SOURCES))
+INC_FLAGS    := $(addprefix -I,$(abspath $(INCLUDE_DIRS)))
+export PYTHONPATH := $(COMMON_DIR)/tb:$(abspath $(TEST_DIR)):$(abspath tb):$(abspath tb/sequences):$(abspath golden):$(PYTHONPATH)
+
+.PHONY: all lint sim sim-icarus waves cov area formal openlane status clean help
+
+all: lint sim
+
+help:
+	@echo "targets: lint sim sim-icarus waves cov area formal openlane status clean"
+	@echo "vars:    TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) SIM=$(SIM) WAVES=$(WAVES) COV=$(COV)"
+
+# --- lint: one Verilator pass per file so each is checked as its own top ------------------------
+lint:
+	@test -n "$(ABS_LINT)" || { echo "lint: no LINT_SOURCES/VERILOG_SOURCES set (skeleton)"; exit 0; }
+	@rc=0; for f in $(ABS_LINT); do \
+	    echo "== verilator --lint-only -Wall $$f"; \
+	    $(VERILATOR) --lint-only -Wall $(INC_FLAGS) $$f || rc=1; \
+	done; \
+	[ $$rc -eq 0 ] && echo "lint: clean" || { echo "lint: FAILED"; exit 1; }
+
+# --- sim: cocotb 2.0 python runner (cocotb_tools.runner) ----------------------------------------
+sim:
+	@test -n "$(MODULE)" -a -n "$(ABS_SOURCES)" || { echo "sim: no VERILOG_SOURCES/MODULE yet (skeleton)"; exit 0; }
+	$(PYTHON) $(COMMON_DIR)/scripts/cocotb_run.py \
+	    --sim $(SIM) --toplevel $(TOPLEVEL) --module $(MODULE) \
+	    --build-dir $(SIM_BUILD) --waves $(WAVES) --cov $(COV) \
+	    $(if $(TESTCASE),--testcase $(TESTCASE)) $(if $(SEED),--seed $(SEED)) \
+	    $(addprefix --include ,$(abspath $(INCLUDE_DIRS))) \
+	    $(ABS_SOURCES)
+	@mkdir -p $(HW_ROOT)/.advisor && touch $(HW_ROOT)/.advisor/last_sim.txt  # consumed by tools/hw/stop_hook.py
+
+sim-icarus:
+	$(MAKE) sim SIM=icarus SIM_BUILD=sim_build_icarus
+
+waves:
+	$(MAKE) sim WAVES=1
+	@if [ -f $(SIM_BUILD)/dump.vcd ]; then vcd2fst $(SIM_BUILD)/dump.vcd $(SIM_BUILD)/dump.fst >/dev/null; \
+	    echo "waves: $(SIM_BUILD)/dump.fst (from dump.vcd; open with surfer or gtkwave)"; \
+	else echo "waves: $(SIM_BUILD)/dump.fst (open with surfer or gtkwave)"; fi
+
+# --- cov: Verilator --coverage, annotate, summary ---------------------------------------------
+cov:
+	$(MAKE) sim SIM=verilator COV=1 SIM_BUILD=sim_build_cov
+	@covdat=$$(find sim_build_cov -name 'coverage.dat' | head -1); \
+	test -n "$$covdat" || { echo "cov: coverage.dat not produced"; exit 1; }; \
+	cp $$covdat coverage.dat; \
+	rm -rf coverage_annotated; \
+	$(VERILATOR_COVERAGE) --annotate coverage_annotated coverage.dat >/dev/null; \
+	$(PYTHON) $(COMMON_DIR)/scripts/cov_summary.py coverage.dat
+
+# --- area: Yosys generic + sky130 liberty mapped ---------------------------------------------
+area:
+	@test -n "$(ABS_SOURCES)" || { echo "area: no VERILOG_SOURCES (skeleton)"; exit 0; }
+	@test -s "$(PDK_LIB)" || { echo "area: PDK_LIB not found: $(PDK_LIB) (run hw/setup.sh)"; exit 1; }
+	@mkdir -p synth
+	@sed -e 's|@TOP@|$(TOPLEVEL)|g' -e 's|@SOURCES@|$(ABS_SOURCES)|g' \
+	     -e 's|@LIB@|$(PDK_LIB)|g' -e 's|@OUT@|$(abspath synth)|g' \
+	     $(COMMON_DIR)/synth/yosys_area.ys > synth/yosys_area.gen.ys
+	$(YOSYS) -q -l synth/yosys.log -s synth/yosys_area.gen.ys
+	@$(PYTHON) $(COMMON_DIR)/scripts/area_summary.py synth/area.txt
+
+# --- formal: SymbiYosys if the module provides a .sby --------------------------------------------
+formal:
+	@if [ -f "$(FORMAL_SBY)" ]; then $(SBY) -f $(FORMAL_SBY); else echo "formal: skip ($(FORMAL_SBY) not present)"; fi
+
+openlane:
+	@echo "openlane: not wired yet (run hw/setup.sh --with-openlane, then hw-ppa skill)"
+
+status:
+	@if [ -f "$(PROJ_ROOT)/tools/hw/render_progress.py" ]; then \
+	    $(PYTHON) $(PROJ_ROOT)/tools/hw/render_progress.py; \
+	else echo "status: tools/hw/render_progress.py not present yet"; fi
+
+clean:
+	rm -rf sim_build sim_build_icarus sim_build_cov results.xml coverage.dat coverage_annotated \
+	       synth/yosys_area.gen.ys synth/yosys.log synth/*.json __pycache__ .pytest_cache \
+	       $(TEST_DIR)/__pycache__ tb/__pycache__ dump.fst dump.vcd

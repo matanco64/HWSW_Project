@@ -1,0 +1,12 @@
+# Yosys area script template; hw/common/Makefile.cocotb substitutes skid_buffer /home/yuvalk/HWSW/HWSW_Proj/hw/common/rtl/skid_buffer.sv /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib /home/yuvalk/HWSW/HWSW_Proj/hw/common/synth.
+# Produces /home/yuvalk/HWSW/HWSW_Proj/hw/common/synth/area.txt with a technology-independent `stat` followed by the
+# sky130_fd_sc_hd Liberty-mapped `stat -liberty` (cell counts + chip area in um^2).
+read_verilog -sv /home/yuvalk/HWSW/HWSW_Proj/hw/common/rtl/skid_buffer.sv
+hierarchy -check -top skid_buffer
+synth -top skid_buffer -flatten
+tee -q -o /home/yuvalk/HWSW/HWSW_Proj/hw/common/synth/area.txt stat
+dfflibmap -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+opt_clean
+tee -q -a /home/yuvalk/HWSW/HWSW_Proj/hw/common/synth/area.txt stat -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+write_json /home/yuvalk/HWSW/HWSW_Proj/hw/common/synth/skid_buffer_synth.json

@@ -7,3 +7,19 @@ results/*.perf.data.old
 rust/**/target/
 venv/
 .venv/
+# hardware flow: local toolchain, venv, simulation & synthesis artifacts
+hw/tools/
+hw/.venv/
+hw/**/sim_build/
+hw/**/results.xml
+hw/**/*.vcd
+hw/**/*.fst
+hw/**/*.fst.hier
+hw/**/runs/
+hw/**/__pycache__/
+hw/**/.pytest_cache/
+hw/**/coverage.dat
+hw/.advisor/
+hw/**/coverage_annotated/
+hw/**/sim_build_icarus/
+hw/common/synth/area.txt
