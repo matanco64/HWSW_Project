@@ -1,0 +1,773 @@
+{
+  "modules": {
+    "grape_pipeline": {
+      "stages": {
+        "prd": {
+          "state": "todo",
+          "started": "2026-08-26T05:06:56Z",
+          "finished": "",
+          "gate": {
+            "every requirement has a measurable KPI + acceptance test": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "HW/SW split table": {
+              "result": "n/a",
+              "evidence": "",
+              "at": "2026-08-26T05:06:57Z"
+            },
+            "workload slice quantified from results/ profile": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review findings resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "mas": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "I/O table with widths + clock": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "register map (offset, name, bits, access, reset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "DMA/stream protocol": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "driver API sketch": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "block diagram": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "uarch": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pipeline/FSM diagrams": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "number formats fixed": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "memories sized": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "per-stage timing budget": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "latency/throughput derived and matches PRD KPI": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "rtl": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "make lint clean (verilator --lint-only -Wall)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Yosys synth succeeds (synthesizable subset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "agent code review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_testplan": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "features ↔ tests ↔ covergroups ↔ checkers matrix": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "golden-model interface defined": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal properties listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_bringup": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pyuvm env instantiates": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "first directed test passes on Verilator": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "scoreboard compares against golden": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_coverage": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "constrained-random sequences": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "line/toggle ≥ 90 %": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "all functional covergroups hit": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_signoff": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "golden equivalence on the full benchmark input": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "directed + random suites pass": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "coverage goals": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "lint clean": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Icarus 4-state run X-free after reset": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal (sby) where listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "ppa": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "Yosys+Liberty area + cell counts": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "OpenLane 2 run: Fmax, area µm², power": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "trade-off table (≥2 design points)": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "integration": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "register map ↔ driver model consistent": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "cycle-accurate speedup estimate vs results/baseline_*": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "report §7 bullets mapped": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        }
+      },
+      "metrics": {
+        "dv": {
+          "line_cov": 0,
+          "toggle_cov": 0,
+          "func_cov": 0,
+          "tests_run": 0,
+          "tests_pass": 0,
+          "formal": "n/a"
+        },
+        "ppa": {
+          "cells": 0,
+          "area_um2": 0,
+          "fmax_mhz": 0,
+          "power_mw": 0
+        }
+      }
+    },
+    "huffman_engine": {
+      "stages": {
+        "prd": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "every requirement has a measurable KPI + acceptance test": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "HW/SW split table": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "workload slice quantified from results/ profile": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review findings resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "mas": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "I/O table with widths + clock": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "register map (offset, name, bits, access, reset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "DMA/stream protocol": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "driver API sketch": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "block diagram": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "uarch": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pipeline/FSM diagrams": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "number formats fixed": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "memories sized": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "per-stage timing budget": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "latency/throughput derived and matches PRD KPI": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "rtl": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "make lint clean (verilator --lint-only -Wall)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Yosys synth succeeds (synthesizable subset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "agent code review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_testplan": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "features ↔ tests ↔ covergroups ↔ checkers matrix": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "golden-model interface defined": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal properties listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_bringup": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pyuvm env instantiates": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "first directed test passes on Verilator": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "scoreboard compares against golden": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_coverage": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "constrained-random sequences": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "line/toggle ≥ 90 %": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "all functional covergroups hit": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_signoff": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "golden equivalence on the full benchmark input": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "directed + random suites pass": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "coverage goals": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "lint clean": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Icarus 4-state run X-free after reset": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal (sby) where listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "ppa": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "Yosys+Liberty area + cell counts": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "OpenLane 2 run: Fmax, area µm², power": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "trade-off table (≥2 design points)": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "integration": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "register map ↔ driver model consistent": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "cycle-accurate speedup estimate vs results/baseline_*": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "report §7 bullets mapped": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        }
+      },
+      "metrics": {
+        "dv": {
+          "line_cov": 0,
+          "toggle_cov": 0,
+          "func_cov": 0,
+          "tests_run": 0,
+          "tests_pass": 0,
+          "formal": "n/a"
+        },
+        "ppa": {
+          "cells": 0,
+          "area_um2": 0,
+          "fmax_mhz": 0,
+          "power_mw": 0
+        }
+      }
+    },
+    "mtf_cam": {
+      "stages": {
+        "prd": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "every requirement has a measurable KPI + acceptance test": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "HW/SW split table": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "workload slice quantified from results/ profile": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review findings resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "mas": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "I/O table with widths + clock": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "register map (offset, name, bits, access, reset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "DMA/stream protocol": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "driver API sketch": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "block diagram": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "uarch": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pipeline/FSM diagrams": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "number formats fixed": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "memories sized": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "per-stage timing budget": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "latency/throughput derived and matches PRD KPI": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "hw-review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "rtl": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "make lint clean (verilator --lint-only -Wall)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Yosys synth succeeds (synthesizable subset)": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "agent code review resolved": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_testplan": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "features ↔ tests ↔ covergroups ↔ checkers matrix": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "golden-model interface defined": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal properties listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_bringup": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "pyuvm env instantiates": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "first directed test passes on Verilator": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "scoreboard compares against golden": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_coverage": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "constrained-random sequences": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "line/toggle ≥ 90 %": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "all functional covergroups hit": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "dv_signoff": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "golden equivalence on the full benchmark input": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "directed + random suites pass": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "coverage goals": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "lint clean": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "Icarus 4-state run X-free after reset": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "formal (sby) where listed": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "ppa": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "Yosys+Liberty area + cell counts": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "OpenLane 2 run: Fmax, area µm², power": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "trade-off table (≥2 design points)": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        },
+        "integration": {
+          "state": "todo",
+          "started": "",
+          "finished": "",
+          "gate": {
+            "register map ↔ driver model consistent": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "cycle-accurate speedup estimate vs results/baseline_*": {
+              "result": "n/a",
+              "evidence": ""
+            },
+            "report §7 bullets mapped": {
+              "result": "n/a",
+              "evidence": ""
+            }
+          }
+        }
+      },
+      "metrics": {
+        "dv": {
+          "line_cov": 0,
+          "toggle_cov": 0,
+          "func_cov": 0,
+          "tests_run": 0,
+          "tests_pass": 0,
+          "formal": "n/a"
+        },
+        "ppa": {
+          "cells": 0,
+          "area_um2": 0,
+          "fmax_mhz": 0,
+          "power_mw": 0
+        }
+      }
+    }
+  },
+  "order": [
+    "grape_pipeline",
+    "huffman_engine",
+    "mtf_cam"
+  ],
+  "stages": [
+    "prd",
+    "mas",
+    "uarch",
+    "rtl",
+    "dv_testplan",
+    "dv_bringup",
+    "dv_coverage",
+    "dv_signoff",
+    "ppa",
+    "integration"
+  ],
+  "updated": "2026-08-26T05:06:57Z"
+}
