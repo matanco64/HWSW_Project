@@ -285,3 +285,9 @@ A4 is complete; nothing further to run (the `__pycache__` removal was denied —
 1. Bash `tool_response` is `{stdout, stderr, interrupted, isImage}` — **no exit-code field**. Non-zero exits are delivered to **PostToolUseFailure** with top-level `error: "Exit code N\n…"`. friction_hook is wired to both events and parses `error`/stderr, with fallbacks for `exit_code`/`exitCode` if they ever appear.
 2. On exit 0, **plain stdout of PostToolUse and Stop hooks is not shown to Claude** (debug log only). So lint findings are returned as `hookSpecificOutput.addi
 ... [truncated, 4994 chars total]"
+
+2026-08-26T05:29:03Z — Claude Code session (auto-logged)
+Prompt: "restarted"
+
+2026-08-26T20:31:31Z — Claude Code session (auto-logged)
+Prompt: "let's commit and push - I have the access now"
