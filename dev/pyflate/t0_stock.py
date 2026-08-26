@@ -1,83 +1,15 @@
-#!/usr/bin/env python
+"""T0 - stock pyflate decoder (verbatim algorithm from pyperformance 1.14.0).
+
+Extracted from benchmarks/bm_pyflate/run_benchmark.py with the pyperf harness
+removed so tiers can be timed/verified side by side.  DO NOT EDIT the algorithm.
 """
-Copyright 2006--2007-01-21 Paul Sladen
-http://www.paul.sladen.org/projects/compression/
-
-You may use and distribute this code under any DFSG-compatible
-license (eg. BSD, GNU GPLv2).
-
-Stand-alone pure-Python DEFLATE (gzip) and bzip2 decoder/decompressor.
-This is probably most useful for research purposes/index building;  there
-is certainly some room for improvement in the Huffman bit-matcher.
-
-With the as-written implementation, there was a known bug in BWT
-decoding to do with repeated strings.  This has been worked around;
-see 'bwt_reverse()'.  Correct output is produced in all test cases
-but ideally the problem would be found...
-
------------------------------------------------------------------------
-HW/SW final project -- SOFTWARE OPTIMIZATION of the bzip2 decode path.
-
-The workload is unchanged: the same 67,562-byte bzip2 stream is decoded to
-the same 399,360 bytes, and the same MD5 check guards every run.  What
-changed is *how* the decoder does its work.  The author's own docstring
-above says "there is certainly some room for improvement in the Huffman
-bit-matcher" -- that is exactly what is fixed here.
-
-  1. Bit reader (`RBitfield`).  The stock reader called `f.read(1)` once per
-     input byte and rebuilt a Python int with `_mask()` helper calls on every
-     access.  It now reads the stream once into `bytes` and keeps a bounded
-     bit window refilled 32 bits at a time; the mask is a precomputed table.
-
-  2. Huffman decode.  The stock `find_next_symbol()` walked the 258-entry
-     `HuffmanLength` list linearly, calling `snoopbits()` again at every new
-     code length.  bzip2 codes are *canonical*, so per table we precompute the
-     zlib/libbzip2 arrays (`limit`, `base`, `perm`) plus a flat primary lookup
-     table indexed by the next PRIMARY_BITS bits.  A symbol is then one list
-     index (99.6% of symbols in this stream); the rest fall back to canonical
-     bit-at-a-time extension.  Table build cost is ~0.5 ms for all six tables
-     and happens 6 times per block, versus 148,271 symbol decodes.
-
-  3. Move-to-front.  The list is kept in reverse order, so a move-to-front is
-     `l.append(l.pop(-r))`, which memmoves `rank` slots (mean rank 7.2) rather
-     than rebuilding the whole 147-entry list from three slices.
-
-  4. Inverse BWT.  `bytes(sorted(L))` + 256 `find()` calls -- an O(n log n)
-     sort used only to recover 256 bucket offsets -- is replaced by an
-     O(n + 256) counting sort, and the chain walk fills a preallocated
-     `bytearray`.
-
-  5. Final RLE4 expansion.  The per-byte loop that sliced one byte at a time
-     is replaced by a regex that locates each 4-byte run at C speed; the
-     literal stretches between runs are copied with one slice each.
-
-The DEFLATE/gzip half of the module (`Bitfield`, `HuffmanTable`,
-`gzip_main`, ...) is deliberately left untouched and still functional.
-"""
-
 import hashlib
-import io
 import os
-import re
 import struct
 
-import pyperf
 
 
 int2byte = struct.Struct(">B").pack
-
-# Precomputed low-bit masks; replaces the per-call `_mask()` helper, which the
-# stock decoder invoked 655,015 times for this input.
-MASK = [(1 << i) - 1 for i in range(65)]
-
-# Width of the flat Huffman lookup table.  11 bits resolves 99.6% of the
-# symbols in this stream in a single index while keeping each table at 2048
-# entries; measured end-to-end time is flat for any value in 9..13.
-PRIMARY_BITS = 11
-
-# Four identical bytes followed by at least one more byte: the bzip2 RLE4
-# escape.  `(?s)` so that '.' also matches b'\n'.
-RUN4 = re.compile(rb'(?s)(.)\1{3}(?=.)')
 
 
 class BitfieldBase(object):
@@ -135,7 +67,6 @@ class BitfieldBase(object):
 
 
 class Bitfield(BitfieldBase):
-    """LSB-first bit reader used by the DEFLATE/gzip path (unmodified)."""
 
     def _more(self):
         c = self._read(1)
@@ -156,82 +87,26 @@ class Bitfield(BitfieldBase):
         return r
 
 
-class RBitfield(object):
-    """MSB-first bit reader over an in-memory buffer.
+class RBitfield(BitfieldBase):
 
-    OPTIMIZED: the stock version inherited from BitfieldBase and pulled one
-    byte at a time out of a file object (`_more` -> `_read` -> `f.read(1)`),
-    then masked with a `_mask()` method call on every snoop and every read.
-    This version slurps the stream once and refills 32 bits at a time from a
-    `bytes` object, with masks taken from a table.  Same bit order, same
-    values returned.
-    """
-
-    __slots__ = ('data', 'datalen', 'pos', 'bitfield', 'bits')
-
-    # Tail padding so that a wide peek (PRIMARY_BITS) or a 32-bit refill on
-    # the final symbol of the stream cannot run off the end of the buffer.
-    # The padding is never part of a decoded symbol: the stream terminates at
-    # its end-of-stream magic well before it.
-    _PAD = b'\x00' * 8
-
-    def __init__(self, x):
-        data = x if isinstance(x, (bytes, bytearray)) else x.read()
-        self.datalen = len(data)
-        self.data = data + self._PAD
-        self.pos = 0
-        self.bitfield = 0
-        self.bits = 0
-
-    def _fill(self, n):
-        d = self.data
-        p = self.pos
-        bf = self.bitfield
-        b = self.bits
-        while b < n:
-            if p >= self.datalen + 8:
-                raise Exception("Length Error")
-            bf = (bf << 32) | int.from_bytes(d[p:p + 4], 'big')
-            b += 32
-            p += 4
-        self.pos = p
-        self.bitfield = bf
-        self.bits = b
+    def _more(self):
+        c = self._read(1)
+        self.bitfield <<= 8
+        self.bitfield += ord(c)
+        self.bits += 8
 
     def snoopbits(self, n=8):
         if n > self.bits:
-            self._fill(n)
-        return (self.bitfield >> (self.bits - n)) & MASK[n]
+            self.needbits(n)
+        return (self.bitfield >> (self.bits - n)) & self._mask(n)
 
     def readbits(self, n=8):
         if n > self.bits:
-            self._fill(n)
-        b = self.bits - n
-        bf = self.bitfield
-        self.bits = b
-        self.bitfield = bf & MASK[b]
-        return (bf >> b) & MASK[n]
-
-    def align(self):
-        n = self.bits & 0x7
-        if n:
-            self.readbits(n)
-
-    def tell(self):
-        return self.pos - ((self.bits + 7) >> 3), 7 - ((self.bits - 1) & 0x7)
-
-    def tellbits(self):
-        b, k = self.tell()
-        return (b << 3) + k
-
-    def remainder(self):
-        """A file object positioned at the next unconsumed byte.
-
-        Used only to hand the still-unmodified gzip decoder its input, since
-        that path expects a file-like object rather than this buffer.
-        """
-        off = self.pos - (self.bits >> 3)
-        return io.BytesIO(self.data[off:self.datalen])
+            self.needbits(n)
+        r = (self.bitfield >> (self.bits - n)) & self._mask(n)
+        self.bits -= n
+        self.bitfield &= ~(self._mask(n) << self.bits)
+        return r
 
 
 def printbits(v, n):
@@ -286,11 +161,6 @@ def reverse_bytes(v, n):
 
 
 class HuffmanTable(object):
-    """Object-per-code Huffman table with a linear matcher.
-
-    Still used by the DEFLATE/gzip path.  The bzip2 path now uses the
-    canonical tables built by `build_huffman_table()` below.
-    """
 
     def __init__(self, bootstrap):
         l = []
@@ -350,6 +220,14 @@ class HuffmanTable(object):
         raise Exception("unfound symbol, even after end of table @%r"
                         % field.tell())
 
+        for bits in range(self.min_bits, self.max_bits + 1):
+            r = self._find_symbol(bits, field.snoopbits(bits), self.table)
+            if 0 <= r:
+                field.readbits(bits)
+                return r
+            elif bits == self.max_bits:
+                raise "unfound symbol, even after max_bits"
+
 
 class OrderedHuffmanTable(HuffmanTable):
 
@@ -357,69 +235,6 @@ class OrderedHuffmanTable(HuffmanTable):
         l = len(lengths)
         z = list(zip(range(l), lengths)) + [(l, -1)]
         HuffmanTable.__init__(self, z)
-
-
-def build_huffman_table(lengths, primary_bits=PRIMARY_BITS):
-    """Canonical Huffman decode tables for one bzip2 group.
-
-    OPTIMIZED replacement for `OrderedHuffmanTable` +
-    `populate_huffman_symbols()` + `min_max_bits()` on the bzip2 path.
-
-    bzip2 hands out codes canonically: sorted by (length, symbol), starting at
-    zero, shifted left by one at every length increment -- exactly what the
-    stock `populate_huffman_symbols()` computes.  That lets us decode with
-    arithmetic instead of a search:
-
-        limit[l] : largest assigned l-bit code
-        base[l]  : offset such that perm[code - base[l]] is the symbol
-        perm[]   : symbols in canonical order
-
-    and, on top of that, a flat table indexed by the next `primary_bits` bits
-    that answers most symbols in a single index.  Because the codes are
-    canonical and MSB-first, the slots belonging to consecutive symbols are
-    contiguous, so the table is filled with one C-level span assignment per
-    symbol rather than 2**primary_bits individual writes.
-
-    Returns (pb, pmask, tbl, limit, base, perm) where
-    tbl[peek(pb)] == (symbol << 5) | code_length, or 0 for "code is longer
-    than pb bits, use limit/base/perm".
-    """
-    n = len(lengths)
-    minLen = min(l for l in lengths if l)
-    maxLen = max(lengths)
-
-    perm = []
-    for l in range(minLen, maxLen + 1):
-        for s in range(n):
-            if lengths[s] == l:
-                perm.append(s)
-
-    count = [0] * (maxLen + 2)
-    for l in lengths:
-        if l:
-            count[l] += 1
-
-    limit = [0] * (maxLen + 2)
-    base = [0] * (maxLen + 2)
-    vec = 0
-    cum = 0
-    for l in range(minLen, maxLen + 1):
-        vec += count[l]
-        limit[l] = vec - 1
-        base[l] = (vec - count[l]) - cum
-        cum += count[l]
-        vec <<= 1
-
-    pb = min(primary_bits, maxLen)
-    tbl = []
-    for s in perm:
-        l = lengths[s]
-        if l > pb:
-            break
-        tbl += [(s << 5) | l] * (1 << (pb - l))
-    tbl += [0] * ((1 << pb) - len(tbl))
-
-    return pb, MASK[pb], tbl, limit, base, perm
 
 
 def code_length_orders(i):
@@ -461,89 +276,47 @@ def move_to_front(l, c):
 
 
 def bwt_transform(L):
-    """Bucket-start pointers for the inverse BWT.
-
-    OPTIMIZED: the stock version built `bytes(sorted(L))` -- an O(n log n)
-    sort of 336,184 bytes -- and then called `F.find()` 256 times, purely to
-    learn where each symbol's bucket starts.  A counting sort gets the same
-    answer in O(n + 256): count the symbols, prefix-sum the counts, then place
-    each position into its bucket.
-    """
-    counts = [0] * 256
-    for symbol in L:
-        counts[symbol] += 1
-
+    # Semi-inefficient way to get the character counts
+    F = bytes(sorted(L))
     base = []
-    total = 0
-    for c in counts:
-        base.append(total)
-        total += c
+    for i in range(256):
+        base.append(F.find(int2byte(i)))
 
     pointers = [-1] * len(L)
     for i, symbol in enumerate(L):
-        b = base[symbol]
-        pointers[b] = i
-        base[symbol] = b + 1
+        pointers[base[symbol]] = i
+        base[symbol] += 1
     return pointers
 
 
 def bwt_reverse(L, end):
-    # STRAGENESS WARNING: There was a bug somewhere here in that
-    # if the output of the BWT resolves to a perfect copy of N
-    # identical strings (think exact multiples of 255 'X' here),
-    # then a loop is formed.  When decoded, the output string would
-    # be cut off after the first loop, typically '\0\0\0\0\xfb'.
-    # The previous loop construct was:
-    #
-    #  next = T[end]
-    #  while next != end:
-    #      out += L[next]
-    #      next = T[next]
-    #  out += L[next]
-    #
-    # For the moment, I've instead replaced it with a check to see
-    # if there has been enough output generated.  I didn't figured
-    # out where the off-by-one-ism is yet---that actually produced
-    # the cyclic loop.
-    n = len(L)
-    if not n:
-        return b''
-    T = bwt_transform(L)
-    # OPTIMIZED: fill a preallocated bytearray instead of appending 336k ints
-    # to a list and converting at the end.
-    out = bytearray(n)
-    for i in range(n):
-        end = T[end]
-        out[i] = L[end]
-    return bytes(out)
-
-
-def rle4_expand(nt):
-    """bzip2's final run-length step.
-
-    OPTIMIZED: the stock loop advanced one byte at a time over the whole
-    336,184-byte buffer, testing four neighbours and appending a fresh
-    one-byte `bytes` object for every literal.  Runs are rare (8,542 of them
-    here), so instead the regex engine finds the next run at C speed and each
-    literal stretch between two runs is copied with a single slice.  Same
-    left-to-right semantics: a run consumes 4 bytes plus the count byte, and
-    scanning resumes after it.
-    """
     out = []
-    append = out.append
-    search = RUN4.search
-    i = 0
-    while True:
-        m = search(nt, i)
-        if m is None:
-            break
-        s = m.start()
-        if s > i:
-            append(nt[i:s])
-        append(nt[s:s + 1] * (nt[s + 4] + 4))
-        i = s + 5
-    append(nt[i:])
-    return b"".join(out)
+    if len(L):
+        T = bwt_transform(L)
+
+        # STRAGENESS WARNING: There was a bug somewhere here in that
+        # if the output of the BWT resolves to a perfect copy of N
+        # identical strings (think exact multiples of 255 'X' here),
+        # then a loop is formed.  When decoded, the output string would
+        # be cut off after the first loop, typically '\0\0\0\0\xfb'.
+        # The previous loop construct was:
+        #
+        #  next = T[end]
+        #  while next != end:
+        #      out += L[next]
+        #      next = T[next]
+        #  out += L[next]
+        #
+        # For the moment, I've instead replaced it with a check to see
+        # if there has been enough output generated.  I didn't figured
+        # out where the off-by-one-ism is yet---that actually produced
+        # the cyclic loop.
+
+        for i in range(len(L)):
+            end = T[end]
+            out.append(L[end])
+
+    return bytes(out)
 
 
 def compute_used(b):
@@ -583,7 +356,7 @@ def compute_selectors_list(b, huffman_groups):
 
 
 def compute_tables(b, huffman_groups, symbols_in_use):
-    tables = []
+    groups_lengths = []
     for j in range(huffman_groups):
         length = b.readbits(5)
         lengths = []
@@ -593,7 +366,14 @@ def compute_tables(b, huffman_groups, symbols_in_use):
             while b.readbits(1):
                 length -= (b.readbits(1) * 2) - 1
             lengths += [length]
-        tables.append(build_huffman_table(lengths))
+        groups_lengths += [lengths]
+
+    tables = []
+    for g in groups_lengths:
+        codes = OrderedHuffmanTable(g)
+        codes.populate_huffman_symbols()
+        codes.min_max_bits()
+        tables.append(codes)
     return tables
 
 
@@ -612,69 +392,23 @@ def decode_huffman_block(b, out):
     symbols_in_use = sum(used) + 2  # remember RUN[AB] RLE symbols
     tables = compute_tables(b, huffman_groups, symbols_in_use)
 
-    # OPTIMIZED: the move-to-front list holds plain ints and is kept in
-    # REVERSE order, so the front of the list is favourites[-1] and rank r-1
-    # sits at index -r.  `pop(-r)` + `append()` then memmoves only `rank`
-    # slots (mean rank 7.2 for this stream) instead of rebuilding all 147
-    # entries from three slices the way `move_to_front()` does.
-    favourites = [i for i, x in enumerate(used) if x]
-    favourites.reverse()
-    fav_pop = favourites.pop
-    fav_append = favourites.append
-
-    eob = symbols_in_use - 1
-    buffer = bytearray()
-    buf_append = buffer.append
-    buf_extend = buffer.extend
-
-    # OPTIMIZED: the bit reader is unpacked into locals for the symbol loop,
-    # so fetching bits is integer arithmetic rather than three bound-method
-    # calls (snoopbits -> needbits -> _mask) per code length tried.
-    data = b.data
-    pos = b.pos
-    acc = b.bitfield
-    nbits = b.bits
+    favourites = [int2byte(i) for i, x in enumerate(used) if x]
 
     selector_pointer = 0
     decoded = 0
-    repeat = repeat_power = 0
-    nsel = len(selectors_list)
-    pb = pmask = 0
-    tbl = limit = base = perm = None
-
     # Main Huffman loop
+    repeat = repeat_power = 0
+    buffer = []
+    t = None
     while True:
         decoded -= 1
         if decoded <= 0:
             decoded = 50  # Huffman table re-evaluate/switch length
-            if selector_pointer <= nsel:
-                pb, pmask, tbl, limit, base, perm = \
-                    tables[selectors_list[selector_pointer]]
+            if selector_pointer <= len(selectors_list):
+                t = tables[selectors_list[selector_pointer]]
                 selector_pointer += 1
 
-        # keep at least 32 bits buffered (the longest bzip2 code is 20 bits)
-        if nbits < 32:
-            acc = ((acc & MASK[nbits]) << 32) | int.from_bytes(data[pos:pos + 4], 'big')
-            nbits += 32
-            pos += 4
-
-        # OPTIMIZED Huffman decode: one array index for a short code, else
-        # canonical bit-at-a-time extension.  Replaces the linear scan of the
-        # 258-entry HuffmanLength list (mean 5.0 entries, 2.3 snoopbits calls
-        # per symbol, 148,271 symbols).
-        zvec = (acc >> (nbits - pb)) & pmask
-        v = tbl[zvec]
-        if v:
-            nbits -= v & 31
-            r = v >> 5
-        else:
-            zn = pb
-            while zvec > limit[zn]:
-                zn += 1
-                zvec = (zvec << 1) | ((acc >> (nbits - zn)) & 1)
-            nbits -= zn
-            r = perm[zvec - base[zn]]
-
+        r = t.find_next_symbol(b, False)
         if 0 <= r <= 1:
             if repeat == 0:
                 repeat_power = 1
@@ -685,27 +419,33 @@ def decode_huffman_block(b, out):
             # Remember kids: If there is only one repeated
             # real symbol, it is encoded with *zero* Huffman
             # bits and not output... so buffer[-1] doesn't work.
-            buf_extend(bytes((favourites[-1],)) * repeat)
+            buffer.append(favourites[0] * repeat)
             repeat = 0
-        if r == eob:
+        if r == symbols_in_use - 1:
             break
         else:
-            o = fav_pop(-r)
-            fav_append(o)
-            buf_append(o)
+            o = favourites[r - 1]
+            move_to_front(favourites, r - 1)
+            buffer.append(o)
+            pass
 
-    b.pos = pos
-    b.bitfield = acc & MASK[nbits]
-    b.bits = nbits
-
-    nearly_there = bwt_reverse(bytes(buffer), pointer)
+    nt = nearly_there = bwt_reverse(b"".join(buffer), pointer)
+    i = 0
     # Pointless/irritating run-length encoding step
-    out.append(rle4_expand(nearly_there))
+    while i < len(nearly_there):
+        if i < len(nearly_there) - 4 and nt[i] == nt[i + 1] == nt[i + 2] == nt[i + 3]:
+            out.append(nearly_there[i:i + 1] * (ord(nearly_there[i + 4:i + 5]) + 4))
+            i += 5
+        else:
+            out.append(nearly_there[i:i + 1])
+            i += 1
 
 # Sixteen bits of magic have been removed by the time we start decoding
 
 
-def bzip2_main(b):
+def bzip2_main(input):
+    b = RBitfield(input)
+
     method = b.readbits(8)
     if method != ord('h'):
         raise Exception(
@@ -875,38 +615,16 @@ def gzip_main(field):
     return "".join(out)
 
 
-def bench_pyflake(loops, filename):
-    input_fp = open(filename, 'rb')
-    range_it = range(loops)
-    t0 = pyperf.perf_counter()
 
-    for _ in range_it:
-        input_fp.seek(0)
+NAME = "T0 stock"
+
+
+def decompress(filename):
+    with open(filename, 'rb') as input_fp:
         field = RBitfield(input_fp)
-
         magic = field.readbits(16)
-        if magic == 0x1f8b:  # GZip
-            # the gzip decoder still consumes a file object
-            out = gzip_main(field.remainder())
-        elif magic == 0x425a:  # BZip2
-            out = bzip2_main(field)
-        else:
-            raise Exception("Unknown file magic %x, not a gzip/bzip2 file"
-                            % hex(magic))
-
-    dt = pyperf.perf_counter() - t0
-    input_fp.close()
-
-    if hashlib.md5(out).hexdigest() != "afa004a630fe072901b1d9628b960974":
-        raise Exception("MD5 checksum mismatch")
-
-    return dt
-
-
-if __name__ == '__main__':
-    runner = pyperf.Runner()
-    runner.metadata['description'] = "Pyflate benchmark"
-
-    filename = os.path.join(os.path.dirname(__file__),
-                            "data", "interpreter.tar.bz2")
-    runner.bench_time_func('pyflate', bench_pyflake, filename)
+        if magic == 0x1f8b:
+            return gzip_main(field)
+        elif magic == 0x425a:
+            return bzip2_main(field)
+        raise Exception("Unknown file magic %x" % magic)
