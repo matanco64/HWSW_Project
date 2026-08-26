@@ -7,6 +7,12 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "0cd14026efa0330083cbc7adf590976c162b60e02f696a8dcce96f0b4dab8a72"
     },
+    "claude-skill-verilog": {
+      "source": "londey/claude-skill-verilog",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "468ab0b98bd25bd6556317dce3cc7d067a80f0b4e911a906dec6f5fc32fe7e67"
+    },
     "codebase-design": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -24,6 +30,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "computedHash": "a11713c0ff7870efa3c331b2e273f09116158485246edc89ae5088eefd1b0b48"
+    },
+    "gf-cocotb": {
+      "source": "codejunkie99/Gateflow-Plugin",
+      "sourceType": "github",
+      "skillPath": "skills/gf-cocotb/SKILL.md",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -60,6 +72,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/research/SKILL.md",
       "computedHash": "c8c1cba327a6f824b554cd978079a3dadd7406d73174f8fb9bfef58824691970"
+    },
+    "tb-best-practices": {
+      "source": "codejunkie99/Gateflow-Plugin",
+      "sourceType": "github",
+      "skillPath": "skills/tb-best-practices/SKILL.md",
+      "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "teach": {
       "source": "mattpocock/skills",
