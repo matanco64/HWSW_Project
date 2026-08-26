@@ -20,7 +20,11 @@ benchmarks/
   MANIFEST                              pyperformance custom-benchmark manifest
   bm_pyflate/                           Benchmark copy — optimizations land here
   bm_nbody/                             Benchmark copy — optimizations land here
-hw/                                     Hardware accelerator designs (Verilog/SystemVerilog)
+hw/                                     Hardware accelerator designs (SystemVerilog) + the stage-gated
+                                        HW flow: hw/FLOW.md (definition), hw/PLAN.md (steps),
+                                        hw/PROGRESS.md (generated status), hw/setup.sh (toolchain)
+research/                               Cited research notes (agent skills/toolchain, nbody & pyflate algorithms)
+tools/hw/                               Claude Code hooks + status/progress scripts for the HW flow
 rust/                                   Rust/PyO3 acceleration crates (stage-2 optimizations)
 results/                                Measured data: pyperf JSONs, perf reports, flame graphs
 ```
