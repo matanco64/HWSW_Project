@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop hook: warn if hw/**/*.sv changed without a later `make sim`
+"""Stop hook (only when HW mode is on and something under hw/ changed): warn if hw/**/*.sv changed without a later `make sim`
 (hw/.advisor/last_sim.txt is touched by Makefile.cocotb's sim target), and remind to run
 the hw-advisor skill. Never blocks; never spawns anything.
 
@@ -14,30 +14,30 @@ import subprocess
 import sys
 
 from _common import HW, ROOT, payload
+from mode import get as get_mode
 
 LAST_SIM = HW / ".advisor" / "last_sim.txt"
 
 
-def changed_sv():
+def changed_hw():
+    """(all changed paths under hw/, the .sv subset) from git status; [] on any failure."""
     try:
         r = subprocess.run(["git", "status", "--porcelain", "--untracked-files=all", "--", "hw/"], cwd=ROOT, text=True,
                            capture_output=True, timeout=15)
     except Exception:
-        return []
-    files = []
-    for line in r.stdout.splitlines():
-        path = line[3:].split(" -> ")[-1].strip()
-        if path.endswith(".sv"):
-            files.append(path)
-    return files
+        return [], []
+    files = [line[3:].split(" -> ")[-1].strip() for line in r.stdout.splitlines()]
+    return files, [f for f in files if f.endswith(".sv")]
 
 
 def main() -> None:
     p = payload()
-    if p.get("stop_hook_active"):
-        return
+    if p.get("stop_hook_active") or get_mode() != "on":
+        return  # software-only checkout (or mode unset): stay silent
+    changed, sv = changed_hw()
+    if not changed:
+        return  # nothing under hw/ touched this session: no reminder
     out = {}
-    sv = changed_sv()
     if sv:
         sim_t = LAST_SIM.stat().st_mtime if LAST_SIM.exists() else 0
         newest = max((ROOT / f).stat().st_mtime for f in sv if (ROOT / f).exists()) if sv else 0

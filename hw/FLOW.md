@@ -71,14 +71,20 @@ of `STATUS.json`), `hw-advisor` (lessons + skill improvement). Third-party: `cla
 
 ## Hooks (`.claude/settings.json` → `tools/hw/*.py`)
 
+**Mode gate.** `hw/.advisor/mode` (gitignored, per machine; `/hw-mode on|off|status`,
+`tools/hw/mode.py`) is the explicit signal that a checkout is used for hardware work. Unset → the
+first session asks once (AskUserQuestion) and records the answer. `off` → SessionStart injection and
+the Stop reminder stay silent and `/hw-flow` refuses; path-scoped hooks never fire outside `hw/`
+anyway. A software-only teammate therefore sees nothing of the flow.
+
 | Event | Matcher | Action |
 |---|---|---|
 | PostToolUse | Edit/Write of `hw/**/*.sv` | `verilator --lint-only -Wall` on the file; warnings returned to the agent |
 | PostToolUse | Edit/Write of `hw/STATUS.json` | regenerate `hw/PROGRESS.md`; `gh_sync.py` (no-op until `gh auth` works) |
 | PostToolUse | Bash with non-zero exit under `hw/` | append to `hw/.advisor/friction.jsonl` |
 | PreToolUse | Edit/Write of `hw/*/golden/**` | deny — golden models are frozen; change via explicit user request only |
-| SessionStart | — | inject `hw/PROGRESS.md` |
-| Stop | — | warn if `.sv` under `hw/` changed without a `make sim` this session; spawn `hw-advisor` |
+| SessionStart | — | mode unset: ask once; mode on: inject `hw/PROGRESS.md`; mode off: silent |
+| Stop | — | mode on and `hw/` changed: warn if `.sv` changed without a `make sim`; remind to run `hw-advisor` |
 
 ## Tracking
 
