@@ -18,3 +18,9 @@ Quick start:
 ```sh
 ./hw/setup.sh && source hw/env.sh && make -C hw/common lint sim cov area
 ```
+
+## Software-only teammates
+
+The first Claude Code session in a fresh clone asks once whether the checkout is used for the
+hardware flow. Answer "Software only" and every hardware hook stays silent (`/hw-mode on` to change
+later). The answer lives in `hw/.advisor/mode`, which is gitignored.

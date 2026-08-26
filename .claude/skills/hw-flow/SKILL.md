@@ -17,6 +17,9 @@ argument, ask which module.
 
 ## Procedure
 
+0. **Check the mode.** `python3 tools/hw/mode.py` must print `on`. If `off` or `unset`, do not
+   proceed silently: ask with AskUserQuestion (header "HW flow") whether to enable hardware mode
+   on this checkout; on yes run `python3 tools/hw/mode.py on`, otherwise stop (see `hw-mode`).
 1. **Locate the stage.** `python3 tools/hw/status.py next <module>` prints `<stage> <state>` for the
    first stage not `done`. Stage ↔ skill ↔ gate come from the FLOW.md table; checkpoints are
    `prd`, `mas`, `uarch`, `dv_signoff`.

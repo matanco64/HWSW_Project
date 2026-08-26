@@ -291,3 +291,9 @@ Prompt: "restarted"
 
 2026-08-26T20:31:31Z — Claude Code session (auto-logged)
 Prompt: "let's commit and push - I have the access now"
+
+2026-08-26T20:40:27Z — Claude Code session (auto-logged)
+Prompt: "and if matan only develops the software, don't our flow disturb him?"
+
+2026-08-26T20:44:29Z — Claude Code session (auto-logged)
+Prompt: "we do need an explicit signal for loading the hw skills - maybe even through the askuserquestion tool?"
