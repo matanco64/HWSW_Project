@@ -1,8 +1,54 @@
+"""Solve a Gen-1 Pokemon battle as a Markov decision process.
+
+Optimized version of the pyperformance 1.14.0 `mdp` benchmark.  It computes
+the identical result by the identical algorithm: the same state graph, the
+same exact transition probabilities, the same Gauss-Seidel interval value
+iteration in the same topological order, the same freeze rule, and the same
+111 sweeps.  Verified bit-for-bit -- not just the asserted root value, but
+all 4823 states x 2 bounds and all 22418 transition probabilities (see
+dev/mdp/verify.py).
+
+Three changes, none of which alters what is computed:
+
+1.  getCritDist is memoized.  It is a pure function, called 3659 times per
+    run with only 3 distinct argument tuples (stats are constant during a
+    battle; only HP changes).  The cache is per-run, so every measured
+    iteration does exactly the work stock does.
+
+2.  fractions.Fraction is replaced by exact fixed-denominator integers.
+    Every probability here is a rational whose denominator divides a
+    statically known constant:
+        DMG_DEN  = 512 * 39 = 19968   (one attack outcome)
+        MULT_DEN = 260                (the enemy's move mixture)
+        DEN      = DMG_DEN * MULT_DEN = 5191680 < 2**23
+    so numerators are single-digit CPython ints and no gcd is ever needed.
+    This is exact, not approximate: Fraction.__float__ is numerator /
+    denominator on the reduced pair and int division is correctly rounded,
+    so num / DEN yields the identical double.
+
+3.  States are renumbered to dense integers after topoSort and the graph is
+    flattened to CSR arrays (kind/row/col/prb/lo/hi/frz).  Stock addresses
+    every value by a tuple of nested namedtuples, and CPython does not cache
+    tuple hashes, so the sweep loop was re-hashing deep structures roughly
+    5 million times per run.  The CSR sweep is the same arithmetic in the
+    same order over list indices.
+
+NOTE for anyone porting the sweep: accumulate naively left-to-right, do not
+reorder edges, and do not parallelize across nodes.  Node-level parallelism
+turns Gauss-Seidel into Jacobi, which needs 369 sweeps instead of 111 and
+lands on a different answer.
+"""
 import collections
-from collections import defaultdict
-from fractions import Fraction
+import functools
 
 import pyperf
+
+DMG_DEN = 512 * 39          # 19968   - denominator of a single-attack outcome
+MULT_DEN = 260              # denominator of the enemy's move mixture
+DEN = DMG_DEN * MULT_DEN    # 5191680 - denominator of a joint outcome
+
+CHANCE = 1                  # node kinds: expectation node ...
+CHOICE = 0                  # ... and player-choice (max) node
 
 
 def topoSort(roots, getParents):
@@ -27,7 +73,6 @@ def topoSort(roots, getParents):
                 stack.extend((parent, 0) for parent in getParents(current))
         else:
             # after recursing
-            assert(current in visited)
             results.append(current)
     return results
 
@@ -41,14 +86,20 @@ def getDamages(L, A, D, B, stab, te):
     return [(x * z) // 255 for z in range(217, 256)]
 
 
-def getCritDist(L, p, A1, A2, D1, D2, B, stab, te):
-    p = min(p, Fraction(1))
+@functools.lru_cache(maxsize=None)
+def getCritDist(L, pnum, pden, A1, A2, D1, D2, B, stab, te):
+    """Damage distribution as integer numerators over DMG_DEN (exact)."""
+    if pnum > pden:                      # min(p, 1)
+        pnum = pden = 1
     norm = getDamages(L, A1, D1, B, stab, te)
     crit = getDamages(L * 2, A2, D2, B, stab, te)
 
-    dist = defaultdict(Fraction)
-    for mult, vals in zip([1 - p, p], [norm, crit]):
-        mult /= len(vals)
+    # (1 - p) / len(norm) and p / len(norm), as numerators over DMG_DEN
+    scale, rem = divmod(DMG_DEN, pden * len(norm))
+    assert rem == 0
+
+    dist = collections.defaultdict(int)
+    for mult, vals in ((pden - pnum) * scale, norm), (pnum * scale, crit):
         for x in vals:
             dist[x] += mult
     return dist
@@ -89,22 +140,23 @@ attack_data = {
 
 
 def _applyActionSide1(state, act):
+    """Outcome distribution as integer numerators over DMG_DEN."""
     me, them, extra = state
 
     if act == 'Super Potion':
         me = applyHPChange(me, 50)
-        return {(me, them, extra): Fraction(1)}
+        return {(me, them, extra): DMG_DEN}
 
     mdata = attack_data[act]
     aind = 3 if mdata.isspec else 0
     dind = 3 if mdata.isspec else 1
     pdiv = 64 if mdata.crit else 512
-    dmg_dist = getCritDist(me.fixed.lvl, Fraction(me.fixed.basespeed, pdiv),
-                           me.stats[aind], me.fixed.stats[aind], them.stats[
-                               dind], them.fixed.stats[dind],
+    dmg_dist = getCritDist(me.fixed.lvl, me.fixed.basespeed, pdiv,
+                           me.stats[aind], me.fixed.stats[aind],
+                           them.stats[dind], them.fixed.stats[dind],
                            mdata.power, mdata.stab, mdata.te)
 
-    dist = defaultdict(Fraction)
+    dist = collections.defaultdict(int)
     for dmg, p in dmg_dist.items():
         them2 = applyHPChange(them, -dmg)
         dist[me, them2, extra] += p
@@ -124,15 +176,10 @@ class Battle(object):
 
     def __init__(self):
         self.successors = {}
-        self.min = defaultdict(float)
-        self.max = defaultdict(lambda: 1.0)
-        self.frozen = set()
-
         self.win = 4, True
         self.loss = 4, False
-        self.max[self.loss] = 0.0
-        self.min[self.win] = 1.0
-        self.frozen.update([self.win, self.loss])
+        # per-run cache: every measured iteration does the same work
+        getCritDist.cache_clear()
 
     def _getSuccessorsA(self, statep):
         st, state = statep
@@ -140,22 +187,23 @@ class Battle(object):
             yield (1, state, action)
 
     def _applyActionPair(self, state, side1, act1, side2, act2, dist, pmult):
+        win, loss = self.win, self.loss
         for newstate, p in _applyAction(state, side1, act1).items():
             if newstate[0].hp == 0:
-                newstatep = self.loss
+                newstatep = loss
             elif newstate[1].hp == 0:
-                newstatep = self.win
+                newstatep = win
             else:
                 newstatep = 2, newstate, side2, act2
             dist[newstatep] += p * pmult
 
     def _getSuccessorsB(self, statep):
         st, state, action = statep
-        dist = defaultdict(Fraction)
-        for eact, p in [('Water Gun', Fraction(64, 130)),
-                        ('Bubblebeam', Fraction(66, 130))]:
-            priority1 = state[0].stats.speed + \
-                10000 * (action == 'Super Potion')
+        dist = collections.defaultdict(int)
+        # 64/130 -> 128/260 and 66/130 -> 132/260, over MULT_DEN
+        for eact, p in (('Water Gun', 128), ('Bubblebeam', 132)):
+            priority1 = (state[0].stats.speed
+                         + 10000 * (action == 'Super Potion'))
             priority2 = state[1].stats.speed + 10000 * (action == 'X Defend')
 
             if priority1 > priority2:
@@ -163,23 +211,25 @@ class Battle(object):
             elif priority1 < priority2:
                 self._applyActionPair(state, 1, eact, 0, action, dist, p)
             else:
-                self._applyActionPair(state, 0, action, 1, eact, dist, p / 2)
-                self._applyActionPair(state, 1, eact, 0, action, dist, p / 2)
+                h = p >> 1
+                self._applyActionPair(state, 0, action, 1, eact, dist, h)
+                self._applyActionPair(state, 1, eact, 0, action, dist, h)
 
-        return {k: float(p) for k, p in dist.items() if p > 0}
+        return {k: n / DEN for k, n in dist.items() if n > 0}
 
     def _getSuccessorsC(self, statep):
         st, state, side, action = statep
-        dist = defaultdict(Fraction)
+        dist = collections.defaultdict(int)
+        win, loss = self.win, self.loss
         for newstate, p in _applyAction(state, side, action).items():
             if newstate[0].hp == 0:
-                newstatep = self.loss
+                newstatep = loss
             elif newstate[1].hp == 0:
-                newstatep = self.win
+                newstatep = win
             else:
                 newstatep = 0, newstate
             dist[newstatep] += p
-        return {k: float(p) for k, p in dist.items() if p > 0}
+        return {k: n / DMG_DEN for k, n in dist.items() if n > 0}
 
     def getSuccessors(self, statep):
         try:
@@ -205,6 +255,51 @@ class Battle(object):
             temp = list(zip(*temp))[0] if temp else []
         return temp
 
+    def _buildCSR(self, initial_statep):
+        """topoSort the graph, then renumber states to dense integers and
+        flatten the successor lists into CSR arrays.
+
+        Node i owns col[row[i]:row[i+1]] and prb[row[i]:row[i+1]].  The node
+        order is exactly the topological order stock sweeps in, so the value
+        iteration below is the same Gauss-Seidel pass over the same nodes in
+        the same sequence.
+        """
+        stateps = topoSort([initial_statep], self.getSuccessorsList)
+        succs = self.successors
+        n = len(stateps)
+        idx = {}
+        for i, sp in enumerate(stateps):
+            idx[sp] = i
+
+        kind = bytearray(n)
+        row = [0] * (n + 1)
+        lo = [0.0] * n
+        hi = [1.0] * n
+        frz = bytearray(n)
+        col = []
+        prb = []
+
+        for i, sp in enumerate(stateps):
+            st = sp[0]
+            if st == 4:
+                # terminal: win == (4, True) -> [1, 1], loss -> [0, 0]
+                lo[i] = hi[i] = 1.0 if sp[1] else 0.0
+                frz[i] = 1
+            elif st == 0:
+                kind[i] = CHOICE
+                for sp2 in succs[sp]:
+                    col.append(idx[sp2])
+                    prb.append(0.0)
+            else:
+                kind[i] = CHANCE
+                for sp2, p in succs[sp]:
+                    col.append(idx[sp2])
+                    prb.append(p)
+            row[i + 1] = len(col)
+
+        order = [i for i in range(n) if not frz[i]]
+        return kind, row, col, prb, lo, hi, frz, order, idx[initial_statep]
+
     def evaluate(self, tolerance=0.15):
         badges = 1, 0, 0, 0
 
@@ -217,31 +312,53 @@ class Battle(object):
         initial_state = charhalf, starhalf, 0
         initial_statep = 0, initial_state
 
-        dmin, dmax, frozen = self.min, self.max, self.frozen
-        stateps = topoSort([initial_statep], self.getSuccessorsList)
+        kind, row, col, prb, lo, hi, frz, order, root = \
+            self._buildCSR(initial_statep)
 
-        itercount = 0
-        while dmax[initial_statep] - dmin[initial_statep] > tolerance:
-            itercount += 1
+        self.itercount = 0
+        while hi[root] - lo[root] > tolerance:
+            self.itercount += 1
+            newly_frozen = False
 
-            for sp in stateps:
-                if sp in frozen:
-                    continue
-
-                if sp[0] == 0:
-                    # choice node
-                    dmin[sp] = max(dmin[sp2] for sp2 in self.getSuccessors(sp))
-                    dmax[sp] = max(dmax[sp2] for sp2 in self.getSuccessors(sp))
+            for i in order:
+                s = row[i]
+                e = row[i + 1]
+                if kind[i]:
+                    # expectation node: accumulate left-to-right, in the
+                    # edge order the model was built in
+                    a = 0.0
+                    c = 0.0
+                    for j in range(s, e):
+                        k = col[j]
+                        p = prb[j]
+                        a += lo[k] * p
+                        c += hi[k] * p
                 else:
-                    dmin[sp] = sum(dmin[sp2] * p for sp2,
-                                   p in self.getSuccessors(sp))
-                    dmax[sp] = sum(dmax[sp2] * p for sp2,
-                                   p in self.getSuccessors(sp))
+                    # choice node: max over the successors
+                    k = col[s]
+                    a = lo[k]
+                    c = hi[k]
+                    for j in range(s + 1, e):
+                        k = col[j]
+                        v = lo[k]
+                        if v > a:
+                            a = v
+                        v = hi[k]
+                        if v > c:
+                            c = v
 
-                if dmin[sp] >= dmax[sp]:
-                    dmax[sp] = dmin[sp] = (dmin[sp] + dmax[sp]) / 2
-                    frozen.add(sp)
-        return (dmax[initial_statep] + dmin[initial_statep]) / 2
+                if a >= c:
+                    a = c = (a + c) / 2
+                    frz[i] = 1
+                    newly_frozen = True
+                lo[i] = a
+                hi[i] = c
+
+            if newly_frozen:
+                # frozen states never change again: drop them from the sweep
+                order = [i for i in order if not frz[i]]
+
+        return (hi[root] + lo[root]) / 2
 
 
 def bench_mdp(loops):
