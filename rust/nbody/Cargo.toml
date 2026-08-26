@@ -1,0 +1,31 @@
+[package]
+name = "nbody_rs"
+version = "0.1.0"
+edition = "2021"
+description = "Native kernel for the pyperformance nbody benchmark (HW/SW final project)"
+license = "MIT"
+
+[lib]
+name = "nbody_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+# No abi3: we target exactly one interpreter (cp310 in the course VM), so a
+# version-specific wheel avoids the Limited API's performance penalty.
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+# Keep symbols so Rust frames show up with real names under
+# `perf record -g` / FlameGraph -- the before/after flame graph (Python
+# interpreter towers collapsing into one narrow native block) is a
+# presentation asset.
+debug = true
+
+# DO NOT add fast-math / -ffp-contract=fast style flags here.  The whole
+# correctness argument of this crate is that it performs the same IEEE-754
+# double operations in the same order as the Python loop.  Rust's default is
+# strict IEEE semantics with no FMA contraction and no reassociation, which is
+# exactly what we need; enabling relaxed FP would silently break bit-identity.
