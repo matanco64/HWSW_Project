@@ -1,12 +1,20 @@
 # Hardware accelerator designs
 
-Planned modules (Verilog/SystemVerilog, logically consistent, non-tapeout):
+Verilog/SystemVerilog accelerators for the two profiled benchmarks (logically consistent, non-tapeout):
+`grape_pipeline` (nbody pair-force pipeline), `huffman_engine` (pyflate canonical-Huffman decode),
+`mtf_cam` (pyflate move-to-front CAM). Each module is verified with a pyuvm/cocotb testbench
+against a frozen Python golden model wrapping `benchmarks/bm_*`, and sized with Yosys + sky130.
 
-- `huffman_engine/` — pyflate: fixed-function canonical-Huffman decode engine
-  (bit aligner, comparator cascade, symbol RAM, selector FSM; MMIO + DMA descriptor interface).
-- `mtf_cam/` — pyflate: 256-entry move-to-front shift-register CAM (fused pipeline stage).
-- `grape_pipeline/` — nbody: GRAPE-style pairwise gravity pipeline
-  (rsqrt Newton-Raphson datapath, FMA accumulate, step-count FSM; MMIO register file).
+- [FLOW.md](FLOW.md) — the flow contract: stages, gates, skills, hooks, make targets, STATUS.json schema
+- [PLAN.md](PLAN.md) — concrete step list (to be written)
+- [PROGRESS.md](PROGRESS.md) — generated from `STATUS.json`, never hand-edited
+- Algorithm research: [../research/hw-algorithms-nbody.md](../research/hw-algorithms-nbody.md),
+  [../research/hw-algorithms-pyflate.md](../research/hw-algorithms-pyflate.md)
+- Shared library: `common/rtl` (skid buffer, FIFO, AXI-Lite regs), `common/tb` (pyuvm base test/env,
+  stream + AXI-Lite agents, scoreboard, vcd2csv), `common/Makefile.cocotb`
 
-Each module ships with a testbench checked against a Python golden model
-(pyflate: symbol-stream trace diff; nbody: trajectory/energy diff).
+Quick start:
+
+```sh
+./hw/setup.sh && source hw/env.sh && make -C hw/common lint sim cov area
+```

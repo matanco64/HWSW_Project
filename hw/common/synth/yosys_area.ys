@@ -1,0 +1,12 @@
+# Yosys area script template; hw/common/Makefile.cocotb substitutes @TOP@ @SOURCES@ @LIB@ @OUT@.
+# Produces @OUT@/area.txt with a technology-independent `stat` followed by the
+# sky130_fd_sc_hd Liberty-mapped `stat -liberty` (cell counts + chip area in um^2).
+read_verilog -sv @SOURCES@
+hierarchy -check -top @TOP@
+synth -top @TOP@ -flatten
+tee -q -o @OUT@/area.txt stat
+dfflibmap -liberty @LIB@
+abc -liberty @LIB@
+opt_clean
+tee -q -a @OUT@/area.txt stat -liberty @LIB@
+write_json @OUT@/@TOP@_synth.json
