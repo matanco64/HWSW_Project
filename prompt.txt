@@ -381,3 +381,6 @@ Prompt: "apply all the advisor diffs, then commit without pushing"
 2026-08-28 — hw-advisor (process change, grape_pipeline/prd)
 Lesson: grill-with-docs is user-only; golden must wrap the benchmark; calibrate tolerances before writing them; env.sh is cwd-relative; friction hook logged read-only commands.
 Files changed: .claude/skills/hw-prd/SKILL.md, hw-mas/SKILL.md, hw-uarch/SKILL.md, hw/FLOW.md, hw/README.md, tools/hw/friction_hook.py (see hw/docs/lessons.md 2026-08-28).
+
+2026-08-28T13:19:57Z — Claude Code session (auto-logged)
+Prompt: "do we track progress? we have a little sub-task before we continue. let's get to a stopping point from which we can fast ramp-up after we finish our sub-task."
