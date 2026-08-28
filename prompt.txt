@@ -384,3 +384,24 @@ Files changed: .claude/skills/hw-prd/SKILL.md, hw-mas/SKILL.md, hw-uarch/SKILL.m
 
 2026-08-28T13:19:57Z — Claude Code session (auto-logged)
 Prompt: "do we track progress? we have a little sub-task before we continue. let's get to a stopping point from which we can fast ramp-up after we finish our sub-task."
+
+2026-08-28T13:22:30Z — Claude Code session (auto-logged)
+Prompt: "now once we have clean repo with local commits, we need to pull from remote and follow those instructions, gave me from my teammate Matan:
+For Yuval
+
+His clone still points at the old commits, and a plain git pull will try to merge two copies of the same history. He should:
+
+cd <his-repo>
+git fetch origin
+git status                      # confirm nothing uncommitted worth keeping
+git reset --hard origin/main
+
+That's sufficient because all his work was already on origin before the rewrite — it exists in the new history under new SHAs, with his authorship intact. If he has unpushed local commits, he should not reset. Instead:
+
+git branch wip-backup           # save them first
+git fetch origin
+git rebase --onto origin/main 2b24041 main
+
+where 2b24041 was the old origin/main tip.
+
+One more thing worth telling him, or the footers come straight back on the next commit: the repo's .claude/settings.json has no includeCoAuthoredBy setting, so it defaults to on. Adding "includeCoAuthoredBy": false to that file turns it off for both of you permanently — and since it's committed, it applies to whoever clones. Want me to add it? It's a shared-repo file so I left it alone, but it's the durable version of what you asked me for, and it'd save you re-stripping footers later."
