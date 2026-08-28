@@ -14,16 +14,20 @@ clock and driver decisions become one ADR each).
 ## Procedure
 
 1. `python3 tools/hw/status.py set <module> prd in_progress`.
-2. Run the interview with `grill-with-docs` (invoke `grilling` and `domain-modeling`), seeded
+2. Invoke `grilling` and `domain-modeling` directly (`grill-with-docs` is user-invocation only and the Skill tool refuses it), seeded
    with the agenda below. Every term the user and the research note use differently goes into
    `hw/CONTEXT.md` the moment it is settled; every cross-module choice becomes an ADR.
-3. Write `docs/prd.md` with these sections: Purpose and workload slice; KPIs; Functional
+3. Golden model first: `golden/` **wraps** `benchmarks/bm_<bench>/` (import + instrument, never
+   re-implement) and an *emulation model* of the hardware's exact operation order sits beside it.
+   Calibrate every numeric tolerance or cycle claim in software (`golden/calibrate.py`) before
+   writing the number into a requirement; quote the measured value and the margin.
+4. Write `docs/prd.md` with these sections: Purpose and workload slice; KPIs; Functional
    requirements (numbered `PRD-Fn`); HW/SW split; Interfaces (at PRD level: bus family, clock
    target, data volume per invocation); Non-goals; Acceptance tests; Open questions.
-4. Every requirement row carries: id, statement, measurable KPI with unit, acceptance test
+5. Every requirement row carries: id, statement, measurable KPI with unit, acceptance test
    (the `make` target or tb sequence that will prove it), source (profile line / research §).
-5. Run `hw-review` in spec mode; resolve every `must`.
-6. Record gate rows and set `review` (checkpoint; the human approves via `hw-flow`).
+6. Run `hw-review` in spec mode; resolve every `must`.
+7. Record gate rows and set `review` (checkpoint; the human approves via `hw-flow`).
 
 ## Agenda (module-specific)
 

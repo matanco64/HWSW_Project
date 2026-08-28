@@ -12,7 +12,7 @@ Modules proceed one at a time from here (`grape_pipeline` â†’ `huffman_engine` â
 ## Procedure
 
 1. `python3 tools/hw/status.py set <module> uarch in_progress`.
-2. Interview with `grill-with-docs`, agenda below. Each design-point choice (rsqrt method, table
+2. Invoke `grilling` and `domain-modeling` directly (`grill-with-docs` is user-invocation only and the Skill tool refuses it); agenda below. Each design-point choice (rsqrt method, table
    count, CAM style) is an ADR with the rejected options and their cost.
 3. Write `docs/uarch.md` sections: Block list (one per RTL module, with file name under `rtl/`);
    Pipeline diagram (Mermaid, stage per column, register boundary marked); FSMs (states,

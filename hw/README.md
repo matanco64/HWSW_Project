@@ -16,7 +16,7 @@ against a frozen Python golden model wrapping `benchmarks/bm_*`, and sized with 
 Quick start:
 
 ```sh
-./hw/setup.sh && source hw/env.sh && make -C hw/common lint sim cov area
+./hw/setup.sh && source "$(git rev-parse --show-toplevel)/hw/env.sh" && make -C hw/common lint sim cov area
 ```
 
 ## Software-only teammates

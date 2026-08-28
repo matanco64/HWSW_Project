@@ -104,6 +104,9 @@ anyway. A software-only teammate therefore sees nothing of the flow.
 
 ## Conventions
 
+- Shell: `source "$(git rev-parse --show-toplevel)/hw/env.sh"` (env.sh is cwd-relative).
+- Golden models wrap `benchmarks/bm_*` (import + instrument, never re-implement); tolerances are
+  calibrated in software (`golden/calibrate.py`) before they enter a requirement.
 - Glossary `hw/CONTEXT.md`; ADRs `hw/docs/adr/NNNN-<slug>.md`; lessons `hw/docs/lessons.md`
   (`## <date> — <module>/<stage>`); friction lines `{ts, cmd, exit, tail}`.
 - Review findings: `hw/<module>/docs/review_<stage>.md`, rows `id | must/should/nit | location |

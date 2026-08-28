@@ -3,26 +3,29 @@
     "grape_pipeline": {
       "stages": {
         "prd": {
-          "state": "todo",
+          "state": "done",
           "started": "2026-08-26T05:06:56Z",
-          "finished": "",
+          "finished": "2026-08-28T12:23:55Z",
           "gate": {
             "every requirement has a measurable KPI + acceptance test": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §3: 17 PRD-F rows (grep -c '^| PRD-' = 17), every row has KPI+unit and acceptance-test cells filled",
+              "at": "2026-08-28T12:10:57Z"
             },
             "HW/SW split table": {
-              "result": "n/a",
-              "evidence": "",
-              "at": "2026-08-26T05:06:57Z"
+              "result": "pass",
+              "evidence": "docs/prd.md §4: function → HW/SW → bytes per invocation (≈590 B), Amdahl note",
+              "at": "2026-08-28T12:10:57Z"
             },
             "workload slice quantified from results/ profile": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §1: baseline_nbody_stats.txt:19 (229 ms), perf_report_nbody.txt lines 12,123,142,149,154,159,189,194,212,343",
+              "at": "2026-08-28T12:10:57Z"
             },
             "hw-review findings resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_prd.md: 23 findings (2 passes), 0 must open",
+              "at": "2026-08-28T12:12:14Z"
             }
           }
         },
@@ -769,5 +772,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-26T05:06:57Z"
+  "updated": "2026-08-28T12:23:55Z"
 }

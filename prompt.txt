@@ -297,3 +297,87 @@ Prompt: "and if matan only develops the software, don't our flow disturb him?"
 
 2026-08-26T20:44:29Z — Claude Code session (auto-logged)
 Prompt: "we do need an explicit signal for loading the hw skills - maybe even through the askuserquestion tool?"
+
+2026-08-28T09:20:54Z — Claude Code session (auto-logged)
+Prompt: "Q1 - a, but let's keep in mind that this might change - we did not decide the SW interface yet.
+Q2 - b sounds good, let's get a min of 50 MHZ and target to 100 MHZ
+Q3 - BOTH!
+Q4"
+
+2026-08-28T09:31:58Z — Claude Code session (auto-logged)
+Prompt: "Q1 - a, but let's keep in mind that this might change - we did not decide the SW interface yet.
+Q2 - b sounds good, let's get a min of 50 MHZ and target to 100 MHZ
+Q3 - BOTH!
+Q4 - I think c - the requirement is 5, but we want to ask to do more. le't plan for c and give a fallback option to b
+Q5 - I don't know what ADR-0001 is, but AXI is a good choise - we can discuss this deeper later with tradeoffs. any way we need correct model to also check the AXI once it is implemented.
+Q6 - c - both. we will check performance later. any way each of them is good.
+Q7 - a
+Q8 - IEEE propagation + sticky flags
+Q9 - NSTEPS=0 completes
+Q10 - confirm
+Q11 - Accept
+/using-superpowers /ask-matt"
+
+2026-08-28T11:54:22Z — Claude Code session (auto-logged)
+Prompt: "Q12 - c
+Q13 - YES
+Q14 - YES
+Q15 - a
+Q16 - a
+Q17 - a
+Q18 - YES
+Q19 - a
+Q20 - c
+Q21 - c"
+
+2026-08-28T12:03:14Z — Claude Code session (auto-logged)
+Prompt: "Q22 - Accept
+Q23 - Go."
+
+2026-08-28T12:07:27Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a6d04f34eecd6b1e0</task-id>
+<tool-use-id>toolu_0179XEi2NeDiC1PZcS1VBi9x</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a6d04f34eecd6b1e0.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review grape_pipeline PRD" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | PRD-F13 / §7 `test_corner` vs `golden/emulation.py` | F13 requires "flags == emulation-model flags" and bit-exact state on dsq = 0 / NaN / Inf, but `emulation.py` computes no flags and `rcp = 1.0 / d3` raises `ZeroDivisionError` at dsq = 0 (also `math.sqrt` raises on negative NaN payload cases), so the reference for the coincident-body case does not exist. | Make the emulation model IEEE-complete (e.g. numpy float64 with `np.errstate` to capture invalid/divzero/overflow, or explicit special-value handling) and state in F13 that it is the flag reference; or scope F13 to "hardware flags per IEEE-754 §7, checked by directed vectors". |
+| R2 | must | PRD-F5 vs PRD-F10 / §7 `test_full_benchmark` | F5 demands |Δr|/|r|, |Δv|/|v| bounds "for every body, every step", measured in `test_full_benchmark` (one NSTEPS = 20000 invocation). F10 says state reads during BUSY return only the last committed state, so per-step hardware state is unobservable through the interface; the test cannot measure what F5 claims. | Either (a) restate F5 as: final-state bounds at NSTEPS = 20000 plus per-step bounds guaranteed transitively by F2 bit-exactness + `calibrate.py`; or (b) specify the test as 20000 invocations of NSTEPS = 1 (and note K1 is then not measured there); or (c) allow a testbench-internal probe and say so. |
+| R3 | must | §2 K1 | "≤ 128 cycles/step" has no derivation: no latency budget for sqrt, div, muls, the order-dependent velocity accumulation (adds to the same body across pairs are serially dependent), position update, or step-FSM overhead. Research §3 gives sqrt→div ≈ 40 cycles alone. | Add a one-line budget: e.g. pair-walk issue (10) + sqrt (a) + div (b) + mul chain (c) + dependent accumulate (d) + position update (e) + FSM (f) = X ≤ 128, with the numbers taken from research §3 and marked "to be confirmed at uArch". |
+| R4 | must | PRD-F7 / §3 (missing error cases) | No behaviour defined for out-of-range register values: pair index ≥ N_BODIES, i == j (F7 says "i ≠ j" but not what happens otherwise), NPAIRS &gt; N_PAIRS_MAX, DT = 0/negative/NaN. Hardware must do *something*; unspecified means unverifiable. | Add PRD-F17: "index ≥ N_BODIES or NPAIRS &gt; N_PAIRS_MAX → doorbell rejected, sticky ERR_PARAM, state unchanged; i == j is legal and follows F13 (dsq = 0); DT is any FP64 value." Add to `test_corner`. |
+| R5 | must | PRD-F9/F10/F11 (missing error cases) | Register writes to DT, NSTEPS, NPAIRS, pair list or state window *while BUSY* are unspecified (ignored? latched for next invocation? affect running invocation?). ABORT while idle and ABORT+DOORBELL in the same cycle are also unspecified. | Add: "configuration/state writes while BUSY are ignored and set ERR_BUSY" (or "are accepted and take effect at the next doorbell"); "ABORT while idle is a no-op"; "DOORBELL and ABORT in the same write cycle: ABORT wins". Cover in `test_driver`. |
+| R6 | should | PRD-F9, PRD-F13 | Sticky ERR_BUSY and FP_* flags have no clear mechanism defined (W1C? cleared on doorbell? reset only?). F15 clears them on reset only. | State: "sticky flags are W1C and additionally cleared by the next accepted doorbell" (or whichever) — the choice affects driver semantics and is PRD-level. |
+| R7 | should | PRD-F15 | "Reset in any state returns the module to idle" — does not say whether body state, pair list, DT/NSTEPS ar
+... [truncated, 8639 chars total]"
+
+2026-08-28T12:11:48Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a00db1b17ad9e88d5</task-id>
+<tool-use-id>toolu_01AxsvUTeiV4AwVM2dxUbCio</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a00db1b17ad9e88d5.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review grape PRD after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | PRD-F17 (and F12, §5) | Rejected doorbell (ERR_PARAM) specifies "state unchanged, no BUSY" but not whether DONE/IRQ fire. A driver that waits on DONE/IRQ after the doorbell has no defined behaviour; `test_corner` cannot assert on DONE/IRQ. §5 status list also omits ERR_PARAM. | State explicitly: rejected doorbell sets ERR_PARAM only, DONE/ABORTED/IRQ are not asserted, CYCLES/STEPS_DONE hold (per F14 "accepted doorbell"). Add ERR_PARAM to §5 status group. |
+| S2 | must | PRD-F2/F13 vs `golden/emulation.py` | "0 mismatching bits" on every state word is unverifiable once a word is NaN: numpy/x86 SSE propagates input NaN payload/sign, while an RTL FP unit typically emits a canonical qNaN. F13's "state bit-exact vs emulation on dsq = 0, NaN and Inf inputs" test would fail on payload, not on semantics. | Define the comparison rule for NaN words (e.g. any NaN matches any NaN, or hardware emits canonical 0x7FF8000000000000 and the scoreboard canonicalises the emulation output) in F2/F13; everything else stays bit-exact. |
+| S3 | must | PRD-F11 vs F12 | ABORT written during the final step: the next step boundary is also completion. Whether DONE or ABORTED (or both) asserts is undefined, so `test_driver`'s "ABORTED ≤ K1 + 8 cycles" check has no defined expected value in that case. | Add one sentence: if the boundary reached is step NSTEPS, DONE asserts and ABORTED does not (or vice-versa) — pick one. |
+| S4 | should (task 2 contradiction) | PRD-F5, ADR-0002, `calibrate.py` docstring | ADR-0002 and calibrate.py state the F5 bounds are "10× the per-step maxima", but 10 × 1.055e-10 = 1.06e-9 &gt; 1e-9 and 10 × 2.638e-12 = 2.64e-11 &gt; 2.5e-11; the actual margin is ~9.5×. Requirement itself (1e-9 / 2.5e-11) is verifiable, but the stated derivation is false. | Either raise bounds to 2e-9 / 5e-11 (or 1.1e-9 / 2.7e-11) to make "≥ 10×" true, or reword ADR-0002 and calibrate.py to "≈ 9.5× the measured maxima". |
+
+All pass-1 resolutions R1–R19 verified present in the artifacts (emulation.py numpy/flag rewrite, F5 restatement, K1 budget, F17, F9/F11 semantics, F12 W1C, F15 reset, F11 latency/IRQ, F4 alignment 1.7e-14/1.9e-14 across PRD/ADR/calibrate, F5 formula, §4 assumptions, F1 semantic ordering, F14 edges, §7 extensions, ADR-0001 byte counts, docstring F2, §8 Q3 trimmed, platform line). None unresolved.</result>
+<usage><subagent_tokens>36330</subagent_tokens><tool_uses>2</tool_uses><duration_ms>61780</duration_ms></usage>
+</task-notification>"
+
+2026-08-28T12:23:49Z — Claude Code session (auto-logged)
+Prompt: "approve"
+
+2026-08-28T13:16:56Z — Claude Code session (auto-logged)
+Prompt: "apply all the advisor diffs, then commit without pushing"
+
+2026-08-28 — hw-advisor (process change, grape_pipeline/prd)
+Lesson: grill-with-docs is user-only; golden must wrap the benchmark; calibrate tolerances before writing them; env.sh is cwd-relative; friction hook logged read-only commands.
+Files changed: .claude/skills/hw-prd/SKILL.md, hw-mas/SKILL.md, hw-uarch/SKILL.md, hw/FLOW.md, hw/README.md, tools/hw/friction_hook.py (see hw/docs/lessons.md 2026-08-28).
