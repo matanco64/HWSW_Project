@@ -60,3 +60,48 @@ integrator itself drifts).
 **Doorbell**:
 The single register write that starts an invocation.
 _Avoid_: start bit, go, kick
+
+## huffman_engine / mtf_cam (pyflate)
+
+**Block**:
+One bzip2 block (up to 900 kB of output) or one DEFLATE block; one invocation decodes one block.
+
+**Table**:
+One canonical Huffman code (a code-length vector over the alphabet); bzip2 blocks carry 2–6,
+DEFLATE blocks carry a literal/length table and a distance table.
+_Avoid_: group, tree
+
+**Selector**:
+The 3-bit table index that applies to the next group of 50 symbols in a bzip2 block; software
+delivers the list already inverse-MTF-decoded.
+
+**Symbol**:
+The 9-bit value a Huffman code decodes to: bzip2 alphabet = RUNA, RUNB, MTF indices 1..255, EOB;
+DEFLATE = literal 0..255, EOB 256, length codes 257..285, distance codes 0..29.
+
+**Symbol stream**:
+The ordered sequence of decoded symbols (plus, in DEFLATE mode, the extra-bit values folded into
+length/distance) that the engine emits on its output stream port.
+
+**Table build**:
+Deriving count/first_code/base/symtab from a code-length vector inside the engine.
+
+**Aligner**:
+The bit-window logic that presents the next MAXLEN stream bits to the decoder and consumes the
+matched length (MSB-first for bzip2, bit-reversed LSB-first for DEFLATE).
+
+**Comparator cascade**:
+Parallel comparison of the aligned window against every code length's first_code range; the
+shortest match wins. The chosen decode architecture (ADR-0003).
+
+**L-vector**:
+The output of the MTF + run expansion stage: the byte string the inverse BWT consumes.
+_Avoid_: BWT input, tt
+
+**Emulation model** (this module):
+`golden/canonical_model.py` — an independent implementation of the comparator-cascade algorithm
+and its cycle model; the pyuvm predictor. Never derived from pyflate.
+
+**Golden model** (this module):
+`golden/pyflate_ref.py` — the stock pyflate decoder (`dev/pyflate/t0_stock.py`) instrumented to
+emit the symbol trace, cross-checked against libbzip2/zlib.

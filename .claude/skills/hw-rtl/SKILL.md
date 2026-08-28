@@ -52,6 +52,7 @@ only, logic in `always_comb`, Q-notation comments, sized literals, Yosys-synthes
 | agent code review resolved | `docs/review_rtl.md: N findings, 0 must open` |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> rtl "<criterion>" pass "<evidence>"   # ×3
 python3 tools/hw/status.py metric <module> ppa.cells <n>
 python3 tools/hw/status.py set <module> rtl done

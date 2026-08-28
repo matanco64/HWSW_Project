@@ -44,6 +44,7 @@ KPI. Outputs: `hw/<module>/docs/ppa.md`, `hw/<module>/synth/` (`yosys.ys`, `area
 | trade-off table (≥ 2 design points) | `docs/ppa.md §Trade-off` — row count |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> ppa "<criterion>" pass "<evidence>"   # ×3
 python3 tools/hw/status.py metric <module> ppa.<cells|area_um2|fmax_mhz|power_mw> <v>
 python3 tools/hw/status.py set <module> ppa done

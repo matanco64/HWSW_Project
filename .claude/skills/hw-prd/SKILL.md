@@ -17,10 +17,15 @@ clock and driver decisions become one ADR each).
 2. Invoke `grilling` and `domain-modeling` directly (`grill-with-docs` is user-invocation only and the Skill tool refuses it), seeded
    with the agenda below. Every term the user and the research note use differently goes into
    `hw/CONTEXT.md` the moment it is settled; every cross-module choice becomes an ADR.
-3. Golden model first: `golden/` **wraps** `benchmarks/bm_<bench>/` (import + instrument, never
-   re-implement) and an *emulation model* of the hardware's exact operation order sits beside it.
-   Calibrate every numeric tolerance or cycle claim in software (`golden/calibrate.py`) before
-   writing the number into a requirement; quote the measured value and the margin.
+3. Golden model first: `golden/` **wraps the upstream benchmark algorithm** (import + instrument,
+   never re-implement) — `dev/<bench>/t0_stock.py` or a pinned commit, because
+   `benchmarks/bm_<bench>/run_benchmark.py` carries the software teammate's optimisations.
+   Cross-check the golden against a C library where one exists (`bz2`, `zlib`, NumPy). Count
+   consumed bits/bytes in the wrapper itself; a reference's own position or size reporting is
+   not trusted (stock pyflate's `tellbits()` is off by 16). An *emulation model* of the
+   hardware's exact algorithm sits beside it as the pyuvm predictor. Calibrate every numeric
+   tolerance or cycle claim in software (`golden/calibrate.py`) before writing the number into a
+   requirement; quote the measured value and the margin.
 4. Write `docs/prd.md` with these sections: Purpose and workload slice; KPIs; Functional
    requirements (numbered `PRD-Fn`); HW/SW split; Interfaces (at PRD level: bus family, clock
    target, data volume per invocation); Non-goals; Acceptance tests; Open questions.
@@ -44,8 +49,11 @@ the profile: `find_next_symbol` ~44 % + bit-buffer ~20 %. SW keeps delta-coded l
 **mtf_cam** — KPI = 1 symbol/cycle sustained including RUNA/RUNB expansion; output = L-vector byte
 stream into a DMA buffer; slice = `move_to_front` ~11 %. Non-goal: inverse BWT stays in software
 (research §3) — state it as a deliberate non-target for report §7.
-**All** — HW/SW split table (function → HW/SW → data crossing per invocation, bytes); Amdahl
-bound from the profile percentages; acceptance test names that `hw-dv-testplan` will reuse.
+**All** — read the software teammate's latest findings first (`dev/<bench>/FINDINGS.md`,
+`git log -- benchmarks/bm_<bench>/`): the optimised software moves the hotspots. HW/SW split
+table (function → HW/SW → data crossing per invocation, bytes); Amdahl bound from *self-time*
+profile shares; speed-up quoted against both the stock and the optimised software; acceptance
+test names that `hw-dv-testplan` will reuse.
 
 ## Gate (FLOW.md row 1)
 
@@ -57,6 +65,7 @@ bound from the profile percentages; acceptance test names that `hw-dv-testplan` 
 | `hw-review` findings resolved | `docs/review_prd.md: N findings, 0 must open` |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> prd "<criterion>" pass "<evidence>"   # ×4
 python3 tools/hw/status.py set <module> prd review
 ```

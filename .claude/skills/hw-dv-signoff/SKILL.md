@@ -52,6 +52,7 @@ coverage part to `done` before starting sign-off.
 | formal (sby) where listed | `make formal → PASS` or `n/a: testplan §Formal none` |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> dv_signoff "<criterion>" pass|n/a "<evidence>"   # ×6
 python3 tools/hw/status.py set <module> dv_signoff review
 ```

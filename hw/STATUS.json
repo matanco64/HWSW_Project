@@ -257,25 +257,29 @@
     "huffman_engine": {
       "stages": {
         "prd": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-08-28T19:34:34Z",
+          "finished": "2026-08-28T20:54:29Z",
           "gate": {
             "every requirement has a measurable KPI + acceptance test": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §3: 15 PRD-F rows (grep -c '^| PRD-' = 15), every KPI/test cell filled",
+              "at": "2026-08-28T20:08:10Z"
             },
             "HW/SW split table": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §4: pyflate function → HW/SW → bytes per block; 444 config words, 67,562 B stream in, 148,271 symbols out",
+              "at": "2026-08-28T20:08:10Z"
             },
             "workload slice quantified from results/ profile": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:19 (1.13 s), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)",
+              "at": "2026-08-28T20:08:10Z"
             },
             "hw-review findings resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_prd.md: 25 findings (2 passes), 0 must open",
+              "at": "2026-08-28T20:23:04Z"
             }
           }
         },
@@ -772,5 +776,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-28T12:23:55Z"
+  "updated": "2026-08-28T20:54:29Z"
 }

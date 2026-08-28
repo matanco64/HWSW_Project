@@ -50,6 +50,7 @@ tb/Makefile / pytest    # via ../common/Makefile.cocotb: SIM?=verilator
 | scoreboard compares against golden | scoreboard log line `compared N items, 0 mismatches` with golden function name |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> dv_bringup "<criterion>" pass "<evidence>"   # ×3
 python3 tools/hw/status.py metric <module> dv.tests_run <n>; ... dv.tests_pass <n>
 python3 tools/hw/status.py set <module> dv_bringup done

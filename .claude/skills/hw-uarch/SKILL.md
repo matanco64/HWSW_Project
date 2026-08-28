@@ -54,6 +54,7 @@ path; pipeline hazards between consume and refill.
 | `hw-review` resolved | `docs/review_uarch.md: N findings, 0 must open` |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> uarch "<criterion>" pass "<evidence>"   # ×6
 python3 tools/hw/status.py set <module> uarch review
 ```
