@@ -44,6 +44,7 @@ reference). Output: `hw/<module>/docs/testplan.md`. Methodology reference: `tb-b
 | formal properties listed | `§Formal` — list or "none: <reason>" |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> dv_testplan "<criterion>" pass "<evidence>"   # ×3
 python3 tools/hw/status.py set <module> dv_testplan done
 ```

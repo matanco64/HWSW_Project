@@ -23,3 +23,26 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - **Friction-hook noise** — two "failures" (exit 2) were `ls` of a not-yet-existing directory
   inside read-only inspection commands; not friction. Consider ignoring exit codes from commands
   whose first word is `cat`/`ls`/`grep`/`head` in `friction_hook.py`.
+
+## 2026-08-28 — huffman_engine/prd
+
+- **The benchmark file is a moving target** — `benchmarks/bm_pyflate/run_benchmark.py` is now
+  Matan's optimised T3 code (commit da971fc), so "wrap the benchmark" would have wrapped the wrong
+  algorithm. The stock algorithm lives in `dev/pyflate/t0_stock.py`. Fix: `hw-prd` step 3 says
+  "wrap the *upstream* benchmark code (pin the commit or the `dev/*/t0_stock.py` copy), and
+  cross-check the golden against a C library (`bz2`, `zlib`) where one exists".
+- **Reference-model bookkeeping can be wrong** — stock pyflate's `tellbits()` drops 16 bits
+  (copy-constructor bug `self.count = x.bitfield`); the first golden trace had every bit position
+  off by 16 and the emulation model "failed". Fix: golden wrappers count consumed bits themselves
+  (patch the read primitive), never trust the reference's own position/size reporting; and the
+  first debugging step for a golden-vs-model mismatch is "which side is wrong?" — the user's Q8
+  instinct ("maybe the golden model is wrong") was the right one.
+- **Software work changes the Amdahl story** — after T3, the Huffman/MTF loop is ~39 % (not
+  75 %) and iBWT is co-equal; the PRD now quotes both baselines. Fix: `hw-prd` agenda says "read
+  the software teammate's latest findings (`dev/<bench>/FINDINGS.md`) before setting KPIs; quote
+  the speed-up against both the stock and the optimised software".
+- **`source ./hw/env.sh` from a module directory failed again** (friction 20:03:29Z) even after
+  the previous lesson — `env.sh` itself is already cwd-independent; the *path to it* is not, and
+  an ad-hoc `cd hw/<module>/golden` earlier in the same shell broke it. Fix: every hw-* skill
+  command block starts with `cd "$(git rev-parse --show-toplevel)"` on its own first line (one
+  rule, no per-command path arithmetic).

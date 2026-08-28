@@ -51,6 +51,9 @@ argument, ask which module.
 
 ## Rules
 
+- Every shell command block starts with `cd "$(git rev-parse --show-toplevel)"`; `source ./hw/env.sh`
+  is cwd-relative and has bitten twice.
+
 - Never set a gate row yourself without the command output in hand; never set `done` on a
   checkpoint without an explicit approval message from the user.
 - Lockstep order (FLOW.md "Modules"): `mas` of any module may start only when `prd` of all three is

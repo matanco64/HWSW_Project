@@ -54,6 +54,7 @@ end-of-block signalling.
 | `hw-review` resolved | `docs/review_mas.md: N findings, 0 must open` |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> mas "<criterion>" pass "<evidence>"   # ×6
 python3 tools/hw/status.py set <module> mas review
 ```

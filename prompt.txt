@@ -405,3 +405,145 @@ git rebase --onto origin/main 2b24041 main
 where 2b24041 was the old origin/main tip.
 
 One more thing worth telling him, or the footers come straight back on the next commit: the repo's .claude/settings.json has no includeCoAuthoredBy setting, so it defaults to on. Adding "includeCoAuthoredBy": false to that file turns it off for both of you permanently — and since it's committed, it applies to whoever clones. Want me to add it? It's a shared-repo file so I left it alone, but it's the durable version of what you asked me for, and it'd save you re-stripping footers later."
+
+2026-08-28T13:30:48Z — Claude Code session (auto-logged)
+Prompt: "you remove Co-Authored-By / Claude-Session trailers from our 3 unpushed commits that carry them (c705679, 9838314, 843489b) so nothing re-enters his cleaned history.
+strip and add the setting"
+
+2026-08-28T19:37:30Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ac80b633f3dd97103</task-id>
+<tool-use-id>toolu_01Ng7gofXtp8kAFtDjEWx7fS</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/ac80b633f3dd97103.output</output-file>
+<status>completed</status>
+<summary>Agent "Measure pyflate bzip2 symbol statistics" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>I have everything needed. Report follows.
+
+# pyflate bzip2 workload profile (huffman_engine input)
+
+**Files / commands**
+- Benchmark: `/home/yuvalk/HWSW/HWSW_Proj/benchmarks/bm_pyflate/run_benchmark.py` (HEAD `da971fc`, already software-optimized; stock pyperformance 1.14.0 version extracted from `a9959c6` for comparison).
+- Input: `/home/yuvalk/HWSW/HWSW_Proj/benchmarks/bm_pyflate/data/interpreter.tar.bz2` (only `.bz2` in repo outside spec2017).
+- Scripts (scratchpad `.../scratchpad/pyflate_stats/`): `stats.py` (monkey-patches `rb.decode_huffman_block` with a counting re-implementation, uses `RBitfield.tellbits()` at section boundaries, MD5 verified), `prof.py` (cProfile, tottime), `wall.py` (20-run wall), `stock_run_benchmark.py`. Run with `source ./hw/env.sh &amp;&amp; python &lt;script&gt;`. `pyperf` is not installed in the venv, so it is stubbed with `time.perf_counter`.
+
+**No DEFLATE/gzip is exercised.** `__main__` hard-codes `data/interpreter.tar.bz2`; there is no argparser/other data file; `bench_pyflake` dispatches on magic (0x425a = bzip2). The gzip path (`Bitfield`, `HuffmanTable.find_next_symbol`, `gzip_main`) is dead code for the benchmark.
+
+## 1–2. Stream / block facts (single block, so per-block == total)
+
+| Quantity | Value |
+|---|---|
+| Compressed size | 67,562 B = 540,496 bits (decoder consumes exactly all of them) |
+| Block size level | `'9'` (900 kB) |
+| bzip2 blocks | **1** |
+| Uncompressed size | 399,360 B (MD5 afa004a6… OK) |
+| Huffman tables (groups) | 6 |
+| Selectors | 2,966 (= ceil(148271/50)); use per table: [664, 515, 59, 594, 811, 323] |
+| Alphabet size (symbols in use) | 147 (145 used bytes + RUNA/RUNB; EOB = symbol 146) |
+| Huffman symbols decoded | **148,271** (89,837 MTF literals + 58,433 RUNA/RUNB + 1 EOB) |
+| RUNA/RUNB fraction | 58,433 / 148,271 = **39.41 %** |
+| Symbols decoded per table | [33200, 25750, 2950, 29700, 40550, 16121] |
+| Run groups (RUNA/RUNB sequences) | 34,664 runs, expanding to 246,347 bytes; longest run 8,157 |
+| MTF/run-stage output (L vector) | **336,184 B** (89,837 literal + 246,347 run bytes) |
+| Mean MTF rank of literals | 8.17 (ranks 2..146 as coded, i.e. r-1 position) |
+| BWT origin pointer | read as 24 bits |
+
+## 3. Code-length statistics (weighted by decoded-symbol frequency, all 6 tables)
+
+- Mean bits per decoded symbol: **3.585** (531,571 bits / 148,271 symbols; check matches bit-position delta exactly)
+- Min code length used: 2; **max code length used: 15** (max defined in any table: 15; per-table max = 15,15,11,15,15,14; per-table min = 3,2,2,2,2,2; no zero-length entries)
+- Symbols resolved by an 11-bit primary lookup: 99.64 % (lengths ≤ 11)
+
+| len | count | % |
+|---|---|---|
+| 2 | 62,162 | 41.93 |
+| 3 | 30,584 | 20.63 |
+| 4 | 21,955 | 14.81 |
+| 5 | 11,589 | 7.82 |
+| 6 | 6,735 | 4.54 |
+| 7 | 5,522 | 3.72 |
+| 8 | 3,926 | 2.65 |
+| 9 | 2,527 | 1.70 |
+| 10 | 1,283 | 0.87 |
+| 11 | 925 | 0.62 |
+| 12 | 534 | 0.36 |
+| 13 | 354 | 0.24 |
+| 14 | 125 | 0.08 |
+| 15 | 50 | 0.03 |
+| 16–20 | 0 | 0 |
+
+Unweighted (per-table-entry) mean code lengths: 11.16, 12.20, 10.10, 12.17, 11.93, 11.54 — i.e. the rarely used symbols have long codes; the decoded stream is dominated by 2–4-bit codes.
+
+## 4. Bit-stream breakdown (540,496 bits total)
+
+| Section | bits | % |
+|---|---|---|
+| Stream header (`BZ` + `h` + level) | 32 | 0.006 |
+| Block magic + block CRC | 80 | 0.015 |
+| Block hdr: randomised(1) + origPtr(24) + used-ma
+... [truncated, 7304 chars total]"
+
+2026-08-28T19:46:52Z — Claude Code session (auto-logged)
+Prompt: "Q1 - c
+Q2 - c
+Q3 - both a and b are fine, sounds like c is correct at the moment
+Q4 - Confirm
+Q5 - a
+Q6 - a
+Q7 - confirm, but make sure it actually correct and working.
+Q8 - a, but we also have to hold a uvm model too, maybe matan is wrong with the golden model?
+Q9 - Accept as listed."
+
+2026-08-28T20:01:09Z — Claude Code session (auto-logged)
+Prompt: "Q10 - yes
+Q11 - yes for both - let's see the area we get, then understand if it makes sence and compare it to other accelerators for comparison.
+Q12 - Go."
+
+2026-08-28T20:10:46Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a1bf765c1d8d4c953</task-id>
+<tool-use-id>toolu_01PLdxxfVxjf3k2B3SZotRCa</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a1bf765c1d8d4c953.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review huffman_engine PRD" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | PRD-F5, §5 | DEFLATE distance field is 15-bit, but RFC 1951 distances span 1..32,768 (dist code 29 + 13 extra bits = 24,577..32,768) — 32,768 does not fit in 15 bits; `canonical_model` computes it correctly, so DUT and predictor would diverge on the beat width. | Make distance 16-bit (or emit distance−1 in 15 bits and say so); fix "1 + 9 + 15 bit event" in §5 to match. |
+| R2 | must | PRD-F9 | ERR_TABLE "Kraft-invalid or zero-symbol table" rejects valid DEFLATE: RFC 1951 §3.2.7 allows one distance code (incomplete, Kraft sum ½) and zero distance codes (literal-only block); `test_random` only generates Kraft-valid tables so this is never exercised. | Define ERR_TABLE as *over-subscribed* only (Σ2^-l &gt; 1); accept incomplete tables (ERR_NOCODE at decode covers them); allow an all-zero distance table in DEFLATE mode; add the single-code and empty-distance cases to `test_deflate`/`test_corner`. |
+| R3 | must | PRD-F9, F1 | No error for DEFLATE symbols that are Kraft-legal but forbidden: literal/length 286/287, distance 30/31 (pyflate raises; `canonical_model` IndexErrors on `_LEN_BASE[s-257]`), and no statement on length code 284 + extra 31 = 258. | Add ERR_SYMBOL (stop at the offending symbol) for lit ≥ 286 / dist ≥ 30; state that 284/31 is decoded as 258 (or rejected) and add both to `test_corner`; fix the emulation model accordingly. |
+| R4 | must | PRD-F9 | Post-error state is undefined: does BUSY drop, is DONE/IRQ raised, is TLAST emitted on `m_sym` (without it `mtf_cam`/DMA hang), do CYCLES/BITS freeze at the error? "counters hold" is stated only for the doorbell-reject cases. | Specify: on any run-time ERR_* → BUSY=0, DONE=0, ERR flag + IRQ, no TLAST, CYCLES/SYMBOLS/BITS frozen at the offending symbol; put it in the F9 acceptance column. |
+| R5 | must | PRD-F12, F9 (ERR_UNDERRUN) | Self-contradiction and missing hardware fact: "never reads past the bits it consumes" vs "over-fetch ≤ 4 words is allowed"; and the MAXLEN peek at the end of the buffer is undefined — EOB is normally &lt; MAXLEN bits before TLAST, so the window must be padded. `canonical_model.BitReader` pads with 0 silently. | State: after TLAST the aligner pads the window with zeros; ERR_UNDERRUN fires only when a *consumed* bit lies beyond the last received bit; drop "never reads past" and keep the OVERFETCH bound (define its unit: words). |
+| R6 | must | PRD-F7, F8, F1 | DEFLATE-mode table mapping is unstated: which table slots hold literals/distances, what N_TABLES/NSELECTORS/ALPHABET mean in that mode (two alphabets, 288 and 30), and that MAXLEN is 15 there — F8 says MAXLEN = 20 only, while `canonical_model` rejects DEFLATE lengths &gt; 15. | Add to F7: MODE=DEFLATE ⇒ table 0 = lit/len (ALPHABET ≤ 288), table 1 = distance (≤ 32), selectors ignored, lengths &gt; 15 ⇒ ERR_TABLE; F8 "MAXLEN = 20 (bzip2) / 15 (DEFLATE)". |
+| R7 | must | PRD-F10 | Delegating semantics to grape F9–F12/F15 imports requirements that have no analogue here (grape F10 "state-window reads while BUSY return the last committed state" — which window? lengths/selectors?) and omits the ones that differ (ABORT during a 1,884-cycle table build: is "within 8 cycles" still required? ABORT while stalled by `tready` low?). | Write the huffman_engine semantics out in full (one row each) and cover ABORT during build and during back-pressure with a cycl
+... [truncated, 9244 chars total]"
+
+2026-08-28T20:22:15Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a757c852c1cbbcd1c</task-id>
+<tool-use-id>toolu_019yZYkFpR5jC4f6ysJmR9xj</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a757c852c1cbbcd1c.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review huffman PRD after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | F7 acceptance column vs §4/§5; `calibrate.py` config line | F7 quotes "benchmark config = 147 length words + **297 selector beats**", but selectors are now one 8-bit beat per selector on `s_sel` (§4: "2,966 × 8-bit beats", §5: "2,966 B in"). 297 is the retired 10-per-word AXI-Lite packing, which `calibrate.py` still prints ("147 length words + 297 selector words = 444 … via AXI-Lite"), so the PRD preamble "all numbers below are printed by calibrate.py" no longer holds for the config numbers (§4 says ≈160 AXI-Lite transactions, calibrate says 444). | F7: "147 length words + 2,966 `s_sel` beats". `calibrate.py`: print `sel_beats = len(selectors)` on `s_sel` and `lengths_words + ~10` control words for AXI-Lite; drop `sel_words`. |
+| S2 | must | F7 NSELECTORS / F9 / F10 ERR_SELECTOR / F6 | With the list streamed, the role of the NSELECTORS register is undefined relative to `s_sel` TLAST: F10 ends the list on TLAST, F9 range-checks NSELECTORS, nothing says what happens when the beat count and NSELECTORS disagree (TLAST before NSELECTORS beats; more beats than NSELECTORS; beats left unconsumed after EOB — which would leak into the next invocation of F13). F6 also lists stall behaviour only for `s_bits.tvalid`, not `s_sel.tvalid`. | Either delete NSELECTORS (TLAST is the only terminator, engine drains/ignores surplus beats up to TLAST after EOB — state which) or define: ERR_SELECTOR if TLAST arrives before NSELECTORS beats, beats after NSELECTORS ignored/drained; add "`s_sel.tvalid` low stalls the decoder" to F6 and a `test_corner` case for each mismatch. |
+| S3 | must | F12 vs F7/F10 | F12 claims "None can overflow within SYMBOL_LIMIT (2^32 × 20 bits &lt; 2^64 cycles)". SYMBOL_LIMIT is a 32-bit register, so at its maximum SYMBOLS (32-bit) wraps to 0 exactly when ERR_LIMIT should fire, and BITS (32-bit) overflows after 2^32/20 ≈ 2.1 × 10^8 symbols; the claim is false and the acceptance "== testbench counts (exact)" is unverifiable there. F9 also does not reject SYMBOL_LIMIT = 0 (immediate ERR_LIMIT? no output?). | Bound SYMBOL_LIMIT in F9 (ERR_PARAM if 0 or &gt; 2^27, which still covers any bzip2 block) and restate F12: "no counter overflows for SYMBOL_LIMIT ≤ 2^27 (2^27 × 20 &lt; 2^32 bits)"; or make SYMBOLS/BITS saturating and say so. |
+| S4 | must | F11 "register reads while BUSY return the values latched at the doorbell" | Taken literally this covers every register, including the status bits and the F12 counters: BUSY itself would read back as its doorbell-time value (0), DONE/ERR/ABORTED could not be polled, and K2's `BUILD_CYCLES`/F10's "frozen counters" are unreadable until after the run. Contradiction with F9/F10/F11 polling and with K1/K2 measurement via registers. | Restrict to "configuration registers (MODE, START_BIT, ALPHABET, N_TABLES, lengths, NSELECTORS, SYMBOL_LIMIT) read back the latched values; STATUS and counters are live". |
+| S5 | must | F7/F8/F9 DEFLATE mode vs §4 "lengths 288 + 30" | In DEFLATE mode there is one ALPHABET register but two alphabets (lit/len ≤ 288, dist ≤ 32/30). The PRD does not state where table 1's lengths sit in the window ("packed continuously, table-major" implies index ALPHABET × 1, i.e. after 288 lit/len entries, but §4/F8 count only 30 dist lengths) nor what ALPHABET means for the dist table (EOB = ALPHABET − 1 is bzip2-only). F9 also has 
+... [truncated, 5212 chars total]"
+
+2026-08-28T20:54:09Z — Claude Code session (auto-logged)
+Prompt: "approve"
+
+2026-08-28T20:57:09Z — Claude Code session (auto-logged)
+Prompt: "apply the three advisor skill diffs above"
+
+2026-08-28 — hw-advisor (process change, huffman_engine/prd)
+Lesson: wrap the upstream benchmark copy (the benchmark file is now Matan's optimised code); cross-check goldens against C libraries; count bits yourself (stock tellbits() off by 16); read dev/<bench>/FINDINGS.md before KPIs; every skill command block starts with cd to the repo root.
+Files changed: .claude/skills/hw-prd/SKILL.md, hw-flow/SKILL.md, and the command blocks of all hw-* skills (see hw/docs/lessons.md 2026-08-28 huffman_engine/prd).
+
+2026-08-28T21:12:17Z — Claude Code session (auto-logged)
+Prompt: "commit"

@@ -47,6 +47,7 @@ Inputs: `docs/mas.md` (register map, driver API sketch), `docs/ppa.md` (Fmax, ch
 | report §7 bullets mapped | `docs/integration.md §Rubric map` — 7 bullets, each with a path |
 
 ```
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/hw/status.py gate <module> integration "<criterion>" pass "<evidence>"   # ×3
 python3 tools/hw/status.py set <module> integration done
 ```

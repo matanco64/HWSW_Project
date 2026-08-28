@@ -21,16 +21,16 @@ Legend: ☐ todo · ☑ done · ◆ human checkpoint (design review / sign-off)
 
 ## Phase 1 — Lockstep PRD + MAS (all three modules)
 
-**Resume here:** `/hw-flow huffman_engine` (PRD #2). Live state: `hw/PROGRESS.md`.
+**Resume here:** `/hw-flow mtf_cam` (PRD #3, last before lockstep MAS). Live state: `hw/PROGRESS.md`.
 
 Shared decisions taken once and recorded as ADRs under `hw/docs/adr/`: bus (AXI-Lite MMIO + DMA
 descriptors vs streaming), clock target, driver model, block-diagram conventions, number-format policy.
 
 | Step | grape_pipeline | huffman_engine | mtf_cam |
 |---|---|---|---|
-| PRD (`hw-prd`, grilled) | ☑ 2026-08-28 | ☐ | ☐ |
-| `hw-review` spec pre-read | ☑ 23 findings | ☐ | ☐ |
-| ◆ PRD design review | ☑ approved | ☐ | ☐ |
+| PRD (`hw-prd`, grilled) | ☑ 2026-08-28 | ☑ 2026-08-28 | ☐ |
+| `hw-review` spec pre-read | ☑ 23 findings | ☑ 25 findings | ☐ |
+| ◆ PRD design review | ☑ approved | ☑ approved | ☐ |
 | MAS (`hw-mas`) + block diagram | ☐ | ☐ | ☐ |
 | `hw-review` spec pre-read | ☐ | ☐ | ☐ |
 | ◆ MAS design review | ☐ | ☐ | ☐ |
