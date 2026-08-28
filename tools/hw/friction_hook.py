@@ -18,6 +18,8 @@ from _common import HW, ROOT, payload
 
 LOG = HW / ".advisor" / "friction.jsonl"
 EXIT_RE = re.compile(r"[Ee]xit code[: ]+(\d+)")
+# Read-only inspection commands (cat/ls/grep/head ...) fail for reasons that are not flow friction.
+READONLY_RE = re.compile(r"^\s*(cd\s+\S+\s*;\s*)?(cat|ls|grep|head|tail|sed -n|wc|find)\b")
 
 
 def exit_code(p: dict):
@@ -43,7 +45,7 @@ def main() -> None:
     cwd = p.get("cwd") or ""
     in_hw = "hw/" in cmd or cwd.startswith(str(HW))
     code = exit_code(p)
-    if not in_hw or code == 0:
+    if not in_hw or code == 0 or READONLY_RE.match(cmd):
         return
     tr = p.get("tool_response")
     tr = tr if isinstance(tr, dict) else {}

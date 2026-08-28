@@ -15,7 +15,7 @@ ADRs.
 ## Procedure
 
 1. `python3 tools/hw/status.py set <module> mas in_progress`.
-2. Interview with `grill-with-docs`, agenda below. Terms → `hw/CONTEXT.md`; shared choices → ADR.
+2. Invoke `grilling` and `domain-modeling` directly (`grill-with-docs` is user-invocation only and the Skill tool refuses it); agenda below. Terms → `hw/CONTEXT.md`; shared choices → ADR.
 3. Write `docs/mas.md` sections: Context (where the block sits, host, memory); I/O table; Clock and
    reset; Register map; Data path protocol (DMA descriptor or stream); Driver API; Block diagram;
    Error and status behaviour; Traceability to `PRD-Fn`.

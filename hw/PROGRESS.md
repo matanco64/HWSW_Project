@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-26 05:06 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-08-26 05:06 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-28 12:12 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-08-28 12:12 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,7 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class prd review
 ```
 
 ### `huffman_engine`
@@ -80,7 +81,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -88,7 +89,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **PRD** — todo (checkpoint — needs human approval)
+- `grape_pipeline`: **PRD** — review (checkpoint — needs human approval)
 - `huffman_engine`: **PRD** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **PRD** — todo (checkpoint — needs human approval)
 
@@ -96,7 +97,12 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ### `grape_pipeline`
 
-_No stage started yet._
+#### PRD — 🟠 review (started 2026-08-26T05:06:56Z)
+
+- [x] every requirement has a measurable KPI + acceptance test — docs/prd.md §3: 17 PRD-F rows (grep -c '^| PRD-' = 17), every row has KPI+unit and acceptance-test cells filled
+- [x] HW/SW split table — docs/prd.md §4: function → HW/SW → bytes per invocation (≈590 B), Amdahl note
+- [x] workload slice quantified from results/ profile — docs/prd.md §1: baseline_nbody_stats.txt:19 (229 ms), perf_report_nbody.txt lines 12,123,142,149,154,159,189,194,212,343
+- [x] hw-review findings resolved — docs/review_prd.md: 23 findings (2 passes), 0 must open
 
 ### `huffman_engine`
 
