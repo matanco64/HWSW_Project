@@ -48,12 +48,47 @@ as the behavioural specification for the `grape_pipeline` accelerator — the
 `#[pyclass]` is the register file, `advance(dt, n)` is the doorbell write with
 a step-count register, `state()` is the read-back window.
 
+### `pyflate/` — `pyflate_rs`
+
+A `#[pyclass] BlockDecoder`, configured once per block with the code-length
+tables, selector list and favourites, then `decode(bit_pos) -> (L, end_bit_pos)`.
+Inside: u64 bit reader with 32-bit refills, a flat 2048-entry primary table with
+`limit`/`base`/`perm` fallback, the 50-symbol selector-driven table swap,
+move-to-front, and RUNA/RUNB.
+
+**The boundary is the hardware boundary.** It covers exactly
+bit reader → canonical Huffman → MTF → RUNA/RUNB, which is `huffman_engine` +
+`mtf_cam` in `hw/`. Header parsing, `bwt_reverse`, RLE4 and the MD5 check all
+stay in Python. `group_tables()` exposes the built tables as the accelerator's
+config region, and `--trace` dumps a `PFTRACE1` symbol trace for the RTL
+testbench — so one interface serves the native tier, the register map and the
+DV golden model.
+
+`bwt_reverse` is deliberately **not** ported. It is an irreducibly serial
+399 KB pointer chase, and the report's argument is precisely that no amount of
+software fixes it; porting it would blur that.
+
+Measured on CPython 3.10.21, min of 15 interleaved rounds (`dev/pyflate/rs_check.py`):
+
+| | |
+|---|---|
+| kernel speedup | **25x** (43.4 ms → 1.73 ms) |
+| end to end vs pure-Python T3 | **1.68x** (111.3 ms → 66.1 ms) |
+| Amdahl cap | **1.73x** — 97-98% of it achieved on every run |
+| residual | 80% inverse BWT, 15% RLE4 |
+| output | **byte-exact**: `L` and end bit position identical to Python, final output identical to `bz2.decompress`, MD5 matches |
+| FFI crossing | 27 ns |
+
+Hitting 97% of the Amdahl cap is the point worth quoting: the kernel is
+essentially free now, and everything left is the serial tail.
+
+**Measurement note.** The same Python function timed 42 ms in one script and
+92 ms in another on the same machine, so `rs_check.py` interleaves the variants
+round-robin rather than timing them sequentially. An early sequential version
+produced an impossible "1.84x against a 1.61x cap".
+
 ## Not built
 
-There is **no pyflate or mdp crate**. Earlier revisions of this file listed a
-planned `pyflate_kernel/` as though it existed; it never did. If one is added,
-the defensible boundary is the symbol-decode loop only — bit reader, canonical
-Huffman decode, move-to-front, RUNA/RUNB — which is also exactly the
-`huffman_engine` + `mtf_cam` hardware boundary, so one interface would serve
-the software tier, the native tier and the RTL golden model at once. A full
-`bzip2_main` rewrite would not be defensible.
+There is **no mdp crate**. mdp is a measured candidate, not a submitted
+benchmark; if it were revived, the natural boundary is the CSR value-iteration
+sweep, whose export format is already the accelerator's DMA layout.

@@ -1,0 +1,34 @@
+[package]
+name = "pyflate_rs"
+version = "0.1.0"
+edition = "2021"
+description = "Native bzip2 symbol-decode kernel for the pyperformance pyflate benchmark (HW/SW final project)"
+license = "MIT"
+
+[lib]
+name = "pyflate_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+# No abi3: we target exactly one interpreter (cp310 in the course VM), so a
+# version-specific wheel avoids the Limited API's performance penalty.
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+# Keep symbols so Rust frames show up with real names under
+# `perf record -g` / FlameGraph -- the before/after flame graph (the
+# `find_next_symbol` interpreter tower collapsing into one narrow native
+# block) is a presentation asset.
+debug = true
+
+# CORRECTNESS CONTRACT (see src/lib.rs).  This crate is pure integer work, so
+# there is no floating-point contract to protect the way `rust/nbody` has one.
+# What must be protected instead is BYTE-EXACTNESS: the symbol stream produced
+# here has to equal the one the Python T3 tier produces, bit-for-bit in the
+# input stream and byte-for-byte in the output.  Nothing in this profile
+# changes integer semantics; do not add flags that would (there are none that
+# would, which is exactly why the integer kernel is the easy half and the
+# checker in dev/pyflate/rs_check.py is the load-bearing part).
