@@ -33,7 +33,7 @@ log() { printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$*"; }
 stage_artifact() {
     case "$2" in
         baseline)  echo "$RES/baseline_$1.json" ;;
-        profile)   echo "$RES/perf_report_$1.txt" ;;
+        profile)   echo "$RES/perf_report_$1_stock.txt" ;;
         optimized) echo "$RES/optimized_$1.json" ;;
         compare)   echo "$RES/compare_$1.txt" ;;
         *)         echo "" ;;

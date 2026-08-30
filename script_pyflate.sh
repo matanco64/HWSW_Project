@@ -26,23 +26,33 @@ baseline() {
     python3 -m pyperf stats "$RES/baseline_$BENCH.json" | tee "$RES/baseline_${BENCH}_stats.txt"
 }
 
+_profile_one() {
+    # $1 = tag (stock|opt), $2 = run_benchmark.py to profile.
+    # Same flags for both sides so the two flame graphs are directly comparable.
+    perf record -F 999 -g -e cpu-clock -o "$RES/${BENCH}_$1.perf.data" -- \
+        python3-dbg "$2" --worker -l1 -w0 -n3
+    perf report --stdio -i "$RES/${BENCH}_$1.perf.data" > "$RES/perf_report_${BENCH}_$1.txt"
+    perf script -i "$RES/${BENCH}_$1.perf.data" \
+        | "$HOME/FlameGraph/stackcollapse-perf.pl" \
+        | "$HOME/FlameGraph/flamegraph.pl" --title "$BENCH ($1, python3-dbg)" \
+        > "$RES/flame_${BENCH}_$1.svg"
+    # Hardware counters on release python3 (guest PMU counts <=4 events per pass).
+    { perf stat -e cycles:u,instructions:u -- python3 "$2" --fast 2>&1 | tail -20
+      perf stat -e cache-references,cache-misses,branches,branch-misses -- python3 "$2" --fast 2>&1 | tail -20
+    } > "$RES/perf_stat_${BENCH}_$1.txt"
+}
+
 profile() {
-    # Profile shape with python3-dbg (symbols); timings from this stage are NOT quotable.
+    # Profile shape with python3-dbg (symbols); timings here are NOT quotable.
     # KVM guest: the 'cycles' PMU event records zero samples — MUST use -e cpu-clock.
     # NOTE: 'pyperf system tune' (setup) sets perf_event_max_sample_rate=1, which
-    # throttles perf record to 1 Hz — restore a usable rate before profiling.
+    # throttles perf record to 1 Hz — restore a usable rate before recording.
     sudo sysctl -w kernel.perf_event_max_sample_rate=100000 \
                   kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
-    perf record -F 999 -g -e cpu-clock -o "$RES/$BENCH.perf.data" -- \
-        python3-dbg "$ROOT/benchmarks/bm_$BENCH/run_benchmark.py" --worker -l1 -w0 -n3
-    perf report --stdio -i "$RES/$BENCH.perf.data" > "$RES/perf_report_$BENCH.txt"
-    perf script -i "$RES/$BENCH.perf.data" \
-        | "$HOME/FlameGraph/stackcollapse-perf.pl" \
-        | "$HOME/FlameGraph/flamegraph.pl" --title "$BENCH (python3-dbg)" > "$RES/flame_$BENCH.svg"
-    # Hardware counters (release python3; guest PMU counts max 4 events per pass).
-    { perf stat -e cycles:u,instructions:u -- python3 "$BM_STOCK/run_benchmark.py" --fast 2>&1 | tail -20
-      perf stat -e cache-references,cache-misses,branches,branch-misses -- python3 "$BM_STOCK/run_benchmark.py" --fast 2>&1 | tail -20
-    } > "$RES/perf_stat_$BENCH.txt"
+    # Both sides: 'stock' is the Initial Analysis evidence, 'opt' shows the
+    # hotspot actually moving after the optimizations.
+    _profile_one stock "$BM_STOCK/run_benchmark.py"
+    _profile_one opt   "$ROOT/benchmarks/bm_$BENCH/run_benchmark.py"
 }
 
 optimized() {
