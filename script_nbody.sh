@@ -29,13 +29,23 @@ baseline() {
 _profile_one() {
     # $1 = tag (stock|opt), $2 = run_benchmark.py to profile.
     # Same flags for both sides so the two flame graphs are directly comparable.
-    perf record -F 999 -g -e cpu-clock -o "$RES/${BENCH}_$1.perf.data" -- \
+    # --call-graph dwarf, NOT -g: Ubuntu's python3-dbg has no frame pointers, so
+    # frame-pointer unwinding walks into freed memory and yields chains of
+    # 0xfdfdfd.. (Py_DEBUG fill bytes) -- an unusable flame graph.
+    perf record -F 999 --call-graph dwarf,16384 -e cpu-clock -o "$RES/${BENCH}_$1.perf.data" -- \
         python3-dbg "$2" --worker -l2 -w0 -n6
     perf report --stdio -i "$RES/${BENCH}_$1.perf.data" > "$RES/perf_report_${BENCH}_$1.txt"
     perf script -i "$RES/${BENCH}_$1.perf.data" \
         | "$HOME/FlameGraph/stackcollapse-perf.pl" \
         | "$HOME/FlameGraph/flamegraph.pl" --title "$BENCH ($1, python3-dbg)" \
         > "$RES/flame_${BENCH}_$1.svg"
+    # Python-level flame graph. CPython 3.10 has no -X perf trampoline, so perf
+    # can only ever show C frames; py-spy samples the interpreter frame stack
+    # and names the actual Python functions.
+    PYSPY="$(command -v py-spy || echo "$HOME/.local/bin/py-spy")"
+    if [ -x "$PYSPY" ]; then
+        sudo "$PYSPY" record -f flamegraph -o "$RES/pyspy_${BENCH}_$1.svg" \n            -- python3 "$2" --worker -l2 -w0 -n6 || echo "py-spy failed ($1), non-fatal"
+    fi
     # Hardware counters on release python3 (guest PMU counts <=4 events per pass).
     { perf stat -e cycles:u,instructions:u -- python3 "$2" --fast 2>&1 | tail -20
       perf stat -e cache-references,cache-misses,branches,branch-misses -- python3 "$2" --fast 2>&1 | tail -20
