@@ -1,6 +1,6 @@
 # huffman_engine — MAS (Architecture Spec)
 
-Status: **review** (checkpoint — awaiting human approval). Stage 2 of `hw/FLOW.md`.
+Status: **approved** 2026-08-30 (MAS checkpoint). Stage 2 of `hw/FLOW.md`.
 Inputs: `docs/prd.md` (approved 2026-08-28), ADR-0001 (AXI-Lite 32-bit + AXI-Stream bulk),
 ADR-0003 (architecture + HW/SW boundary), ADR-0005 (register conventions), ADR-0006 (symbol-beat
 encoding). Block diagram: `docs/block_diagram.{json,mmd,svg}`. Interview: `prompt.txt` 2026-08-30 (Q1–Q8).

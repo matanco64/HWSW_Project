@@ -30,7 +30,9 @@ ADRs.
 
 ## Agenda (module-specific)
 
-**All** — AXI-Lite MMIO for control/status (`cocotbext-axi` is the tb driver) vs custom; DMA
+**All** — for every ERR_* decide *when* the hardware can know it (doorbell / build / per symbol)
+and hold the doorbell response only for doorbell-time checks; stream modules define the DMA
+stop/flush life-cycle around DONE/ERR/ABORT. AXI-Lite MMIO for control/status (`cocotbext-axi` is the tb driver) vs custom; DMA
 descriptor (address, length, bit offset, table pointer, doorbell) vs pure valid/ready streaming with
 a host FIFO — decide per module, one ADR for the shared choice. Interrupt vs polling `STATUS`.
 Single clock domain, `rst_n`. Endianness and bit order of every stream.
