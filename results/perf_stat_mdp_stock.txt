@@ -1,0 +1,30 @@
+...........
+mdp: Mean +- std dev: 4.93 sec +- 0.02 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_mdp/run_benchmark.py --fast':
+
+      389812229643      cycles:u                                                    
+      981038112550      instructions:u            #    2.52  insn per cycle         
+
+     164.159863223 seconds time elapsed
+
+     163.857240000 seconds user
+       0.284453000 seconds sys
+
+
+...........
+mdp: Mean +- std dev: 4.96 sec +- 0.04 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_mdp/run_benchmark.py --fast':
+
+        1213145525      cache-references                                            
+          23207410      cache-misses              #    1.913 % of all cache refs    
+      205811883265      branches                                                    
+        1096514616      branch-misses             #    0.53% of all branches        
+
+     165.222853677 seconds time elapsed
+
+     164.901204000 seconds user
+       0.295657000 seconds sys
+
+

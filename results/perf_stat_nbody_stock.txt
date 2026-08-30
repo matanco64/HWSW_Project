@@ -5,17 +5,17 @@ Run 'python3 -m pyperf system tune' command to reduce the system jitter.
 Use pyperf stats, pyperf dump and pyperf hist to analyze results.
 Use --quiet option to hide these warnings.
 
-nbody: Mean +- std dev: 232 ms +- 5 ms
+nbody: Mean +- std dev: 232 ms +- 3 ms
 
  Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
 
-       21128531240      cycles:u                                                    
-       60203495142      instructions:u            #    2.85  insn per cycle         
+       21206927504      cycles:u                                                    
+       60202389488      instructions:u            #    2.84  insn per cycle         
 
-       9.140430192 seconds time elapsed
+       9.181988426 seconds time elapsed
 
-       8.893305000 seconds user
-       0.207849000 seconds sys
+       8.966887000 seconds user
+       0.192787000 seconds sys
 
 
 Try to rerun the benchmark with more runs, values and/or loops.
@@ -23,18 +23,18 @@ Run 'python3 -m pyperf system tune' command to reduce the system jitter.
 Use pyperf stats, pyperf dump and pyperf hist to analyze results.
 Use --quiet option to hide these warnings.
 
-nbody: Mean +- std dev: 231 ms +- 2 ms
+nbody: Mean +- std dev: 234 ms +- 6 ms
 
  Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
 
-          72787323      cache-references                                            
-           1151491      cache-misses              #    1.582 % of all cache refs    
-       10347778905      branches                                                    
-          63610017      branch-misses             #    0.61% of all branches        
+          74443966      cache-references                                            
+           2557265      cache-misses              #    3.435 % of all cache refs    
+       10347197547      branches                                                    
+          59060232      branch-misses             #    0.57% of all branches        
 
-       9.124023299 seconds time elapsed
+       9.197836457 seconds time elapsed
 
-       8.883926000 seconds user
-       0.204201000 seconds sys
+       9.003352000 seconds user
+       0.175277000 seconds sys
 
 
