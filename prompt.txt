@@ -811,3 +811,7 @@ Verification notes (not findings): all pass-1 resolutions R1–R20 are present i
 
 2026-08-30T12:18:20Z — Claude Code session (auto-logged)
 Prompt: "commit, then /hw-flow mtf_cam"
+
+2026-08-30 — hw-advisor (process change, huffman_engine/mas)
+Lesson: decide when each error is knowable; stream modules need a DMA life-cycle rule.
+Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 huffman_engine/mas).
