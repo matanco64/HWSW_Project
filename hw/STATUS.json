@@ -30,9 +30,9 @@
           }
         },
         "mas": {
-          "state": "review",
+          "state": "done",
           "started": "2026-08-30T08:02:05Z",
-          "finished": "",
+          "finished": "2026-08-30T11:22:57Z",
           "gate": {
             "I/O table with widths + clock": {
               "result": "pass",
@@ -786,5 +786,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-30T08:22:44Z"
+  "updated": "2026-08-30T11:22:57Z"
 }

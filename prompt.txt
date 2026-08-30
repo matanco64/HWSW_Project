@@ -758,3 +758,7 @@ All 18 pass-1 resolutions (R1–R18) are present in the artifacts as claimed; R1
 
 2026-08-30T11:22:29Z — Claude Code session (auto-logged)
 Prompt: "commmit, then go"
+
+2026-08-30 — hw-advisor (process change, grape_pipeline/mas)
+Lesson: read the shared RTL cells before the register map; write a delta-to-cell subsection.
+Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 grape_pipeline/mas).
