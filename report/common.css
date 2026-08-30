@@ -1,0 +1,28 @@
+@page { size: A4; margin: 14mm 13mm; }
+html { font-size: 10.2pt; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+       color: #16181d; line-height: 1.42; margin: 0; }
+h1 { font-size: 1.62rem; margin: 0 0 .1rem; letter-spacing: -.01em; }
+.sub { font-size: 1.02rem; color: #3d4450; margin: 0 0 .15rem; }
+.by { font-size: .86rem; color: #5b6472; margin: 0 0 .9rem;
+      border-bottom: 2px solid #16181d; padding-bottom: .5rem; }
+h2 { font-size: 1.06rem; margin: 1.1rem 0 .35rem; padding-bottom: .12rem;
+     border-bottom: 1px solid #c8cdd6; }
+h3 { font-size: .95rem; margin: .75rem 0 .25rem; color: #22262e; }
+p { margin: .35rem 0; text-align: justify; }
+ul { margin: .3rem 0; padding-left: 1.1rem; }
+li { margin: .22rem 0; }
+code, .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: .88em; }
+table { border-collapse: collapse; width: 100%; margin: .45rem 0; font-size: .89rem; }
+th, td { border: 1px solid #c8cdd6; padding: .22rem .4rem; text-align: left; }
+th { background: #eef1f5; font-weight: 600; }
+td.num, th.num { text-align: right; font-family: "Cascadia Mono", Consolas, monospace; }
+.win { color: #14622c; font-weight: 600; }
+.loss { color: #9b1c1c; font-weight: 600; }
+figure { margin: .55rem 0; text-align: center; page-break-inside: avoid; }
+figcaption { font-size: .8rem; color: #5b6472; margin-top: .2rem; text-align: left; }
+.lead { font-size: .99rem; }
+.note { background: #f5f7fa; border-left: 3px solid #7d8796; padding: .35rem .55rem;
+        margin: .45rem 0; font-size: .9rem; }
+.flame { width: 100%; border: 1px solid #c8cdd6; display: block; }
+h2, h3 { page-break-after: avoid; }
