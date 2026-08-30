@@ -12,12 +12,18 @@ OUT="$HERE/fig"
 WIDTH="${WIDTH:-2400}"   # px; flame graphs are wide, so oversample for print
 
 mkdir -p "$OUT"
-for bench in nbody pyflate mdp; do
-    for tag in stock opt; do
-        src="$RES/flame_${bench}_${tag}.svg"
-        [ -f "$src" ] || { echo "skip (missing): $(basename "$src")"; continue; }
-        dst="$OUT/flame_${bench}_${tag}.png"
-        rsvg-convert -w "$WIDTH" "$src" -o "$dst"
-        echo "wrote $(basename "$dst")  $(stat -c%s "$dst") bytes"
+# flame_*  = perf, C-level interpreter frames (the course guide's format)
+# pyspy_*  = py-spy, Python-level frames. CPython 3.10 has no -X perf
+#            trampoline, so perf cannot name Python functions; py-spy is the
+#            readable counterpart and the one worth putting in a report.
+for prefix in flame pyspy; do
+    for bench in nbody pyflate mdp; do
+        for tag in stock opt; do
+            src="$RES/${prefix}_${bench}_${tag}.svg"
+            [ -f "$src" ] || { echo "skip (missing): $(basename "$src")"; continue; }
+            dst="$OUT/${prefix}_${bench}_${tag}.png"
+            rsvg-convert -w "$WIDTH" "$src" -o "$dst"
+            echo "wrote $(basename "$dst")  $(stat -c%s "$dst") bytes"
+        done
     done
 done
