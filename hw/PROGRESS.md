@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 11:22 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-08-30 11:22 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 12:14 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-08-30 12:14 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -49,7 +49,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class mas review
     class prd done
 ```
 
@@ -84,7 +85,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| `huffman_engine` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `huffman_engine` | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
@@ -92,7 +93,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 ## Next up
 
 - `grape_pipeline`: **uArch** — todo (checkpoint — needs human approval)
-- `huffman_engine`: **MAS** — todo (checkpoint — needs human approval)
+- `huffman_engine`: **MAS** — review (checkpoint — needs human approval)
 - `mtf_cam`: **MAS** — todo (checkpoint — needs human approval)
 
 ## Gates
@@ -123,6 +124,15 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] HW/SW split table — docs/prd.md §4: pyflate function → HW/SW → bytes per block; 444 config words, 67,562 B stream in, 148,271 symbols out
 - [x] workload slice quantified from results/ profile — docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:19 (1.13 s), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)
 - [x] hw-review findings resolved — docs/review_prd.md: 25 findings (2 passes), 0 must open
+
+#### MAS — 🟠 review (started 2026-08-30T11:22:57Z)
+
+- [x] I/O table with widths + clock — docs/mas.md §2: 14 signal rows (AXI-Lite collapsed to one row), all with width and clock (script-checked)
+- [x] register map (offset, name, bits, access, reset) — docs/mas.md §4: 35 rows incl. LEN window and reserved ranges, all five columns filled (script-checked)
+- [x] DMA/stream protocol — docs/mas.md §5: s_bits/s_sel/m_sym AXI-Stream rules, ADR-0001 + ADR-0006
+- [x] driver API sketch — docs/mas.md §6: HuffmanDriver incl. decode_block() and read_table()
+- [x] block diagram — docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML
+- [x] hw-review resolved — docs/review_mas.md: 23 findings (2 passes), 0 must open
 
 ### `mtf_cam`
 

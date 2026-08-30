@@ -134,3 +134,13 @@ three streams are moved by platform DMA outside this module (testbench-modelled,
 ## 9. Review findings
 
 See `docs/review_prd.md`.
+
+## Errata (post-approval, from the MAS review 2026-08-30)
+
+- PRD-F9: an **over-subscribed table** (Σ 2^−l > 1) cannot be detected at doorbell time — the
+  count pass of the hardware build is what computes the sum. MAS §8 defines it as a build-time
+  ERR_TABLE (BUSY 1 → 0, no beats, counters stop at the failing table). Length > MAXLEN remains a
+  doorbell-time rejection. `test_corner` follows the MAS definition.
+- PRD-F9 "no BUSY/DONE/IRQ" on a doorbell-time rejection: "no IRQ" means no *DONE* interrupt; the
+  ERR_PARAM / ERR_TABLE flags do assert `irq` when their IRQ_EN bit is set (ADR-0005 mask rule,
+  uniform across modules; MAS §2/§8).

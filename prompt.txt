@@ -762,3 +762,52 @@ Prompt: "commmit, then go"
 2026-08-30 — hw-advisor (process change, grape_pipeline/mas)
 Lesson: read the shared RTL cells before the register map; write a delta-to-cell subsection.
 Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 grape_pipeline/mas).
+
+2026-08-30T12:06:23Z — Claude Code session (auto-logged)
+Prompt: "1. accept
+2. a
+3. accept
+4. accept
+5. accept
+6. accept
+7. accept
+8. accept"
+
+2026-08-30T12:11:25Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a3d8eeda9d2c4451a</task-id>
+<tool-use-id>toolu_014qP9txBH553ucZdt21QaGb</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a3d8eeda9d2c4451a.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review huffman_engine MAS" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | §4 DBG_SEL (0x114) / DBG_DATA | `index` field is 15:8 = 8 bits (0..255) but DBG_DATA says symtab is addressed by "symbol slot 0..287"; slots 256..287 are unreachable, so F3 debug read-back (and `read_table()`) cannot cover ALPHABET &gt; 256 (DEFLATE lit/len is 257..288). Table field 2:0 also allows 6/7 and kind/index out of range are undefined. | Widen index to 16:8 (9 bits); state "table ≥ N_TABLES, index 0 or &gt; MAXLEN (kinds 0–2), index ≥ ALPHABET (kind 3) → DBG_DATA reads 0"; state what DBG_DATA returns before the first build / during a build (0 or live). |
+| R2 | must | §4 CTRL row, §5 "Doorbell response", §8 "doorbell rejected (F9)" | ERR_TABLE (over-subscribed table, Σ2^−l &gt; 1) can only be known after the count pass of the hardware build, i.e. ≥ ALPHABET cycles after the doorbell, yet the MAS treats it as a doorbell-time rejection with BUSY = 0, counters hold, and (ADR-0005) BRESP held until rejection is visible in STATUS. Either BRESP is held ~6 × 314 cycles or BUSY/CYCLES run before the rejection — the text does not say which. | State explicitly: doorbell BRESP returns after ERR_PARAM check only (≤ N cycles); ERR_TABLE is raised during the build with BUSY = 1 → 0, CYCLES/BUILD_CYCLES stop at the failing table, no beats, `s_bits`/`s_sel` tready never rise — and reconcile with PRD-F9 wording (or pre-scan lengths at the doorbell and bound the BRESP hold). |
+| R3 | must | §6 Driver API (`AccelDriver.wait_done`, grape MAS §6) | Inherited `wait_done` polls until DONE\|ABORTED and raises only on ERR_PARAM/ERR_BUSY; huffman run-time errors (ERR_NOCODE…ERR_UNDERRUN) and ERR_TABLE end the invocation with BUSY = 0, DONE = 0 → base `wait_done` spins to timeout. | Declare `HuffmanDriver.wait_done` override: returns when BUSY = 0 or DONE\|ABORTED\|ERR_* set; document which ERR_* raise vs return; note `clear()` mask 0x1FFFE writes reserved bit 16 (WI, harmless) or set 0xFFFE. |
+| R4 | must | §2 `s_axis_bits_tkeep`, §5 `s_bits` | TKEEP semantics undefined beyond "partial last word": non-contiguous patterns, TKEEP ≠ 0xF on non-last beats, TKEEP = 0 on the TLAST beat, and how "last received bit" (ERR_UNDERRUN reference point) is computed from TKEEP. | State: TKEEP must be all-ones except on the TLAST beat where it is contiguous from lane 0 (0x1/0x3/0x7/0xF); any other pattern is treated as its lowest contiguous run (or is a protocol violation caught by the agent); last received bit = bit 7 of the highest valid byte. |
+| R5 | must | §5 `s_bits`/`s_sel`, §8 error rows | DMA-model assumption is unstated: after EOB (≤ 4 over-fetched beats), after a run-time error, or after ABORT, the source DMAs are left mid-transfer with tready = 0 and the `m_sym` sink DMA never sees TLAST. "A new invocation restarts the DMA" requires software to abort/reset three DMA channels — not a listed driver rule, and the cocotb `AxiStreamSource`/`Sink` model must be flushed between blocks (F13 test). | Add to §5 driver rules: before each doorbell software stops/flushes all three DMA channels; `s_bits`/`s_sel` tready = 0 from DONE/ERR/ABORT until the next accepted doorbell; the sink is closed by software on ERR/ABORT (no TLAST). |
+| R6 | should | §5 `s_bits`, §4 STATUS bit 15 | Zero padding after TLAST (F4) and ERR_UNDERRUN (F10, consumed bit beyond last received bit) are both referenced but their boundary is not wr
+... [truncated, 9493 chars total]"
+
+2026-08-30T12:14:34Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a9bb32b55a634dde5</task-id>
+<tool-use-id>toolu_01Xv7xtUEwrtr9ySLrH6Po1y</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a9bb32b55a634dde5.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review huffman MAS after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | mas.md §8 rows "doorbell accepted" vs "over-subscribed table found during the build" (and §5 `s_bits` prefetch note) | Internal contradiction: the doorbell-accepted row says "`s_bits`/`s_sel` tready may rise; build starts", but the build-time ERR_TABLE row asserts "tready never rose for `s_sel`". §5 only defines prefetch for `s_bits` ("bounded by the window"); whether a selector beat can be pulled during the build is undefined, so the DMA-flush rule and the F13 "surplus beats do not affect block 2" test have no fixed reference for what may have been consumed on a build-time error. | Pick one and state it in §5 and both §8 rows: recommended "`s_sel` tready stays 0 until the last table build completes (first selector is needed only before symbol 0); only `s_bits` may prefetch (≤ 4 beats) during the build". Change the doorbell row to "`s_bits` tready may rise". |
+| S2 | must | mas.md §2 `irq`, §4 IRQ_EN (15:1), §8 "doorbell rejected" row (irq = "flag") vs prd.md PRD-F9 ("sticky flag, no BUSY/DONE/IRQ") | PRD-F9 says a doorbell-time rejection raises no IRQ; the MAS defines `irq` = \|(STATUS &amp; IRQ_EN) with IRQ_EN covering bits 9/10, so ERR_PARAM / doorbell-time ERR_TABLE do assert `irq` when enabled and §8 says so explicitly. The Errata only re-times over-subscription; the IRQ contradiction is unresolved and `test_corner` (F9 acceptance) would check opposite behaviours depending on which document it follows. | Either add a PRD erratum: "F9 'no IRQ' means no DONE interrupt; ERR_PARAM/ERR_TABLE assert `irq` iff their IRQ_EN bit is set (MAS §2)", or make the MAS exclude bits 9:10 from IRQ_EN. Recommended: the erratum (keeps the ADR-0005 mask definition uniform across modules). |
+| S3 | must | mas.md §2 `m_axis_sym_tdata` row vs ADR-0006 | The MAS defines the EOB beat's value ([8:0] = ALPHABET−1 / 256) and TLAST but never states its TYPE field; ADR-0006 is itself ambiguous — TYPE 0 is described as "bzip2 symbol — RUNA/RUNB/MTF index/**EOB by value**" while TYPE 3 is "EOB, both modes". `mtf_cam` (which "consumes TYPE 0 and 3") therefore cannot tell from the spec whether a bzip2 EOB arrives as TYPE 0 (needs ALPHABET to recognise it) or TYPE 3; this is the on-chip contract between the two modules. | In MAS §2 write "EOB beat: TYPE = 3 in both modes, [8:0] = ALPHABET−1 (bzip2) / 256 (DEFLATE), [27:12] = 0, TLAST = 1; TYPE 0 beats never carry the EOB value" and drop "EOB by value" from ADR-0006's TYPE 0 description. |
+
+Verification notes (not findings): all pass-1 resolutions R1–R20 are present in the revised text. The specific checks requested are consistent: DBG_SEL fields 2:0 / 5:4 / 16:8 do not overlap and 9 index bits reach slot 287; LEN window 288 words × 6 = 1728 = 6 × 288 entries exactly, DEFLATE ALPHABET + 30 ≤ 318 fits, last word at 0x400 + 4·287 = 0x87C and SLVERR from 0x880; BRESP hold (≤ 8 cycles, doorbell-time checks only) matches ADR-0005 and the PRD erratum; ABORT-during-drain (→ DONE, not ABORTED) matches PRD-F11 in §4 and §8; DMA flush rules are compatible with F13 (DMA restarts from the re-presented buffer start, START_BIT re-based by software).</result>
+<usage><subagent_tokens>48009</subagent_tokens><tool_uses>3</tool_uses><duration_ms>96431</duration_ms></usage>
+</task-notification>"
+
+2026-08-30T12:18:20Z — Claude Code session (auto-logged)
+Prompt: "commit, then /hw-flow mtf_cam"

@@ -131,3 +131,7 @@ The 256-bit bitmap of byte values present in a bzip2 block (pyflate `used`); sof
 
 **N_USED**:
 popcount of the used map (145 here); the MTF list length; ALPHABET = N_USED + 2 and EOB = N_USED + 1.
+
+**Symbol beat**:
+One 32-bit AXI-Stream transfer of the symbol stream (ADR-0006): value in [8:0], TYPE in [11:9]
+(0 bzip2 symbol, 1 DEFLATE literal, 2 DEFLATE length+distance, 3 EOB), TLAST on EOB.
