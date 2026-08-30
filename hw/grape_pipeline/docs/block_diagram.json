@@ -1,0 +1,141 @@
+{
+  "title": "grape_pipeline \u2014 architecture (MAS)",
+  "columns": [
+    {
+      "name": "Host / bus",
+      "blocks": [
+        {
+          "id": "cpu",
+          "label": "CPU + driver",
+          "sub": "GrapeDriver.advance()"
+        },
+        {
+          "id": "axi",
+          "label": "AXI4-Lite handshake",
+          "sub": "axi_lite_if + decoder, 4 KB"
+        }
+      ]
+    },
+    {
+      "name": "Control",
+      "blocks": [
+        {
+          "id": "regs",
+          "label": "Register file",
+          "sub": "pending/latched cfg, STATUS, IRQ"
+        },
+        {
+          "id": "fsm",
+          "label": "Step FSM",
+          "sub": "doorbell, abort, NSTEPS loop"
+        },
+        {
+          "id": "cnt",
+          "label": "Counters",
+          "sub": "CYCLES 64b, STEPS_DONE 32b"
+        }
+      ]
+    },
+    {
+      "name": "State",
+      "blocks": [
+        {
+          "id": "body",
+          "label": "Body register file",
+          "sub": "working + committed, 5 \u00d7 7 FP64"
+        },
+        {
+          "id": "pairs",
+          "label": "Pair list",
+          "sub": "\u226410 \u00d7 (i, j)"
+        }
+      ]
+    },
+    {
+      "name": "Datapath (FP64)",
+      "blocks": [
+        {
+          "id": "pipe",
+          "label": "Pair pipeline",
+          "sub": "sub \u2192 r\u00b2 \u2192 sqrt \u2192 rcp \u2192 \u00d7dt \u2192 \u00d7m"
+        },
+        {
+          "id": "acc",
+          "label": "Velocity accumulate",
+          "sub": "6 FMA, ordered by pair"
+        },
+        {
+          "id": "integ",
+          "label": "Position integrator",
+          "sub": "r += dt\u00b7v, 5 bodies"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "cpu",
+      "to": "axi",
+      "label": "MMIO"
+    },
+    {
+      "from": "axi",
+      "to": "regs",
+      "label": "wr/rd strobes"
+    },
+    {
+      "from": "regs",
+      "to": "fsm",
+      "label": "doorbell / abort"
+    },
+    {
+      "from": "fsm",
+      "to": "cnt"
+    },
+    {
+      "from": "axi",
+      "to": "body",
+      "label": "state load / read-back"
+    },
+    {
+      "from": "axi",
+      "to": "pairs",
+      "label": "pair list"
+    },
+    {
+      "from": "body",
+      "to": "pipe",
+      "label": "x_i x_j m_i m_j"
+    },
+    {
+      "from": "pairs",
+      "to": "pipe",
+      "label": "(i, j) per cycle"
+    },
+    {
+      "from": "pipe",
+      "to": "acc",
+      "label": "dx\u00b7b1m, dx\u00b7b2m"
+    },
+    {
+      "from": "acc",
+      "to": "integ",
+      "label": "v (5 bodies)"
+    },
+    {
+      "from": "integ",
+      "to": "body",
+      "label": "commit r, v"
+    },
+    {
+      "from": "fsm",
+      "to": "pipe",
+      "label": "start step"
+    },
+    {
+      "from": "regs",
+      "to": "cpu",
+      "label": "STATUS, irq"
+    }
+  ]
+}

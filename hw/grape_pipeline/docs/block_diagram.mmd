@@ -1,0 +1,36 @@
+flowchart LR
+    subgraph C0["Host / bus"]
+        direction TB
+        cpu["CPU + driver<br/><i>GrapeDriver.advance()</i>"]
+        axi["AXI4-Lite handshake<br/><i>axi_lite_if + decoder, 4 KB</i>"]
+    end
+    subgraph C1["Control"]
+        direction TB
+        regs["Register file<br/><i>pending/latched cfg, STATUS, IRQ</i>"]
+        fsm["Step FSM<br/><i>doorbell, abort, NSTEPS loop</i>"]
+        cnt["Counters<br/><i>CYCLES 64b, STEPS_DONE 32b</i>"]
+    end
+    subgraph C2["State"]
+        direction TB
+        body["Body register file<br/><i>working + committed, 5 × 7 FP64</i>"]
+        pairs["Pair list<br/><i>≤10 × (i, j)</i>"]
+    end
+    subgraph C3["Datapath (FP64)"]
+        direction TB
+        pipe["Pair pipeline<br/><i>sub → r² → sqrt → rcp → ×dt → ×m</i>"]
+        acc["Velocity accumulate<br/><i>6 FMA, ordered by pair</i>"]
+        integ["Position integrator<br/><i>r += dt·v, 5 bodies</i>"]
+    end
+    cpu -->|MMIO| axi
+    axi -->|wr/rd strobes| regs
+    regs -->|doorbell / abort| fsm
+    fsm --> cnt
+    axi -->|state load / read-back| body
+    axi -->|pair list| pairs
+    body -->|x_i x_j m_i m_j| pipe
+    pairs -->|(i, j) per cycle| pipe
+    pipe -->|dx·b1m, dx·b2m| acc
+    acc -->|v (5 bodies)| integ
+    integ -->|commit r, v| body
+    fsm -->|start step| pipe
+    regs -->|STATUS, irq| cpu
