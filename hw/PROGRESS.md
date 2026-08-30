@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 07:35 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-08-30 07:35 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 07:51 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-08-30 07:51 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -74,7 +74,7 @@ flowchart LR
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
     class mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd review
+    class prd done
 ```
 
 Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, orange review, green done, red blocked.
@@ -85,7 +85,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| `mtf_cam` | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `mtf_cam` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
@@ -93,7 +93,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 - `grape_pipeline`: **MAS** — todo (checkpoint — needs human approval)
 - `huffman_engine`: **MAS** — todo (checkpoint — needs human approval)
-- `mtf_cam`: **PRD** — review (checkpoint — needs human approval)
+- `mtf_cam`: **MAS** — todo (checkpoint — needs human approval)
 
 ## Gates
 
@@ -117,7 +117,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ### `mtf_cam`
 
-#### PRD — 🟠 review (started 2026-08-28T21:13:50Z)
+#### PRD — ✅ done (started 2026-08-28T21:13:50Z, finished 2026-08-30T07:51:36Z)
 
 - [x] every requirement has a measurable KPI + acceptance test — docs/prd.md §3: 16 PRD-F rows (grep -c '^| PRD-' = 16), every KPI/test cell filled
 - [x] HW/SW split table — docs/prd.md §4: used-map 32 B in, 148,271 symbol beats on chip, 336,184 B L-vector out via DMA

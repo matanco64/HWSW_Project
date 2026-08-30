@@ -511,9 +511,9 @@
     "mtf_cam": {
       "stages": {
         "prd": {
-          "state": "review",
+          "state": "done",
           "started": "2026-08-28T21:13:50Z",
-          "finished": "",
+          "finished": "2026-08-30T07:51:36Z",
           "gate": {
             "every requirement has a measurable KPI + acceptance test": {
               "result": "pass",
@@ -780,5 +780,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-30T07:35:03Z"
+  "updated": "2026-08-30T07:51:36Z"
 }

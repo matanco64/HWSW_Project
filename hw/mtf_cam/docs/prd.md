@@ -1,6 +1,6 @@
 # mtf_cam — PRD (Product Requirements Document)
 
-Status: **review** (checkpoint — awaiting human approval). Stage 1 of `hw/FLOW.md`.
+Status: **approved** 2026-08-30 (PRD checkpoint). Stage 1 of `hw/FLOW.md`.
 Vocabulary: `hw/CONTEXT.md`. Decisions: ADR-0001 (bus family, proposed), ADR-0003 (iBWT stays in
 software), ADR-0004 (chained module, expander width parameter, accepted). Research:
 `research/hw-algorithms-pyflate.md` §2; `dev/pyflate/FINDINGS.md` §0, §1e. Interview record:
