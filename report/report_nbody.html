@@ -1,0 +1,311 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>report_nbody</title>
+<link rel="stylesheet" href="common.css">
+
+<h1>Benchmark Report: <span style="font-family:Consolas,monospace">nbody</span></h1>
+<p class="sub">Five bodies, twenty thousand steps, and a sixth of the runtime spent computing the number zero</p>
+<p class="by">Matan Cohen &middot; Yuval Kogan &middot; HWSW Final Project, Technion &middot;
+   <span class="mono">github.com/matanco64/HWSW_Project</span></p>
+
+<p class="lead">
+A probe is falling toward Neptune, and somebody has to know where it will be in six hours. That is
+this benchmark: integrate the Sun and the four gas giants forward under Newtonian gravity, twenty
+thousand steps at a time. It is thirty lines of arithmetic with no libraries, no I/O and no data
+structures more exotic than a list of floats &mdash; which makes it the cleanest possible place to
+ask a question that turns out to have a surprising answer: <b>when Python runs this, what is it
+actually doing?</b> Almost none of it is gravity.
+</p>
+
+<h2>1. Overview</h2>
+<p>
+<span class="mono">nbody</span> comes from the Computer Language Benchmarks Game: a
+<b>symplectic-Euler integration</b> of the Sun plus Jupiter, Saturn, Uranus and Neptune under
+Newtonian gravity. Five bodies means <b>ten interacting pairs</b>, computed once at import and reused
+for the whole run. Each pyperf iteration runs <span class="mono">report_energy()</span>,
+<span class="mono">advance(dt=0.01, n=20000)</span>, then <span class="mono">report_energy()</span>
+again.
+</p>
+<ul>
+<li><b>Libraries:</b> stdlib only &mdash; the stock version does not even import
+    <span class="mono">math</span>. Nothing is vectorized, nothing is compiled.</li>
+<li><b>Data structures:</b> a list of <span class="mono">[position, velocity, mass]</span> triples,
+    where position and velocity are 3-element lists of floats and mass is a float;
+    <span class="mono">PAIRS</span> is a list of 2-tuples of those triples. Total mutable state is
+    <b>35 floats</b>.</li>
+<li><b>Correctness oracle:</b> total system energy. A symplectic integrator conserves it to
+    O(dt); any optimization that changes the physics shows up immediately.</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 560 150" width="100%" style="max-width:520px" role="img"
+     aria-label="Five bodies with ten pairwise interaction lines">
+  <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="2.4" orient="auto">
+      <path d="M0,0 L6,2.4 L0,4.8 z" fill="#9b1c1c"/></marker></defs>
+  <g stroke="#b9c0cb" stroke-width="1">
+    <line x1="70" y1="75" x2="200" y2="40"/><line x1="70" y1="75" x2="200" y2="112"/>
+    <line x1="70" y1="75" x2="330" y2="38"/><line x1="70" y1="75" x2="330" y2="114"/>
+    <line x1="200" y1="40" x2="200" y2="112"/><line x1="200" y1="40" x2="330" y2="38"/>
+    <line x1="200" y1="40" x2="330" y2="114"/><line x1="200" y1="112" x2="330" y2="38"/>
+    <line x1="200" y1="112" x2="330" y2="114"/><line x1="330" y1="38" x2="330" y2="114"/>
+  </g>
+  <circle cx="70" cy="75" r="17" fill="#e8a33d"/>
+  <circle cx="200" cy="40" r="9" fill="#8d6e4f"/>
+  <circle cx="200" cy="112" r="8" fill="#c2a878"/>
+  <circle cx="330" cy="38" r="7" fill="#7fa8b8"/>
+  <circle cx="330" cy="114" r="7" fill="#4a6fa5"/>
+  <g font-size="10" fill="#3d4450" font-family="sans-serif">
+    <text x="70" y="106" text-anchor="middle">Sun</text>
+    <text x="200" y="26" text-anchor="middle">Jupiter</text>
+    <text x="200" y="134" text-anchor="middle">Saturn</text>
+    <text x="348" y="41">Uranus</text><text x="348" y="117">Neptune</text>
+  </g>
+  <g font-size="10.5" font-family="sans-serif" fill="#16181d">
+    <text x="410" y="46" font-weight="600">10 pairs</text>
+    <text x="410" y="62">&#215; 20,000 steps</text>
+    <text x="410" y="78">= 200,000 force</text>
+    <text x="410" y="94">&nbsp;&nbsp;&nbsp;evaluations</text>
+  </g>
+  <line x1="186" y1="52" x2="96" y2="70" stroke="#9b1c1c" stroke-width="1.6" marker-end="url(#ar)"/>
+</svg>
+<figcaption><b>Figure 1.</b> The entire workload. Because N=5, the pair list is <i>fixed for the whole
+run</i> &mdash; the fact &sect;3 exploits.</figcaption>
+</figure>
+
+<h2>2. Initial analysis</h2>
+<p class="note">
+<b>Setup.</b> Course QEMU VM: Ubuntu 22.04, CPython 3.10.12, pyperformance 1.14.0, KVM on a Technion
+host. Timings are <span class="mono">pyperformance run --rigorous</span> (40 processes / 120 values)
+on release <span class="mono">python3</span>. Profiles are recorded separately with
+<span class="mono">python3-dbg</span> for symbols and are <i>never</i> quoted as timings &mdash; the
+debug build's assertions and allocator hooks inflate interpreter-internal frames roughly
+2.5&ndash;3&times;. Guest quirks: the <span class="mono">cycles</span> PMU event records <b>zero</b>
+samples under KVM, so sampling uses <span class="mono">-e cpu-clock</span>; and
+<span class="mono">perf stat</span> silently returns zeros past four events, so counters are taken in
+two passes.
+</p>
+<p>
+Stock <span class="mono">nbody</span> measures <b>231&nbsp;ms &plusmn; 3&nbsp;ms</b>, reproduced to
+within 1&nbsp;ms across runs a week apart. The flame graph is a single
+<span class="mono">advance()</span> plateau over <span class="mono">_PyEval_EvalFrameDefault</span>,
+about 95% of samples. The interesting part is underneath it:
+</p>
+<table>
+<tr><th>Cost group</th><th class="num">Self</th><th>Symbols</th></tr>
+<tr><td>List subscript machinery</td><td class="num">~15%</td>
+    <td><span class="mono">list_ass_item</span> 2.83, <span class="mono">PyNumber_AsSsize_t</span> 2.12,
+        <span class="mono">_PyNumber_Index</span> 1.87, <span class="mono">PyObject_GetItem</span> 1.65,
+        <span class="mono">list_item</span> 1.65, <span class="mono">PyObject_SetItem</span> 1.47,
+        <span class="mono">PyLong_AsSsize_t</span> 1.43, <span class="mono">list_ass_subscript</span> 1.33</td></tr>
+<tr><td>Generic binary-op dispatch</td><td class="num">~8%</td>
+    <td><span class="mono">binary_op1</span> 5.75, <span class="mono">_Py_CheckSlotResult</span> 2.22</td></tr>
+<tr><td>Float boxing</td><td class="num">large</td>
+    <td><span class="mono">PyFloat_FromDouble</span> / <span class="mono">float_dealloc</span> churn</td></tr>
+<tr><td>Actual arithmetic</td><td class="num">small</td>
+    <td>libm <span class="mono">pow</span> for <span class="mono">d**-1.5</span>, plus the adds and multiplies</td></tr>
+</table>
+<p>
+On CPython 3.10 every <span class="mono">v1[0] -= dx * b2m</span> is a full
+<span class="mono">PyObject_GetItem</span> &rarr; <span class="mono">_PyNumber_Index</span> &rarr;
+<span class="mono">PyLong_AsSsize_t</span> &rarr; <span class="mono">list_item</span> round trip, and
+the reverse for the store. <b>Roughly a sixth of the runtime is spent converting the constant
+<span class="mono">0</span> into a C array index, twenty thousand times over.</b> None of it is
+physics. CPython 3.11 later added <span class="mono">BINARY_SUBSCR_LIST_INT</span> specialization to
+make exactly this cheap; 3.10 &mdash; the course VM's version &mdash; has none of it.
+</p>
+<figure>
+<img class="flame" src="../results/flame_nbody_stock.svg" alt="Stock nbody flame graph">
+<figcaption><b>Figure 2.</b> Stock, <span class="mono">python3-dbg</span>,
+<span class="mono">perf -F 999 -e cpu-clock</span>. One wide <span class="mono">advance()</span>
+plateau; the width under it is interpreter machinery, not arithmetic.</figcaption>
+</figure>
+
+<h2>3. Optimizations</h2>
+<h3>3a. What shipped: compile the schedule away</h3>
+<p>
+The inner loop rediscovers, twenty thousand times, a schedule that is constant for the entire run:
+which bodies interact, in what order, with which masses. Only the 30 coordinate floats change. So we
+compute that schedule <b>once, at import time</b> (outside the timed region) and emit straight-line
+source for <span class="mono">advance(dt, n)</span> in which every coordinate is a Python <i>local</i>
+(<span class="mono">LOAD_FAST</span>) and every mass is a <i>literal</i>
+(<span class="mono">LOAD_CONST</span>). State is read out of the body lists before the step loop and
+written back after, so <span class="mono">report_energy()</span> observes the same objects as before.
+This is <b>partial evaluation</b> &mdash; the technique <span class="mono">dataclasses</span> and
+Django's template compiler use.
+</p>
+<table>
+<tr><th>Per integration step</th><th class="num">Stock</th><th class="num">Generated</th></tr>
+<tr><td>Bytecodes executed</td><td class="num">1484.5</td><td class="num">850.6</td></tr>
+<tr><td>List subscripts (<span class="mono">BINARY_SUBSCR</span>/<span class="mono">STORE_SUBSCR</span>)</td>
+    <td class="num">150</td><td class="num">4</td></tr>
+</table>
+<p>
+Removing 146 of 150 subscripts per step attacks precisely the ~15% tower above. Bytecode counts come
+from <span class="mono">sys.monitoring</span> and are a version-independent structural metric: unlike
+wall clock they do not depend on which CPython specializes what.
+</p>
+<p>
+<b>The output is bit-for-bit identical.</b> All 35 state floats compare <span class="mono">==</span>
+against stock after 20,000 steps, and so does <span class="mono">report_energy()</span>:
+<span class="mono">max |&Delta;| = 0.0</span> &mdash; an equality, not a tolerance. We kept the stock
+<span class="mono">dt * (dsq ** -1.5)</span> rather than the cheaper
+<span class="mono">dt / (dsq * sqrt(dsq))</span> to preserve that claim, and measurement justified the
+choice independently: the <span class="mono">sqrt</span> variant was not distinguishable from zero on
+any interpreter tested, and on one run came out slower. The generated code is emitted by a function
+that is <b>generic in N</b> &mdash; hand it nine bodies and it emits a nine-body kernel &mdash; so this
+is a specialization of the given workload, not a hand-written answer.
+</p>
+
+<h3>3b. Three anti-results</h3>
+<ul>
+<li><b>Fast Multipole / Barnes&ndash;Hut is a <span class="loss">3.4&times; slowdown</span> at N=5.</b>
+    We built a real octree Barnes&ndash;Hut (monopole, &theta;=0.5, tree rebuilt every step, validated
+    by driving &theta;&rarr;0 to reproduce direct summation to 1.2e-16) and measured the crossover.
+    BH/direct is <b>3.39 at N=5</b>, 1.58 at N=100, and only drops under 1.0 near
+    <b>N&nbsp;&asymp;&nbsp;300&ndash;400</b> &mdash; this benchmark runs 70&times; below that. At N=5 the
+    tree does 18 force-term evaluations where direct summation does 10, and builds a 7-node tree
+    20,000 times on top. Note log&#8322;5 = 2.3, so "O(N log N) beats O(N&sup2;)" compares
+    5&times;2.3 &asymp; 12 against 25/2 &asymp; 12: <b>there is no asymptotic gap to exploit at this
+    size.</b> Barnes&ndash;Hut is the <i>cheaper</i> tree code, so this is a strict lower bound on
+    FMM's constant factor. pyperformance itself ships <span class="mono">bm_barnes_hut</span> as a
+    <i>separate</i> benchmark &mdash; upstream treats the tree code as a different workload, not an
+    optimization of this one.</li>
+<li><b>Struct-of-arrays loses (<span class="loss">0.88&times;</span>).</b> Textbook advice, wrong here.
+    In C, <span class="mono">x[i]</span> is a pointer add and the lanes vectorize; in CPython it is a
+    <span class="mono">PyObject_GetItem</span> round trip, and the stock layout already hands the loop
+    two <i>direct</i> velocity-list locals. SoA raises subscripts per step from 150 to 245. A
+    data-layout optimization is only an optimization relative to a cost model, and the interpreter's
+    cost model is not the hardware's.</li>
+<li><b>NumPy loses (<span class="loss">0.35&times;</span>).</b> At vector length 5&ndash;25 there is
+    nothing to amortize the per-call dispatch against.</li>
+</ul>
+<p>
+We also disproved a widely-repeated micro-optimization recorded in our own research notes: "stop
+destructuring positions, index <span class="mono">r1[0] - r2[0]</span> directly". Measured against a
+semantic-no-op control, it is worth <b>1.005&times; &mdash; nothing</b>. The real win in that tier
+(1.12&times;) came from a different change: turning six subscript read-modify-writes into six plain
+stores.
+</p>
+
+<h2>4. Performance comparison</h2>
+<p>
+Stock and optimized were run back-to-back in the same session on the VM with
+<span class="mono">pyperformance run --rigorous</span>, the optimized build through a custom
+<span class="mono">--manifest</span> keeping the benchmark name identical so
+<span class="mono">pyperf compare_to</span> matches by name. Significance is Student's two-tailed
+t-test at 95% confidence.
+</p>
+<table>
+<tr><th>Configuration</th><th class="num">Mean &plusmn; std dev</th><th class="num">Speedup</th><th>Correctness</th></tr>
+<tr><td>Stock pyperformance 1.14.0</td><td class="num">231 ms &plusmn; 3 ms</td><td class="num">1.00&times;</td><td>reference</td></tr>
+<tr><td>Optimized (shipped, pure Python)</td><td class="num">141 ms &plusmn; 4 ms</td>
+    <td class="num win">1.64&times;</td><td>bit-identical state + energy</td></tr>
+</table>
+<p>
+A <b>39.0% reduction in runtime</b> against a requirement of 7% &mdash; <b>5.6&times; the bar</b> &mdash;
+and the difference is reported significant. On CPython 3.12 the same change measures ~1.5&times;
+rather than 1.64&times;: 3.11+ adaptive specialization already recovers part of the subscript overhead
+we remove, so the win is <i>larger</i> on the 3.10 the course targets. Anyone re-running this on a
+newer interpreter should expect a smaller number and should not read it as a regression.
+</p>
+<figure>
+<img class="flame" src="../results/flame_nbody_opt.svg" alt="Optimized nbody flame graph">
+<figcaption><b>Figure 3.</b> After. Same <span class="mono">perf</span> settings and same workload
+flags as Figure 2, so the pair is directly comparable. The interpreter machinery under
+<span class="mono">advance()</span> has thinned; what remains is dominated by the float arithmetic
+and the libm <span class="mono">pow</span> call &mdash; which is what &sect;5 targets.</figcaption>
+</figure>
+<p>
+<b>A native tier, for scale.</b> We also built the kernel as a Rust/PyO3 extension
+(<span class="mono">rust/nbody/</span>): state resident in a <span class="mono">#[pyclass]</span>,
+one FFI crossing per <span class="mono">advance()</span>. It runs the 20,000-step integration in
+<b>3.59&nbsp;ms against 92.5&nbsp;ms</b> &mdash; <b>25.8&times; on the kernel</b> &mdash; and its output is
+<i>also</i> bit-for-bit identical, because <span class="mono">f64::powf(-1.5)</span> lowers to the same
+glibc <span class="mono">pow</span> CPython calls and Rust neither contracts to FMA nor reassociates
+floats by default. The FFI crossing costs <b>91&nbsp;ns</b>, or 2.5e-5 of one
+<span class="mono">advance()</span> call, which is why the coarse boundary is the right one. We
+deliberately did <b>not</b> wire it into the measured benchmark: the pure-Python tier already clears
+the bar, and an optional import that silently falls back would make the measured configuration
+ambiguous. It stands as a tier &mdash; and, as &sect;5 argues, as the accelerator's behavioural
+specification.
+</p>
+
+<h2>5. Hardware acceleration proposal</h2>
+<p>
+&sect;2 showed the arithmetic is cheap and the interpretation is expensive; &sect;4 showed that even
+after removing the interpreter entirely (Rust), the remaining cost is concentrated in one operation:
+<span class="mono">d&#8315;&sup1;&#8901;&#8309;</span>, a libm <span class="mono">pow</span> call per pair
+per step. That is the case for fixed-function hardware.
+</p>
+<p>
+<b>Precedent.</b> The GRAPE machines (GRAPE-1&hellip;8, University of Tokyo, Makino et al.) were real
+silicon built for exactly this force law and won Gordon Bell prizes; GRAPE-8 reports
+20.5&nbsp;Gflops/W. The designs were never released as open RTL &mdash; the published record is papers,
+not source &mdash; so the design below is our own, informed by theirs.
+</p>
+<p>
+<b>Datapath</b> (per pair, fully pipelined): 3 subtractions for
+<span class="mono">dx,dy,dz</span> &rarr; 3 multiplies + 2 adds for <span class="mono">d&sup2;</span>
+&rarr; <span class="mono">d&#8315;&sup1;&#8901;&#8309;</span> via an rsqrt ROM seed plus two
+Newton&ndash;Raphson iterations &rarr; two mass multiplies &rarr; six velocity accumulate-FMAs. A second
+short pipeline integrates the five positions once per step.
+<b>Control:</b> an FSM sequences all ten pairs then the position update; the only cross-step
+dependency is the state itself, so the pair loop pipelines freely while steps stay serial.
+</p>
+<p>
+<b>Inputs / outputs and operating frequency.</b> FP64 datapath (FP32 carried as an area design
+point). MMIO register map: body-state load window (5&times;7&times;64&nbsp;bit),
+<span class="mono">DT</span> (64), <span class="mono">NSTEPS</span> (32),
+<span class="mono">START</span> doorbell, <span class="mono">STATUS</span>/IRQ, and a read-back
+window. Target <b>100&nbsp;MHz</b> on FPGA; at ~20&ndash;30 cycles per step that is ~500k cycles
+&asymp; <b>5&nbsp;ms</b>, against 231&nbsp;ms in Python and 3.59&nbsp;ms in Rust.
+</p>
+<p>
+<b>HW/SW interface.</b> The key decision is the <span class="mono">NSTEPS</span> register: software
+writes <span class="mono">dt</span> and <span class="mono">n=20000</span> once and rings the doorbell
+<i>once</i>, collapsing 20,000 interpreter-driven iterations into a single MMIO transaction. A thin
+character driver plus a <span class="mono">ctypes</span>/PyO3 wrapper exposes it to Python.
+<b>And the software work already specified it:</b> the Rust <span class="mono">#[pyclass]</span> from
+&sect;4 <i>is</i> the register file, <span class="mono">advance(dt, n)</span> <i>is</i> the doorbell
+write, and <span class="mono">state()</span> <i>is</i> the read-back window. One boundary, three
+implementations.
+</p>
+<p>
+<b>Justification.</b> <span class="mono">advance()</span> is ~95% of runtime, so Amdahl is unusually
+kind &mdash; offloading it bounds the whole benchmark rather than a slice of it. Assumptions: state
+resident on-device across steps (no per-step DMA), one pair per pipeline pass, and a fully pipelined
+rsqrt unit.
+</p>
+<p>
+<b>Performance / area / frequency / power trade-offs.</b> Three knobs. <i>Replication:</i> one
+pipeline reused across the ten pairs (small area, ~10&times; latency) versus ten replicated pipelines
+(~10&times; area, near-single-step latency). <i>Precision:</i> FP64&rarr;FP32 roughly halves multiplier
+area and shortens the critical path, buying frequency at a precision cost that is directly measurable
+against the benchmark's own energy oracle &mdash; an experiment our bit-identical software baseline
+makes meaningful. <i>rsqrt:</i> ROM seed width against Newton&ndash;Raphson iteration count trades
+table area for latency; this is the operation that still dominates even the compiled Rust kernel, so
+it is where fixed-function hardware earns its win over software. On power, the GRAPE lineage is the
+evidence that a fixed-function gravity pipeline reaches roughly an order of magnitude better
+Gflops/W than a general-purpose core on this kernel.
+</p>
+
+<h2>6. Conclusion</h2>
+<p>
+The benchmark looks like a physics problem and behaves like an interpreter problem. About a sixth of
+stock runtime goes into turning the constant <span class="mono">0</span> into an array index, which
+is why the change that paid was not a better algorithm but the removal of 146 of 150 list subscripts
+per step &mdash; <b>1.64&times; on the course VM, 39% less runtime, against a 7% requirement, with
+bit-for-bit identical output</b>. The Rust kernel takes the same idea to its conclusion at 25.8&times;,
+still bit-identical, and in doing so exposes the one remaining arithmetic bottleneck that only
+hardware fixes.
+</p>
+<p>
+The negative results were worth more than the win. Barnes&ndash;Hut &mdash; and by extension FMM &mdash;
+is <b>3.4&times; slower</b> at N=5 with a crossover near N&nbsp;&asymp;&nbsp;350; struct-of-arrays,
+the standard data-layout advice, <i>loses</i> in an interpreter; NumPy loses at this vector length;
+and a widely-repeated micro-optimization is worth statistically nothing. Each cost less to establish
+than the effort it redirected. The same discipline then paid a second time in hardware: the measured
+95% share of <span class="mono">advance()</span> is what makes a step-count register worth building,
+and the measured residual cost of <span class="mono">pow</span> is what makes the rsqrt unit the
+centre of the design.
+</p>
