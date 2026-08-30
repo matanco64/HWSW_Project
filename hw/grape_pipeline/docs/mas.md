@@ -1,6 +1,6 @@
 # grape_pipeline — MAS (Architecture Spec)
 
-Status: **review** (checkpoint — awaiting human approval). Stage 2 of `hw/FLOW.md`.
+Status: **approved** 2026-08-30 (MAS checkpoint). Stage 2 of `hw/FLOW.md`.
 Inputs: `docs/prd.md` (approved 2026-08-28), ADR-0001 (AXI-Lite 32-bit, accepted), ADR-0002 (FP64
 datapath), ADR-0005 (register-map conventions). Block diagram: `docs/block_diagram.{json,mmd,svg}`
 (`tools/hw/blockdiag.py`). Interview record: `prompt.txt` 2026-08-30 (Q1–Q8).

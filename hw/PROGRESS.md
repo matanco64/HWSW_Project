@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 08:22 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-08-30 08:22 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 11:22 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-08-30 11:22 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -26,8 +26,7 @@ flowchart LR
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
     class uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class mas review
-    class prd done
+    class prd,mas done
 ```
 
 ### `huffman_engine`
@@ -84,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -92,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **MAS** — review (checkpoint — needs human approval)
+- `grape_pipeline`: **uArch** — todo (checkpoint — needs human approval)
 - `huffman_engine`: **MAS** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **MAS** — todo (checkpoint — needs human approval)
 
@@ -107,7 +106,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] workload slice quantified from results/ profile — docs/prd.md §1: baseline_nbody_stats.txt:19 (229 ms), perf_report_nbody.txt lines 12,123,142,149,154,159,189,194,212,343
 - [x] hw-review findings resolved — docs/review_prd.md: 23 findings (2 passes), 0 must open
 
-#### MAS — 🟠 review (started 2026-08-30T08:02:05Z)
+#### MAS — ✅ done (started 2026-08-30T08:02:05Z, finished 2026-08-30T11:22:57Z)
 
 - [x] I/O table with widths + clock — docs/mas.md §2: 17 signal rows, all with width and clock (checked by script)
 - [x] register map (offset, name, bits, access, reset) — docs/mas.md §4: 24 rows (ADR-0005 header + DT/NSTEPS/NPAIRS/BODY/PAIR), all five columns filled (checked by script)
