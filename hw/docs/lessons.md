@@ -46,3 +46,22 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   an ad-hoc `cd hw/<module>/golden` earlier in the same shell broke it. Fix: every hw-* skill
   command block starts with `cd "$(git rev-parse --show-toplevel)"` on its own first line (one
   rule, no per-command path arithmetic).
+
+## 2026-08-30 — mtf_cam/prd
+
+- **Index mapping misread** — the first emulation model used rank = symbol − 2 (assuming
+  "symbol 2 = rank 0"); pyflate does `favourites[r − 1]`, so rank = symbol − 1 and rank 0 never
+  occurs (friction 07:25:33Z). Fix: `hw-prd` step 3 says "quote the reference's index expression
+  verbatim in the emulation-model docstring before writing the model".
+- **Captured reference values need type normalisation** — pyflate's list holds 1-byte `bytes`
+  objects, the model emits ints; the per-symbol comparison failed on type, not value
+  (friction 07:25:51Z). Fix: golden wrappers normalise captured values to ints/bytes at capture.
+- **Reuse across modules worked** — `mtf_ref.py` imports the huffman golden wrapper instead of
+  re-instrumenting pyflate; one instrumentation point per benchmark. Keep: FLOW.md convention
+  "one golden wrapper per benchmark, per-module goldens import it".
+- No skill-level friction otherwise; the `cd "$(git rev-parse …)"` rule held (0 env.sh failures).
+- **Formula cycle models lie** — the first K3 model (`ceil(n/W) − k`) credited overlap the
+  hardware cannot have (n is unknown until the run group ends); the reviewer caught it and the
+  honest number moved from 1.072 to 1.370 (serialised) / 1.063 (with an 8-item FIFO). Fix:
+  `hw-prd` step 3 says "a cycle claim comes from a two-sided *simulation* with named resources
+  (queues, ports, widths) and a printed sweep, never from a closed-form estimate".

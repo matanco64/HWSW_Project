@@ -105,3 +105,29 @@ and its cycle model; the pyuvm predictor. Never derived from pyflate.
 **Golden model** (this module):
 `golden/pyflate_ref.py` — the stock pyflate decoder (`dev/pyflate/t0_stock.py`) instrumented to
 emit the symbol trace, cross-checked against libbzip2/zlib.
+
+**MTF list**:
+The ordered list of the block's used byte values (≤ 256, 145 here) that `mtf_cam` keeps; symbol
+s ≥ 2 selects rank s − 1, emits that byte and moves it to the front. Rank 0 never occurs (a zero
+is always coded as a run).
+_Avoid_: favourites, CAM table
+
+**Rank**:
+The position of a byte in the MTF list (0 = front).
+
+**Run group**:
+A maximal sequence of RUNA/RUNB symbols; bijective base-2, it encodes n ≥ 1 copies of the MTF
+list's front byte, emitted when the next non-run symbol arrives.
+
+**Expander**:
+The block of `mtf_cam` that turns a run group into n output bytes at W bytes per cycle.
+
+**W (expander width)**:
+Bytes per output beat of `mtf_cam` (parameter; default 8).
+
+**Used map**:
+The 256-bit bitmap of byte values present in a bzip2 block (pyflate `used`); software writes it,
+`mtf_cam` derives the initial MTF list from it.
+
+**N_USED**:
+popcount of the used map (145 here); the MTF list length; ALPHABET = N_USED + 2 and EOB = N_USED + 1.

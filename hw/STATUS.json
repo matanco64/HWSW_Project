@@ -511,25 +511,29 @@
     "mtf_cam": {
       "stages": {
         "prd": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-08-28T21:13:50Z",
           "finished": "",
           "gate": {
             "every requirement has a measurable KPI + acceptance test": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §3: 16 PRD-F rows (grep -c '^| PRD-' = 16), every KPI/test cell filled",
+              "at": "2026-08-30T07:27:51Z"
             },
             "HW/SW split table": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §4: used-map 32 B in, 148,271 symbol beats on chip, 336,184 B L-vector out via DMA",
+              "at": "2026-08-30T07:27:51Z"
             },
             "workload slice quantified from results/ profile": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/prd.md §1: perf_report_pyflate.txt:12 interpreter-level; cProfile move_to_front 9.3 % stock (FINDINGS §3), 80.4 ms MTF trace (§1e), T3 10.5 %; golden/calibrate.py workload numbers",
+              "at": "2026-08-30T07:27:52Z"
             },
             "hw-review findings resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_prd.md: 20 findings (2 passes), 0 must open",
+              "at": "2026-08-30T07:35:03Z"
             }
           }
         },
@@ -776,5 +780,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-28T20:54:29Z"
+  "updated": "2026-08-30T07:35:03Z"
 }
