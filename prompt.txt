@@ -547,3 +547,137 @@ Files changed: .claude/skills/hw-prd/SKILL.md, hw-flow/SKILL.md, and the command
 
 2026-08-28T21:12:17Z — Claude Code session (auto-logged)
 Prompt: "commit"
+
+2026-08-28T21:15:38Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a147ffae9dbfd9d02</task-id>
+<tool-use-id>toolu_01R7cXb2cssjVUw1x5shXkEg</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/tasks/a147ffae9dbfd9d02.output</output-file>
+<status>completed</status>
+<summary>Agent "Measure MTF/RUNA-RUNB workload stats" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result># mtf_cam workload characterisation — pyflate benchmark input
+
+Script: `/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/65ac9b7c-e520-407f-ae9b-41dbcc4b3e9d/scratchpad/mtf_stats/mtf_stats.py` (uses `hw/huffman_engine/golden/pyflate_ref.py`; captures `used` and the `bwt_reverse` argument by monkey-patching `G.S`).
+
+## Reproduction check
+- Reproduced L-vector length **336,184** == stock `bwt_reverse` input length 336,184, byte-for-byte **equal = True**.
+- 148,271 Huffman symbols = 38,207 RUNA + 20,226 RUNB + 89,837 MTF + 1 EOB. ALPHABET = 147.
+- Semantics used (from `dev/pyflate/t0_stock.py:411-429`): RUNA/RUNB: `if repeat==0: repeat_power=1; repeat += repeat_power &lt;&lt; r; repeat_power &lt;&lt;= 1`; on first non-run symbol emit `repeat` copies of `favourites[0]`; MTF: `o = favourites[r-1]`, move index r-1 to front (`move_to_front`, line 274).
+
+## 1. MTF operations
+- **89,837** MTF ops. Rank (= r-1 = favourites index): **mean 7.174, p50 = 3, p90 = 17, p99 = 62, max = 144**.
+- **Rank 0 (front hit) = 0 (0.00%)** — structurally impossible in bzip2: a front hit is a zero, and zeros are always encoded as RUNA/RUNB. The minimum non-run symbol is 2 → rank 1. So `mtf_cam` never sees a rank-0 lookup; rank 1 is the "hot" case.
+
+| rank | count | % | cum% |
+|---|---|---|---|
+| 0 | 0 | 0.00 | 0.00 |
+| 1 | 27,331 | 30.42 | 30.42 |
+| 2 | 13,270 | 14.77 | 45.19 |
+| 3 | 8,573 | 9.54 | 54.74 |
+| 4 | 6,046 | 6.73 | 61.47 |
+| 5 | 4,595 | 5.11 | 66.58 |
+| 6 | 3,724 | 4.15 | 70.73 |
+| 7 | 3,116 | 3.47 | 74.20 |
+| 8 | 2,532 | 2.82 | 77.01 |
+| 9 | 2,219 | 2.47 | 79.48 |
+| 10 | 1,842 | 2.05 | 81.53 |
+| 11 | 1,630 | 1.81 | 83.35 |
+| 12 | 1,335 | 1.49 | 84.83 |
+| 13 | 1,224 | 1.36 | 86.20 |
+| 14 | 1,088 | 1.21 | 87.41 |
+| 15 | 962 | 1.07 | 88.48 |
+| 16-31 | 6,949 | 7.74 | 96.21 |
+| 32-63 | 2,540 | 2.83 | 99.04 |
+| 64-127 | 822 | 0.91 | 99.96 |
+| 128+ | 39 | 0.04 | 100.00 |
+
+## 2. RUNA/RUNB runs
+- **34,664 run groups**; 58,433 RUNA/RUNB symbols; **246,347 run bytes emitted = 73.28% of L** (MTF bytes = 89,837 = 26.72%).
+- Run length: mean 7.11, p50 = 2, **max 8,157**.
+- RUNA/RUNB symbols per group: **mean 1.686, max 12** (20,980 groups of 1; 7,795 of 2; 3,409 of 3; 1,466 of 4; 576 of 5; 272 of 6; 116 of 7; 25 of 8; 12 of 9; 6 of 10; 4 of 11; 3 of 12).
+
+| run len | groups | % groups | bytes | % run bytes |
+|---|---|---|---|---|
+| 1 | 14,794 | 42.68 | 14,794 | 6.01 |
+| 2 | 6,186 | 17.85 | 12,372 | 5.02 |
+| 3-4 | 5,474 | 15.79 | 18,460 | 7.49 |
+| 5-8 | 3,723 | 10.74 | 22,981 | 9.33 |
+| 9-16 | 2,370 | 6.84 | 27,648 | 11.22 |
+| 17-64 | 1,698 | 4.90 | 50,120 | 20.35 |
+| 65-256 | 371 | 1.07 | 42,930 | 17.43 |
+| 257-1024 | 35 | 0.10 | 15,560 | 6.32 |
+| 1025+ | 13 | 0.04 | 41,482 | 16.84 |
+
+Short runs dominate the group count (60% are length 1-2) but long runs dominate the bytes (&gt;=17 bytes = 61% of run bytes; 13 runs &gt;1024 alone = 17%).
+
+## 3. Expander output rate
+Input side: 148,271 cycles (1 per Huffman symbol). Output cycles = 89,837 (MTF, 1 byte/cycle) + sum ceil(run_len / W):
+
+| W | output cycles | out/in | bottleneck |
+|---|---|---|---|
+| 1 | 336,184 | 2.267 | expander |
+| 2 | 224,419 | 1.514 | expander |
+| 4 | 170,008 | 1.147 | expander |
+| **8** | **144,533** | **0.975** | input |
+| 16 | 132,947 | 0.897 | input |
+| 32 | 127,954 | 0.863 | input |
+| 64 | 125,896 | 0.849 | input |
+
+**W = 8 bytes/cycle is the first width at which the expander is no longer the bottleneck** (144,533 &lt;= 148,27
+... [truncated, 5673 chars total]"
+
+2026-08-30T07:24:44Z — Claude Code session (auto-logged)
+Prompt: "Q1 - confirm
+Q2 - confirm
+Q3 - a
+Q4 - yes
+Q5 - confirm
+Q6 - agree
+Q7 - accepy
+Q8 - confirm
+Q9 - c"
+
+2026-08-30T07:30:01Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a7f7dbffcece30e37</task-id>
+<tool-use-id>toolu_01SX6bTrZ9iigFj3vcw8F15f</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a7f7dbffcece30e37.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review mtf_cam PRD" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | K1/K2, F6, §4 "42,023 × 8-byte beats", list_model cycle model | Beat packing undefined. §4 assumes fully packed output (336,184/8 = 42,023 beats), but K1 ("emit in one cycle"), F6 (TKEEP only "partial last beat") and the model (1 output cycle per MTF byte, ceil(n/W) per run) imply one byte-sparse beat per MTF symbol. Packing needs a lane shifter and changes run cost to ceil((offset+n)/W); sparse TKEEP mid-stream is not accepted by typical DMA. | State the rule: output is byte-packed (TKEEP partial only on the last beat) or sparse; make the cycle model and §4 beat count agree with it. |
+| R2 | must | K3, list_model.expand, open question 3 | Cycle model credits a group's own k run-symbol cycles against its ceil(n/W) drain (`ceil(n/W) − k`), but n is unknown until the terminating symbol arrives, so those cycles cannot overlap the drain; the docstring's "stalled if the next symbol also needs the port" is not what the code does. 158,889 / 1.072 is therefore an underived optimistic number. | Define the overlap assumption (which symbols may be accepted while a run drains; any input FIFO) in the PRD, implement exactly that in list_model, re-print K3. |
+| R3 | must | F3 "up to 20 run symbols (n &lt; 2^21)", F8 "21-bit accumulator", F10 ERR_RUN "&gt; 2^20", §7 test_random | Contradiction: 20 run symbols give n ∈ [2^20−1, 2^21−2], so almost every 20-symbol group is an ERR_RUN; test_random "groups up to 20 symbols, n up to 2^20" cannot be both. bzip2 bounds n ≤ 900,000 &lt; 2^20. | Pick one bound: n ≤ 2^20 ⇔ at most 20 symbols with overflow detect on accumulate; state which symbol is "offending" (the run symbol whose add overflows); fix test_random wording. |
+| R4 | must | F12 overflow sentence | "BYTES_OUT ≤ 2^27 × 2^20 … ≤ 2^20 × 20" is garbled and false as a hardware guarantee: SYMBOL_LIMIT = 2^27 with 20-symbol groups gives ≈ 2^43 bytes; the 900 kB block limit is not enforced by the module. | Either add ERR/saturation semantics for BYTES_OUT (32-bit) or bound it by construction (e.g. BYTES_LIMIT register or ERR at 2^32) and derive the number. |
+| R5 | must | F3, F10, F11 | Pending run group at an error: if the terminating symbol is ERR_RANK, are the n queued run bytes emitted before stopping ("bytes before the error" is ambiguous)? Also "ABORT after EOB → DONE only" conflicts with "ABORT within 8 cycles also mid-run-expansion": after EOB the module may still drain up to 8,157 bytes (1,020 cycles at W = 8). | State: run bytes pending at an error are discarded/emitted (choose), and whether ABORT during the post-EOB drain is honoured (ABORTED) or ignored (DONE). |
+| R6 | must | F1, F12 CYCLES, K3 | DONE and CYCLES end after the last `m_l` beat is accepted, so K3 depends on `tready`; the K3 test condition is unstated. | K3: "with `m_l.tready` = 1 and `s_sym.tvalid` = 1 throughout"; define DONE = last beat handshaken. |
+| R7 | should | F1, F10, §5, huffman F5 | EOB identification: F10 defines EOB by value N_USED+1, huffman m_sym has "type bits". Unstated which is authoritative and what happens if they disagree (type EOB, value ≠ N_USED+1) or if huffman ALPHABET ≠ N_USED+2. | Add: EOB = symbol value N_USED+1 (or type bit) and the mismatch → ERR_RANK/ERR_UNDERRUN rule; note the SW obligation ALPHABET = popcount(used)+2. |
+| R8 | should | F4, F7 | `s_sym.tready` during init (≤ 256 cycles), when idle (no d
+... [truncated, 6745 chars total]"
+
+2026-08-30T07:34:47Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a724a5ff61c1cb6c2</task-id>
+<tool-use-id>toolu_01FJKqf9mLZmmceGbvLwFNkD</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a724a5ff61c1cb6c2.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review mtf_cam PRD after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | F10 (requirement vs acceptance column) | Requirement says post-error "the packer's partial beat is flushed with TKEEP and no TLAST" and "BYTES_OUT = bytes handshaken", but the acceptance test says "BYTES_OUT == bytes before the error, 0 beats after". The flush *is* a beat after the error and its bytes *are* handshaken, so the test as written fails a compliant design (and vice-versa). F11 has the same flush wording for ABORT with no acceptance statement of what BYTES_OUT counts. | Pick one: (a) flush → acceptance "≤ 1 beat after the error (partial, TKEEP, no TLAST); BYTES_OUT == bytes handshaken incl. the flush", or (b) no flush → drop the flush sentence from F10/F11 and keep "0 beats after". Apply the same choice to F11 ABORT. |
+
+Everything else checks out:
+
+- All R1–R19 resolutions are present in the revised PRD / CONTEXT.md / golden files (R7 EOB = N_USED+1 in F1+F10; R8 in F4; R9 K5 numbers; R12 glossary terms; R13 N_LIST; R14 `expand`/`cycles` split + F15; R15 §7 rows; R16–R19 wording fixes; R18 `isinstance(..., bytes)` filter in `mtf_ref.py`).
+- `calibrate.py` output matches the PRD exactly: §1 workload numbers, 42,023 beats (F6/§4), K3 D-sweep (1.370 / 1.063 / 1.046 / 1.035), K6 W-sweep (1.175 / 1.063 / 1.023), 157,560 cycles → 3.15 ms → ≈ 25× (K5), lower bound 144,533 vs 148,271.
+- `list_model.cycles` does model the docstring/F7: run symbols produce no item and are accepted 1/cycle; the terminating symbol pushes `[ceil(n/W), 1]` atomically (EOB pushes only the run item); FIFO occupancy excludes the item being drained; D = 0 serialises symbol acceptance behind the drain; the loop runs until `busy_until`, so the return value is last-beat cycle + 2, i.e. DONE one cycle after the last beat with an inclusive count. Only a 1-cycle definitional gap remains between the model ("DONE one cycle after the last beat") and F1/F12 ("DONE when that beat has been handshaken") — nit, not must; worth aligning the wording when F12's "inclusive" is fixed at MAS.
+- Non-must notes (not listed above per instructions): F7 "`tready` drops *only* when the FIFO is full" slightly overstates vs F4's idle/init/error cases; F11 omits BYTES_LIMIT from the write-while-BUSY rule.</result>
+<usage><subagent_tokens>42015</subagent_tokens><tool_uses>4</tool_uses><duration_ms>89249</duration_ms></usage>
+</task-notification>"
+
+2026-08-30T07:42:17Z — Claude Code session (auto-logged)
+Prompt: "commit and let's continue"
