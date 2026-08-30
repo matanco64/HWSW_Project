@@ -27,8 +27,8 @@ precedent in Intel IAA.
 ## Repository structure
 
 ```
-report_pyflate.txt / report_nbody.txt   Per-benchmark reports (course deliverable, one per
-                                        selected benchmark)
+report_pyflate.pdf / report_nbody.pdf   Per-benchmark reports (course deliverable, one per
+                                        selected benchmark; built from report/)
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable)
 script_mdp.sh                           Same runner for mdp (candidate, not submitted)
 prompt.txt                              AI-tool prompt log (course deliverable)
@@ -45,7 +45,7 @@ dev/
                                         FINDINGS.md — working notes, not a deliverable
 rust/nbody/                             PyO3 crate: native advance(). Built and measured, deliberately
                                         NOT wired into the measured benchmark (see below)
-report/                                 Report sources (report.html + common.css) and build.sh -> report.pdf
+report/                                 Report sources (report_<bench>.typ, figures) + build.sh
 results/                                Authoritative course-VM measurements (see below)
 results/wsl/                            SUPERSEDED WSL2 cross-check runs — never quote as a result
 tools/
@@ -79,7 +79,7 @@ quotable numbers all come from the course VM.
 
 ### `rust/nbody/` — built, measured, not wired in
 
-A PyO3 crate implementing `advance()` natively: **25.8x on the kernel**, output
+A PyO3 crate implementing `advance()` natively: **~24x on the kernel**, output
 **bit-for-bit identical** to CPython after 20,000 steps (`dev/nbody/rs_check.py`).
 It is deliberately **not** imported by `benchmarks/bm_nbody/run_benchmark.py`.
 The pure-Python tier already clears the required speedup on its own, and an
@@ -90,10 +90,13 @@ the GRAPE-style accelerator in `hw/`.
 
 ### `report/`
 
-`report.html` + `common.css` are the report sources; `./report/build.sh` renders
-them to `report.pdf` with headless Chrome. Chrome cannot write into the
-OneDrive-synced project folder (access denied), so build.sh prints to a temp path
-and copies the PDF into place.
+One source per submitted benchmark, rendered to `report_<bench>.pdf` at the repo
+root by `./report/build.sh`. The course handout names the reports `.txt`, but the
+sections it asks for (Initial Analysis, Performance Comparison) require flame
+graphs and a block diagram, so they ship as PDFs.
+
+`report/make_figs.sh` rasterizes the perf flame graphs from `results/` into
+`report/fig/` — run it after re-recording profiles.
 
 ## How to reproduce
 
