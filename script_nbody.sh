@@ -44,7 +44,7 @@ _profile_one() {
     # and names the actual Python functions.
     PYSPY="$(command -v py-spy || echo "$HOME/.local/bin/py-spy")"
     if [ -x "$PYSPY" ]; then
-        sudo "$PYSPY" record -f flamegraph -o "$RES/pyspy_${BENCH}_$1.svg" \n            -- python3 "$2" --worker -l2 -w0 -n6 || echo "py-spy failed ($1), non-fatal"
+        sudo "$PYSPY" record -f flamegraph -o "$RES/pyspy_${BENCH}_$1.svg" -- python3 "$2" --worker -l2 -w0 -n6 || echo "py-spy failed ($1), non-fatal"
     fi
     # Hardware counters on release python3 (guest PMU counts <=4 events per pass).
     { perf stat -e cycles:u,instructions:u -- python3 "$2" --fast 2>&1 | tail -20
