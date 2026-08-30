@@ -1,0 +1,257 @@
+{
+  "title": "huffman_engine \u2014 architecture (MAS)",
+  "columns": [
+    {
+      "name": "Host / DMA",
+      "blocks": [
+        {
+          "id": "cpu",
+          "label": "CPU + driver",
+          "sub": "HuffmanDriver.decode_block()"
+        },
+        {
+          "id": "axi",
+          "label": "AXI4-Lite handshake",
+          "sub": "axi_lite_if + decoder, 4 KB"
+        },
+        {
+          "id": "dma",
+          "label": "Platform DMA",
+          "sub": "s_bits / s_sel in, m_sym out"
+        }
+      ]
+    },
+    {
+      "name": "Control",
+      "blocks": [
+        {
+          "id": "regs",
+          "label": "Register file",
+          "sub": "MODE, START_BIT, ALPHABET, N_TABLES, SYMBOL_LIMIT, DBG, STATUS/IRQ"
+        },
+        {
+          "id": "fsm",
+          "label": "Block FSM",
+          "sub": "doorbell \u2192 build \u2192 decode \u2192 EOB"
+        },
+        {
+          "id": "cnt",
+          "label": "Counters",
+          "sub": "CYCLES, SYMBOLS, BITS, BUILD, OVERFETCH"
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "blocks": [
+        {
+          "id": "lenwin",
+          "label": "Length window",
+          "sub": "6 \u00d7 288 \u00d7 5 bit, pending/latched"
+        },
+        {
+          "id": "builder",
+          "label": "Table builder",
+          "sub": "count \u2192 first_code \u2192 base \u2192 symtab"
+        },
+        {
+          "id": "tabs",
+          "label": "6 table register sets",
+          "sub": "first_code/count/base per length"
+        },
+        {
+          "id": "symtab",
+          "label": "Symbol table RAM",
+          "sub": "6 \u00d7 288 \u00d7 9 bit"
+        }
+      ]
+    },
+    {
+      "name": "Aligner",
+      "blocks": [
+        {
+          "id": "fifo",
+          "label": "Word FIFO",
+          "sub": "s_bits 32-bit, TKEEP, TLAST"
+        },
+        {
+          "id": "win",
+          "label": "Bit window",
+          "sub": "64-bit, peek 20, consume \u2264 20, zero pad"
+        },
+        {
+          "id": "rev",
+          "label": "Mode reversal",
+          "sub": "MSB-first bzip2 / LSB-first DEFLATE"
+        }
+      ]
+    },
+    {
+      "name": "Decoder",
+      "blocks": [
+        {
+          "id": "cascade",
+          "label": "Comparator cascade",
+          "sub": "20 lengths in parallel"
+        },
+        {
+          "id": "prio",
+          "label": "Priority encode",
+          "sub": "shortest match, length"
+        },
+        {
+          "id": "lookup",
+          "label": "Symbol lookup",
+          "sub": "base + code \u2212 first_code"
+        },
+        {
+          "id": "extra",
+          "label": "Extra bits (DEFLATE)",
+          "sub": "length/distance bases"
+        }
+      ]
+    },
+    {
+      "name": "Output",
+      "blocks": [
+        {
+          "id": "sel",
+          "label": "Selector FSM",
+          "sub": "s_sel, switch every 50 symbols"
+        },
+        {
+          "id": "pack",
+          "label": "Beat packer",
+          "sub": "ADR-0006 32-bit beats, TLAST on EOB"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "cpu",
+      "to": "axi",
+      "label": "MMIO"
+    },
+    {
+      "from": "axi",
+      "to": "regs",
+      "label": "config / status"
+    },
+    {
+      "from": "regs",
+      "to": "cpu",
+      "label": "STATUS, irq"
+    },
+    {
+      "from": "axi",
+      "to": "lenwin",
+      "label": "lengths (147 words)"
+    },
+    {
+      "from": "regs",
+      "to": "fsm",
+      "label": "doorbell / abort"
+    },
+    {
+      "from": "fsm",
+      "to": "cnt"
+    },
+    {
+      "from": "fsm",
+      "to": "builder",
+      "label": "start build"
+    },
+    {
+      "from": "lenwin",
+      "to": "builder",
+      "label": "5-bit lengths"
+    },
+    {
+      "from": "builder",
+      "to": "tabs"
+    },
+    {
+      "from": "builder",
+      "to": "symtab"
+    },
+    {
+      "from": "dma",
+      "to": "fifo",
+      "label": "s_bits"
+    },
+    {
+      "from": "fifo",
+      "to": "win",
+      "label": "32-bit words"
+    },
+    {
+      "from": "win",
+      "to": "rev",
+      "label": "20-bit window"
+    },
+    {
+      "from": "rev",
+      "to": "cascade",
+      "label": "code window"
+    },
+    {
+      "from": "tabs",
+      "to": "cascade",
+      "label": "first_code, count"
+    },
+    {
+      "from": "cascade",
+      "to": "prio"
+    },
+    {
+      "from": "prio",
+      "to": "lookup",
+      "label": "length, code"
+    },
+    {
+      "from": "symtab",
+      "to": "lookup"
+    },
+    {
+      "from": "lookup",
+      "to": "extra",
+      "label": "symbol"
+    },
+    {
+      "from": "prio",
+      "to": "win",
+      "label": "consume n"
+    },
+    {
+      "from": "dma",
+      "to": "sel",
+      "label": "s_sel"
+    },
+    {
+      "from": "sel",
+      "to": "cascade",
+      "label": "table id"
+    },
+    {
+      "from": "extra",
+      "to": "pack",
+      "label": "symbol / event"
+    },
+    {
+      "from": "pack",
+      "to": "dma",
+      "label": "m_sym"
+    },
+    {
+      "from": "sel",
+      "to": "lookup",
+      "label": "table id"
+    },
+    {
+      "from": "win",
+      "to": "cnt",
+      "label": "BITS, OVERFETCH"
+    }
+  ]
+}

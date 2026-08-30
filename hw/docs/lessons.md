@@ -78,3 +78,17 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - **Shared decisions first, then the module** — Q1–Q2 (bus width, register conventions) became
   ADR-0001 (accepted) and ADR-0005 before any grape-specific offset was written; the next two MAS
   rounds inherit them and should take one round each.
+
+## 2026-08-30 — huffman_engine/mas
+
+- **Doorbell-time vs run-time checks must follow the datapath** — the PRD classed an
+  over-subscribed table as a doorbell-time rejection; the reviewer noted the Kraft sum only exists
+  after the build's count pass. Fix: `hw-mas` agenda line "for every ERR_* decide *when* the
+  hardware can know it (doorbell / build / per symbol) and hold BRESP only for doorbell-time checks";
+  record PRD errata in the PRD file rather than silently editing an approved requirement.
+- **Stream ports need a DMA life-cycle rule** — after DONE/ERR/ABORT the source/sink channels are
+  mid-transfer; without a "stop and flush before every doorbell" rule the multi-block test is
+  unspecifiable. Fix: `hw-mas` agenda line for stream modules.
+- **A shared driver base needs a shared exit rule** — `wait_done` "until DONE|ABORTED" fails for
+  modules whose errors end with BUSY = 0 and DONE = 0; "return when BUSY = 0" is the universal rule
+  (hw-integrate lifts it into `AccelDriver`).

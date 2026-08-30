@@ -1,0 +1,64 @@
+flowchart LR
+    subgraph C0["Host / DMA"]
+        direction TB
+        cpu["CPU + driver<br/><i>HuffmanDriver.decode_block()</i>"]
+        axi["AXI4-Lite handshake<br/><i>axi_lite_if + decoder, 4 KB</i>"]
+        dma["Platform DMA<br/><i>s_bits / s_sel in, m_sym out</i>"]
+    end
+    subgraph C1["Control"]
+        direction TB
+        regs["Register file<br/><i>MODE, START_BIT, ALPHABET, N_TABLES, SYMBOL_LIMIT, DBG, STATUS/IRQ</i>"]
+        fsm["Block FSM<br/><i>doorbell → build → decode → EOB</i>"]
+        cnt["Counters<br/><i>CYCLES, SYMBOLS, BITS, BUILD, OVERFETCH</i>"]
+    end
+    subgraph C2["Tables"]
+        direction TB
+        lenwin["Length window<br/><i>6 × 288 × 5 bit, pending/latched</i>"]
+        builder["Table builder<br/><i>count → first_code → base → symtab</i>"]
+        tabs["6 table register sets<br/><i>first_code/count/base per length</i>"]
+        symtab["Symbol table RAM<br/><i>6 × 288 × 9 bit</i>"]
+    end
+    subgraph C3["Aligner"]
+        direction TB
+        fifo["Word FIFO<br/><i>s_bits 32-bit, TKEEP, TLAST</i>"]
+        win["Bit window<br/><i>64-bit, peek 20, consume ≤ 20, zero pad</i>"]
+        rev["Mode reversal<br/><i>MSB-first bzip2 / LSB-first DEFLATE</i>"]
+    end
+    subgraph C4["Decoder"]
+        direction TB
+        cascade["Comparator cascade<br/><i>20 lengths in parallel</i>"]
+        prio["Priority encode<br/><i>shortest match, length</i>"]
+        lookup["Symbol lookup<br/><i>base + code − first_code</i>"]
+        extra["Extra bits (DEFLATE)<br/><i>length/distance bases</i>"]
+    end
+    subgraph C5["Output"]
+        direction TB
+        sel["Selector FSM<br/><i>s_sel, switch every 50 symbols</i>"]
+        pack["Beat packer<br/><i>ADR-0006 32-bit beats, TLAST on EOB</i>"]
+    end
+    cpu -->|MMIO| axi
+    axi -->|config / status| regs
+    regs -->|STATUS, irq| cpu
+    axi -->|lengths (147 words)| lenwin
+    regs -->|doorbell / abort| fsm
+    fsm --> cnt
+    fsm -->|start build| builder
+    lenwin -->|5-bit lengths| builder
+    builder --> tabs
+    builder --> symtab
+    dma -->|s_bits| fifo
+    fifo -->|32-bit words| win
+    win -->|20-bit window| rev
+    rev -->|code window| cascade
+    tabs -->|first_code, count| cascade
+    cascade --> prio
+    prio -->|length, code| lookup
+    symtab --> lookup
+    lookup -->|symbol| extra
+    prio -->|consume n| win
+    dma -->|s_sel| sel
+    sel -->|table id| cascade
+    extra -->|symbol / event| pack
+    pack -->|m_sym| dma
+    sel -->|table id| lookup
+    win -->|BITS, OVERFETCH| cnt
