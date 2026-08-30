@@ -3,17 +3,26 @@
 Benchmark optimization, analysis, and hardware acceleration proposal for
 pyperformance benchmarks. Course: Hardware/Software Integration, Technion.
 
-The repo carries **three** measured benchmarks; the submission needs **two**.
+**The submission is pyflate + nbody.** A third benchmark, mdp, was optimized and
+fully measured before the choice was made; it stays in the repo as evidence of
+the selection process, but it has no report and is not part of the submission.
 
-| Benchmark | What it is | Baseline | Optimized | Speedup |
-|---|---|---|---|---|
-| **pyflate** | pure-Python bzip2 decompressor | 1.13 s | 288 ms | **3.93x** |
-| **mdp**     | exact-arithmetic Markov decision process solver | 4.98 s | 914 ms | **5.44x** |
-| **nbody**   | N-body gravity simulation | 231 ms | 141 ms | **1.64x** |
+| Benchmark | What it is | Baseline | Optimized | Speedup | |
+|---|---|---|---|---|---|
+| **pyflate** | pure-Python bzip2 decompressor | 1.13 s | 288 ms | **3.93x** | submitted |
+| **nbody**   | N-body gravity simulation | 231 ms | 141 ms | **1.64x** | submitted |
+| mdp         | exact-arithmetic Markov decision process solver | 4.98 s | 914 ms | 5.44x | candidate only |
 
-Course VM (Ubuntu 22.04, CPython 3.10.12), `pyperformance run --rigorous`; see
-`results/compare_<bench>.txt`. mdp was added later as a third candidate and is
-now fully measured — which two ship is not yet fixed.
+Course VM (Ubuntu 22.04, CPython 3.10.12), `pyperformance run --rigorous`, all
+three significant under pyperf's t-test; see `results/compare_<bench>.txt`. The
+requirement is a 7% improvement on two benchmarks: pyflate cuts runtime 74.5%
+and nbody 39.0%, i.e. 10.6x and 5.6x the bar.
+
+The pair was chosen on the hardware story rather than the software margin — mdp
+has the larger speedup, but pyflate and nbody map onto the three accelerator
+modules already scoped in `hw/` (`huffman_engine` + `mtf_cam` for pyflate,
+`grape_pipeline` for nbody), and pyflate's decode engine has shipping-silicon
+precedent in Intel IAA.
 
 ## Repository structure
 
@@ -21,7 +30,7 @@ now fully measured — which two ship is not yet fixed.
 report_pyflate.txt / report_nbody.txt   Per-benchmark reports (course deliverable, one per
                                         selected benchmark)
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable)
-script_mdp.sh                           Same runner for the third candidate
+script_mdp.sh                           Same runner for mdp (candidate, not submitted)
 prompt.txt                              AI-tool prompt log (course deliverable)
 project_instructions.pdf / .md          Course assignment handout (+ text transcription)
 skills-lock.json                        Pinned sources/hashes of the imported skills (`npx skills update`)
