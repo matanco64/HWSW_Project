@@ -25,7 +25,11 @@ clock and driver decisions become one ADR each).
    not trusted (stock pyflate's `tellbits()` is off by 16). An *emulation model* of the
    hardware's exact algorithm sits beside it as the pyuvm predictor. Calibrate every numeric
    tolerance or cycle claim in software (`golden/calibrate.py`) before writing the number into a
-   requirement; quote the measured value and the margin.
+   requirement; quote the measured value and the margin. Three rules that each cost an
+   iteration once: quote the reference's index expression verbatim in the emulation-model
+   docstring (`favourites[r - 1]` → rank = s − 1); normalise captured values (ints vs 1-byte
+   `bytes`) at capture; a cycle claim comes from a two-sided *simulation* with named resources
+   (queues, ports, widths) and a printed sweep, never from a closed-form estimate.
 4. Write `docs/prd.md` with these sections: Purpose and workload slice; KPIs; Functional
    requirements (numbered `PRD-Fn`); HW/SW split; Interfaces (at PRD level: bus family, clock
    target, data volume per invocation); Non-goals; Acceptance tests; Open questions.

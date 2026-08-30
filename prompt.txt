@@ -681,3 +681,7 @@ Everything else checks out:
 
 2026-08-30T07:42:17Z — Claude Code session (auto-logged)
 Prompt: "commit and let's continue"
+
+2026-08-30 — hw-advisor (process change, mtf_cam/prd)
+Lesson: quote the reference's index expression verbatim; normalise captured values at capture; cycle claims come from a two-sided simulation, not a formula.
+Files changed: .claude/skills/hw-prd/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/prd).
