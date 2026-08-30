@@ -26,12 +26,31 @@ BENCHES=("$@")
 
 log() { printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$*"; }
 
+# The artifact each stage must have produced. A stamp on its own is not proof:
+# results/ can be cleaned or archived out from under us, and skipping a stage
+# whose output has since vanished silently leaves a gap (or worse, lets a later
+# stage consume a stale file from a previous session).
+stage_artifact() {
+    case "$2" in
+        baseline)  echo "$RES/baseline_$1.json" ;;
+        profile)   echo "$RES/perf_report_$1.txt" ;;
+        optimized) echo "$RES/optimized_$1.json" ;;
+        compare)   echo "$RES/compare_$1.txt" ;;
+        *)         echo "" ;;
+    esac
+}
+
 run_stage() {
     local bench="$1" stage="$2"
     local stamp="$STAMPS/${bench}_${stage}"
+    local artifact; artifact="$(stage_artifact "$bench" "$stage")"
     if [ -f "$stamp" ] && [ -z "${FORCE:-}" ]; then
-        log "SKIP  $bench/$stage (already done — FORCE=1 to redo)"
-        return 0
+        if [ -z "$artifact" ] || [ -e "$artifact" ]; then
+            log "SKIP  $bench/$stage (already done — FORCE=1 to redo)"
+            return 0
+        fi
+        log "REDO  $bench/$stage (stamped, but $(basename "$artifact") is missing)"
+        rm -f "$stamp"
     fi
     log "START $bench/$stage"
     local t0=$SECONDS

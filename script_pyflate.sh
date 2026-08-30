@@ -19,6 +19,9 @@ setup() {
 
 baseline() {
     # Stock benchmark, release python3, full rigor — the "before" evidence.
+    # pyperformance aborts if the output file exists; clear any stale one so the
+    # stage is re-runnable.
+    rm -f "$RES/baseline_$BENCH.json"
     python3 -m pyperformance run --rigorous -b "$BENCH" -o "$RES/baseline_$BENCH.json"
     python3 -m pyperf stats "$RES/baseline_$BENCH.json" | tee "$RES/baseline_${BENCH}_stats.txt"
 }
@@ -44,6 +47,7 @@ profile() {
 
 optimized() {
     # Our modified benchmark from benchmarks/ via custom manifest (same benchmark name).
+    rm -f "$RES/optimized_$BENCH.json"
     python3 -m pyperformance run --rigorous --manifest "$ROOT/benchmarks/MANIFEST" \
         -b "$BENCH" -o "$RES/optimized_$BENCH.json"
 }
