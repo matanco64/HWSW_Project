@@ -298,6 +298,14 @@ Prompt: "and if matan only develops the software, don't our flow disturb him?"
 2026-08-26T20:44:29Z — Claude Code session (auto-logged)
 Prompt: "we do need an explicit signal for loading the hw skills - maybe even through the askuserquestion tool?"
 
+2026-08-28 — hw-advisor (process change, grape_pipeline/prd)
+Lesson: grill-with-docs is user-only; golden must wrap the benchmark; calibrate tolerances before writing them; env.sh is cwd-relative; friction hook logged read-only commands.
+Files changed: .claude/skills/hw-prd/SKILL.md, hw-mas/SKILL.md, hw-uarch/SKILL.md, hw/FLOW.md, hw/README.md, tools/hw/friction_hook.py (see hw/docs/lessons.md 2026-08-28).
+
+2026-08-28 — hw-advisor (process change, huffman_engine/prd)
+Lesson: wrap the upstream benchmark copy (the benchmark file is now Matan's optimised code); cross-check goldens against C libraries; count bits yourself (stock tellbits() off by 16); read dev/<bench>/FINDINGS.md before KPIs; every skill command block starts with cd to the repo root.
+Files changed: .claude/skills/hw-prd/SKILL.md, hw-flow/SKILL.md, and the command blocks of all hw-* skills (see hw/docs/lessons.md 2026-08-28 huffman_engine/prd).
+
 2026-08-28T09:20:54Z — Claude Code session (auto-logged)
 Prompt: "Q1 - a, but let's keep in mind that this might change - we did not decide the SW interface yet.
 Q2 - b sounds good, let's get a min of 50 MHZ and target to 100 MHZ
@@ -377,10 +385,6 @@ Prompt: "approve"
 
 2026-08-28T13:16:56Z — Claude Code session (auto-logged)
 Prompt: "apply all the advisor diffs, then commit without pushing"
-
-2026-08-28 — hw-advisor (process change, grape_pipeline/prd)
-Lesson: grill-with-docs is user-only; golden must wrap the benchmark; calibrate tolerances before writing them; env.sh is cwd-relative; friction hook logged read-only commands.
-Files changed: .claude/skills/hw-prd/SKILL.md, hw-mas/SKILL.md, hw-uarch/SKILL.md, hw/FLOW.md, hw/README.md, tools/hw/friction_hook.py (see hw/docs/lessons.md 2026-08-28).
 
 2026-08-28T13:19:57Z — Claude Code session (auto-logged)
 Prompt: "do we track progress? we have a little sub-task before we continue. let's get to a stopping point from which we can fast ramp-up after we finish our sub-task."
@@ -541,10 +545,6 @@ Prompt: "approve"
 2026-08-28T20:57:09Z — Claude Code session (auto-logged)
 Prompt: "apply the three advisor skill diffs above"
 
-2026-08-28 — hw-advisor (process change, huffman_engine/prd)
-Lesson: wrap the upstream benchmark copy (the benchmark file is now Matan's optimised code); cross-check goldens against C libraries; count bits yourself (stock tellbits() off by 16); read dev/<bench>/FINDINGS.md before KPIs; every skill command block starts with cd to the repo root.
-Files changed: .claude/skills/hw-prd/SKILL.md, hw-flow/SKILL.md, and the command blocks of all hw-* skills (see hw/docs/lessons.md 2026-08-28 huffman_engine/prd).
-
 2026-08-28T21:12:17Z — Claude Code session (auto-logged)
 Prompt: "commit"
 
@@ -627,6 +627,10 @@ Input side: 148,271 cycles (1 per Huffman symbol). Output cycles = 89,837 (MTF, 
 **W = 8 bytes/cycle is the first width at which the expander is no longer the bottleneck** (144,533 &lt;= 148,27
 ... [truncated, 5673 chars total]"
 
+2026-08-30 — hw-advisor (process change, mtf_cam/prd)
+Lesson: quote the reference's index expression verbatim; normalise captured values at capture; cycle claims come from a two-sided simulation, not a formula.
+Files changed: .claude/skills/hw-prd/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/prd).
+
 2026-08-30T07:24:44Z — Claude Code session (auto-logged)
 Prompt: "Q1 - confirm
 Q2 - confirm
@@ -682,6 +686,13 @@ Everything else checks out:
 2026-08-30T07:42:17Z — Claude Code session (auto-logged)
 Prompt: "commit and let's continue"
 
-2026-08-30 — hw-advisor (process change, mtf_cam/prd)
-Lesson: quote the reference's index expression verbatim; normalise captured values at capture; cycle claims come from a two-sided simulation, not a formula.
-Files changed: .claude/skills/hw-prd/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/prd).
+2026-08-30T21:30:00Z — Claude Code session (manual; the UserPromptSubmit hook did not fire, the session was started one directory above the repo root)
+Prompt: "In @hwsw-project\rust\nbody\src\lib.rs I think we can do a bit of a refactor, the idea is that it will be very perormant, but I want to improve readiability, If I am not mistaken there isn't a Body struct since we want SoA optimization, but maybe 3 coordinates can be consolidated under the same struct x,y,z so it will be readable later, also lets extract some of the code to functions"
+Result: rewrote rust/nbody/src/lib.rs around a repr(C) Vec3 (x,y,z) with componentwise inline operators, so pos/vel became Vec<Vec3> instead of a flat Vec<f64> with 3*i+2 indexing; SoA across pos/vel/mass kept, still no Body struct. Extracted kick(), drift(), potential_energy(), add_kinetic_energy(), pair_schedule(), vec3_from_slice(), flatten(). Splitting energy() into potential + kinetic reassociated the sum and had to be folded back into one accumulator to stay bit-identical to report_energy().
+
+2026-08-30T21:38:00Z — Claude Code session (manual; same session)
+Prompt: "you can connect to the course machine to compile it hwsw-vm"
+Result: built on the VM over ssh (cargo 1.98, clean, no warnings), wheel via maturin for cp310, and ran dev/nbody/rs_check.py: state and energy bit-identical to stock Python after 20,000 steps, 24.1x kernel (9.48 ms vs 228.49 ms). Also built the pre-refactor lib.rs into a second venv and interleaved the two: 9.45-9.54 ms refactored vs 9.60-9.64 ms flat, so the Vec3 version is ~1.5% faster (one bounds check per body instead of three). Numbers written into rust/README.md, which had been quoting WSL timings as if they were the VM's.
+
+2026-08-30T21:45:00Z — Claude Code session (manual; same session)
+Prompt: "commit it as improvements and add my ideas to promts.txt"

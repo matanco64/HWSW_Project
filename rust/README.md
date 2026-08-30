@@ -21,13 +21,21 @@ Two rules hold for every crate here:
 `Vec<Vec3>` positions and velocities plus the fixed pair schedule. One FFI
 crossing per call; three per benchmark iteration.
 
-Measured on the VM's CPython 3.10 (`dev/nbody/rs_check.py`):
+Measured with `dev/nbody/rs_check.py`, 20,000 steps, min of 7 interleaved
+rounds, on the course VM's CPython 3.10.12 (the WSL dev box is ~2.4x faster in
+absolute terms — 3.1 ms vs 75.6 ms — but lands on the same ratio):
 
 | | |
 |---|---|
-| kernel speedup | **~25x** (3.1 ms vs 75.6 ms for 20,000 steps) |
+| kernel speedup | **24.1x** (9.48 ms vs 228.49 ms for 20,000 steps) |
 | output | **bit-for-bit identical** — all 35 state floats and `report_energy()` compare `==` after 20,000 steps, `max abs delta = 0.0` |
-| FFI crossing | ~60 ns, i.e. 2e-5 of one `advance()` call |
+| FFI crossing | ~224 ns, i.e. 2e-5 of one `advance()` call |
+
+The `Vec3` rewrite of the kernel (grouping x/y/z out of the flat `Vec<f64>`)
+was checked against the flat-array version it replaced by building both and
+interleaving the runs: 9.45-9.54 ms vs 9.60-9.64 ms, i.e. ~1.5% *faster* --
+`Vec<Vec3>` is the same bytes with one bounds check per body instead of three
+-- and bit-identical to Python in both.
 
 Build: `maturin build --release -i <python3.10>` produces a
 `cp310-cp310-manylinux_2_34_x86_64` wheel. That tag needs glibc >= 2.34 and the
