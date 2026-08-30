@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# HWSW final project — nbody: setup, baseline, profiling + flame graph, optimized run, comparison.
+# HWSW final project — mdp: setup, baseline, profiling + flame graph, optimized run, comparison.
 # Run INSIDE the course QEMU VM (Ubuntu 22.04, python3.10). Stages are selectable:
-#   ./script_nbody.sh setup|baseline|profile|optimized|compare|all
+#   ./script_mdp.sh setup|baseline|profile|optimized|compare|all
 set -euo pipefail
-BENCH=nbody
+BENCH=mdp
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 RES="$ROOT/results"
 BM_STOCK="/usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_$BENCH"
@@ -30,8 +30,9 @@ profile() {
     # throttles perf record to 1 Hz — restore a usable rate before profiling.
     sudo sysctl -w kernel.perf_event_max_sample_rate=100000 \
                   kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
+    # mdp is slow (~2.5 s/loop release, ~3x that under python3-dbg): -l1 -n2 ~= 15 s.
     perf record -F 999 -g -e cpu-clock -o "$RES/$BENCH.perf.data" -- \
-        python3-dbg "$ROOT/benchmarks/bm_$BENCH/run_benchmark.py" --worker -l2 -w0 -n6
+        python3-dbg "$ROOT/benchmarks/bm_$BENCH/run_benchmark.py" --worker -l1 -w0 -n2
     perf report --stdio -i "$RES/$BENCH.perf.data" > "$RES/perf_report_$BENCH.txt"
     perf script -i "$RES/$BENCH.perf.data" \
         | "$HOME/FlameGraph/stackcollapse-perf.pl" \
