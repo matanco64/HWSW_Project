@@ -1,0 +1,29 @@
+Total duration: 13 min 36.0 sec
+Start date: 2026-08-30 16:57:04
+End date: 2026-08-30 17:10:46
+Raw value minimum: 4.91 sec
+Raw value maximum: 5.08 sec
+
+Number of calibration run: 1
+Number of run with values: 40
+Total number of run: 41
+
+Number of warmup per run: 1
+Number of value per run: 3
+Loop iterations per value: 1
+Total number of values: 120
+
+Minimum:         4.91 sec
+Median +- MAD:   4.97 sec +- 0.02 sec
+Mean +- std dev: 4.98 sec +- 0.04 sec
+Maximum:         5.08 sec
+
+  0th percentile: 4.91 sec (-1% of the mean) -- minimum
+  5th percentile: 4.93 sec (-1% of the mean)
+ 25th percentile: 4.95 sec (-1% of the mean) -- Q1
+ 50th percentile: 4.97 sec (-0% of the mean) -- median
+ 75th percentile: 5.00 sec (+0% of the mean) -- Q3
+ 95th percentile: 5.05 sec (+1% of the mean)
+100th percentile: 5.08 sec (+2% of the mean) -- maximum
+
+Number of outlier (out of 4.88 sec..5.07 sec): 3

@@ -1,0 +1,30 @@
+...........
+mdp: Mean +- std dev: 909 ms +- 7 ms
+
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_mdp/run_benchmark.py --fast':
+
+       74554893963      cycles:u                                                    
+      204938881225      instructions:u            #    2.75  insn per cycle         
+
+      31.667395547 seconds time elapsed
+
+      31.429228000 seconds user
+       0.225669000 seconds sys
+
+
+...........
+mdp: Mean +- std dev: 910 ms +- 7 ms
+
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_mdp/run_benchmark.py --fast':
+
+         242887618      cache-references                                            
+           6037021      cache-misses              #    2.486 % of all cache refs    
+       37994950647      branches                                                    
+         224843750      branch-misses             #    0.59% of all branches        
+
+      31.666228410 seconds time elapsed
+
+      31.358986000 seconds user
+       0.294662000 seconds sys
+
+

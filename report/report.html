@@ -386,11 +386,11 @@ benchmarks.</b>
     <th class="num">Speedup</th><th class="num">vs 7% bar</th><th>Correctness</th></tr>
 <tr><td><span class="mono">pyflate</span></td>
     <td class="num">1.13 s &plusmn; 0.02 s</td><td class="num">288 ms &plusmn; 3 ms</td>
-    <td class="num win">3.93&times;</td><td class="num">38&times;</td>
+    <td class="num win">3.93&times;</td><td class="num">10.6&times;</td>
     <td>MD5 + byte-equal to <span class="mono">bz2</span></td></tr>
 <tr><td><span class="mono">nbody</span></td>
-    <td class="num">231 ms &plusmn; 3 ms</td><td class="num">PENDING_NBODY_OPT</td>
-    <td class="num win">PENDING_NBODY_SPEEDUP</td><td class="num">PENDING_NBODY_BAR</td>
+    <td class="num">231 ms &plusmn; 3 ms</td><td class="num">141 ms &plusmn; 4 ms</td>
+    <td class="num win">1.64&times;</td><td class="num">5.6&times;</td>
     <td>bit-identical state + energy</td></tr>
 </table>
 <p>
@@ -563,7 +563,7 @@ the ablation at 10&nbsp;ms.
 </p>
 <p>
 <b>Results.</b> <span class="mono">pyflate</span> <b>3.93&times;</b> and <span class="mono">nbody</span>
-<b>PENDING_NBODY_SPEEDUP</b> on the course VM, both significant under
+<b>1.64&times;</b> on the course VM, both significant under
 <span class="mono">pyperf</span>'s t-test, against a 1.07&times; requirement. Both are backed by
 correctness proofs stronger than the benchmarks demand: <span class="mono">pyflate</span> is
 byte-identical to <span class="mono">bz2</span>'s output, and <span class="mono">nbody</span> is

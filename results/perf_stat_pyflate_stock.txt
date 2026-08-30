@@ -1,0 +1,36 @@
+* Not enough samples to get a stable result (95% certainly of less than 1% variation)
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python3 -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+
+pyflate: Mean +- std dev: 1.13 sec +- 0.01 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast':
+
+       91080463885      cycles:u                                                    
+      241215794994      instructions:u            #    2.65  insn per cycle         
+
+      39.061972871 seconds time elapsed
+
+      38.403833000 seconds user
+       0.656384000 seconds sys
+
+
+...........
+pyflate: Mean +- std dev: 1.13 sec +- 0.01 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast':
+
+         222095937      cache-references                                            
+          16885040      cache-misses              #    7.603 % of all cache refs    
+       47986190578      branches                                                    
+         164731461      branch-misses             #    0.34% of all branches        
+
+      39.072947817 seconds time elapsed
+
+      38.358070000 seconds user
+       0.714310000 seconds sys
+
+

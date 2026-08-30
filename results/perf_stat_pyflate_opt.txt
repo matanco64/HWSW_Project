@@ -1,0 +1,30 @@
+...........
+pyflate: Mean +- std dev: 291 ms +- 2 ms
+
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_pyflate/run_benchmark.py --fast':
+
+       25643083487      cycles:u                                                    
+       69121958939      instructions:u            #    2.70  insn per cycle         
+
+      11.235358359 seconds time elapsed
+
+      10.859723000 seconds user
+       0.364333000 seconds sys
+
+
+...........
+pyflate: Mean +- std dev: 291 ms +- 3 ms
+
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_pyflate/run_benchmark.py --fast':
+
+         134248056      cache-references                                            
+           5077175      cache-misses              #    3.782 % of all cache refs    
+       12636968760      branches                                                    
+          55416313      branch-misses             #    0.44% of all branches        
+
+      11.273115276 seconds time elapsed
+
+      10.869396000 seconds user
+       0.395453000 seconds sys
+
+
