@@ -30,33 +30,39 @@
           }
         },
         "mas": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-08-30T08:02:05Z",
           "finished": "",
           "gate": {
             "I/O table with widths + clock": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §2: 17 signal rows, all with width and clock (checked by script)",
+              "at": "2026-08-30T08:17:43Z"
             },
             "register map (offset, name, bits, access, reset)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §4: 24 rows (ADR-0005 header + DT/NSTEPS/NPAIRS/BODY/PAIR), all five columns filled (checked by script)",
+              "at": "2026-08-30T08:17:43Z"
             },
             "DMA/stream protocol": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §5: MMIO only, ADR-0001 (accepted), doorbell response rule ADR-0005",
+              "at": "2026-08-30T08:17:30Z"
             },
             "driver API sketch": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §6: AccelDriver base + GrapeDriver incl. advance(dt, n, bodies, pairs)",
+              "at": "2026-08-30T08:17:30Z"
             },
             "block diagram": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/block_diagram.svg (tools/hw/blockdiag.py from block_diagram.json; .mmd alongside), well-formed XML",
+              "at": "2026-08-30T08:17:30Z"
             },
             "hw-review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_mas.md: 21 findings (2 passes), 0 must open",
+              "at": "2026-08-30T08:22:44Z"
             }
           }
         },
@@ -780,5 +786,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-30T07:51:36Z"
+  "updated": "2026-08-30T08:22:44Z"
 }

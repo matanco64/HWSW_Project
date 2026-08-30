@@ -696,3 +696,65 @@ Result: built on the VM over ssh (cargo 1.98, clean, no warnings), wheel via mat
 
 2026-08-30T21:45:00Z — Claude Code session (manual; same session)
 Prompt: "commit it as improvements and add my ideas to promts.txt"
+2026-08-30 — hw-advisor (process change, mtf_cam/prd)
+Lesson: quote the reference's index expression verbatim; normalise captured values at capture; cycle claims come from a two-sided simulation, not a formula.
+Files changed: .claude/skills/hw-prd/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/prd).
+
+2026-08-30T08:03:37Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bg1sisizp</task-id>
+<tool-use-id>toolu_01FbT8WdEmPQ3QkXXEWTEeLS</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/bg1sisizp.output</output-file>
+<status>failed</status>
+<summary>Background command "Test whether npx mermaid-cli can render SVG here" failed with exit code 2</summary>
+</task-notification>"
+
+2026-08-30T08:15:08Z — Claude Code session (auto-logged)
+Prompt: "Q1 - a, keep b as an option for discussion/improvement
+Q2 - accept
+Q3 - accept
+Q4 - accept
+Q5 - confirm
+Q6 - accept
+Q7 - let's take d and b as a backup
+Q8 - confirm"
+
+2026-08-30T08:19:25Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>abf30dfa446dbd8fe</task-id>
+<tool-use-id>toolu_01Lg2n1pu8jW2vXpru1W9hfg</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/abf30dfa446dbd8fe.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review grape_pipeline MAS" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | §4 intro, §5 (BRESP rule), §8 vs `hw/common/rtl/axi_lite_regs.sv` | The assumed cell cannot implement the MAS: (a) a SW write always lands in `regs[]` before `hw_wr_en_i` overrides, and the module never sees `w_data` separately, so W1C on STATUS, "reads 0" WP on CTRL, and "writes while BUSY ignored" all leave a 1-cycle visible corruption or lose the hardware bits; (b) BRESP is issued the cycle after `do_write`, so "doorbell BRESP only after STATUS shows BUSY/ERR_PARAM" is impossible; (c) NUM_REGS is contiguous, so the holes (0x018–0x03C, 0x04C–0x0FC, 0x110–0x1FC, 0x340–0x3FC) return OKAY, not SLVERR, and NUM_REGS would be 266 words | Add a "Cell delta" subsection: either list the required changes to the shared cell (per-register `hw_owned` mask, expose `wr_data`/`wr_strobe` before commit, `resp_hold_i` on the B channel, sparse decode map) or state that grape wraps the cell with its own decoder/strobe fan-out and the cell is used only for the AXI handshake |
+| R2 | must | §4 BODY row ("reads return the committed state"), §8 | While idle, does a BODY read return what software just wrote (PRD-F7 round-trip requires this) or the last committed state (which differs until the next doorbell)? PRD-F10 only constrains reads *while BUSY*; MAS makes it unconditional | Specify: idle → reads return the pending (writable) values; BUSY → committed snapshot; after DONE/ABORTED the pending window is overwritten with the committed state (so the read-back sequence in §5.3 is correct) |
+| R3 | must | §6 `advance(dt, n, bodies, pairs)`, `load_pairs(list[tuple[int,int]])` | Benchmark `PAIRS = combinations(SYSTEM)` is a list of *(body, body)* tuples (each body a `[pos, vel, mass]` list), and `golden/emulation.advance(dt, n, bodies, pairs)` takes the same; `load_pairs` takes index pairs, so `advance` is not drop-in and the i/j ↔ first/second mapping is unstated | Have `advance()` map body objects to indices by identity (`[bodies.index(b) for b in pair]` or `id()` dict), define PAIR[k] i = first element (b1), j = second (b2) matching the F2 `b1m/b2m` naming, and state that mass is not written back |
+| R4 | must | §4 PAIR row, STATUS bit 9 | PAIR bits 31:8 are reserved/ignored, so an index ≥ 16 written by a buggy driver is silently truncated to 4 bits and may pass the F17 check | Either make PAIR index fields wide enough to detect any 32-bit value (e.g. 15:8 / 7:0) with ERR_PARAM on any value ≥ N_BODIES, or have the driver validate before writing and say so |
+| R5 | should | §4 intro, §8 | Bus response for rejected/ignored writes is unspecified: config write while BUSY (ERR_BUSY), writes to RO registers (ID, VERSION, CYCLES, STEPS_DONE, IRQ_STATUS), writes to reserved +0x38 in the BODY window ("not listed → SLVERR" vs "reserved") | State: all in-map writes return OKAY (ignored writes included); RO regs write-ignored OKAY; +0x38 is a listed reserved word (OKAY, RAZ/WI) |
+| R6 | should | §4 "CYCLES is read LO then HI while not BUSY", §8 | Reads of CYCLES while BUSY are allowed ("counters are live") but 64-bit atomicity of a live LO/HI pair is undefined; ADR-0005 requires low-then-high only | Either: while BUSY CYCLES_LO/HI read the live count with no atomicity guarantee (software must re-read), or CYCLES_LO read latches HI into a shadow (atomic); pick one and add it to the test list |
+| R7 | should | §2 `irq`,
+... [truncated, 7718 chars total]"
+
+2026-08-30T08:22:29Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ab8b72a48dff8938d</task-id>
+<tool-use-id>toolu_016BBL5WCWSy2czVDzwtdPxA</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/ab8b72a48dff8938d.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review grape MAS after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | mas.md §6 `AccelDriver.clear(bits=0xFFFE)` vs §4 STATUS bit 16 / IRQ_EN `16:1` (R15 resolution) | Default W1C mask 0xFFFE covers bits 1–15 only; the FP_DENORMAL bit 16 reserved by R15 (and included in IRQ_EN/IRQ_STATUS 16:1) is never cleared by `clear()`, so once uArch enables it a latched irq cannot be dropped through the documented driver contract. R15 is therefore only half-resolved. | Change the default to `0x1FFFE` (or define it as `IRQ_EN`'s full mask) and state "all sticky bits 16:1". |
+| S2 | must | mas.md §4 intro "configuration register (0x100–0x4FF)" vs register rows 0x110–0x1FC / 0x340–0x3FC (RAZ/WI, OKAY) and 0x428–0xFFC (SLVERR) | The while-BUSY rule spans a range that contains both reserved words and unmapped words. A write to e.g. 0x150 or 0x430 while BUSY is simultaneously "ignored with ERR_BUSY, OKAY" (intro) and "RAZ/WI without flag" / "SLVERR" (table). The decoder and `test_driver` (PRD-F9) cannot implement both. | Rephrase: "a write to any *listed* RW configuration register (DT, NSTEPS, NPAIRS, BODY[i] fields, PAIR[k]) while BUSY …"; reserved/unmapped words keep their table behaviour regardless of BUSY. |
+| S3 | must | mas.md §4 table, header region 0x018–0x03C (between IRQ_STATUS and CYCLES_LO) | Not listed at all, so by the §4 rule these in-window header words respond SLVERR, while the neighbouring gap 0x04C–0x0FC is RAZ/WI OKAY and ADR-0005 reserves SLVERR for "offsets outside the window". Table is not contiguous and contradicts the ADR for the shared header the common register agent is built against. | Add a row `0x018–0x03C | — | reserved | RAZ/WI, OKAY` (and, if 0x428–0xFFC is meant to stay SLVERR, note in ADR-0005 that unmapped in-window words may SLVERR). |
+
+All 18 pass-1 resolutions (R1–R18) are present in the artifacts as claimed; R15 is the only one left incomplete (S1). No new contradiction found between §4 intro / §4.1 / §5 / §8, the BODY window arithmetic (0x200–0x33F used, 0x340–0x3FC reserved, PAIR 0x400–0x424, SLVERR from 0x428), the ADR-0005 header, or PRD F7/F10/F11/F12/F14/F17 beyond the items above.</result>
+<usage><subagent_tokens>43958</subagent_tokens><tool_uses>5</tool_uses><duration_ms>87709</duration_ms></usage>
+</task-notification>"
+
+2026-08-30T11:22:29Z — Claude Code session (auto-logged)
+Prompt: "commmit, then go"

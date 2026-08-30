@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1018" height="352" viewBox="0 0 1018 352" font-family="Helvetica, Arial, sans-serif" font-size="12">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
+<rect width="1018" height="352" fill="#ffffff"/>
+<text x="24" y="20" font-size="15" font-weight="bold">grape_pipeline — architecture (MAS)</text>
+<rect x="16" y="24" width="206" height="214" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="24" y="44" font-weight="bold" fill="#3b4a5e">Host / bus</text>
+<rect x="24" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="119.0" y="84" text-anchor="middle" font-weight="bold">CPU + driver</text>
+<text x="119.0" y="104" text-anchor="middle" fill="#555" font-size="11">GrapeDriver.advance()</text>
+<rect x="24" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="119.0" y="174" text-anchor="middle" font-weight="bold">AXI4-Lite handshake</text>
+<text x="119.0" y="194" text-anchor="middle" fill="#555" font-size="11">axi_lite_if + decoder, 4 KB</text>
+<rect x="276" y="24" width="206" height="304" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="284" y="44" font-weight="bold" fill="#3b4a5e">Control</text>
+<rect x="284" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="379.0" y="84" text-anchor="middle" font-weight="bold">Register file</text>
+<text x="379.0" y="104" text-anchor="middle" fill="#555" font-size="11">pending/latched cfg, STATUS, IRQ</text>
+<rect x="284" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="379.0" y="174" text-anchor="middle" font-weight="bold">Step FSM</text>
+<text x="379.0" y="194" text-anchor="middle" fill="#555" font-size="11">doorbell, abort, NSTEPS loop</text>
+<rect x="284" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="379.0" y="264" text-anchor="middle" font-weight="bold">Counters</text>
+<text x="379.0" y="284" text-anchor="middle" fill="#555" font-size="11">CYCLES 64b, STEPS_DONE 32b</text>
+<rect x="536" y="24" width="206" height="214" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="544" y="44" font-weight="bold" fill="#3b4a5e">State</text>
+<rect x="544" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="639.0" y="84" text-anchor="middle" font-weight="bold">Body register file</text>
+<text x="639.0" y="104" text-anchor="middle" fill="#555" font-size="11">working + committed, 5 × 7 FP64</text>
+<rect x="544" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="639.0" y="174" text-anchor="middle" font-weight="bold">Pair list</text>
+<text x="639.0" y="194" text-anchor="middle" fill="#555" font-size="11">≤10 × (i, j)</text>
+<rect x="796" y="24" width="206" height="304" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="804" y="44" font-weight="bold" fill="#3b4a5e">Datapath (FP64)</text>
+<rect x="804" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="899.0" y="84" text-anchor="middle" font-weight="bold">Pair pipeline</text>
+<text x="899.0" y="104" text-anchor="middle" fill="#555" font-size="11">sub → r² → sqrt → rcp → ×dt → ×m</text>
+<rect x="804" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="899.0" y="174" text-anchor="middle" font-weight="bold">Velocity accumulate</text>
+<text x="899.0" y="194" text-anchor="middle" fill="#555" font-size="11">6 FMA, ordered by pair</text>
+<rect x="804" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="899.0" y="264" text-anchor="middle" font-weight="bold">Position integrator</text>
+<text x="899.0" y="284" text-anchor="middle" fill="#555" font-size="11">r += dt·v, 5 bodies</text>
+<line x1="119.0" y1="122" x2="119.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="119.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">MMIO</tspan>MMIO</text>
+<line x1="214" y1="180.0" x2="284" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="249.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">wr/rd strobes</tspan>wr/rd strobes</text>
+<line x1="379.0" y1="122" x2="379.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="379.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">doorbell / abort</tspan>doorbell / abort</text>
+<line x1="379.0" y1="212" x2="379.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="214" y1="180.0" x2="544" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="379.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">state load / read-back</tspan>state load / read-back</text>
+<line x1="214" y1="180.0" x2="544" y2="180.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="379.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">pair list</tspan>pair list</text>
+<line x1="734" y1="90.0" x2="804" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="769.0" y="85.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">x_i x_j m_i m_j</tspan>x_i x_j m_i m_j</text>
+<line x1="734" y1="180.0" x2="804" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="769.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">(i, j) per cycle</tspan>(i, j) per cycle</text>
+<line x1="899.0" y1="122" x2="899.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="899.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">dx·b1m, dx·b2m</tspan>dx·b1m, dx·b2m</text>
+<line x1="899.0" y1="212" x2="899.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="899.0" y="220.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">v (5 bodies)</tspan>v (5 bodies)</text>
+<line x1="804" y1="282.0" x2="734" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="769.0" y="187.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">commit r, v</tspan>commit r, v</text>
+<line x1="474" y1="180.0" x2="804" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="639.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">start step</tspan>start step</text>
+<line x1="284" y1="102.0" x2="214" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="249.0" y="97.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">STATUS, irq</tspan>STATUS, irq</text>
+</svg>

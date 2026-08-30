@@ -65,3 +65,16 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   honest number moved from 1.072 to 1.370 (serialised) / 1.063 (with an 8-item FIFO). Fix:
   `hw-prd` step 3 says "a cycle claim comes from a two-sided *simulation* with named resources
   (queues, ports, widths) and a printed sweep, never from a closed-form estimate".
+
+## 2026-08-30 — grape_pipeline/mas
+
+- **A scaffold cell is not a contract** — the MAS assumed `hw/common/rtl/axi_lite_regs.sv` could
+  carry W1C, write-pulse, ignore-while-BUSY and delayed BRESP; the reviewer read the RTL and it
+  cannot. Fix: `hw-mas` step 3 says "read the shared RTL cells the spec relies on and write a
+  'delta to the shared cell' subsection (or `n/a`) before the register map is final".
+- **No headless Chromium here** — `mmdc` cannot launch in this WSL; `tools/hw/blockdiag.py`
+  renders `.mmd` + `.svg` from one JSON spec with no dependencies. Keep: all three modules use
+  it so the report's diagrams share one style; `mermaid.ink` via curl stays the backup.
+- **Shared decisions first, then the module** — Q1–Q2 (bus width, register conventions) became
+  ADR-0001 (accepted) and ADR-0005 before any grape-specific offset was written; the next two MAS
+  rounds inherit them and should take one round each.
