@@ -1,21 +1,15 @@
-* Not enough samples to get a stable result (95% certainly of less than 1% variation)
-
-Try to rerun the benchmark with more runs, values and/or loops.
-Run 'python3 -m pyperf system tune' command to reduce the system jitter.
-Use pyperf stats, pyperf dump and pyperf hist to analyze results.
-Use --quiet option to hide these warnings.
-
-nbody: Mean +- std dev: 232 ms +- 3 ms
+...........
+nbody: Mean +- std dev: 230 ms +- 2 ms
 
  Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
 
-       21206927504      cycles:u                                                    
-       60202389488      instructions:u            #    2.84  insn per cycle         
+       21045469209      cycles:u                                                    
+       60205275915      instructions:u            #    2.86  insn per cycle         
 
-       9.181988426 seconds time elapsed
+       9.099075719 seconds time elapsed
 
-       8.966887000 seconds user
-       0.192787000 seconds sys
+       8.919277000 seconds user
+       0.155226000 seconds sys
 
 
 Try to rerun the benchmark with more runs, values and/or loops.
@@ -23,18 +17,18 @@ Run 'python3 -m pyperf system tune' command to reduce the system jitter.
 Use pyperf stats, pyperf dump and pyperf hist to analyze results.
 Use --quiet option to hide these warnings.
 
-nbody: Mean +- std dev: 234 ms +- 6 ms
+nbody: Mean +- std dev: 231 ms +- 3 ms
 
  Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --fast':
 
-          74443966      cache-references                                            
-           2557265      cache-misses              #    3.435 % of all cache refs    
-       10347197547      branches                                                    
-          59060232      branch-misses             #    0.57% of all branches        
+          74289288      cache-references                                            
+           2082010      cache-misses              #    2.803 % of all cache refs    
+       10347693633      branches                                                    
+          58652893      branch-misses             #    0.57% of all branches        
 
-       9.197836457 seconds time elapsed
+       9.139258145 seconds time elapsed
 
-       9.003352000 seconds user
-       0.175277000 seconds sys
+       8.922669000 seconds user
+       0.193145000 seconds sys
 
 
