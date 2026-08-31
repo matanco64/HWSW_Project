@@ -23,5 +23,3 @@ hw/.advisor/
 hw/**/coverage_annotated/
 hw/**/sim_build_icarus/
 hw/common/synth/area.txt
-# rasterized report figures are generated from results/*.svg by report/make_figs.sh
-report/fig/*.png
