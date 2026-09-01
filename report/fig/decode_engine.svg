@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 168" style="max-width:520px" role="img"
+     aria-label="Block diagram of the Huffman decode engine and MTF CAM">
+  <defs><marker id="ar2" markerWidth="7" markerHeight="7" refX="6" refY="2.4" orient="auto">
+    <path d="M0,0 L6,2.4 L0,4.8 z" fill="#16181d"/></marker></defs>
+  <g font-family="sans-serif" font-size="9.5" fill="#16181d">
+    <rect x="8" y="60" width="72" height="34" fill="#eef1f5" stroke="#7d8796"/>
+    <text x="44" y="74" text-anchor="middle">DMA</text><text x="44" y="87" text-anchor="middle">reader</text>
+    <rect x="100" y="60" width="86" height="34" fill="#eef1f5" stroke="#7d8796"/>
+    <text x="143" y="74" text-anchor="middle">64-bit barrel</text><text x="143" y="87" text-anchor="middle">shifter / align</text>
+    <rect x="206" y="60" width="96" height="34" fill="#dfe7f0" stroke="#4a6fa5"/>
+    <text x="254" y="74" text-anchor="middle">comparator</text><text x="254" y="87" text-anchor="middle">cascade</text>
+    <rect x="322" y="60" width="80" height="34" fill="#eef1f5" stroke="#7d8796"/>
+    <text x="362" y="74" text-anchor="middle">symbol</text><text x="362" y="87" text-anchor="middle">RAM</text>
+    <rect x="422" y="60" width="82" height="34" fill="#dfe7f0" stroke="#4a6fa5"/>
+    <text x="463" y="74" text-anchor="middle">MTF CAM</text><text x="463" y="87" text-anchor="middle">256&#215;8</text>
+    <rect x="206" y="8" width="96" height="30" fill="#f5f7fa" stroke="#7d8796"/>
+    <text x="254" y="20" text-anchor="middle">limit / base /</text><text x="254" y="32" text-anchor="middle">perm regs</text>
+    <rect x="100" y="120" width="202" height="30" fill="#f5f7fa" stroke="#7d8796"/>
+    <text x="201" y="132" text-anchor="middle">FSM: table swap every 50 symbols</text>
+    <text x="201" y="144" text-anchor="middle">from the selector list</text>
+    <rect x="422" y="120" width="82" height="30" fill="#f5f7fa" stroke="#7d8796"/>
+    <text x="463" y="139" text-anchor="middle">DONE / IRQ</text>
+  </g>
+  <g stroke="#16181d" stroke-width="1.1" fill="none" marker-end="url(#ar2)">
+    <path d="M80,77 L98,77"/><path d="M186,77 L204,77"/><path d="M302,77 L320,77"/>
+    <path d="M402,77 L420,77"/><path d="M254,38 L254,58"/>
+    <path d="M201,120 L201,96"/><path d="M463,94 L463,118"/>
+  </g>
+</svg>
