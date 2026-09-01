@@ -1,43 +1,37 @@
 #!/usr/bin/env bash
-# Render the report HTML sources to PDF with headless Chrome.
+# Build the per-benchmark reports with Typst.
 #
-#   ./build.sh              # build every report_*.html
-#   ./build.sh report_nbody # build just one (with or without .html)
+#   ./build.sh                # build every report_*.typ
+#   ./build.sh report_nbody   # build one (with or without .typ)
 #
-# Two quirks this works around:
-#  - Chrome cannot write into the OneDrive-synced project folder ("Access is
-#    denied"), so it renders to a temp file which we then copy into place.
-#  - Headless Chrome aborts with "Missing headless user data directory" unless
-#    --user-data-dir is given explicitly.
+# Typst is run with --root at the repo root so the sources can reference
+# /results/*.svg -- the flame graphs stay in results/ as the single source of
+# truth rather than being copied into report/fig/.
+#
+# Typst embeds the flamegraph.pl and py-spy SVGs directly; no rasterization is
+# needed. (Verified by rendering to PNG and looking at it -- an SVG that Typst
+# cannot draw still compiles without error, so "it compiled" proves nothing.)
+#
+# Needs a typst binary. On the WSL dev box it lives at /root/bin/typst; override
+# with TYPST=/path/to/typst. Install: https://github.com/typst/typst/releases
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-CHROME="${CHROME:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
-OUTDIR="${OUTDIR:-$HERE/..}"   # PDFs land at the repo root, next to script_*.sh
+ROOT="$(cd "$HERE/.." && pwd)"
+TYPST="${TYPST:-/root/bin/typst}"
+
+command -v "$TYPST" >/dev/null 2>&1 || [ -x "$TYPST" ] || {
+    echo "typst not found at '$TYPST' (set TYPST=...)" >&2; exit 1; }
 
 build_one() {
-    local base="${1%.html}"
-    local src="$HERE/$base.html"
+    local base="${1%.typ}"
+    local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
-
-    # Chrome must write somewhere outside OneDrive; mktemp -d gives us that
-    # without depending on $USER, which Git Bash does not always set.
-    local stage; stage="$(mktemp -d)"
-    local tmp="$stage/${base}.pdf"
-    local profile; profile="$(mktemp -d)"
-    local url="file:///$(cygpath -m "$src" 2>/dev/null || echo "$src")"
-
-    "$CHROME" --headless --disable-gpu --no-pdf-header-footer \
-        --user-data-dir="$(cygpath -w "$profile" 2>/dev/null || echo "$profile")" \
-        --print-to-pdf="$(cygpath -w "$tmp" 2>/dev/null || echo "$tmp")" "$url" 2>/dev/null
-    rm -rf "$profile"
-
-    cp -f "$tmp" "$OUTDIR/$base.pdf"
-    rm -rf "$stage"
-    echo "wrote $OUTDIR/$base.pdf ($(stat -c%s "$OUTDIR/$base.pdf") bytes)"
+    "$TYPST" compile --root "$ROOT" "$src" "$ROOT/$base.pdf"
+    echo "wrote $base.pdf ($(stat -c%s "$ROOT/$base.pdf") bytes)"
 }
 
 if [ $# -gt 0 ]; then
     for f in "$@"; do build_one "$f"; done
 else
-    for f in "$HERE"/report_*.html; do build_one "$(basename "$f")"; done
+    for f in "$HERE"/report_*.typ; do build_one "$(basename "$f")"; done
 fi
