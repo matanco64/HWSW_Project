@@ -963,3 +963,7 @@ Prompt: "<task-notification>
 
 2026-09-04T20:46:16Z — Claude Code session (auto-logged)
 Prompt: "commit, then go"
+
+2026-09-04 — hw-advisor (process change, grape_pipeline/uarch)
+Lesson: latency claims come from an op-graph schedule simulation (fusion audit included), never a stage-sum.
+Files changed: .claude/skills/hw-uarch/SKILL.md (see hw/docs/lessons.md 2026-09-04).

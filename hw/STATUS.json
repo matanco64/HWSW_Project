@@ -67,9 +67,9 @@
           }
         },
         "uarch": {
-          "state": "review",
+          "state": "done",
           "started": "2026-09-04T20:07:41Z",
-          "finished": "",
+          "finished": "2026-09-04T20:46:35Z",
           "gate": {
             "pipeline/FSM diagrams": {
               "result": "pass",
@@ -804,5 +804,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-04T20:42:45Z"
+  "updated": "2026-09-04T20:46:35Z"
 }

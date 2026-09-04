@@ -44,7 +44,7 @@ RUNA/RUNB expander, L-vector output. Inverse BWT is a documented non-target.
 
 Per module, in order (repeat the block three times):
 
-- [ ] uArch (`hw-uarch`): pipelines, FSMs, number formats, memories, timing budget → `hw-review` → ◆ uArch review
+- [x] uArch (`hw-uarch`) grape_pipeline ☑ 2026-09-04 (17 findings, approved; ADR-0007, schedule_model.py) — huffman/mtf pending their turn
 - [ ] RTL (`hw-rtl`): `rtl/*.sv`, `make lint` clean, Yosys synth OK → agent code review (`hw-review` RTL mode)
 - [ ] DV testplan (`hw-dv-testplan`): features ↔ tests ↔ covergroups ↔ checkers; golden-model interface; formal properties
 - [ ] Golden model: instrument `benchmarks/bm_*` code → trace dumps into `golden/` (then frozen by hook)
