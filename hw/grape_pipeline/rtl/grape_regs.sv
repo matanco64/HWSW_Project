@@ -284,6 +284,9 @@ module grape_regs #(
                 if (wr_addr_i == 10'h002) begin        // CTRL (WP)
                     if (wr_data_i[1]) begin
                         abort_n = 1'b1;                // ABORT wins over DOORBELL (MAS §4)
+                        if (wr_data_i[0] && busy_i) begin
+                            sticky_n[B_EBSY] = 1'b1;   // the doorbell half was ignored (MAS §8)
+                        end
                     end else if (wr_data_i[0]) begin
                         if (busy_i) begin
                             sticky_n[B_EBSY] = 1'b1;
