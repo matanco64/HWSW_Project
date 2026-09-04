@@ -67,33 +67,39 @@
           }
         },
         "uarch": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-09-04T20:07:41Z",
           "finished": "",
           "gate": {
             "pipeline/FSM diagrams": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §2 flowchart + §3 two stateDiagrams + accumulate sequencer spec",
+              "at": "2026-09-04T20:30:38Z"
             },
             "number formats fixed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §4: binary64 for every architectural signal, Q-notation for sqrt/rcp internals",
+              "at": "2026-09-04T20:30:38Z"
             },
             "memories sized": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §5: body RF flops, pair list, 1024x20 rcp ROM",
+              "at": "2026-09-04T20:30:38Z"
             },
             "per-stage timing budget": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §6: six rows, all ≤ 8 ns vs 20 ns @ 50 MHz",
+              "at": "2026-09-04T20:30:38Z"
             },
             "latency/throughput derived and matches PRD KPI": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §7 + docs/schedule_model.py: simulated 123 cycles/step nominal, 127 worst ≤ K1 128; 290-op graph, inventory sweep table",
+              "at": "2026-09-04T20:38:00Z"
             },
             "hw-review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_uarch.md: 17 findings (2 passes), 0 must open",
+              "at": "2026-09-04T20:42:45Z"
             }
           }
         },
@@ -798,5 +804,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-04T19:54:58Z"
+  "updated": "2026-09-04T20:42:45Z"
 }

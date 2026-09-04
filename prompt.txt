@@ -873,3 +873,93 @@ Prompt: "mtf_cam MAS approved"
 2026-09-04 — hw-advisor (process change, mtf_cam/mas)
 Lesson: chained modules need a partner-failure rule; producers withdraw un-handshaken beats.
 Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/mas).
+
+2026-09-04T20:15:27Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a741c9a84c1068426</task-id>
+<tool-use-id>toolu_01U841284i4fXs5J4pXUZs51</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a741c9a84c1068426.output</output-file>
+<status>completed</status>
+<summary>Agent "FP64 unit sourcing spike" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All questions are now answerable from primary sources. Final report follows.
+
+---
+
+# FP64 datapath spike — grape_pipeline (sky130, Yosys+Verilator)
+
+## Q1 — FPnew / CVFPU (openhwgroup/cvfpu)
+
+**Ops/formats.** Yes on all counts: FP64 (binary64) add/sub, mul, FMA (4 flavours), div, sqrt, with all IEEE rounding modes incl. RNE ([README](https://github.com/openhwgroup/cvfpu)). Ops issue through one FMA-capable ADDMUL path; div/sqrt map to a DIVSQRT group.
+
+**Div/sqrt units.** Three selectable via `DivSqrtSel` ([docs/README.md](https://github.com/openhwgroup/cvfpu/blob/develop/docs/README.md)): **PULP** (multi-format, FP64 incl.), **TH32** (T-Head OpenE906 — **FP32 only**, useless here), **THMULTI** (T-Head multi-format incl. FP64). The PULP unit is [pulp-platform/fpu_div_sqrt_mvp](https://github.com/pulp-platform/fpu_div_sqrt_mvp) (Solderpad v0.51): iterative, **non-pipelined**, 3 mantissa bits/cycle + 3 pre/post cycles → **FP64 div and sqrt = 21 cycles** ([FPnew paper, Table II](https://arxiv.org/abs/2007.01530)).
+
+**Correct rounding — red flag.** The cvfpu README states: *"Some compliance issues with IEEE 754-2008 are currently known to exist for the PULP DivSqrt unit. Rounding mismatches… results being off by 1 ulp"*, and the inexact flag can be missed ([README](https://github.com/openhwgroup/cvfpu/blob/master/README.md)). This directly conflicts with our correctly-rounded-sqrt requirement. THMULTI's FP64 rounding status: *[unverified]*.
+
+**Licence.** Solderpad HW License v0.51 (Apache-2.0-based, permissive); T-Head vendor code Apache-2.0 ([README](https://github.com/openhwgroup/cvfpu)).
+
+**Verilator/Yosys.** Deliberately tool-friendly SystemVerilog: *"All array types are packed… SystemVerilog interfaces are not used due to poor support in some EDA tools"* ([docs](https://github.com/openhwgroup/cvfpu/blob/develop/docs/README.md)). Verilator: proven — CVA6 ships a Verilator testbench with FPnew ([cva6](https://github.com/openhwgroup/cva6)). Yosys: stock Yosys can't parse it ([cva6 #2319](https://github.com/openhwgroup/cva6/issues/2319)); it uses heavy packages/structs/enum arrays that trip some elaborators ([cvfpu #39](https://github.com/openhwgroup/cvfpu/issues/39)). **But it demonstrably goes through Yosys with the yosys-slang frontend**: Basilisk taped out RV64GC CVA6 (FP64 FPU included — 18.9 MFLOP/s/W on FP64 measured) end-to-end with Yosys-Slang in IHP 130 nm ([arXiv 2505.10060](https://arxiv.org/abs/2505.10060); earlier flow via SVase/sv2v, [arXiv 2406.15107](https://arxiv.org/abs/2406.15107)). So plan on `yosys-slang` (or sv2v) in the synth flow, not plain `read_verilog -sv`.
+
+**Area/latency (GF22FDX silicon, [paper](https://arxiv.org/abs/2007.01530)).** Full transprecision FPU 247 kGE (FMA units 160 kGE across 5 formats, DIVSQRT 19 kGE); FP64 FMA latency 4 cycles, II=1, 923 MHz in 22 nm (expect ~10× lower Fmax in sky130 — Basilisk's whole 130 nm CVA6 ran 62–77 MHz).
+
+## Q2 — Alternatives
+
+**(a) Berkeley HardFloat** ([site](https://www.jhauser.us/arithmetic/HardFloat.html), [module docs](https://www.jhauser.us/arithmetic/HardFloat-1/doc/HardFloat-Verilog.html)). Native **Verilog-2001** (not Chisel output — the Chisel port is separate), BSD-3-Clause, fully IEEE-conformant incl. subnormals; ideal for Yosys (no SV at all) and Verilator. Catch 1: `addRecFN`/`mulAddRecFN` are **combinational** — you add your own pipeline registers (retiming in Yosys on sky130 is mediocre). Ca
+... [truncated, 8825 chars total]"
+
+2026-09-04T20:23:03Z — Claude Code session (auto-logged)
+Prompt: "1. c then a"
+
+2026-09-04T20:27:40Z — Claude Code session (auto-logged)
+Prompt: "1. c then a
+2. a
+3. accept
+4. accept
+5. accept
+6. a"
+
+2026-09-04T20:34:24Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a41ffdf982b27a3a4</task-id>
+<tool-use-id>toolu_01AdRitqmTvv7x4vqXdiMaet</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a41ffdf982b27a3a4.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review grape uArch" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>R1..R13 below — reviewed `uarch.md` against PRD/MAS, ADR-0002/0007, the sourcing spike, `golden/emulation.py`, and the benchmark loop.
+
+| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | uarch §3.3, §1 (fp64_fma row), §2 (I node) | Accumulate micro-op is written as an FMA `v_i.c ← v_i.c − dx_c·b2m` (one rounding); `emulation.py` computes `dx*b2m` as a rounded binary64 mul THEN a rounded sub (two roundings) — fusion breaks PRD-F2 bit-exactness and contradicts §4's own "every Python-visible intermediate is a rounded binary64" and ADR-0007's "never fuse mul+add where Python rounds separately". Same for §1/§2 saying integrate uses FMA (Python `r[c] += dt*v[c]` is mul-then-add) while §3.3 corrects to mul+add | Accumulate lanes consume the pre-rounded S7 force terms with plain add/sub (or FMA(a,b,−0) only as a mul substitute, never fusing the add); restate §1: FMA hardware inside NR only; make §2's I node mul+add |
+| R2 | must | uarch §1/§2/§7/§8 | Mul-unit occupancy busts II=2: per pair 3 squares + d3 + mag + b1m + b2m + 6 force terms = 13 mul-ops per 2 cycles ≈ 6.5 ops/cycle vs 2 units (2/cycle). 10 pairs = 130 mul-ops ⇒ ≥65 cycles of mul issue alone before the last pair's 70-cycle latency tail; "step ≈ 124" and K1 ≤ 128 do not survive | Recount occupancy per unit per 2-cycle slot in §7; add mul capacity (e.g. front-end-idle FMA lanes as muls via c = −0, still one rounding) or restate II and re-derive K1 |
+| R3 | must | uarch §1/§2/§7 | Adder occupancy: 3 subs + 2 dsq adds = 5 add-ops per pair = 2.5 ops/cycle at II=2 vs 2 adders — same structural violation as R2 | Include adds in the reservation-table count; 3rd adder or wider II |
+| R4 | must | uarch §1 (fp64_rcp_nr) | rcp claims II=2 on "an internal 2-stage multiplier": 3 quadratic NR iterations ≈ 2 dependent mul passes each + compensated final step ≈ 6–8 passes/op ⇒ at II=2 that is &gt;3 passes/cycle on one internal multiplier — structurally impossible; and 14 ± 2 cycles is underived (ROM 1 + 3×~4 + compensation ~4–8 ≈ 17–21) | Unroll one multiplier per iteration (pipelined chain) or drop II to match; derive the cycle count stage-by-stage |
+| R5 | must | uarch §1 (fp64_rcp_nr) | "≤ 1 ulp (correctly rounded in practice)" is weaker than PRD-F2: emulation.py's `rcp = F(1.0)/d3` is correctly rounded IEEE division, so any 1-ulp rcp deviation is a bit mismatch on every affected state word; "in practice" is unmeasurable | Require correctly rounded reciprocal outright (Borges compensation gives it — cite the guarantee) and make the HardFloat cross-check exhaustive on the rounding boundary cases |
+| R6 | must | uarch §8 (mul-contention row) | Hazard mitigation is a literal placeholder: "mag chain of pair i uses the mul slots freed by pair i+?" and the reservation table itself is deferred to an "appendix in RTL" — and per R2/R3 no conflict-free static table exists at II=2, so the claim is currently false, not just missing | Publish the cycle-by-cycle reservation table in this spec; totals per unit per slot must be ≤ capacity |
+| R7 | should | uarch §2 vs §7 | §2 sums to forces ready at 2i+**73** (…+ mag chain +9 + forces +3) and says so; §7 derives 2i+**70** (mag 3 + b1m/b2m 3 + forces 3) and builds 97/104/124 on it. At +73 the worst corner is 127+4 = 131 &gt; K1 128 | One derivation table; reconcile the mag-chain latency (6 vs 9) and propagate |
+| R8 | should | uarch §7 (accum), §3.3 | Stall bound "
+... [truncated, 6503 chars total]"
+
+2026-09-04T20:42:08Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>aafb2e5fde17d7d24</task-id>
+<tool-use-id>toolu_01WkfqwtxpnctaR1scHsuVR7</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/aafb2e5fde17d7d24.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review grape uArch after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Verification complete. Summary of evidence gathered:
+
+- The script reproduces §7's nominal column exactly (2A/2M 133, 2A/3M 125, 3A/3M 123, 3A/4M 117). Re-running it externally with the corner latencies (32/24) reproduces the corner column too (2A/3M 129, 3A/3M 127) — the numbers are correct, but the shipped script hardcodes 30/22 and prints no corner sweep.
+- `build_ops()` matches `emulation.py` op-for-op: 3 subs, 3 squares, `(dx²+dy²)+dz²` in Python's left-to-right order, sqrt, `d3` depending on both `dsq` and `s`, rcp, `mag` on rcp only (dt is a register), `b1m`/`b2m` on mag only (masses are registers), `f_i = dx_c·b2m` / `f_j = dx_c·b1m` correctly swapped per the golden model, six chained velocity add/subs in v1-then-v2 component order, then per-body integrate mul-then-add. Counts check out (290 ops; 125 ADD / 145 MUL / 10 SQRT / 10 RCP). The chain-order guard is sound (redundant, in fact, since each chain op lists its predecessor as a data dep); II blocking for the single sqrt/rcp is correct; `schedule()` returns max retire + COMMIT + FSM as §7 claims; waypoints (last sqrt 60, last rcp 85) are internally consistent with rcp = 22.
+- The one real design-level problem: the model schedules accumulate and integrate ops purely by dependency, fully overlapped across §3.1's FSM phases. Gating INTEG issue until "all 60 velocity writes retired" (what §3.1 literally specifies, given "states gate issue only") gives 127 nominal / **131 worst-corner — over K1's 128**; gating ACCUM issue at FORCE→ACCUM as well gives 143/147.
+
+| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | uarch §3.1 vs §3.3/§7, `schedule_model.py` | The 123/127-cycle claim requires accumulate and integrate ops to issue by dependency, overlapped across FSM phases (the model has no phase gates). But §3.1 says "FSM states gate issue" with ACCUM→INTEG only "when the scoreboard is drained (all 60 velocity writes retired)". Implemented as written, INTEG issue waits for full drain: re-simulated step = 127 nominal / **131 worst corner &gt; K1 128** (and if ACCUM adds likewise issue only after "last pair issued", 143/147). The spec as written fails its own K1 evidence. | Re-spec §3.1: FORCE/ACCUM/INTEG transitions are observability/bookkeeping (or merge into one RUN phase); issue of accumulate and integrate ops is governed solely by the static reservation table from `schedule_model.py`, which spans phase boundaries — INTEG's dt·v mul for body b issues as soon as (b, c)'s last velocity write retires. State explicitly that no op issue is gated on a phase transition. |
+| S2 | must | ADR-0007 title (line 4); uarch line 5, §3.1 diagram ("all 15 FMAs retired"), §6 row "accumulate FMA stage" and "re-pipelines mul/FMA" | R1's no-FMA resolution is incompletely propagated: the accepted ADR's title still reads "+ 2 FMA accumulate lanes", the uarch's input list still describes ADR-0007 as "II=2 front end + 2 FMA lanes", the §3.1 FSM edge says "all 15 FMAs retired" (design has 15 muls + 15 adds = 30 ops, as §3.3 itself states), and §6 budgets an "accumulate FMA stage" that no longer exists. These contradict §1 "no FMA unit" and ADR-0007's own body. | Retitle ADR-0007 (drop "2 FMA accumulate lanes"); fix uarch line 5; change the FSM edge to "all 30 integrate ops retired"; replace the §6 FMA row/mention with the actual add/mul stages. |
+| S3 | must | uarch §2 diagram, S5 node | Stale pre-R4 r
+... [truncated, 5073 chars total]"
+
+2026-09-04T20:46:16Z — Claude Code session (auto-logged)
+Prompt: "commit, then go"
