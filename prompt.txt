@@ -967,3 +967,6 @@ Prompt: "commit, then go"
 2026-09-04 — hw-advisor (process change, grape_pipeline/uarch)
 Lesson: latency claims come from an op-graph schedule simulation (fusion audit included), never a stage-sum.
 Files changed: .claude/skills/hw-uarch/SKILL.md (see hw/docs/lessons.md 2026-09-04).
+
+2026-09-04T20:50:28Z — Claude Code session (auto-logged)
+Prompt: "when finished, atonoumusly continue to /hw-flow grape_pipeline again for RTL"

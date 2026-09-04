@@ -104,8 +104,8 @@
           }
         },
         "rtl": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-04T20:46:48Z",
           "finished": "",
           "gate": {
             "make lint clean (verilator --lint-only -Wall)": {
@@ -804,5 +804,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-04T20:46:35Z"
+  "updated": "2026-09-04T20:46:48Z"
 }
