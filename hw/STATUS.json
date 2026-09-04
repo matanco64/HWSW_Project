@@ -550,33 +550,39 @@
           }
         },
         "mas": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-08-30T12:18:39Z",
+          "finished": "2026-09-04T19:54:58Z",
           "gate": {
             "I/O table with widths + clock": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §2: 11 signal rows, all with width and clock (script-checked)",
+              "at": "2026-08-30T14:11:59Z"
             },
             "register map (offset, name, bits, access, reset)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §4: 31 rows incl. used map and reserved ranges, all five columns filled (script-checked)",
+              "at": "2026-08-30T14:12:07Z"
             },
             "DMA/stream protocol": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §5: s_sym / m_l rules, empty-block = no beat, ADR-0001/0004/0006",
+              "at": "2026-08-30T14:11:59Z"
             },
             "driver API sketch": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/mas.md §6: MtfDriver incl. expand_block() and read_list()",
+              "at": "2026-08-30T14:11:59Z"
             },
             "block diagram": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML",
+              "at": "2026-08-30T14:11:59Z"
             },
             "hw-review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_mas.md: 24 findings (2 passes), 0 must open",
+              "at": "2026-08-30T19:00:25Z"
             }
           }
         },
@@ -792,5 +798,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-08-30T12:18:39Z"
+  "updated": "2026-09-04T19:54:58Z"
 }

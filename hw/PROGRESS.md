@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-08-30 12:18 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-08-30 12:18 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-04 19:54 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-04 19:54 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -73,8 +73,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd done
+    class uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class prd,mas done
 ```
 
 Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, orange review, green done, red blocked.
@@ -85,7 +85,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| `mtf_cam` | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
@@ -93,7 +93,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 - `grape_pipeline`: **uArch** — todo (checkpoint — needs human approval)
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
-- `mtf_cam`: **MAS** — todo (checkpoint — needs human approval)
+- `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
 ## Gates
 
@@ -141,6 +141,15 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] HW/SW split table — docs/prd.md §4: used-map 32 B in, 148,271 symbol beats on chip, 336,184 B L-vector out via DMA
 - [x] workload slice quantified from results/ profile — docs/prd.md §1: perf_report_pyflate.txt:12 interpreter-level; cProfile move_to_front 9.3 % stock (FINDINGS §3), 80.4 ms MTF trace (§1e), T3 10.5 %; golden/calibrate.py workload numbers
 - [x] hw-review findings resolved — docs/review_prd.md: 20 findings (2 passes), 0 must open
+
+#### MAS — ✅ done (started 2026-08-30T12:18:39Z, finished 2026-09-04T19:54:58Z)
+
+- [x] I/O table with widths + clock — docs/mas.md §2: 11 signal rows, all with width and clock (script-checked)
+- [x] register map (offset, name, bits, access, reset) — docs/mas.md §4: 31 rows incl. used map and reserved ranges, all five columns filled (script-checked)
+- [x] DMA/stream protocol — docs/mas.md §5: s_sym / m_l rules, empty-block = no beat, ADR-0001/0004/0006
+- [x] driver API sketch — docs/mas.md §6: MtfDriver incl. expand_block() and read_list()
+- [x] block diagram — docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML
+- [x] hw-review resolved — docs/review_mas.md: 24 findings (2 passes), 0 must open
 
 ## Metrics
 

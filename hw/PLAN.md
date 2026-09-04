@@ -21,7 +21,7 @@ Legend: ☐ todo · ☑ done · ◆ human checkpoint (design review / sign-off)
 
 ## Phase 1 — Lockstep PRD + MAS (all three modules)
 
-**Resume here:** `/hw-flow mtf_cam` (MAS #3; ADR-0005/0006 settled). Live state: `hw/PROGRESS.md`.
+**Resume here:** Phase 2 — `/hw-flow grape_pipeline` (uArch #1: rsqrt design point, FP64 units, pipeline/timing budget). Live state: `hw/PROGRESS.md`.
 
 Shared decisions taken once and recorded as ADRs under `hw/docs/adr/`: bus (AXI-Lite MMIO + DMA
 descriptors vs streaming), clock target, driver model, block-diagram conventions, number-format policy.
@@ -31,9 +31,9 @@ descriptors vs streaming), clock target, driver model, block-diagram conventions
 | PRD (`hw-prd`, grilled) | ☑ 2026-08-28 | ☑ 2026-08-28 | ☑ 2026-08-30 |
 | `hw-review` spec pre-read | ☑ 23 findings | ☑ 25 findings | ☑ 20 findings |
 | ◆ PRD design review | ☑ approved | ☑ approved | ☑ approved |
-| MAS (`hw-mas`) + block diagram | ☑ 2026-08-30 | ☑ 2026-08-30 | ☐ |
-| `hw-review` spec pre-read | ☑ 21 findings | ☑ 23 findings | ☐ |
-| ◆ MAS design review | ☑ approved | ☑ approved | ☐ |
+| MAS (`hw-mas`) + block diagram | ☑ 2026-08-30 | ☑ 2026-08-30 | ☑ 2026-09-04 |
+| `hw-review` spec pre-read | ☑ 21 findings | ☑ 23 findings | ☑ 24 findings |
+| ◆ MAS design review | ☑ approved | ☑ approved | ☑ approved |
 
 PRD agenda seeds (from research): grape_pipeline — KPI = cycles/step (serial 20,000-step chain),
 FP64 datapath, energy-tolerance oracle, pair-list input; huffman_engine — KPI = symbols/cycle,

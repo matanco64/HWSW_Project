@@ -92,3 +92,12 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - **A shared driver base needs a shared exit rule** — `wait_done` "until DONE|ABORTED" fails for
   modules whose errors end with BUSY = 0 and DONE = 0; "return when BUSY = 0" is the universal rule
   (hw-integrate lifts it into `AccelDriver`).
+
+## 2026-08-30 — mtf_cam/mas
+
+- **Chained modules need a failure-propagation rule** — with `m_sym → s_sym` wired, an error in
+  either module deadlocks the other (one waits for EOB, one for `tready`); the MAS now makes the
+  chained driver abort the partner. Fix: `hw-mas` agenda line "for chained modules state what
+  happens to the partner on ERR/ABORT/timeout".
+- **Third MAS took one round** as predicted: with ADR-0005/0006 and the DMA rule inherited, only
+  six module-specific questions remained. Keep the shared-decisions-first order for uArch too.
