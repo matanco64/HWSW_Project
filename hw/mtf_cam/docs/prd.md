@@ -115,3 +115,9 @@ streams are on-chip (input) and platform DMA (output), testbench-modelled as bef
 ## 9. Review findings
 
 See `docs/review_prd.md`.
+
+## Errata (post-approval, from the MAS review 2026-08-30)
+
+- PRD-F9 "no BUSY/DONE/IRQ" on a doorbell-time rejection: "no IRQ" means no *DONE* interrupt; the
+  ERR_PARAM flag asserts `irq` when its IRQ_EN bit is set (ADR-0005 rule, uniform across modules).
+- PRD §4 bus traffic: 14 words / ≈ 56 cycles (MAS §5 supersedes the 12-word estimate).

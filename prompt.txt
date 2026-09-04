@@ -815,3 +815,61 @@ Prompt: "commit, then /hw-flow mtf_cam"
 2026-08-30 — hw-advisor (process change, huffman_engine/mas)
 Lesson: decide when each error is knowable; stream modules need a DMA life-cycle rule.
 Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 huffman_engine/mas).
+
+2026-08-30T14:08:29Z — Claude Code session (auto-logged)
+Prompt: "1: b
+2: accept
+3: accept
+4: accept
+5: accept
+6: accept"
+
+2026-08-30T14:14:22Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a28c808ece6ac8989</task-id>
+<tool-use-id>toolu_01RVEiyMUa6H4SQMkKm2i1fw</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a28c808ece6ac8989.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec-review mtf_cam MAS" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | §5 `m_l`, §8 ABORT / run-time error rows, §4 CTRL.ABORT | The ERR/ABORT flush beat is a handshaken beat, but the spec says ABORTED "within 8 cycles in any state (… stalled)" and counters "frozen at the offending symbol" while BYTES_OUT "counts the flush". If `m_l.tready` is low the flush cannot complete in 8 cycles; unspecified whether BUSY/ABORTED/ERR wait for the flush handshake, and what happens if tready never rises. | State: flag + BUSY=0 within 8 cycles regardless of tready; the flush beat stays valid (tvalid held) until handshaken or reset; BYTES_OUT increments only on that handshake; CYCLES stops at the flag. Or drop the flush on stall — choose one and make the PRD-F10 "≤ 1 beat after the error" test read it. |
+| R2 | must | §4 ERR_LIMIT, §8 run-time error row | "BYTES_OUT would exceed BYTES_LIMIT — per symbol / per beat": undefined whether the error fires at the symbol side (run item n would cross the limit, nothing emitted) or at the drain beat that crosses. With the item FIFO the "offending symbol" for a drain-side error is ambiguous, and SYMBOLS_IN may already include later symbols. | Define: byte-limit check at item production (symbol side: BYTES_OUT + pending FIFO bytes + item bytes &gt; BYTES_LIMIT → ERR_LIMIT at that symbol, item not enqueued); counters frozen = SYMBOLS_IN at that beat. |
+| R3 | must | §5, §8 run-time error / ABORT rows | Item-FIFO contents at ERR/ABORT are not specified ("pending run discarded" covers only the accumulator). PRD-F10 requires ≤ 1 beat after the error, so queued items must be discarded; the spec never says so. | Add: FIFO and expander state discarded; only the packer's partial beat is flushed. |
+| R4 | must | §1, §5 DMA rules, §6 | Chained failure handling missing: if `huffman_engine` ends in ERR/ABORT, `mtf_cam` stays BUSY forever (no EOB); if `mtf_cam` errors first, `huffman_engine` stalls on tready=0 and never reaches DONE. No ordering/recovery rule for the driver. | Add a rule: the chained driver aborts the other module after either ERR/ABORT/timeout, then applies the DMA flush rule; also state that huffman doorbelled before mtf_cam is tolerated (beats wait on tready=0) or forbidden. |
+| R5 | must | §2 `s_axis_sym_tdata` | Row lists TYPE 0 value "2..N_USED" only — RUNA/RUNB (values 0/1, TYPE 0) are omitted from the I/O contract; also the TYPE-0-with-value-N_USED+1 case (value EOB without type, ERR_RANK per PRD-F1) is not visible here. | Rewrite: TYPE 0 value 0/1 = RUNA/RUNB, 2..N_USED = MTF rank value−1, N_USED+1 or greater = ERR_RANK; TYPE 3 value must equal N_USED+1. |
+| R6 | should | §4 ERR_PARAM | N_USED &gt; N_LIST (formal build N_LIST=16, popcount up to 256) has no error; PRD-F4 bounds N_USED to 1..N_LIST. | Add N_USED &gt; N_LIST to ERR_PARAM. |
+| R7 | should | §2 `s_axis_sym_tlast`, §4 ERR_UNDERRUN | EOB beat (TYPE 3) with TLAST = 0 is unspecified (accepted as DONE? error?). | State: TLAST ignored on TYPE 3 (DONE) or ERR_UNDERRUN — pick one; note huffman always sets it. |
+| R8 | should | §2, §5 `s_sym` | Handling of TDATA[27:12] and [31:28] on TYPE 0/3 beats (ADR-0006 says 0) is unspecified — ignored or checked. | State "ignored" (or ERR_RANK if non-zero). |
+| R9 | should | §4 ERR_LIMIT | "SYMBOLS_IN reaches SYMBOL_LIMIT without EOB": is beat number SYMBOL_LIMIT being the EOB DONE (huffman MAS rule) or ERR_LIMIT? | Copy the huffma
+... [truncated, 7050 chars total]"
+
+2026-08-30T18:58:34Z — Claude Code session (auto-logged)
+Prompt: "still running?"
+
+2026-08-30T18:59:50Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a90e044afbe0952e6</task-id>
+<tool-use-id>toolu_016k5sNJc8Gz85Br6dNNLAzT</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a90e044afbe0952e6.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-review mtf_cam MAS after fixes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>| id | severity | location | problem | proposed fix |
+|---|---|---|---|---|
+| S1 | must | mas.md §5 `m_l` ERR/ABORT rule, §8 ABORT / run-time-error rows, §5 DMA rule | The held partial beat "stays presented until handshaken or reset", yet the DMA rule requires the sink to be **stopped** before the next doorbell, and nothing says an accepted doorbell drops the pending beat. A stopped sink never handshakes it, so either the next block's `m_l` stream begins with a stale beat from the previous block, or the driver cannot satisfy the flush rule at all. Also `wait_done` returns at BUSY = 0 while BYTES_OUT may still exclude the flush, so `expand_block`'s "sink bytes == BYTES_OUT" can race. | Add one sentence to §5/§8: "an accepted doorbell (and reset) withdraws any still-pending partial beat (`tvalid` → 0, bytes not counted)"; and in §6 state that the driver drains the sink (or waits for `tvalid` = 0 / reads BYTES_OUT only after the sink flush) before comparing. |
+| S2 | must | mas.md §4 STATUS bit 12 ERR_LIMIT vs BYTES_OUT (0x04C) / §8 "BYTES_OUT counts the flush" / PRD-F12 "BYTES_OUT ≤ BYTES_LIMIT" | The check "BYTES_OUT + bytes queued in the FIFO/expander + this item's bytes &gt; BYTES_LIMIT" omits bytes sitting in the **packer** (partial beat plus a full beat presented but not handshaken under back-pressure). Those bytes are neither in BYTES_OUT nor in "FIFO/expander" but are flushed and counted on ERR/ABORT, so BYTES_OUT can exceed BYTES_LIMIT by up to 2W−1, contradicting F12's no-overflow argument and the "would exceed BYTES_LIMIT" semantics of F10. | Reword: "BYTES_OUT + bytes accepted but not yet handshaken (item FIFO, expander, packer) + this item's bytes &gt; BYTES_LIMIT". |
+| S3 | must | mas.md §5 chained abort rule vs huffman MAS §5/§8 (m_sym after ABORT) and mas.md §5 `s_sym` "surplus is the producer's problem" | On an mtf_cam ERR/ABORT the driver aborts `huffman_engine`, which may then be holding a valid `m_sym` beat against `tready` = 0. Neither MAS says that beat is withdrawn: huffman §8 only says "no TLAST emitted on abort", and its §5 flush rule assumes a DMA sink can be flushed — but in the chained wrapper the sink is `mtf_cam`, which cannot be "flushed" by the driver. When mtf_cam is doorbelled next and raises `tready`, it consumes a stale symbol from the previous block (silent corruption, no error). Same hazard for the reverse order (huffman ERR while mtf_cam waits). | Specify in mas.md §5 (and flag for a huffman MAS amendment / ADR-0006 note): "`huffman_engine` deasserts `m_sym.tvalid` within its ABORT/ERR bound and emits nothing until its next accepted doorbell; `mtf_cam` therefore starts every invocation with an empty `s_sym`". Alternatively require the chained driver to doorbell `mtf_cam` only after huffman is confirmed idle and huffman to discard un-handshaken beats on abort. |
+| S4 | must | mas.md §4 INIT_CYCLES "N_USED + c, c ≤ 4 (≤ 260)" vs §5 "INIT_CYCLES ≤ 256" and PRD-F4 acceptance "INIT_CYCLES ≤ 256" | The revised R20 text allows up to 260 init cycles for N_USED &gt; 252, contradicting §5 of the same document and the PRD-F4 acceptance criterion (which `test_driver`/`test_random` will enforce). | Either bound the overhead so N_USED + c ≤ 256 (e.g. c counted only when N_USED ≤ 252, or define INIT_CYCLES as the fill cycles = N_USED exactly, overhead excluded), or write "≤ 260" in §5 and add an explicit "supersedes PRD-F4's 256" note as done for 
+... [truncated, 4703 chars total]"
+
+2026-09-04T19:47:56Z — Claude Code session (auto-logged)
+Prompt: "where do we stand with hardware development?"
+
+2026-09-04T19:54:40Z — Claude Code session (auto-logged)
+Prompt: "mtf_cam MAS approved"
+
+2026-09-04 — hw-advisor (process change, mtf_cam/mas)
+Lesson: chained modules need a partner-failure rule; producers withdraw un-handshaken beats.
+Files changed: .claude/skills/hw-mas/SKILL.md (see hw/docs/lessons.md 2026-08-30 mtf_cam/mas).

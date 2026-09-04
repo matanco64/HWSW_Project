@@ -12,3 +12,7 @@ and 0 in [27:12]), `TDATA[31:28]` reserved 0; TLAST on the EOB beat. `mtf_cam` c
 raises ERR_RANK on any other TYPE (PRD-F1/F10 of mtf_cam). Alternatives rejected: 9-bit beats
 with a mode-dependent sideband (two formats to verify), 64-bit beats (wasteful for the 148 k
 bzip2 symbols per block).
+
+Chaining rule (added 2026-08-30): a producer withdraws any un-handshaken beat on its own
+ERR/ABORT and on an accepted doorbell, so the consumer always starts an invocation with an empty
+stream; the chained driver aborts the partner module when either side ends in ERR/ABORT/timeout.

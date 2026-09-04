@@ -190,3 +190,10 @@ and pipeline depth are uArch decisions.
 ## 10. Review findings
 
 See `docs/review_mas.md` (written by `hw-review`).
+
+## Amendments (post-approval)
+
+- 2026-08-30 (mtf_cam MAS review S3): on ERR/ABORT `huffman_engine` deasserts `m_axis_sym_tvalid`
+  within its ABORT/ERR bound (a beat presented but not handshaken is withdrawn) and emits nothing
+  until its next accepted doorbell; likewise an accepted doorbell withdraws any pending beat. This
+  is what lets the chained `mtf_cam` start every invocation with an empty `s_sym`.

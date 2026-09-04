@@ -1,0 +1,49 @@
+{
+  "title": "mtf_cam — architecture (MAS)",
+  "columns": [
+    {"name": "Host / DMA", "blocks": [
+      {"id": "cpu", "label": "CPU + driver", "sub": "MtfDriver.expand_block()"},
+      {"id": "axi", "label": "AXI4-Lite handshake", "sub": "axi_lite_if + decoder, 4 KB"},
+      {"id": "dma", "label": "Platform DMA / huffman_engine", "sub": "s_sym in (ADR-0006), m_l out"}
+    ]},
+    {"name": "Control", "blocks": [
+      {"id": "regs", "label": "Register file", "sub": "used map, SYMBOL/BYTES_LIMIT, CAPS, DBG, STATUS/IRQ"},
+      {"id": "fsm", "label": "Block FSM", "sub": "doorbell → init → run → EOB / error"},
+      {"id": "cnt", "label": "Counters", "sub": "CYCLES, SYMBOLS_IN, BYTES_OUT, INIT, MAX_RUN"}
+    ]},
+    {"name": "List", "blocks": [
+      {"id": "init", "label": "List init", "sub": "used map → ascending bytes, ≤ 256 cycles"},
+      {"id": "cam", "label": "MTF list", "sub": "N_LIST × 8-bit shift-register CAM"},
+      {"id": "rank", "label": "Rank select", "sub": "symbol − 1 → byte, shift 0..r−1"}
+    ]},
+    {"name": "Run", "blocks": [
+      {"id": "acc", "label": "Run accumulator", "sub": "RUNA/RUNB bijective base-2, ≤ 2^20"}
+    ]},
+    {"name": "Item FIFO", "blocks": [
+      {"id": "fifo", "label": "Item FIFO", "sub": "depth D: byte | run(n, byte)"}
+    ]},
+    {"name": "Expander / output", "blocks": [
+      {"id": "exp", "label": "Run expander", "sub": "W bytes/cycle"},
+      {"id": "pack", "label": "Beat packer", "sub": "W lanes, TKEEP on last, TLAST"}
+    ]}
+  ],
+  "edges": [
+    {"from": "cpu", "to": "axi", "label": "MMIO"},
+    {"from": "axi", "to": "regs", "label": "config / used map"},
+    {"from": "regs", "to": "cpu", "label": "STATUS, irq"},
+    {"from": "regs", "to": "fsm", "label": "doorbell / abort"},
+    {"from": "fsm", "to": "cnt"},
+    {"from": "regs", "to": "init", "label": "used map"},
+    {"from": "init", "to": "cam", "label": "initial list"},
+    {"from": "dma", "to": "rank", "label": "s_sym (TYPE 0/3)"},
+    {"from": "cam", "to": "rank", "label": "entries"},
+    {"from": "rank", "to": "cam", "label": "move to front"},
+    {"from": "dma", "to": "acc", "label": "RUNA / RUNB"},
+    {"from": "rank", "to": "fifo", "label": "byte item"},
+    {"from": "acc", "to": "fifo", "label": "run item (n, front byte)"},
+    {"from": "fifo", "to": "exp", "label": "items"},
+    {"from": "exp", "to": "pack", "label": "bytes"},
+    {"from": "pack", "to": "dma", "label": "m_l"},
+    {"from": "pack", "to": "cnt", "label": "BYTES_OUT"}
+  ]
+}

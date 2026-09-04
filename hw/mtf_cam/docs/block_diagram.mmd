@@ -1,0 +1,49 @@
+flowchart LR
+    subgraph C0["Host / DMA"]
+        direction TB
+        cpu["CPU + driver<br/><i>MtfDriver.expand_block()</i>"]
+        axi["AXI4-Lite handshake<br/><i>axi_lite_if + decoder, 4 KB</i>"]
+        dma["Platform DMA / huffman_engine<br/><i>s_sym in (ADR-0006), m_l out</i>"]
+    end
+    subgraph C1["Control"]
+        direction TB
+        regs["Register file<br/><i>used map, SYMBOL/BYTES_LIMIT, CAPS, DBG, STATUS/IRQ</i>"]
+        fsm["Block FSM<br/><i>doorbell → init → run → EOB / error</i>"]
+        cnt["Counters<br/><i>CYCLES, SYMBOLS_IN, BYTES_OUT, INIT, MAX_RUN</i>"]
+    end
+    subgraph C2["List"]
+        direction TB
+        init["List init<br/><i>used map → ascending bytes, ≤ 256 cycles</i>"]
+        cam["MTF list<br/><i>N_LIST × 8-bit shift-register CAM</i>"]
+        rank["Rank select<br/><i>symbol − 1 → byte, shift 0..r−1</i>"]
+    end
+    subgraph C3["Run"]
+        direction TB
+        acc["Run accumulator<br/><i>RUNA/RUNB bijective base-2, ≤ 2^20</i>"]
+    end
+    subgraph C4["Item FIFO"]
+        direction TB
+        fifo["Item FIFO<br/><i>depth D: byte | run(n, byte)</i>"]
+    end
+    subgraph C5["Expander / output"]
+        direction TB
+        exp["Run expander<br/><i>W bytes/cycle</i>"]
+        pack["Beat packer<br/><i>W lanes, TKEEP on last, TLAST</i>"]
+    end
+    cpu -->|MMIO| axi
+    axi -->|config / used map| regs
+    regs -->|STATUS, irq| cpu
+    regs -->|doorbell / abort| fsm
+    fsm --> cnt
+    regs -->|used map| init
+    init -->|initial list| cam
+    dma -->|s_sym (TYPE 0/3)| rank
+    cam -->|entries| rank
+    rank -->|move to front| cam
+    dma -->|RUNA / RUNB| acc
+    rank -->|byte item| fifo
+    acc -->|run item (n, front byte)| fifo
+    fifo -->|items| exp
+    exp -->|bytes| pack
+    pack -->|m_l| dma
+    pack -->|BYTES_OUT| cnt
