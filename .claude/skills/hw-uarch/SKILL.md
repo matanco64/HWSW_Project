@@ -20,8 +20,10 @@ Modules proceed one at a time from here (`grape_pipeline` → `huffman_engine` �
    `claude-skill-verilog` notation); Memories (name, depth × width, ports, flop vs OpenRAM);
    Timing budget (per stage: logic depth estimate, target ns at the MAS clock); Latency and
    throughput derivation; Hazards and stalls; Reset and CDC statement; Traceability to `PRD-Fn`.
-4. Derive latency/throughput from the pipeline table and compare against the PRD KPI in a short
-   calculation the reader can redo; a mismatch is fixed here, not in RTL.
+4. Derive latency/throughput with a schedule *simulation* over the full op graph (one node per
+   reference-visible rounding — the graph doubles as the fusion audit; see
+   grape_pipeline/docs/schedule_model.py), never a stage-sum; the gate row cites the script and
+   its printed sweep. A KPI mismatch is fixed here, not in RTL.
 5. `hw-review` spec mode (concurrency and complexity checks matter most here); resolve `must`.
 6. Record gate rows; set `review`.
 

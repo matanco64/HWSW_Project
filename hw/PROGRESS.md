@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-04 20:42 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-04 20:42 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-04 20:46 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-04 20:46 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -26,8 +26,7 @@ flowchart LR
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
     class rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class uarch review
-    class prd,mas done
+    class prd,mas,uarch done
 ```
 
 ### `huffman_engine`
@@ -84,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -92,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **uArch** — review (checkpoint — needs human approval)
+- `grape_pipeline`: **RTL** — todo
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -116,7 +115,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] block diagram — docs/block_diagram.svg (tools/hw/blockdiag.py from block_diagram.json; .mmd alongside), well-formed XML
 - [x] hw-review resolved — docs/review_mas.md: 21 findings (2 passes), 0 must open
 
-#### uArch — 🟠 review (started 2026-09-04T20:07:41Z)
+#### uArch — ✅ done (started 2026-09-04T20:07:41Z, finished 2026-09-04T20:46:35Z)
 
 - [x] pipeline/FSM diagrams — docs/uarch.md §2 flowchart + §3 two stateDiagrams + accumulate sequencer spec
 - [x] number formats fixed — docs/uarch.md §4: binary64 for every architectural signal, Q-notation for sqrt/rcp internals

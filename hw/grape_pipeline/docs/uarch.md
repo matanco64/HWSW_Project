@@ -1,6 +1,6 @@
 # grape_pipeline — uArch (Micro-architecture Spec)
 
-Status: **review** (checkpoint — awaiting human approval). Stage 3 of `hw/FLOW.md`.
+Status: **approved** 2026-09-04 (uArch checkpoint). Stage 3 of `hw/FLOW.md`.
 Inputs: `docs/prd.md`, `docs/mas.md` (approved), ADR-0002 (FP64 + operation order), ADR-0005,
 ADR-0007 (own FP64 units, 3 add / 3 mul / sqrt / rcp, no FMA). Research:
 `research/hw-algorithms-nbody.md` §3, `research/fp64-unit-sourcing.md`. Interview: `prompt.txt`
