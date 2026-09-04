@@ -101,3 +101,17 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   happens to the partner on ERR/ABORT/timeout".
 - **Third MAS took one round** as predicted: with ADR-0005/0006 and the DMA rule inherited, only
   six module-specific questions remained. Keep the shared-decisions-first order for uArch too.
+
+## 2026-09-04 — grape_pipeline/uarch
+
+- **The mtf_cam lesson generalised and paid off** — the hand-derived §7 latency (124) hid two
+  structural impossibilities (145 mul-ops/step through 2 units; an FMA accumulate that silently
+  broke bit-exactness). The cycle-accurate 290-op schedule model (`docs/schedule_model.py`) gave
+  the real numbers (123/127) and picked the inventory (3 add/3 mul; 2 add/3 mul fails the worst
+  corner by exactly 1 cycle). Fix: `hw-uarch` step 4 says "the latency/throughput gate row cites
+  a schedule *simulation* over the full op graph, never a stage-sum".
+- **Fusion is the default failure mode of FP datapaths** — "use an FMA for a·b+c" is reflexive
+  and wrong wherever the reference rounds twice. The op graph in the schedule model doubles as
+  the fusion audit: one node per Python rounding.
+- **Spike before grilling worked** — the FP64 sourcing agent (CVFPU 1-ulp red flag, yosys-slang
+  requirement) turned Q1/Q6 from opinions into decisions with citations.
