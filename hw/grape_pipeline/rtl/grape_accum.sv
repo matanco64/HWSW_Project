@@ -72,6 +72,7 @@ module grape_accum #(
     logic       add_sh_ia [3][ADD_LAT];                // ADD: op is an integrate add
     logic [2:0] add_sh_b  [3][ADD_LAT];                // ADD target body
     logic [2:0] add_sh_f  [3][ADD_LAT];                // ADD target field
+    logic [1:0] add_sh_c  [3][ADD_LAT];                // ADD target component (review R3: field is comp+3 for v)
     logic       mul_sh_v  [3][MUL_LAT];                // MUL shadow valids (integrate muls)
     logic [3:0] mul_sh_l  [3][MUL_LAT];                // MUL integrate lane
 
@@ -93,6 +94,7 @@ module grape_accum #(
     logic        mul_slot_found;                       // A MUL slot is free
     logic [1:0]  mul_slot;                             // Chosen MUL slot
     logic        clr_bypass;                           // Target clears this cycle (retire bypass)
+    logic [63:0] byp_data;                             // Retiring value forwarded on the bypass (R5)
 
     always_comb begin
         // defaults
@@ -115,11 +117,13 @@ module grape_accum #(
         acc_force = force_flat_i[({28'd0, acc_pair}*32'd6 + {29'd0, acc_op})*64 +: 64];
         // retire bypass: an ADD retiring this cycle to the same (body,comp)
         clr_bypass = 1'b0;
+        byp_data   = 64'd0;
         for (int u = 0; u < 3; u++) begin
             if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1] && !add_sh_ia[u][ADD_LAT-1]) begin
                 if (4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
-                    + {2'd0, add_sh_f[u][ADD_LAT-1][1:0]}) == bc_idx) begin
+                    + {2'd0, add_sh_c[u][ADD_LAT-1]}) == bc_idx) begin
                     clr_bypass = 1'b1;
+                    byp_data   = add_r_i[u*64 +: 64];  // review R5: data bypass paired with the clear bypass
                 end
             end
         end
@@ -152,15 +156,19 @@ module grape_accum #(
         if (acc_can_issue) begin
             add_valid_o[add_slot] = 1'b1;
             add_sub_o[add_slot]   = (acc_op <= 3'd2);  // v_i -= ; v_j +=
-            add_a_o[add_slot*64 +: 64] = body_field(working_flat_i, acc_body, 3'({1'b0, acc_comp} + 3'd3));
+            add_a_o[add_slot*64 +: 64] = clr_bypass
+                                         ? byp_data
+                                         : body_field(working_flat_i, acc_body, 3'({1'b0, acc_comp} + 3'd3));
             add_b_o[add_slot*64 +: 64] = acc_force;
         end
         // integrate muls (after all accumulate issued AND retired for the lane's body? —
         // dependency: dt*v needs the FINAL v: all accumulate ops retired (busy_bc clear and
         // acc_done). Conservative per uArch §3.1: issue integrate muls once acc_done and no
         // accumulate op in flight for that (body,comp).
+        // Review R6: per-lane gating (uArch §3.1 rejects phase gating): the lane's chain is final
+        // once all accumulates are ISSUED (acc_done) and none is in flight for this (body,comp).
         if (run_i && acc_done && !integ_mul_done && mul_slot_found) begin
-            if (!busy_bc[integ_idx[3:0]] && !integ_mul_v[integ_idx[3:0]] && retired_acc_all) begin
+            if (!busy_bc[integ_idx[3:0]] && !integ_mul_v[integ_idx[3:0]]) begin
                 mul_valid_o[mul_slot] = 1'b1;
                 mul_a_o[mul_slot*64 +: 64] = dt_i;
                 mul_b_o[mul_slot*64 +: 64] =
@@ -184,11 +192,10 @@ module grape_accum #(
         integ_body = 3'(integ_idx / 5'd3);
         integ_comp = 2'(integ_idx % 5'd3);
     end
-    logic        retired_acc_all;                      // All accumulate ops retired
-    logic [7:0]  acc_total;                            // 6 * NPAIRS
+    logic [7:0]  acc_total;                            // 6 * NPAIRS (NPAIRS <= N_PAIRS_MAX = 10
+                                                       // enforced by ERR_PARAM, so 4 bits suffice — R10)
     assign acc_total = 8'({4'd0, npairs_i[3:0]} * 8'd6);
     logic [7:0]  acc_retired;                          // Retired accumulate ops
-    assign retired_acc_all = acc_done && (acc_retired == acc_total) && (busy_bc == 15'd0);
 
     // integrate add pick: lowest lane with mul result ready and add not yet issued
     logic        integ_add_pick_v;                     // A lane is ready for its add
@@ -217,16 +224,19 @@ module grape_accum #(
                 add_sh_ia[u][0] <= 1'b1;
                 add_sh_b[u][0]  <= integ_add_body;
                 add_sh_f[u][0]  <= integ_add_comp;
+                add_sh_c[u][0]  <= integ_add_comp[1:0];
             end else begin
                 add_sh_ia[u][0] <= 1'b0;
                 add_sh_b[u][0]  <= acc_body;
                 add_sh_f[u][0]  <= 3'({1'b0, acc_comp} + 3'd3);
+                add_sh_c[u][0]  <= acc_comp;
             end
             for (int d = 1; d < ADD_LAT; d++) begin
                 add_sh_v[u][d]  <= add_sh_v[u][d-1];
                 add_sh_ia[u][d] <= add_sh_ia[u][d-1];
                 add_sh_b[u][d]  <= add_sh_b[u][d-1];
                 add_sh_f[u][d]  <= add_sh_f[u][d-1];
+                add_sh_c[u][d]  <= add_sh_c[u][d-1];
             end
             mul_sh_v[u][0] <= mul_valid_o[u];
             mul_sh_l[u][0] <= integ_idx[3:0];
@@ -264,12 +274,13 @@ module grape_accum #(
                 if (!add_sh_ia[u][ADD_LAT-1]) begin
                     acc_retired <= acc_retired + 8'd1;
                     busy_bc[4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
-                            + {2'd0, add_sh_f[u][ADD_LAT-1][1:0]})] <= 1'b0;
+                            + {2'd0, add_sh_c[u][ADD_LAT-1]})] <= 1'b0;
                 end
             end
             if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
                 integ_mul_v[mul_sh_l[u][MUL_LAT-1]] <= 1'b1;
                 integ_mul_r[mul_sh_l[u][MUL_LAT-1]] <= mul_r_i[u*64 +: 64];
+                retired <= retired + 8'd1;             // review R4: integrate muls count too
             end
         end
         if (integ_add_pick_v && add_valid_o != 3'b000 && !acc_can_issue) begin
@@ -332,9 +343,9 @@ module grape_accum #(
     end
 `endif
 
-    assign all_done_o = retired_acc_all && integ_mul_done
+    assign all_done_o = acc_done && integ_mul_done
                         && (integ_add_issued == 15'h7FFF)
-                        && (retired == acc_total + 8'd30);
+                        && (retired == acc_total + 8'd30);   // 6·NPAIRS acc + 15 muls + 15 adds (R4)
 
 endmodule
 
