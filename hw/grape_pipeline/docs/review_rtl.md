@@ -23,3 +23,19 @@ Checklist verdicts (pass 1): top PASS · force_pipe FAIL→fixed · accum FAIL�
 step_fsm PASS · regs PASS+R7/R12 · axi_lite_if PASS+R8 · fp64 units PASS (unit-tested elsewhere).
 Verilator whole-module lint: clean, no UNOPTFLAT. Operand order vs `emulation.py` verified correct
 (v_i − dx·b2m then v_j + dx·b1m, i-then-j).
+
+## Pass 2 — 2026-09-05 (independent reviewer agent, after pass-1 fixes)
+
+R1–R12 verified in the current code (R4/R6 "implemented as claimed but refuted in effect" by the
+two new findings). 4 new findings, all resolved (commit follows):
+
+| id | severity | area | problem | resolution |
+|---|---|---|---|---|
+| S1 | must | accum retired counter | two `retired + 1` NBAs in one always_ff collapse to +1 when an ADD and a MUL retire together → all_done unreachable → hang | single comb `retire_cnt` (0..2), one accumulation |
+| S2 | must | busy_bc set/clear collision | bypass-issued op's set lost to the simultaneous retire clear → integrate gate defeated | retire clear suppressed when the same index is being re-occupied by `acc_can_issue` this cycle |
+| S3 | low | test_regs notes | contradictory leftovers of the R9 edit | rewritten |
+| S4 | low | acc_retired | dead state | deleted |
+
+Also swept clean: scr_fwd aliasing (impossible — single producer per tag), UNOPTFLAT (none),
+single-ADD-retire assumption (holds; SVA in place), shadow metadata at step_start (valids cleared).
+Open must: **0**. Total: 16 findings (2 passes).

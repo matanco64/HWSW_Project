@@ -195,7 +195,7 @@ module grape_accum #(
     logic [7:0]  acc_total;                            // 6 * NPAIRS (NPAIRS <= N_PAIRS_MAX = 10
                                                        // enforced by ERR_PARAM, so 4 bits suffice — R10)
     assign acc_total = 8'({4'd0, npairs_i[3:0]} * 8'd6);
-    logic [7:0]  acc_retired;                          // Retired accumulate ops
+    logic [1:0]  retire_cnt;                           // Ops retiring this cycle (0..2: ≤1 ADD + ≤1 MUL, S1)
 
     // integrate add pick: lowest lane with mul result ready and add not yet issued
     logic        integ_add_pick_v;                     // A lane is ready for its add
@@ -203,6 +203,15 @@ module grape_accum #(
     logic [2:0]  integ_add_body;                       // Its body
     logic [2:0]  integ_add_comp;                       // Its component (position field)
     always_comb begin
+        retire_cnt = 2'd0;
+        for (int u = 0; u < 3; u++) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
+                retire_cnt = retire_cnt + 2'd1;
+            end
+            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
+                retire_cnt = retire_cnt + 2'd1;
+            end
+        end
         integ_add_pick_v = 1'b0;
         integ_add_lane   = 4'd0;
         for (int l = 14; l >= 0; l--) begin
@@ -267,20 +276,22 @@ module grape_accum #(
             end
             integ_idx <= integ_idx + 5'd1;
         end
-        // retires
+        // retires (single accumulation of retire_cnt — S1: two `retired + 1` NBAs collapse)
+        retired <= retired + {6'd0, retire_cnt};
         for (int u = 0; u < 3; u++) begin
             if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
-                retired <= retired + 8'd1;
                 if (!add_sh_ia[u][ADD_LAT-1]) begin
-                    acc_retired <= acc_retired + 8'd1;
-                    busy_bc[4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
-                            + {2'd0, add_sh_c[u][ADD_LAT-1]})] <= 1'b0;
+                    if (!(acc_can_issue && (4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
+                            + {2'd0, add_sh_c[u][ADD_LAT-1]})) == bc_idx)) begin
+                        // S2: keep busy when a bypass-issued op re-occupies the same (body,comp)
+                        busy_bc[4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
+                                + {2'd0, add_sh_c[u][ADD_LAT-1]})] <= 1'b0;
+                    end
                 end
             end
             if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
                 integ_mul_v[mul_sh_l[u][MUL_LAT-1]] <= 1'b1;
                 integ_mul_r[mul_sh_l[u][MUL_LAT-1]] <= mul_r_i[u*64 +: 64];
-                retired <= retired + 8'd1;             // review R4: integrate muls count too
             end
         end
         if (integ_add_pick_v && add_valid_o != 3'b000 && !acc_can_issue) begin
@@ -296,7 +307,6 @@ module grape_accum #(
             integ_mul_v      <= 15'd0;
             integ_add_issued <= 15'd0;
             retired          <= 8'd0;
-            acc_retired      <= 8'd0;
             busy_bc          <= 15'd0;
             for (int u = 0; u < 3; u++) begin
                 for (int d = 0; d < ADD_LAT; d++) begin
