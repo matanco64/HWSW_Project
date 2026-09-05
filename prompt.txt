@@ -970,3 +970,312 @@ Files changed: .claude/skills/hw-uarch/SKILL.md (see hw/docs/lessons.md 2026-09-
 
 2026-09-04T20:50:28Z — Claude Code session (auto-logged)
 Prompt: "when finished, atonoumusly continue to /hw-flow grape_pipeline again for RTL"
+
+2026-09-04T21:03:27Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a1f07be0fe78ddb2a</task-id>
+<tool-use-id>toolu_01DmKDcVoho1AbZgWx5AkW4m</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a1f07be0fe78ddb2a.output</output-file>
+<status>completed</status>
+<summary>Agent "Unit-test axi_lite_if + grape_regs" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All confirmed. Final state: wrapper lint-clean, 10/11 tests green, the single red is exactly the documented MAS mismatch.
+
+## Report
+
+**Deliverables (all new files; no RTL/Makefile touched):**
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/rtl/grape_regs_tb_top.sv` — TB-only wiring wrapper (`axi_lite_if` + `grape_regs` + `grape_body_rf`, register bus between if and regs, `body_pending → load_flat_i` on `doorbell_o`, `committed_flat_o → body_committed_i`); step-FSM inputs (`busy_i/done_set_i/aborted_set_i/fp_flags_set_i/steps_done_i/cycles_i`), body-RF write/commit inputs (`bwr_*`, `commit_en_i`), outputs `doorbell_o/abort_o/irq_o/wr_resp_hold_o` plus latched `dt_o/nsteps_o/npairs_o/pairs_o` and `working_flat_o`. Comment header marks it TB-only/non-synthesis. Zero logic.
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/tb/unit/test_regs.py` — 11 cocotb tests using `cocotbext.axi.AxiLiteMaster` covering: ID/VERSION/CTRL/STATUS reset values; config round-trip incl. single-byte wstrb writes and reserved-bit masking (NPAIRS[31:8], PAIR[31:16], IRQ_EN[0]); reserved words 0x018/0x0FC/0x110/0x238/0x340 (OKAY, read 0, no ERR_BUSY while busy) and unmapped 0x428/0xFFC (SLVERR both directions); doorbell acceptance with BRESP-after-BUSY ordering check + busy lockout (writes ignored, sticky ERR_BUSY, latched read-back); ERR_PARAM (pair index 5, NPAIRS=11; sticky survives a later accepted doorbell); committed-bank BODY reads while busy (uncommitted working write invisible until `commit_en`); DONE/IRQ/W1C + committed→pending read-back; abort pulses (idle, combined-idle, busy); FP flag stickies; counters.
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/tb/unit/__init__.py` — empty, makes `MODULE=unit.test_regs` importable.
+
+**Commands (both verified, documented in the test docstring):**
+- Green path: `make -C hw/grape_pipeline sim TOPLEVEL=grape_regs_tb_top MODULE=unit.test_regs` → `TESTS=11 PASS=10 FAIL=1` (`sim: 10/11 tests passed (verilator)`)
+- Fallback (identical result): same command with `VERILOG_SOURCES="rtl/grape_regs.sv rtl/grape_body_rf.sv rtl/grape_regs_tb_top.sv ../common/rtl/axi_lite_if.sv"`
+- Lint: `verilator --lint-only -Wall -I../common/rtl -Irtl rtl/grape_regs_tb_top.sv` → clean.
+
+**Findings (1 mismatch, test left red on purpose):**
+1. **DOORBELL+ABORT in one write while BUSY does not set ERR_BUSY.** MAS §8: "DOORBELL + ABORT in one write — BUSY: ABORT acts **and** ERR_BUSY (the doorbell was ignored)". Observed: `grape_regs.sv` lines 284–295 take the abort branch exclusively (`if (wr_data_i[1]) ... else if (wr_data_i[0])`), so the ignored doorbell never sets sticky bit 8. Failing test: `test_abort_doorbell_while_busy_sets_err_busy` (`AssertionError: ... assert (1 &amp; 256)` — STATUS read 0x1, bit 8 clear). abort_o pulse and no-doorbell parts of the same write are correct.
+
+**Spec ambiguities hit:**
+- MAS §4 calls idle ABORT a "no-op", yet the decoder still pulses `abort_o` when idle. Since STATUS is unchanged and the step FSM would ignore the pulse, I treated the pulse as correct (the task's expectation too) — not a finding.
+- Commit/done ordering: if the FSM pulsed `done_set_i` in the same cycle as `commit_en_i`, the committed→pending copy would capture the pre-commit bank (`body_committed_i` updates a cycle later). MAS doesn't pin this; the test commits one cycle before DONE.
+- CTRL writes ignore `wstrb` in the RTL (bits taken from `wr_data_i` directly); MAS/A
+... [truncated, 4354 chars total]"
+
+2026-09-04T21:05:30Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>af38af5904960af5b</task-id>
+<tool-use-id>toolu_01D2cE44hagnhnUi5TgNqvNN</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/af38af5904960af5b.output</output-file>
+<status>failed</status>
+<summary>Agent "Build fp64_rcp_nr RTL" failed: Agent terminated early due to an API error: You've hit your session limit · resets 4am (Asia/Jerusalem) (error type rate_limit, HTTP 429, request id req_011Cej5YWd79XG76F3MyYmtV, model sent to the API: claude-fable-5)</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>ROM values generated (all fit in 19 bits: max 0x7FF00). Hard-case generation is running in background. Now I'll write the RTL with a splice marker for the ROM initial block.</result>
+</task-notification>"
+
+2026-09-04T21:05:45Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a84867a9fabbc03f6</task-id>
+<tool-use-id>toolu_01E9ixeUjfRV1x8hWpuTVNdj</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a84867a9fabbc03f6.output</output-file>
+<status>failed</status>
+<summary>Agent "Build fp64_sqrt_srt RTL" failed: Agent terminated early due to an API error: You've hit your session limit · resets 4am (Asia/Jerusalem) (error type rate_limit, HTTP 429, request id req_011Cej5ZhTFtB6tYnf2yLGVz, model sent to the API: claude-fable-5)</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All 4 tests pass. Final verification sweep: re-run lint on the final file, check line count, and inspect the 5 Yosys warnings.</result>
+</task-notification>"
+
+2026-09-04T21:07:44Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ad4687b985d67fba0</task-id>
+<tool-use-id>toolu_01RpQ7AWot1CRxNBXGqenMSo</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/ad4687b985d67fba0.output</output-file>
+<status>failed</status>
+<summary>Agent "Build fp64_add and fp64_mul RTL" failed: Agent terminated early due to an API error: You've hit your session limit · resets 4am (Asia/Jerusalem) (error type rate_limit, HTTP 429, request id req_011Cej5iQqNuCXdyirj9YyP9, model sent to the API: claude-fable-5)</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Yosys accepts explicit `pkg::` scoped references (no `import`) and Verilator is happy with `-I`. Let me check the lint hook's flags and the golden-guard hook before writing files.</result>
+</task-notification>"
+
+2026-09-05T06:01:56Z — Claude Code session (auto-logged)
+Prompt: "continue"
+
+2026-09-05T06:03:23Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a84867a9fabbc03f6</task-id>
+<tool-use-id>toolu_015BGeKbwL9BX5Vpf5xJMZKg</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a84867a9fabbc03f6.output</output-file>
+<status>completed</status>
+<summary>Agent "Build fp64_sqrt_srt RTL" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All green with the full current tree (including the other agents' new files). Final report:
+
+## Deliverables
+
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/rtl/fp64_sqrt_srt.sv` — 336 lines, self-contained (written before `fp64_pkg.sv` appeared; no import needed, not modified)
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/tb/unit/test_fp64_sqrt.py` — 186 lines
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/tb/unit/__init__.py` — empty package marker (did not exist yet)
+
+## Green commands (exact) + output tails
+
+```
+source hw/env.sh &amp;&amp; make -C hw/grape_pipeline sim TOPLEVEL=fp64_sqrt_srt MODULE=unit.test_fp64_sqrt
+  ** unit.test_fp64_sqrt.test_directed         PASS   7170.00 ns
+  ** unit.test_fp64_sqrt.test_random           PASS 400420.00 ns
+  ** unit.test_fp64_sqrt.test_latency_single   PASS    820.00 ns
+  ** unit.test_fp64_sqrt.test_ii2_stream       PASS   3330.00 ns
+  ** TESTS=4 PASS=4 FAIL=0 SKIP=0
+  sim: 4/4 tests passed (verilator)
+
+verilator --lint-only -Wall hw/grape_pipeline/rtl/fp64_sqrt_srt.sv   → clean, zero warnings, no pragmas
+yosys -p "read_verilog -sv hw/grape_pipeline/rtl/fp64_sqrt_srt.sv; synth"
+  → "Found and reported 0 problems", 15672 cells (~2.3k FFs); the 5 warnings are benign
+    "Replacing memory \dp_*/\mt_* with list of registers" (unpacked-array flattening) + an ABC info note.
+```
+The invocation pattern (documented in the test docstring) comes from `hw/common/Makefile.cocotb`: it exports `PYTHONPATH` containing `tb/`, so the module resolves as package `unit.test_fp64_sqrt` — same shape as the contract's `make sim TOPLEVEL=fp64_add MODULE=unit.test_fp64_add`.
+
+## Implementation
+
+Digit recurrence retiring 2 root bits/iteration (radix-4 rate, realized as two chained restoring radix-2 steps — non-redundant digits, so the remainder is exact by construction), 28 iterations over a 56-bit root (1 int + 52 mantissa + round + 2 guard; one bit more than the uArch's "55-bit" so 28 iterations retire exactly 56 — noted in the header). **LATENCY = 30 fixed**: 1 pre-stage (unpack + subnormal LZC/normalize + exponent-parity handling), 28 recurrence edges, 1 round/pack register; specials (±0/±inf/NaN/negatives) and exact powers-of-4 flow through the full pipe — no early exit. **II = 2 via a shared datapath**: 14 physical stages, each stage's single iteration unit time-multiplexed 2 cycles/op (iterations 2s, 2s+1), consecutive ops interleaving through the same hardware; up to 15 in flight, control is a 30-bit valid shift register. An SVA (`in_valid |=&gt; !in_valid`, inside `ifdef VERILATOR` because Yosys can't parse concurrent properties) asserts the II=2 contract.
+
+## Latency / II verification
+
+TB monitor timestamps every issue/retire edge: `latency 30 for all` asserted per-op in all 4 tests (20,357 ops total); `test_ii2_stream` checks 64 back-to-back ops retire at exactly 2-cycle spacing, plus an irregular ≥2-gap pattern (gaps 2/3/5). One TB-side fix was needed: post-NBA `ReadOnly` sampling sees `out_valid` one edge before a consumer flop would — the monitor records the consumer-visible edge (commented in the file).
+
+## Rounding correctness evidence
+
+- Sticky comes from the exact final remainder; RNE closes because a binary64 sqrt can never be exactly halfway (if the round bit were set with zero sticky, `(2m+1)² = odd` would have to equal an even integer — contradiction). The RTL still uses the full RNE expression including the LSB tie term.
+- Pre-RTL,
+... [truncated, 5291 chars total]"
+
+2026-09-05T06:12:16Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ad4687b985d67fba0</task-id>
+<tool-use-id>toolu_015Dga3KuyxBtZh628CDrrwG</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/ad4687b985d67fba0.output</output-file>
+<status>completed</status>
+<summary>Agent "Build fp64_add and fp64_mul RTL" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All green on the first full run. The work is complete — final report:
+
+## Files written (all under `/home/yuvalk/HWSW/HWSW_Proj/`)
+
+| File | Role |
+|---|---|
+| `hw/grape_pipeline/rtl/fp64_pkg.sv` | Shared package: `fp_class` (nan/snan/inf), `fp_unpack` (effective exponent + hidden-bit significand), `clz64`, `fp_round_pack` (RNE round + denormalize + pack + overflow/underflow flags) |
+| `hw/grape_pipeline/rtl/fp64_add.sv` | 3-stage adder/subtractor: S1 unpack/classify/magnitude-order/align (120-bit sticky-preserving shift, GRS frame), S2 add-sub (sticky-as-borrow) + LZC, S3 normalize/round/pack/special mux |
+| `hw/grape_pipeline/rtl/fp64_mul.sv` | 3-stage multiplier: S1 unpack + subnormal pre-normalize (CLZ+shift) + two 53×27/53×26 partial products, S2 sum + 1-bit normalize, S3 round/pack/special mux |
+| `hw/grape_pipeline/tb/unit/test_fp64_add.py`, `test_fp64_mul.py`, `__init__.py` | cocotb suites per the contract |
+
+## Green commands (exact, from repo root after `source hw/env.sh`)
+
+**Sims** — 0 failures:
+```
+make -C hw/grape_pipeline sim TOPLEVEL=fp64_add MODULE=unit.test_fp64_add VERILOG_SOURCES="rtl/fp64_pkg.sv rtl/fp64_add.sv"
+  → TESTS=4 PASS=4 FAIL=0 SKIP=0 / "sim: 4/4 tests passed (verilator)"
+make -C hw/grape_pipeline sim TOPLEVEL=fp64_mul MODULE=unit.test_fp64_mul VERILOG_SOURCES="rtl/fp64_pkg.sv rtl/fp64_mul.sv"
+  → TESTS=4 PASS=4 FAIL=0 SKIP=0 / "sim: 4/4 tests passed (verilator)"
+```
+Per unit: directed cross (23×23 corner values ×{add,sub} + targeted boundary pairs, ~1070/542 ops), 10,000 uniform bit patterns, 10,000 magnitude-window (log-uniform 1e-5..1e2) ops — bits AND flags vs `fp_helpers.ref_op`, seed 1. Commands are documented in each test docstring (explicit `VERILOG_SOURCES` because the wildcard now matches other agents' units).
+
+**Lint** — clean, no pragmas: `verilator --lint-only -Wall -Ihw/common/rtl hw/grape_pipeline/rtl/fp64_{pkg,add,mul}.sv` (also clean under the PostToolUse hook's exact flags).
+
+**Synth** — `yosys -p "read_verilog -sv hw/grape_pipeline/rtl/fp64_add.sv; synth"` and (mul) both exit 0; zero `$dlatch`/latch cells, no `$display`; only ABC's benign "network is combinational" note. Mul synth 37 s (ABC on the multiplier).
+
+## Latency / II
+Verified explicitly: `out_valid` low for cycles +1/+2, high exactly at +3, exactly one cycle wide; every one of the ~21k ops per unit is checked `out_edge − drive_edge == 3`, back-to-back bursts (II=1) and 35%-gapped streams included. Valid pipeline is the only reset state (`rst_n` sync, clears valids only), sized by `localparam LATENCY = 3`.
+
+## Oracle disputes
+None — zero mismatches. I probed numpy first and matched it: underflow = tininess **after rounding with unbounded exponent** AND inexact delivered result (x86/SSE), confirmed by probes where a delivered min-normal carries UE=1 (e.g. `5·2⁻⁵⁴⁰ × 7205759403792793·2⁻⁵³⁷`) and the tie-up twin `(2²⁷−1)·2⁻⁵³⁸ × (2²⁷+1)·2⁻⁵³⁸` carries UE=0; both are directed tests.
+
+## Decisions the contract left open
+- **Package consumption**: Yosys 0.68 rejects `import` inside a module body, so both units use explicit `fp64_pkg::` scoped references, pulled in by a guarded `` `include "../../grape_pipeline/rtl/fp64_pkg.sv" `` — that one path resolves under the lint hook (`-Ihw/common/rtl`, cwd=root), the Makefile's `-I` dirs, and Yosys's including-file-dir search, making each module file self-sufficient for the single-file yosys command. Documented in the pkg heade
+... [truncated, 4725 chars total]"
+
+2026-09-05T06:17:42Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>af38af5904960af5b</task-id>
+<tool-use-id>toolu_01VCDtZ4jKzRbuhTe6pRLqRe</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/af38af5904960af5b.output</output-file>
+<status>completed</status>
+<summary>Agent "Build fp64_rcp_nr RTL" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All verification except Yosys is green. Waiting on the synth monitor — I'll assemble the final report when it fires.</result>
+<usage><subagent_tokens>205877</subagent_tokens><tool_uses>28</tool_uses><duration_ms>903328</duration_ms></usage>
+</task-notification>"
+
+2026-09-05T06:18:52Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>af38af5904960af5b</task-id>
+<tool-use-id>toolu_01UwztkkVq2cFYqPhLnMLoJb</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/af38af5904960af5b.output</output-file>
+<status>completed</status>
+<summary>Agent "Build fp64_rcp_nr RTL" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>The background Yosys is alive and healthy — the run restarted at 09:12 after the session interruption and is now in ABC technology mapping (~114k cells, CPU at 100%). My monitor is still armed on its output and will fire on `YOSYS_SYNTH_OK` or any error. Waiting for that event to assemble the final report.</result>
+<usage><subagent_tokens>202422</subagent_tokens><tool_uses>30</tool_uses><duration_ms>974272</duration_ms></usage>
+</task-notification>"
+
+2026-09-05T06:30:03Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>af38af5904960af5b</task-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/af38af5904960af5b.output</output-file>
+<status>completed</status>
+<summary>Agent "Build fp64_rcp_nr RTL" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All gates are green. Final report:
+
+## Deliverables
+
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/rtl/fp64_rcp_nr.sv` — 1482 lines (≈1024 of which are generated seed-ROM init data). Contract interface (`clk, rst_n, in_valid, a, out_valid, result, flags`), `localparam LATENCY = 22`.
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/tb/unit/test_fp64_rcp.py` — 4 cocotb tests (directed / 20,000 random / single-op latency / II=2 streaming), invocation documented in the docstring, fixed seed 20260905.
+- `tb/unit/__init__.py` already existed from the fp64_add/mul agent (I did not touch it). `fp64_pkg.sv` untouched (module is self-contained). No Makefile, fp_helpers, or contract edits; only the two files above created.
+
+## Green commands + tails
+
+```
+$ verilator --lint-only -Wall hw/grape_pipeline/rtl/fp64_rcp_nr.sv
+- V e r i l a t i o n   R e p o r t: Verilator 5.051 ...
+LINT_CLEAN                       (zero warnings, no pragmas/waivers)
+
+$ make -C hw/grape_pipeline sim TOPLEVEL=fp64_rcp_nr MODULE=unit.test_fp64_rcp SIM_BUILD=sim_build_rcp
+** unit.test_fp64_rcp.test_directed         PASS
+** unit.test_fp64_rcp.test_random           PASS
+** unit.test_fp64_rcp.test_latency_single   PASS
+** unit.test_fp64_rcp.test_ii2_stream       PASS
+** TESTS=4 PASS=4 FAIL=0 SKIP=0
+sim: 4/4 tests passed (verilator)
+
+$ yosys -p "read_verilog -sv rtl/fp64_rcp_nr.sv; synth -top fp64_rcp_nr"
+YOSYS_SYNTH_OK   (16m43s; 109,869 cells, 2,296 DFFs; only benign "memory→registers" warnings)
+```
+ROM is a generated `initial`-block (no .hex/`$readmemh`): I rejected the hex file because Verilator resolves the path at sim runtime CWD while Yosys resolves at read time — un-reconcilable across the cocotb build dir and repo-root synth; the initial block is CWD-independent and Yosys infers the 1024×20b memory.
+
+## Latency / II
+
+Latency is a 22-register pipeline (12 compute stages + 10-deep result delay padding every path, specials included); TB asserts `out_valid` edge − `in_valid` edge == 22 for **every** op in all four tests. II=2: outputs verified to stream at exactly 2-cycle spacing over 64 back-to-back ops plus an irregular ≥2-gap pattern. The contract SVA (`!(in_valid &amp;&amp; valid_q[0])`) is in the RTL under `` `ifdef VERILATOR `` (probe showed Yosys `synth` cannot parse `assert property`; this is a synthesis guard, not lint silencing) — verified live with a standalone `verilator --binary --assert` run: silent for legal II=2, fires "II = 2 violated" on back-to-back `in_valid`. Note: the shared `cocotb_run.py` doesn't pass `--assert`, so assertions are inert in `make sim` (runner is outside my editable scope). Datapath is fully pipelined (II=1-capable); the uArch's 2-deep multiplier interleave is deferred to PPA as an area optimization.
+
+## Rounding evidence (the hard part)
+
+Algorithm: 1024×20b UQ1.19 seed ROM (reciprocal of interval midpoint), 3 NR iterations UQ1.28→UQ1.57→UQ1.57, compensated step `r = 1 − m·y3` via the exact 111-bit product (measured max |r| = 2^-56 vs 2^-54 assertion bound), `y' = y3 + y3·r` in UQ1.62, then RNE by residual sign at the boundary: candidate `C = round(y'·2^(p+1))`, exact residuals `A1 = 2^(54+p) + M − 2CM`, `A2 = A1 − 2M` select C−1/C/C+1. Ties are impossible (would force M to a power of two — exact bypass path), so the sign check fully decides RNE; |C−X| ≤ 0.5+2^-8.6 ≪ 1.5 makes the ±1 window sufficient. Result denorm shift is provably ≤2 (1/|a| ≥ 2^-1024), handled by moving the round position (p = 51/50).
+
+Validated via a bit-exact 
+... [truncated, 6491 chars total]"
+
+2026-09-05T06:35:17Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b91x3bqd3</task-id>
+<tool-use-id>toolu_01K7VQr5HbY7BQShiRHTvZaW</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/b91x3bqd3.output</output-file>
+<status>completed</status>
+<summary>Background command "Full-module Yosys area synthesis (background, long)" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-05T06:39:04Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a8cd970e2c5b58549</task-id>
+<tool-use-id>toolu_01Jdo72eTNEFq5baCQH9rvAn</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/a8cd970e2c5b58549.output</output-file>
+<status>completed</status>
+<summary>Agent "RTL-mode review of grape_pipeline" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All evidence is in — lint run, ROM decoded, both engines and the docs traced. Findings below.
+
+## grape_pipeline RTL review (hw-review, RTL mode)
+
+**Verilator `--lint-only -Wall`: clean** — no warnings, no UNOPTFLAT (Verilator 5.051 devel; only the verilation report lines printed).
+
+### Findings
+
+| id | severity | file:line/area | problem | proposed fix |
+|---|---|---|---|---|
+| R1 | must | `hw/grape_pipeline/rtl/grape_force_pipe.sv:217-238` | Shadow-pipe entries are written with `ev_pair`/`ev_tag`, which after the `always_comb` event loop hold the **last** matching event of the cycle. The table issues up to 6 events/cycle (48 of 81 issue cycles have &gt;1 event; e.g. cycle 3 = events 9–14 across units 0–5). Every unit's result is then captured into the wrong `(pair, tag)` scratch slot — e.g. all three ADD shadows at cycle 3 record (pair 0, SQ_Z). Silent scratch corruption on essentially every cycle. | Record per-unit pair/tag: capture `ev_pair`/`ev_tag` into per-unit temporaries inside the event loop (arrays indexed by `sched_unit(e)`), and use those in the shadow writes (same for sqrt/rcp). |
+| R2 | must | `grape_force_pipe.sv:140-211` operand select vs `grape_sched_rom.svh` timing | The generated table schedules a consumer at `parent_issue + LAT` exactly (`schedule_model.py`: `done[i] = t + lat`, issuable when `done[d] &lt;= t`; e.g. SQ_X pair 0 at cycle 3 consumes SUB_X pair 0 issued at cycle 0, ADD_LAT = 3). But scratch is written at the **end** of the out_valid cycle, so a consumer issued at `t+LAT` samples the pre-capture scratch value (X on the first step — scratch is reset-free). Shadow depths themselves are correct (issue at t → `sh[LAT-1]` valid exactly at out_valid, edge-counted for LAT 3/30/22), so this is purely a missing same-cycle forward. | Add result-bus forwarding into operand select: if the `(pair, tag)` being read matches a shadow tail entry retiring this cycle, take `add_r_i`/`mul_r_i`/`sqrt_r_i`/`rcp_r_i` instead of scratch. Alternative: regenerate the ROM with availability `t+LAT+1` and re-verify ≤ 128 cycles — costs schedule length. |
+| R3 | must | `grape_accum.sv:271-272` (clear) and `:122-124` (bypass compare) | Scoreboard index at retire uses `field[1:0]`, but accumulate entries store `field = comp+3` ∈ {3,4,5}, so `field[1:0]` = {3,0,1}: a z-retire clears the **y** bit, a y-retire clears the **x** bit, and an x-retire clears `body*3+3` = the *next body's* x bit. `busy_bc[body*3+2]` is never cleared → `retired_acc_all` (needs `busy_bc == 0`) never true → integrate never issues, S_RUN hangs; plus premature clears / cross-body false `clr_bypass` allow same-(body,comp) ops in flight concurrently. | Use `field - 3'd3` (or store `comp` directly in the shadow struct) in both the clear index and the bypass compare. |
+| R4 | must | `grape_accum.sv:275-278` vs `:340-342` | Integrate MUL retires set `integ_mul_v` but never increment `retired`; only ADD retires do. Max reachable `retired` = 6·NPAIRS+15, but `all_done_o` requires `retired == acc_total + 8'd30` (6·NPAIRS+30, the header's "all 90"). `all_done_o` is unreachable → step FSM hangs in S_RUN for every configuration, **including NPAIRS = 0** (where the PRD-F8 integrate-only path is otherwise correctly reached via line 256's `acc_done` and the table-free MUL slots). | Add `retired &lt;= retired + 8'd1` in the MUL-retire branch (and keep the +30 target), or count only ADDs against `acc_total + 8'
+... [truncated, 10609 chars total]"
+
+2026-09-05T06:45:26Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bkwsbtnnw</task-id>
+<tool-use-id>toolu_01Px5EbWvhxn23CA4fQ51wEW</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/bkwsbtnnw.output</output-file>
+<status>killed</status>
+<summary>Background command "Relaunch full-module area synthesis (background)" was stopped</summary>
+</task-notification>"
+
+2026-09-05T06:45:26Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bablfv0se</task-id>
+<tool-use-id>toolu_018fu8KP2WdSMyuikbkKrjG1</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/bablfv0se.output</output-file>
+<status>killed</status>
+<summary>Background command "Re-verify both fixed engines (long budget)" was stopped</summary>
+</task-notification>"
+
+2026-09-05T06:56:22Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ac171f8daf46ad98b</task-id>
+<tool-use-id>toolu_016QLvw7W1yfkSJWkb9qRnwQ</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/34db82db-1e1d-4179-bde6-3826dae6b4a8/tasks/ac171f8daf46ad98b.output</output-file>
+<status>completed</status>
+<summary>Agent "RTL review pass 2 verification" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. All evidence gathered (full read of grape_force_pipe.sv, grape_accum.sv, grape_pipeline.sv, grape_body_rf.sv, grape_step_fsm.sv, grape_regs.sv, axi_lite_if.sv, sched ROM header, fp64_add output stage, test_regs.py, plus a clean `make lint` run).
+
+| id | severity | file:area | problem | proposed fix |
+|----|----------|-----------|---------|--------------|
+| S1 | must | hw/grape_pipeline/rtl/grape_accum.sv:271-285 (retire counting) | `retired &lt;= retired + 8'd1` appears twice in the same always_ff (ADD-retire branch and MUL-retire branch). NBA RHS reads the pre-edge value, so when an integrate ADD and an integrate MUL retire in the same cycle (routine in the integrate phase: mul for lane N and add for lane M both issue in one cycle, both LAT=3, retire together) the two increments collapse to +1. `retired` undercounts, `retired == acc_total+30` is never reached, `all_done_o` never asserts — the step hangs (incl. NPAIRS=0). This was introduced by the R4 fix (before it, only ADDs counted and ≤1 ADD retires/cycle). | Compute a combinational per-cycle retire count (0..2) from the ADD and MUL retire conditions and do a single `retired &lt;= retired + count`. |
+| S2 | must | hw/grape_pipeline/rtl/grape_accum.sv:249-250 vs 276-277 (busy_bc set/clear collision) | When an accumulate op issues via `clr_bypass`, the issue writes `busy_bc[bc_idx] &lt;= 1` (line 250) and the simultaneous retire to the same index writes `busy_bc &lt;= 0` (line 276, later in the block). Last NBA wins, so busy_bc stays 0 while the newly issued ADD is in flight for 3 cycles. The accumulate chain itself survives only by the coincidental ≥3-op same-(body,comp) spacing + bypass, but the R6 per-lane integrate gate (`!busy_bc[lane]`, line 171) is defeated: if the bypass-issued op is among the last accumulate ops for a low-numbered lane, the lane's dt·v mul can issue while that ADD is still in flight and read a stale v. New consequence of the R6 fix (the old global gate masked it). | Give the issue-set priority: move the `if (acc_can_issue) busy_bc[bc_idx] &lt;= 1'b1` after the retire loop, or suppress the retire clear when its index equals `bc_idx` and `acc_can_issue` holds. |
+| S3 | low | hw/grape_pipeline/tb/unit/test_regs.py:18-21, 445-446 (R9 note) | The R9 edit left the note self-contradictory: header now says "test green since the RTL fix" but the same sentence still ends "...so test_abort_doorbell_while_busy_sets_err_busy fails against the current RTL", and the test docstring still opens "KNOWN RED:" with a grammatically broken parenthetical. | Rewrite both blurbs to a single clean statement that the MAS §8 behavior is implemented and the test passes. |
+| S4 | low | hw/grape_pipeline/rtl/grape_accum.sv:198,275,299 (acc_retired) | `acc_retired` is incremented and reset but read nowhere (only in its own increment RHS, which is why lint stays quiet). Dead bookkeeping state. | Delete it, or use it (e.g., SVA: integrate muls only issue for lanes whose accumulates retired). |
+
+R1-R12 verification against current code:
+- **R1 confirmed** — per-unit `*_iss_p/_t` captured in the event loop (grape_force_pipe.sv:120-127, 241-258) and used in shadow stage-0 writes (275-306); each unit in a multi-event cycle gets its own (pair, tag). R11 folded in, confirmed.
+- **R2 confirmed** — `scr_fwd` built from all four unit result buses before the event loop (lines 170-188); every scratch operand read goes th
+... [truncated, 6917 chars total]"
+
+2026-09-05T07:01:39Z — Claude Code session (auto-logged)
+Prompt: "apply the diff"
+
+2026-09-05 — hw-advisor (process change, grape_pipeline/rtl)
+Lesson: dynamic issue/scoreboard/retire engines get a synthetic-stream unit TB before review; only pure FP datapaths defer to bring-up.
+Files changed: .claude/skills/hw-rtl/SKILL.md (see hw/docs/lessons.md 2026-09-05).
