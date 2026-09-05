@@ -1323,3 +1323,58 @@ Prompt: "<task-notification>
 <event>AREA DONE:    Chip area for module '\grape_pipeline': 2938435.692799</event>
 If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
 </task-notification>"
+
+2026-09-05T18:35:24Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a6562d66f9df35334</task-id>
+<tool-use-id>toolu_01M9K26aEfvfreZMdwJnMebQ</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a6562d66f9df35334.output</output-file>
+<status>completed</status>
+<summary>Agent "Adversarial testplan review pass 1" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review written to `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/docs/review_testplan.md` (testplan.md untouched).
+
+**Counts: 22 findings — 7 must, 12 should, 3 nit.**
+
+**Must findings:**
+
+1. **F-04/F-05 "expect 0" is false** — the testplan conflates the emulation model with the golden model. HW is bit-exact to `emulation.py`, but PRD-F4/F5 compare vs `nbody_ref` (libm `pow`); `golden/calibrate.py` measures nonzero deltas (r 1.06e-10, energy 1.7e-14, bounds set as ~19x/50x margins). The checker either spuriously fails vs nbody_ref or never runs nbody_ref and leaves F4/F5 unverified.
+2. **F-10 checker applies committed-snapshot equality to CYCLES/STEPS_DONE**, but MAS §4 says the counters are *live* while BUSY (CYCLES explicitly with no LO/HI atomicity). Would fail correct RTL.
+3. **FP-flags compare ill-defined across invocations** — FP_* are sticky and survive doorbells (PRD-F12), while `emulation.advance` returns a per-call set; b2b runs (`test_random`, F-33 chains) compare a union against a per-run set. No scoreboard W1C policy is defined.
+4. **NPAIRS=0 verified nowhere** — cg_cfg bins are {1..10}, no test programs 0, despite PRD-F6 "NPAIRS ∈ [0,10]" and PRD §7 `test_corner` listing NPAIRS=0 (the integrate-only corner).
+5. **NSTEPS=2³²−1 abort (counter-width) test from PRD §7 is missing** — max NSTEPS anywhere is 20000 &lt; 2¹⁶, so a 16-bit-truncated NSTEPS would pass the whole plan.
+6. **Abort-on-final-boundary → DONE-wins case untested and mis-checked** — PRD-F11/MAS §8/RTL (`grape_step_fsm.sv:82-85`) say DONE wins at step NSTEPS, but F-11's checker unconditionally expects ABORTED within K1+8, cg_abort has no such bin, and F-21's abort-at-accept checker asserts ABORTED — wrong for NSTEPS=1.
+7. **The AXI monitor the whole scoreboard/F-16 path relies on doesn't exist** — `hw/common/tb/axi_lite_agent.py` has driver+sequencer only, no monitor/analysis ports; cocotbext-axi `AxiLiteMaster` is a BFM, not the "independent protocol agent" PRD-F16 requires. The env plan presents it as provided.
+
+Notable verified-true claims (no finding): `--assert` armed in `cocotb_run.py:32`, both claimed SVAs exist in RTL, SCHED_STEP_CYCLES=123, unit TBs 4/4 + test_regs 11 tests, and the abort-replay strategy is sound for state and flags (ABORT sampled only at COMMIT, so only whole steps execute) — its residual holes are findings 6 and 17 (the STEPS_DONE check is circular; the independent expected-step count derivable from the static 123-cycle schedule is omitted).</result>
+<usage><subagent_tokens>102416</subagent_tokens><tool_uses>17</tool_uses><duration_ms>474392</duration_ms></usage>
+</task-notification>"
+
+2026-09-05T18:40:27Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>af95dcc5b5e48f1bb</task-id>
+<tool-use-id>toolu_01MqdMZk5w2c7ZD4Jm4KpFT1</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/af95dcc5b5e48f1bb.output</output-file>
+<status>completed</status>
+<summary>Agent "Testplan review pass 2 verify" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass 2 appended to /home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/docs/review_testplan.md (testplan.md untouched).
+
+**Summary: 1 must open.**
+
+**A. Pass-1 must resolutions — all 7 verified resolved**, each checked against sources:
+1. Two-reference tolerance policy is real and correct: cited ~1.7e-14 / ~1.06e-10 match PRD-F4/F5 calibrated values and `golden/calibrate.py`'s docstring; §4 names the sign-off input (`benchmark_system()`, `advance(0.01, 20000)`).
+2. F-10 snapshot equality restricted to BODY; counters live/monotonic per MAS §4.
+3. §4 sticky mirror (union, cleared on observed W1C/reset) is well-defined; `emulation.advance` confirmed to return the per-call flag set.
+4. NPAIRS=0: `test_corner::npairs0` + `cg_cfg` bins 0..10 + F-32 checker (integrate-only, golden agrees).
+5. NSTEPS=2³²−1: `test_abort::huge_nsteps` + cg_abort/cg_cfg bins.
+6. DONE-wins fixed in both F-11 and F-21, consistent with PRD-F11, MAS §8, and `grape_step_fsm.sv` (`abort_pend &amp;&amp; (steps+1) != nsteps`).
+7. Env plan verified honest: `axi_lite_agent.py` really has no monitor; the plan now declares it a dv_bringup deliverable and explains PRD-F16 independence.
+
+**B. Shoulds:** 10 remain open (9, 10, 11, 12, 13a, 14, 15, 16, 18, 19); 2 moot (13b — NSTEPS=0 bin now exists; 17 — the F-11 edit added the independent cycle-stamped STEPS_DONE cross-check); 1 escalated (8 → N1).
+
+**C. New/unresolved must — N1:** the F-05 edit kept "same for v" and §4 says only "trajectory 2e-9". PRD-F5 requires **5e-11 for v** (calibrate.py docstring: "F5 = 2e-9 (r) / 5e-11 (v)"; measured 2.64e-12). With the false "expect 0" removed by the must-1 fix, this loose bound is now the operative check — the plan would sign off hardware violating the PRD v bound by up to 40x. Neither 5e-11 nor 2.64e-12 appears anywhere in testplan.md.
+
+Also 3 new shoulds: N2 (F-11's fixed-123-cycle prediction ignores the 123..127 data-dependent range — needs a window), N3 (sticky mirror undefined for W1C while BUSY, which MAS permits), N4 (F-01's test column can't hit its newly added bins — same pattern as pass-1 finding 12).</result>
+<usage><subagent_tokens>88711</subagent_tokens><tool_uses>12</tool_uses><duration_ms>228361</duration_ms></usage>
+</task-notification>"

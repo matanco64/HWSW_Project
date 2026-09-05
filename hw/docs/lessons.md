@@ -158,3 +158,15 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - **Synthesis-runtime is a gate concern, not just synthesizability**: lint-clean + parse-clean
   said nothing about the 4-hour mem2reg blowup. The area gate must actually complete before the
   stage closes (it did, this time, only after three restructurings).
+
+## 2026-09-05 — grape_pipeline/dv_testplan
+
+- No command friction (0 friction.jsonl entries; the stage is document work). Review friction
+  pattern worth keeping: **both passes' hard findings were reference-model conflations** — the
+  plan said "expect 0" against the wrong golden (emulation vs nbody_ref) and dropped the PRD's
+  split r/v tolerance. When a module has two references (op-order emulation + benchmark libm),
+  every tolerance line must name which reference it binds to. `hw-dv-testplan` step 5 already
+  demands the tolerance policy; the sharpening is "per reference, per quantity" — carried as a
+  proposal below rather than applied (one data point).
+- Second data point for the "review catches what generation glosses" series: 8 musts across 2
+  passes on a 26-row matrix written from the specs it traces to.
