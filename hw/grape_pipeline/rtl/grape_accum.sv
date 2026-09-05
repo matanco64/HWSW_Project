@@ -66,17 +66,14 @@ module grape_accum #(
     logic [14:0] busy_bc;                              // Scoreboard: (body,comp) in flight (accumulate)
 
     // Shadow pipes for result routing: (kind, body, field/lane)
-    typedef struct packed {
-        logic       v;                                 // Valid
-        logic       is_integ_mul;                      // MUL: dt*v (else accumulate unused)
-        logic       is_integ_add;                      // ADD: r + dtv (else accumulate v update)
-        logic [2:0] body;                              // Target body
-        logic [2:0] field;                             // Target field (v: 3+c, r: c)
-        logic [3:0] lane;                              // Integrate lane (mul results)
-    } ash_t;
-
-    ash_t add_sh [3][ADD_LAT];                         // ADD shadow pipes (this module's issues)
-    ash_t mul_sh [3][MUL_LAT];                         // MUL shadow pipes
+    // Shadow pipes as parallel arrays (Yosys 0.68 struct-array limitation): valid, integrate-add
+    // flag, target body, target field, integrate lane.
+    logic       add_sh_v  [3][ADD_LAT];                // ADD shadow valids
+    logic       add_sh_ia [3][ADD_LAT];                // ADD: op is an integrate add
+    logic [2:0] add_sh_b  [3][ADD_LAT];                // ADD target body
+    logic [2:0] add_sh_f  [3][ADD_LAT];                // ADD target field
+    logic       mul_sh_v  [3][MUL_LAT];                // MUL shadow valids (integrate muls)
+    logic [3:0] mul_sh_l  [3][MUL_LAT];                // MUL integrate lane
 
     function automatic logic [63:0] body_field(input logic [N_BODIES*7*64-1:0] flat,
                                                input logic [2:0] body, input logic [2:0] field);
@@ -119,9 +116,9 @@ module grape_accum #(
         // retire bypass: an ADD retiring this cycle to the same (body,comp)
         clr_bypass = 1'b0;
         for (int u = 0; u < 3; u++) begin
-            if (add_ovalid_i[u] && add_sh[u][ADD_LAT-1].v && !add_sh[u][ADD_LAT-1].is_integ_add) begin
-                if (4'(({1'b0, add_sh[u][ADD_LAT-1].body} * 4'd3)
-                    + {2'd0, add_sh[u][ADD_LAT-1].field[1:0]}) == bc_idx) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1] && !add_sh_ia[u][ADD_LAT-1]) begin
+                if (4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
+                    + {2'd0, add_sh_f[u][ADD_LAT-1][1:0]}) == bc_idx) begin
                     clr_bypass = 1'b1;
                 end
             end
@@ -215,29 +212,27 @@ module grape_accum #(
     always_ff @(posedge clk) begin
         // shadow pipes
         for (int u = 0; u < 3; u++) begin
-            add_sh[u][0] <= '{v: 1'b0, is_integ_mul: 1'b0, is_integ_add: 1'b0,
-                              body: 3'd0, field: 3'd0, lane: 4'd0};
-            if (add_valid_o[u]) begin
-                if (integ_add_pick_v && !acc_can_issue) begin
-                    add_sh[u][0] <= '{v: 1'b1, is_integ_mul: 1'b0, is_integ_add: 1'b1,
-                                      body: integ_add_body, field: integ_add_comp,
-                                      lane: integ_add_lane};
-                end else begin
-                    add_sh[u][0] <= '{v: 1'b1, is_integ_mul: 1'b0, is_integ_add: 1'b0,
-                                      body: acc_body, field: 3'({1'b0, acc_comp} + 3'd3), lane: 4'd0};
-                end
+            add_sh_v[u][0]  <= add_valid_o[u];
+            if (integ_add_pick_v && !acc_can_issue) begin
+                add_sh_ia[u][0] <= 1'b1;
+                add_sh_b[u][0]  <= integ_add_body;
+                add_sh_f[u][0]  <= integ_add_comp;
+            end else begin
+                add_sh_ia[u][0] <= 1'b0;
+                add_sh_b[u][0]  <= acc_body;
+                add_sh_f[u][0]  <= 3'({1'b0, acc_comp} + 3'd3);
             end
             for (int d = 1; d < ADD_LAT; d++) begin
-                add_sh[u][d] <= add_sh[u][d-1];
+                add_sh_v[u][d]  <= add_sh_v[u][d-1];
+                add_sh_ia[u][d] <= add_sh_ia[u][d-1];
+                add_sh_b[u][d]  <= add_sh_b[u][d-1];
+                add_sh_f[u][d]  <= add_sh_f[u][d-1];
             end
-            mul_sh[u][0] <= '{v: 1'b0, is_integ_mul: 1'b0, is_integ_add: 1'b0,
-                              body: 3'd0, field: 3'd0, lane: 4'd0};
-            if (mul_valid_o[u]) begin
-                mul_sh[u][0] <= '{v: 1'b1, is_integ_mul: 1'b1, is_integ_add: 1'b0,
-                                  body: integ_body, field: 3'd0, lane: integ_idx[3:0]};
-            end
+            mul_sh_v[u][0] <= mul_valid_o[u];
+            mul_sh_l[u][0] <= integ_idx[3:0];
             for (int d = 1; d < MUL_LAT; d++) begin
-                mul_sh[u][d] <= mul_sh[u][d-1];
+                mul_sh_v[u][d] <= mul_sh_v[u][d-1];
+                mul_sh_l[u][d] <= mul_sh_l[u][d-1];
             end
         end
         // issue bookkeeping
@@ -264,17 +259,17 @@ module grape_accum #(
         end
         // retires
         for (int u = 0; u < 3; u++) begin
-            if (add_ovalid_i[u] && add_sh[u][ADD_LAT-1].v) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
                 retired <= retired + 8'd1;
-                if (!add_sh[u][ADD_LAT-1].is_integ_add) begin
+                if (!add_sh_ia[u][ADD_LAT-1]) begin
                     acc_retired <= acc_retired + 8'd1;
-                    busy_bc[4'(({1'b0, add_sh[u][ADD_LAT-1].body} * 4'd3)
-                            + {2'd0, add_sh[u][ADD_LAT-1].field[1:0]})] <= 1'b0;
+                    busy_bc[4'(({1'b0, add_sh_b[u][ADD_LAT-1]} * 4'd3)
+                            + {2'd0, add_sh_f[u][ADD_LAT-1][1:0]})] <= 1'b0;
                 end
             end
-            if (mul_ovalid_i[u] && mul_sh[u][MUL_LAT-1].v) begin
-                integ_mul_v[mul_sh[u][MUL_LAT-1].lane[3:0]] <= 1'b1;
-                integ_mul_r[mul_sh[u][MUL_LAT-1].lane[3:0]] <= mul_r_i[u*64 +: 64];
+            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
+                integ_mul_v[mul_sh_l[u][MUL_LAT-1]] <= 1'b1;
+                integ_mul_r[mul_sh_l[u][MUL_LAT-1]] <= mul_r_i[u*64 +: 64];
             end
         end
         if (integ_add_pick_v && add_valid_o != 3'b000 && !acc_can_issue) begin
@@ -294,10 +289,10 @@ module grape_accum #(
             busy_bc          <= 15'd0;
             for (int u = 0; u < 3; u++) begin
                 for (int d = 0; d < ADD_LAT; d++) begin
-                    add_sh[u][d].v <= 1'b0;
+                    add_sh_v[u][d] <= 1'b0;
                 end
                 for (int d = 0; d < MUL_LAT; d++) begin
-                    mul_sh[u][d].v <= 1'b0;
+                    mul_sh_v[u][d] <= 1'b0;
                 end
             end
         end
@@ -315,13 +310,13 @@ module grape_accum #(
         wr_data_o  = 64'd0;
         wr_sel     = 2'd0;
         for (int u = 2; u >= 0; u--) begin
-            if (add_ovalid_i[u] && add_sh[u][ADD_LAT-1].v) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
                 wr_en_o    = 1'b1;
                 wr_sel     = u[1:0];
-                wr_body_o  = add_sh[u][ADD_LAT-1].body;
-                wr_field_o = add_sh[u][ADD_LAT-1].is_integ_add
-                             ? {1'b0, add_sh[u][ADD_LAT-1].field[1:0]}
-                             : add_sh[u][ADD_LAT-1].field;
+                wr_body_o  = add_sh_b[u][ADD_LAT-1];
+                wr_field_o = add_sh_ia[u][ADD_LAT-1]
+                             ? {1'b0, add_sh_f[u][ADD_LAT-1][1:0]}
+                             : add_sh_f[u][ADD_LAT-1];
             end
         end
         wr_data_o = add_r_i[wr_sel*64 +: 64];
@@ -330,9 +325,9 @@ module grape_accum #(
 `ifdef SIMULATION
     // At most one accumulate/integrate ADD may retire per cycle (single-issue engine).
     always_comb begin
-        assert ($countones({add_ovalid_i[2] && add_sh[2][ADD_LAT-1].v,
-                            add_ovalid_i[1] && add_sh[1][ADD_LAT-1].v,
-                            add_ovalid_i[0] && add_sh[0][ADD_LAT-1].v}) <= 1)
+        assert ($countones({add_ovalid_i[2] && add_sh_v[2][ADD_LAT-1],
+                            add_ovalid_i[1] && add_sh_v[1][ADD_LAT-1],
+                            add_ovalid_i[0] && add_sh_v[0][ADD_LAT-1]}) <= 1)
             else $error("grape_accum: multiple ADD retires in one cycle");
     end
 `endif
