@@ -79,6 +79,8 @@ module axi_lite_if #(
     logic [3:0]         wr_strb_next;                  // Next captured strobes
     logic               wr_err_q;                      // Latched write error
     logic               wr_err_next;                   // Next latched write error
+    logic               wr_err_seen;                   // wr_err captured for this transaction
+    logic               wr_err_seen_next;              // Next wr_err_seen
     logic               aw_hs;                         // AW handshake this cycle
     logic               w_hs;                          // W handshake this cycle
     logic               wr_start;                      // Both halves available
@@ -94,7 +96,8 @@ module axi_lite_if #(
         wr_addr_next  = wr_addr_q;
         wr_data_next  = wr_data_q;
         wr_strb_next  = wr_strb_q;
-        wr_err_next   = wr_err_q;
+        wr_err_next      = wr_err_q;
+        wr_err_seen_next = wr_err_seen;
         if (aw_hs) begin
             wr_addr_next = s_axi_awaddr[ADDR_W-1:2];
             aw_seen_next = 1'b1;
@@ -111,10 +114,14 @@ module axi_lite_if #(
                 end
             end
             W_PULSE: begin
-                wstate_next = W_WAIT;                  // Decoder answers next cycle
+                wstate_next      = W_WAIT;             // Decoder answers next cycle
+                wr_err_seen_next = 1'b0;
             end
             W_WAIT: begin
-                wr_err_next = wr_err_i;
+                if (!wr_err_seen) begin
+                    wr_err_next      = wr_err_i;       // capture once, first W_WAIT cycle (R8)
+                    wr_err_seen_next = 1'b1;
+                end
                 if (!wr_resp_hold_i) begin
                     wstate_next = W_RESP;
                 end
@@ -131,15 +138,17 @@ module axi_lite_if #(
             end
         endcase
         if (!rst_n) begin
-            wstate_next  = W_IDLE;
-            aw_seen_next = 1'b0;
-            w_seen_next  = 1'b0;
-            wr_err_next  = 1'b0;
+            wstate_next      = W_IDLE;
+            aw_seen_next     = 1'b0;
+            w_seen_next      = 1'b0;
+            wr_err_next      = 1'b0;
+            wr_err_seen_next = 1'b0;
         end
     end
 
     always_ff @(posedge clk) begin
         wstate    <= wstate_next;
+        wr_err_seen <= wr_err_seen_next;
         aw_seen   <= aw_seen_next;
         w_seen    <= w_seen_next;
         wr_addr_q <= wr_addr_next;

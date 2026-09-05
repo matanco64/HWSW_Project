@@ -58,7 +58,9 @@ module grape_regs #(
     logic [7:0]  npairs_l;                             // Latched NPAIRS
     logic [15:0] pairs_l [N_PAIRS_MAX];                // Latched pair list
     logic [15:0] sticky;                               // STATUS sticky bits [15:1] (bit 0 unused)
-    logic [16:1] irq_en;                               // IRQ_EN mask
+    logic [16:1] irq_en;                               // IRQ_EN mask (bit 16 writable but FP_DENORMAL
+                                                       // is reserved: no STATUS source until the uArch
+                                                       // subnormal decision — documented dead, R12)
     logic        irq_q;                                // Registered IRQ
     logic        db_pending;                           // Doorbell decision window (this cycle)
     logic        db_hold;                              // BRESP hold flag
@@ -281,7 +283,7 @@ module grape_regs #(
                 end
             end else begin
                 // header/writable-while-BUSY registers
-                if (wr_addr_i == 10'h002) begin        // CTRL (WP)
+                if (wr_addr_i == 10'h002 && wr_strb_i[0]) begin   // CTRL (WP; byte 0 must be strobed — R7)
                     if (wr_data_i[1]) begin
                         abort_n = 1'b1;                // ABORT wins over DOORBELL (MAS §4)
                         if (wr_data_i[0] && busy_i) begin
