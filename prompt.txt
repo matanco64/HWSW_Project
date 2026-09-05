@@ -1378,3 +1378,29 @@ Prompt: "<task-notification>
 Also 3 new shoulds: N2 (F-11's fixed-123-cycle prediction ignores the 123..127 data-dependent range — needs a window), N3 (sticky mirror undefined for W1C while BUSY, which MAS permits), N4 (F-01's test column can't hit its newly added bins — same pattern as pass-1 finding 12).</result>
 <usage><subagent_tokens>88711</subagent_tokens><tool_uses>12</tool_uses><duration_ms>228361</duration_ms></usage>
 </task-notification>"
+
+2026-09-05T19:44:46Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a0e823086b08fd181</task-id>
+<tool-use-id>toolu_01WT9A34FqMrMzbb4gL35c9r</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a0e823086b08fd181.output</output-file>
+<status>completed</status>
+<summary>Agent "Bring-up RTL/TB review" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. Findings written to `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/docs/review_bringup.md` (Pass 1, 2026-09-05). Reviewed files were not edited.
+
+**Counts: 2 must / 5 should / 4 nit**
+
+**Must list:**
+
+1. **Monitor X-checks don't match their claim** (`hw/common/tb/axi_lite_agent.py:7,76-79`) — the docstring claims the monitor "asserts that DUT-driven signals are X-free after reset", but `_hs()` silently treats an X on any of the five valid/ready signals as "no handshake" (no assert, no log); only BRESP/RDATA/RRESP are asserted, and on the primary 2-state Verilator sim every X-assert is vacuous by construction. In Icarus a dropped handshake surfaces only indirectly (orphan-B/AR assert cycles later, or a driver hang). Fix: assert `is_resolvable` on all valid/ready pairs post-reset, or narrow the docstring.
+
+2. **Sticky FP-flag mirror is never cleared** (`hw/grape_pipeline/tb/env.py:115-116`) — the STATUS-write branch is `pass`, yet its comment says "sticky mirror cleared only for FP bits" and testplan §4 requires clearing on an observed W1C. This masks RTL whose FP-bit W1C is broken: RTL keeps the stale flags, the mirror keeps the uncleared union, and `got == expected` still holds. Dormant in bring-up (no flags raised) but defeats F-13/F-24 the moment `test_fp_flags` exists.
+
+**Key verified-clean results:** the `2'(ev_unit - 3'd3)` fix covers all six sites and every consumer of the MUL lane index (`mul_iss_p/t`, shadow pipes, `mul_free_o` → accum, top-level merge/instantiation) is lane-indexed 0..2; `grape_force_pipe.sv:201` is the only `SCHED_UNIT_V` consumer and the sqrt=6/rcp=7 decode fully covers the 3-bit id — no residual global-id/lane confusion. `grape_accum.sv` diff is a pure declaration hoist. No `.strb` AttributeError path exists (strb read only in the write branch, always set by the monitor). The FP-flags and config-read compares are reachable and live (the 70-word readback is the real bit-exact check), and the F-01/F-08/F-30 "pass (bring-up)" rows are honestly driven by the sequences. Monitor handshake sampling (RisingEdge+ReadOnly) and FIFO AW/W/B pairing are sound for everything cocotbext-axi can legally produce, including same-cycle AW+W+B.
+
+**Notable shoulds:** W1C efficacy entirely unchecked (stuck-DONE passes smoke); mirror-busy tail skew (writes between real-DONE and observed-DONE dropped from the mirror); partial-strobe and reserved-bit write modeling diverges from `grape_regs.sv`'s `apply_strb`; no abort model in the replay; same-cycle write-before-read `ap` ordering is safe only while the driver stays blocking/single-outstanding.
+
+Note: all reviewed changes (RTL fixes, monitor, env/sequences) are currently uncommitted working-tree edits; env.py/smoke.py/test_grape_pipeline.py are untracked.</result>
+<usage><subagent_tokens>129427</subagent_tokens><tool_uses>23</tool_uses><duration_ms>575199</duration_ms></usage>
+</task-notification>"

@@ -249,11 +249,11 @@ module grape_force_pipe #(
                         add_iss_p[ev_unit[1:0]] = ev_pair;
                         add_iss_t[ev_unit[1:0]] = ev_tag;
                     end else if (ev_unit <= 3'd5) begin
-                        mul_valid_o[ev_unit[1:0]] = 1'b1;
-                        mul_a_o[ev_unit[1:0]*64 +: 64] = op_a;
-                        mul_b_o[ev_unit[1:0]*64 +: 64] = op_b;
-                        mul_iss_p[ev_unit[1:0]] = ev_pair;
-                        mul_iss_t[ev_unit[1:0]] = ev_tag;
+                        mul_valid_o[2'(ev_unit - 3'd3)] = 1'b1;
+                        mul_a_o[2'(ev_unit - 3'd3)*64 +: 64] = op_a;
+                        mul_b_o[2'(ev_unit - 3'd3)*64 +: 64] = op_b;
+                        mul_iss_p[2'(ev_unit - 3'd3)] = ev_pair;
+                        mul_iss_t[2'(ev_unit - 3'd3)] = ev_tag;
                     end else if (ev_unit == 3'd6) begin
                         sqrt_valid_o = 1'b1;
                         sqrt_a_o     = op_a;
@@ -271,7 +271,7 @@ module grape_force_pipe #(
                 if (ev_unit <= 3'd2) begin
                     add_free_o[ev_unit[1:0]] = 1'b0;
                 end else if (ev_unit <= 3'd5) begin
-                    mul_free_o[ev_unit[1:0]] = 1'b0;
+                    mul_free_o[2'(ev_unit - 3'd3)] = 1'b0;
                 end
             end
         end

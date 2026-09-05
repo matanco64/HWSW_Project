@@ -88,6 +88,14 @@ module grape_accum #(
     logic [1:0] acc_comp;                              // Current accumulate component
     logic [63:0] acc_force;                            // Current force term
     logic        acc_can_issue;                        // Ready + not hazarded
+    // helper decodes for integrate (declared before first use — Icarus binds in order)
+    logic [2:0] integ_body;                            // integ_idx / 3
+    logic [1:0] integ_comp;                            // integ_idx % 3
+    // integrate add pick: lowest lane with mul result ready and add not yet issued
+    logic        integ_add_pick_v;                     // A lane is ready for its add
+    logic [3:0]  integ_add_lane;                       // Chosen lane
+    logic [2:0]  integ_add_body;                       // Its body
+    logic [2:0]  integ_add_comp;                       // Its component (position field)
     logic [3:0]  bc_idx;                               // Scoreboard index body*3+comp
     logic        add_slot_found;                       // An ADD slot is free this cycle
     logic [1:0]  add_slot;                             // Chosen ADD slot
@@ -185,9 +193,6 @@ module grape_accum #(
         end
     end
 
-    // helper decodes for integrate
-    logic [2:0] integ_body;                            // integ_idx / 3
-    logic [1:0] integ_comp;                            // integ_idx % 3
     always_comb begin
         integ_body = 3'(integ_idx / 5'd3);
         integ_comp = 2'(integ_idx % 5'd3);
@@ -197,11 +202,6 @@ module grape_accum #(
     assign acc_total = 8'({4'd0, npairs_i[3:0]} * 8'd6);
     logic [1:0]  retire_cnt;                           // Ops retiring this cycle (0..2: ≤1 ADD + ≤1 MUL, S1)
 
-    // integrate add pick: lowest lane with mul result ready and add not yet issued
-    logic        integ_add_pick_v;                     // A lane is ready for its add
-    logic [3:0]  integ_add_lane;                       // Chosen lane
-    logic [2:0]  integ_add_body;                       // Its body
-    logic [2:0]  integ_add_comp;                       // Its component (position field)
     always_comb begin
         retire_cnt = 2'd0;
         for (int u = 0; u < 3; u++) begin
