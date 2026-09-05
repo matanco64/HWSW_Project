@@ -442,7 +442,7 @@ async def test_abort_pulses(dut):
 @cocotb.test()
 async def test_abort_doorbell_while_busy_sets_err_busy(dut):
     """MAS par.8: DOORBELL+ABORT in one write while BUSY -> ABORT acts AND ERR_BUSY (the
-    doorbell was ignored). KNOWN RED: grape_regs.sv takes the abort branch exclusively and
+    doorbell was ignored). MAS §8 same-write rule (ABORT acts AND ERR_BUSY) is implemented; this test passes.
     (FIXED 2026-09-05: now sets ERR_BUSY per MAS §8) for the ignored doorbell."""
     axil = await setup(dut)
     await write_good_config(axil)
