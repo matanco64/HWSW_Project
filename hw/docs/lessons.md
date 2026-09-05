@@ -115,3 +115,22 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   the fusion audit: one node per Python rounding.
 - **Spike before grilling worked** — the FP64 sourcing agent (CVFPU 1-ulp red flag, yosys-slang
   requirement) turned Q1/Q6 from opinions into decisions with citations.
+
+## 2026-09-05 — grape_pipeline/rtl (stage in progress)
+
+- **`yosys | grep '^ERROR'` is a false green** — Yosys prefixes errors with `file:line:`, so two
+  "synth-checked" blocks had never parsed. Fix: grep bare `ERROR`; better, the `make area` target
+  is the only synth evidence that counts (it fails loudly).
+- **Yosys 0.68 SystemVerilog potholes** (now in the module headers): no struct members on
+  unpacked-array elements, no bit-selects on function calls, no unpacked localparam arrays, no
+  in-module `import` — write parallel arrays / hoist to locals / case-functions / scoped refs.
+- **The reviewer beats lint where it matters** — all five silent-corruption/hang bugs (shadow
+  mis-tagging, two missing one-cycle forwards, scoreboard index, uncounted retires) were
+  lint-clean. The adversarial trace of issue/retire edge arithmetic is the highest-value review
+  instruction; keep it verbatim in future RTL reviews.
+- **Contract-first parallel unit builds worked** — three agents built four FP64 units against
+  `rtl_contracts.md` + the numpy oracle with zero interface rework at integration; the one
+  cross-agent artifact (`fp64_pkg.sv`) landed without collision. Keep: binding contracts + an
+  executable oracle before dispatching parallel RTL agents.
+- **Rate-limit interruptions are cheap to absorb** — SendMessage resume continued all three
+  agents from their transcripts with no lost work.
