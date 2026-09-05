@@ -134,3 +134,10 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   executable oracle before dispatching parallel RTL agents.
 - **Rate-limit interruptions are cheap to absorb** — SendMessage resume continued all three
   agents from their transcripts with no lost work.
+- **Dynamic engines need their unit TB before review, not after** — `grape_regs` (unit-tested
+  first) survived review with 1 bug; `grape_accum`/`grape_force_pipe` (no unit TB, "golden
+  comparison at bring-up") collected 9 findings across two passes, and two pass-2 musts (S1/S2)
+  were regressions introduced by pass-1 fixes — exactly the class a synthetic-stream unit TB
+  (fake op streams, check counters/ordering/all_done) would catch in minutes. The "no cheap
+  oracle" exemption is real only for pure FP datapaths; issue/scoreboard/retire logic always has
+  a cheap oracle. Evidence: review_rtl.md, git churn grape_accum ×4.

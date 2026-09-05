@@ -19,8 +19,11 @@ only, logic in `always_comb`, Q-notation comments, sized literals, Yosys-synthes
 3. Build leaf blocks first, top last. For each block use `superpowers:test-driven-development`
    where a cheap check exists: write the cocotb smoke test under `tb/unit/test_<block>.py`
    (reset, one transaction, one boundary value — `gf-cocotb` template) before the RTL, watch it
-   fail, then implement. Blocks with no cheap oracle (FP64 datapath) get the golden-model
-   comparison at `hw-dv-bringup` instead; say so in the block header.
+   fail, then implement. The "no cheap oracle" exemption covers ONLY pure FP datapaths (they
+   get the golden-model comparison at `hw-dv-bringup`; say so in the block header).
+   Issue/scoreboard/retire engines always have a cheap oracle — synthetic op streams checking
+   counters, ordering and completion — and get their unit TB BEFORE `hw-review`: review
+   regressions in dynamic engines (grape_accum S1/S2) are what the TB prevents.
 4. After every `.sv` edit the PostToolUse hook runs `verilator --lint-only -Wall` on the file;
    fix warnings before the next edit. Verkor lesson: write each `always_ff` as "what the flops
    hold next cycle", never as a sequence of steps — a `for` loop with a data dependency inside
