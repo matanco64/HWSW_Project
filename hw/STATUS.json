@@ -104,21 +104,24 @@
           }
         },
         "rtl": {
-          "state": "in_progress",
+          "state": "done",
           "started": "2026-09-04T20:46:48Z",
-          "finished": "",
+          "finished": "2026-09-05T18:20:49Z",
           "gate": {
             "make lint clean (verilator --lint-only -Wall)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make -C hw/grape_pipeline lint (11 files incl. TB wrapper) -> lint: clean, 2026-09-05",
+              "at": "2026-09-05T06:58:02Z"
             },
             "Yosys synth succeeds (synthesizable subset)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/area.txt: 393367 sky130_fd_sc_hd cells, 2938435.7 um^2; yosys.log 0 errors (full flatten, post scr_fwd synthesizability fixes)",
+              "at": "2026-09-05T18:20:48Z"
             },
             "agent code review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_rtl.md: 16 findings (2 passes), 0 must open",
+              "at": "2026-09-05T06:57:28Z"
             }
           }
         },
@@ -259,8 +262,8 @@
           "formal": "n/a"
         },
         "ppa": {
-          "cells": 0,
-          "area_um2": 0,
+          "cells": 393367,
+          "area_um2": 2938436,
           "fmax_mhz": 0,
           "power_mw": 0
         }
@@ -804,5 +807,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-04T20:46:48Z"
+  "updated": "2026-09-05T18:20:49Z"
 }

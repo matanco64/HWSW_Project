@@ -141,3 +141,20 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   (fake op streams, check counters/ordering/all_done) would catch in minutes. The "no cheap
   oracle" exemption is real only for pure FP datapaths; issue/scoreboard/retire logic always has
   a cheap oracle. Evidence: review_rtl.md, git churn grape_accum ×4.
+
+### Addendum (area gate, same stage)
+
+- **Yosys constant case-functions are a trap at scale**: a constant-arg function call is inlined
+  as its whole case tree at every call site — 200-entry case × ~30 sites × 200 unrolled
+  iterations never terminates. Packed `localparam` vectors read with `[e*W +: W]` fold at
+  elaboration. `hw-rtl` ROMs should be packed vectors, case-functions only for handfuls of
+  entries.
+- **Dynamic array reads through intermediate variables defeat mem2reg**: `arr[v]` where `v` was
+  just assigned a constant-foldable expression still becomes a full-depth read mux. Index with
+  the foldable expression directly.
+- **Keep wide comb views out of big guarded processes**: a 12,800-bit array view built inside a
+  200-guard `always_comb` sends every bit through the whole PROC_MUX decision tree (44,706
+  items). In its own `always_comb`: 3,216. Split view construction from consumers.
+- **Synthesis-runtime is a gate concern, not just synthesizability**: lint-clean + parse-clean
+  said nothing about the 4-hour mem2reg blowup. The area gate must actually complete before the
+  stage closes (it did, this time, only after three restructurings).

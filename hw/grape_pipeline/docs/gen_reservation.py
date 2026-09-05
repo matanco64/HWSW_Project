@@ -86,22 +86,20 @@ def emit(rows, step):
              f"localparam int SCHED_STEP_CYCLES = {step};"]
     for tag_i, tag in enumerate(TAGS):
         lines.append(f"localparam int TAG_{tag} = {tag_i};")
-    # Yosys rejects unpacked localparam arrays: emit constant case-functions instead.
-    def fn(name, vals, w):
-        lines.append(f"function automatic logic [{w-1}:0] {name}(input int e);")
-        lines.append(f"    logic [{w-1}:0] r;")
-        lines.append(f"    r = {w}'d0;")
-        lines.append("    case (e)")
-        for i, v in enumerate(vals):
-            lines.append(f"        {i}: r = {w}'d{v};")
-        lines.append(f"        default: r = {w}'d0;")
-        lines.append("    endcase")
-        lines.append(f"    {name} = r;")
-        lines.append("endfunction")
-    fn("sched_cycle", [r[0] for r in rows], 8)
-    fn("sched_unit", [r[1] for r in rows], 3)
-    fn("sched_pair", [r[2] for r in rows], 4)
-    fn("sched_tag", [TAGS.index(r[3]) for r in rows], 5)
+    # Yosys rejects unpacked localparam arrays, and constant case-functions inline their whole
+    # 200-entry case at every call site (AST explosion; synthesis does not terminate). Packed
+    # localparam vectors read with a constant part-select fold at elaboration in both tools:
+    # SCHED_X_V[e*W +: W] with a constant e is a constant.
+    def vec(name, vals, w):
+        parts = [f"{w}'d{v}" for v in reversed(vals)]      # event 0 at the LSB end
+        lines.append(f"localparam logic [{len(vals)*w-1}:0] {name}_V = {{")
+        for i in range(0, len(parts), 16):
+            sep = "," if i + 16 < len(parts) else "};"
+            lines.append("    " + ", ".join(parts[i:i+16]) + sep)
+    vec("SCHED_CYCLE", [r[0] for r in rows], 8)
+    vec("SCHED_UNIT", [r[1] for r in rows], 3)
+    vec("SCHED_PAIR", [r[2] for r in rows], 4)
+    vec("SCHED_TAG", [TAGS.index(r[3]) for r in rows], 5)
     out.write_text("\n".join(lines) + "\n")
     print(f"wrote {out}: {n} events, step {step}")
 
