@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-05 18:41 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-05 18:41 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-05 19:45 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-05 19:45 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,8 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd,mas,uarch,rtl,dv_testplan done
+    class dv_coverage,dv_signoff,ppa,integration todo
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup done
 ```
 
 ### `huffman_engine`
@@ -83,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -91,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **DV bring-up** — todo
+- `grape_pipeline`: **DV coverage** — todo
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -138,6 +138,13 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] features <-> tests <-> covergroups <-> checkers matrix — docs/testplan.md §2: 26 rows (F-01..17 = PRD-F1..17, F-20..24 FSM/collisions/hazards, F-30..33 schedule/counters), no empty cell
 - [x] hw-review resolved — docs/review_testplan.md: 26 findings (2 passes: 7+1 must all resolved, 10 shoulds accepted), 0 must open
 
+#### DV bring-up — ✅ done (started 2026-09-05T19:22:15Z, finished 2026-09-05T19:45:54Z)
+
+- [x] pyuvm env instantiates — make sim: GrapeEnv (axi agent + passive monitor + GrapeScoreboard) builds/connects; 2 tests run under it (Verilator + Icarus)
+- [x] first directed test passes on Verilator — test_grape_pipeline.smoke PASS (NPAIRS=2 NSTEPS=2 bit-exact; K1 measured 126.0 <= 128); test_corner PASS (PRD-F8 nsteps0 + npairs0)
+- [x] scoreboard compares against golden — scoreboard: compared 146 items, 0 mismatches (golden=emulation.advance, 2 runs); same on Icarus 4-state
+- [x] hw-review resolved — docs/review_bringup.md: 11 findings, 2 musts fixed (monitor X-assert, W1C mirror clear), 0 must open
+
 ### `huffman_engine`
 
 #### PRD — ✅ done (started 2026-08-28T19:34:34Z, finished 2026-08-28T20:54:29Z)
@@ -178,6 +185,6 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 0 | 0 | 0 | 0/0 | n/a | 393367 | 2938436 | 0 | 0 |
+| `grape_pipeline` | 0 | 0 | 0 | 4/4 | n/a | 393367 | 2938436 | 0 | 0 |
 | `huffman_engine` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |

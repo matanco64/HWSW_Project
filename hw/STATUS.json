@@ -157,21 +157,29 @@
           }
         },
         "dv_bringup": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-05T19:22:15Z",
+          "finished": "2026-09-05T19:45:54Z",
           "gate": {
             "pyuvm env instantiates": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim: GrapeEnv (axi agent + passive monitor + GrapeScoreboard) builds/connects; 2 tests run under it (Verilator + Icarus)",
+              "at": "2026-09-05T19:45:54Z"
             },
             "first directed test passes on Verilator": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "test_grape_pipeline.smoke PASS (NPAIRS=2 NSTEPS=2 bit-exact; K1 measured 126.0 <= 128); test_corner PASS (PRD-F8 nsteps0 + npairs0)",
+              "at": "2026-09-05T19:45:54Z"
             },
             "scoreboard compares against golden": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "scoreboard: compared 146 items, 0 mismatches (golden=emulation.advance, 2 runs); same on Icarus 4-state",
+              "at": "2026-09-05T19:45:54Z"
+            },
+            "hw-review resolved": {
+              "result": "pass",
+              "evidence": "docs/review_bringup.md: 11 findings, 2 musts fixed (monitor X-assert, W1C mirror clear), 0 must open",
+              "at": "2026-09-05T19:45:54Z"
             }
           }
         },
@@ -269,8 +277,8 @@
           "line_cov": 0,
           "toggle_cov": 0,
           "func_cov": 0,
-          "tests_run": 0,
-          "tests_pass": 0,
+          "tests_run": 4,
+          "tests_pass": 4,
           "formal": "n/a"
         },
         "ppa": {
@@ -819,5 +827,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-05T18:41:33Z"
+  "updated": "2026-09-05T19:45:54Z"
 }

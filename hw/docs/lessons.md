@@ -170,3 +170,23 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   proposal below rather than applied (one data point).
 - Second data point for the "review catches what generation glosses" series: 8 musts across 2
   passes on a 26-row matrix written from the specs it traces to.
+
+## 2026-09-05 — grape_pipeline/dv_bringup
+
+- **The first full-chip sim caught a silently-dropped-op bug in under an hour** that lint, Yosys,
+  two RTL review passes and four unit TBs all missed: the schedule ROM's global unit ids (3..5 =
+  MUL) were indexed into the 3-lane mul buses as `ev_unit[1:0]` — unit 3 wrote out of bounds
+  (op vanished), 4/5 landed on wrong-but-consistent lanes. Symptom chain: divzero flag +
+  STEPS_DONE stuck. Vindicates the narrowed hw-rtl rule: an issue engine's unit TB (or the
+  module smoke) must run BEFORE review sign-off; a top-level smoke would have caught this at the
+  RTL stage.
+- The Verkor debug flow (VCD → vcd2csv → reason over the table) found it in three dumps:
+  FSM/counters first (localised the hang), then issue/ovalid valids (localised the lane), no
+  waveform GUI needed. Worth keeping as the default `hw-dv-bringup` debug loop.
+- cocotbext-axi API drift: `write_dword`/`read_dword` return None in the pinned version —
+  use `write(addr, bytes)`/`read(addr, n)` whose results carry `.resp`/`.data` (the regs unit TB
+  already knew; the shared driver didn't).
+- Icarus binds identifiers in declaration order: forward uses that Verilator/Yosys accept are
+  elaboration errors (`Unable to bind`). Declare before first use in shared RTL.
+- Replay-in-check_phase scoreboarding (single monitor stream, mirror replayed in bus order)
+  needed zero concurrency and survived both simulators unchanged.
