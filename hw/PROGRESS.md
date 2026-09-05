@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-05 18:20 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-05 18:20 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-05 18:41 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-05 18:41 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,8 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd,mas,uarch,rtl done
+    class dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class prd,mas,uarch,rtl,dv_testplan done
 ```
 
 ### `huffman_engine`
@@ -83,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -91,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **DV testplan** — todo
+- `grape_pipeline`: **DV bring-up** — todo
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -129,6 +129,14 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] make lint clean (verilator --lint-only -Wall) — make -C hw/grape_pipeline lint (11 files incl. TB wrapper) -> lint: clean, 2026-09-05
 - [x] Yosys synth succeeds (synthesizable subset) — synth/area.txt: 393367 sky130_fd_sc_hd cells, 2938435.7 um^2; yosys.log 0 errors (full flatten, post scr_fwd synthesizability fixes)
 - [x] agent code review resolved — docs/review_rtl.md: 16 findings (2 passes), 0 must open
+
+#### DV testplan — ✅ done (started 2026-09-05T18:24:42Z, finished 2026-09-05T18:41:33Z)
+
+- [ ] features ↔ tests ↔ covergroups ↔ checkers matrix
+- [x] golden-model interface defined — docs/testplan.md §4: emulation.advance bit-exact + sticky-flag mirror; nbody_ref tolerances 1e-12 / 2e-9 (r) / 5e-11 (v) with calibrate.py margins; abort replay policy
+- [x] formal properties listed — docs/testplan.md §6: 3 sby properties (FSM arcs, BRESP hold, W1C) + justified datapath exclusion + fallback clause
+- [x] features <-> tests <-> covergroups <-> checkers matrix — docs/testplan.md §2: 26 rows (F-01..17 = PRD-F1..17, F-20..24 FSM/collisions/hazards, F-30..33 schedule/counters), no empty cell
+- [x] hw-review resolved — docs/review_testplan.md: 26 findings (2 passes: 7+1 must all resolved, 10 shoulds accepted), 0 must open
 
 ### `huffman_engine`
 
