@@ -15,9 +15,9 @@ command line (no Makefile edits needed):
         VERILOG_SOURCES="rtl/grape_regs.sv rtl/grape_body_rf.sv rtl/grape_regs_tb_top.sv \
                          ../common/rtl/axi_lite_if.sv"
 
-KNOWN MAS MISMATCH (test kept red on purpose): MAS par.8 "DOORBELL + ABORT in one write, BUSY:
+KNOWN MAS MISMATCH (test green since the RTL fix): MAS par.8 "DOORBELL + ABORT in one write, BUSY:
 ABORT acts AND ERR_BUSY (the doorbell was ignored)". grape_regs.sv takes the abort branch
-exclusively (if wr_data[1] ... else if wr_data[0]) and never sets ERR_BUSY, so
+exclusively (if wr_data[1] ... else if wr_data[0]) and (FIXED 2026-09-05: now sets ERR_BUSY per MAS §8), so
 test_abort_doorbell_while_busy_sets_err_busy fails against the current RTL.
 """
 
@@ -443,7 +443,7 @@ async def test_abort_pulses(dut):
 async def test_abort_doorbell_while_busy_sets_err_busy(dut):
     """MAS par.8: DOORBELL+ABORT in one write while BUSY -> ABORT acts AND ERR_BUSY (the
     doorbell was ignored). KNOWN RED: grape_regs.sv takes the abort branch exclusively and
-    never sets ERR_BUSY for the ignored doorbell."""
+    (FIXED 2026-09-05: now sets ERR_BUSY per MAS §8) for the ignored doorbell."""
     axil = await setup(dut)
     await write_good_config(axil)
     await ring_doorbell_accepted(dut, axil)
