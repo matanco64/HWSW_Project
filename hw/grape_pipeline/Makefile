@@ -1,5 +1,5 @@
 # grape_pipeline — see hw/FLOW.md for targets. Placeholders until the RTL stage.
 TOPLEVEL        := grape_pipeline
-VERILOG_SOURCES := $(wildcard rtl/*.sv)
+VERILOG_SOURCES := $(wildcard rtl/*.sv) ../common/rtl/axi_lite_if.sv
 MODULE          := test_grape_pipeline
 include ../common/Makefile.cocotb
