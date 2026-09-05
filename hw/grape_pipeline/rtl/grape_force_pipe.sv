@@ -115,6 +115,20 @@ module grape_force_pipe #(
     logic [3:0]  ev_pair;                              // Helper: current event pair
     logic [4:0]  ev_tag;                               // Helper: current event tag
     logic [2:0]  ev_unit;                              // Helper: current event unit binding
+    // Per-unit issue capture (review R1: up to 6 events issue per cycle; ev_* holds only the
+    // last one after the loop, so each unit records its own pair/tag here).
+    logic [3:0]  add_iss_p [3];                        // ADD issue pair per unit
+    logic [4:0]  add_iss_t [3];                        // ADD issue tag per unit
+    logic [3:0]  mul_iss_p [3];                        // MUL issue pair per unit
+    logic [4:0]  mul_iss_t [3];                        // MUL issue tag per unit
+    logic [3:0]  sqrt_iss_p;                           // SQRT issue pair
+    logic [4:0]  sqrt_iss_t;                           // SQRT issue tag
+    logic [3:0]  rcp_iss_p;                            // RCP issue pair
+    logic [4:0]  rcp_iss_t;                            // RCP issue tag
+    // Result-forwarded scratch view (review R2: the table schedules consumers at
+    // parent_issue + LAT, the exact cycle the result retires — scratch is written at the end of
+    // that cycle, so reads go through this same-cycle forward).
+    logic [63:0] scr_fwd [N_PAIRS_MAX][N_TAGS];        // Scratch with retiring results forwarded
     logic [2:0]  bi;                                   // Body i of the pair
     logic [2:0]  bj;                                   // Body j of the pair
     logic [63:0] op_a;                                 // Selected operand a
@@ -138,11 +152,40 @@ module grape_force_pipe #(
         ev_pair = 4'd0;
         ev_tag  = 5'd0;
         ev_unit = 3'd0;
+        for (int u = 0; u < 3; u++) begin
+            add_iss_p[u] = 4'd0;
+            add_iss_t[u] = 5'd0;
+            mul_iss_p[u] = 4'd0;
+            mul_iss_t[u] = 5'd0;
+        end
+        sqrt_iss_p = 4'd0;
+        sqrt_iss_t = 5'd0;
+        rcp_iss_p  = 4'd0;
+        rcp_iss_t  = 5'd0;
         bi      = 3'd0;
         bj      = 3'd0;
         op_a    = 64'd0;
         op_b    = 64'd0;
         op_sub  = 1'b0;
+        for (int k = 0; k < N_PAIRS_MAX; k++) begin
+            for (int g = 0; g < N_TAGS; g++) begin
+                scr_fwd[k][g] = scratch[k][g];
+            end
+        end
+        for (int u = 0; u < 3; u++) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
+                scr_fwd[add_sh_p[u][ADD_LAT-1]][add_sh_t[u][ADD_LAT-1]] = add_r_i[u*64 +: 64];
+            end
+            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
+                scr_fwd[mul_sh_p[u][MUL_LAT-1]][mul_sh_t[u][MUL_LAT-1]] = mul_r_i[u*64 +: 64];
+            end
+        end
+        if (sqrt_ovalid_i && sqrt_sh_v[SQRT_LAT-1]) begin
+            scr_fwd[sqrt_sh_p[SQRT_LAT-1]][sqrt_sh_t[SQRT_LAT-1]] = sqrt_r_i;
+        end
+        if (rcp_ovalid_i && rcp_sh_v[RCP_LAT-1]) begin
+            scr_fwd[rcp_sh_p[RCP_LAT-1]][rcp_sh_t[RCP_LAT-1]] = rcp_r_i;
+        end
         for (int e = 0; e < SCHED_EVENTS; e++) begin
             if (run_i && sched_cycle(e) == cyc) begin
                 ev_pair = sched_pair(e);
@@ -158,36 +201,36 @@ module grape_force_pipe #(
                     op_b   = body_field(working_flat_i, bj, ev_tag[2:0]);
                     op_sub = 1'b1;
                 end else if (ev_tag <= TAG_SQ_Z[4:0]) begin
-                    op_a = scratch[ev_pair][ev_tag - 5'd3];               // SQ_c -> SUB_c
+                    op_a = scr_fwd[ev_pair][ev_tag - 5'd3];               // SQ_c -> SUB_c
                     op_b = op_a;
                 end else if (ev_tag == TAG_A1[4:0]) begin
-                    op_a = scratch[ev_pair][TAG_SQ_X];
-                    op_b = scratch[ev_pair][TAG_SQ_Y];
+                    op_a = scr_fwd[ev_pair][TAG_SQ_X];
+                    op_b = scr_fwd[ev_pair][TAG_SQ_Y];
                 end else if (ev_tag == TAG_DSQ[4:0]) begin
-                    op_a = scratch[ev_pair][TAG_A1];
-                    op_b = scratch[ev_pair][TAG_SQ_Z];
+                    op_a = scr_fwd[ev_pair][TAG_A1];
+                    op_b = scr_fwd[ev_pair][TAG_SQ_Z];
                 end else if (ev_tag == TAG_SQRT[4:0]) begin
-                    op_a = scratch[ev_pair][TAG_DSQ];
+                    op_a = scr_fwd[ev_pair][TAG_DSQ];
                 end else if (ev_tag == TAG_D3[4:0]) begin
-                    op_a = scratch[ev_pair][TAG_DSQ];
-                    op_b = scratch[ev_pair][TAG_SQRT];
+                    op_a = scr_fwd[ev_pair][TAG_DSQ];
+                    op_b = scr_fwd[ev_pair][TAG_SQRT];
                 end else if (ev_tag == TAG_RCP[4:0]) begin
-                    op_a = scratch[ev_pair][TAG_D3];
+                    op_a = scr_fwd[ev_pair][TAG_D3];
                 end else if (ev_tag == TAG_MAG[4:0]) begin
                     op_a = dt_i;
-                    op_b = scratch[ev_pair][TAG_RCP];
+                    op_b = scr_fwd[ev_pair][TAG_RCP];
                 end else if (ev_tag == TAG_B1M[4:0]) begin
                     op_a = body_field(working_flat_i, bi, 3'd6);
-                    op_b = scratch[ev_pair][TAG_MAG];
+                    op_b = scr_fwd[ev_pair][TAG_MAG];
                 end else if (ev_tag == TAG_B2M[4:0]) begin
                     op_a = body_field(working_flat_i, bj, 3'd6);
-                    op_b = scratch[ev_pair][TAG_MAG];
+                    op_b = scr_fwd[ev_pair][TAG_MAG];
                 end else if (ev_tag <= TAG_F_I_Z[4:0]) begin
-                    op_a = scratch[ev_pair][ev_tag - 5'd14];              // F_I_c -> SUB_c (tag 14..16 -> 0..2)
-                    op_b = scratch[ev_pair][TAG_B2M];
+                    op_a = scr_fwd[ev_pair][ev_tag - 5'd14];              // F_I_c -> SUB_c (tag 14..16 -> 0..2)
+                    op_b = scr_fwd[ev_pair][TAG_B2M];
                 end else begin
-                    op_a = scratch[ev_pair][ev_tag - 5'd17];              // F_J_c -> SUB_c (tag 17..19 -> 0..2)
-                    op_b = scratch[ev_pair][TAG_B1M];
+                    op_a = scr_fwd[ev_pair][ev_tag - 5'd17];              // F_J_c -> SUB_c (tag 17..19 -> 0..2)
+                    op_b = scr_fwd[ev_pair][TAG_B1M];
                 end
                 if ({28'd0, ev_pair} < {24'd0, npairs_i}) begin
                     if (ev_unit <= 3'd2) begin
@@ -195,16 +238,24 @@ module grape_force_pipe #(
                         add_sub_o[ev_unit[1:0]]   = op_sub;
                         add_a_o[ev_unit[1:0]*64 +: 64] = op_a;
                         add_b_o[ev_unit[1:0]*64 +: 64] = op_b;
+                        add_iss_p[ev_unit[1:0]] = ev_pair;
+                        add_iss_t[ev_unit[1:0]] = ev_tag;
                     end else if (ev_unit <= 3'd5) begin
                         mul_valid_o[ev_unit[1:0]] = 1'b1;
                         mul_a_o[ev_unit[1:0]*64 +: 64] = op_a;
                         mul_b_o[ev_unit[1:0]*64 +: 64] = op_b;
+                        mul_iss_p[ev_unit[1:0]] = ev_pair;
+                        mul_iss_t[ev_unit[1:0]] = ev_tag;
                     end else if (ev_unit == 3'd6) begin
                         sqrt_valid_o = 1'b1;
                         sqrt_a_o     = op_a;
+                        sqrt_iss_p   = ev_pair;
+                        sqrt_iss_t   = ev_tag;
                     end else begin
                         rcp_valid_o = 1'b1;
                         rcp_a_o     = op_a;
+                        rcp_iss_p   = ev_pair;
+                        rcp_iss_t   = ev_tag;
                     end
                 end
                 // Table ownership blocks accum use of the slot even when suppressed (keeps
@@ -222,16 +273,16 @@ module grape_force_pipe #(
     always_ff @(posedge clk) begin
         for (int u = 0; u < 3; u++) begin
             add_sh_v[u][0] <= add_valid_o[u];
-            add_sh_p[u][0] <= ev_pair;
-            add_sh_t[u][0] <= ev_tag;
+            add_sh_p[u][0] <= add_iss_p[u];
+            add_sh_t[u][0] <= add_iss_t[u];
             for (int d = 1; d < ADD_LAT; d++) begin
                 add_sh_v[u][d] <= add_sh_v[u][d-1];
                 add_sh_p[u][d] <= add_sh_p[u][d-1];
                 add_sh_t[u][d] <= add_sh_t[u][d-1];
             end
             mul_sh_v[u][0] <= mul_valid_o[u];
-            mul_sh_p[u][0] <= ev_pair;
-            mul_sh_t[u][0] <= ev_tag;
+            mul_sh_p[u][0] <= mul_iss_p[u];
+            mul_sh_t[u][0] <= mul_iss_t[u];
             for (int d = 1; d < MUL_LAT; d++) begin
                 mul_sh_v[u][d] <= mul_sh_v[u][d-1];
                 mul_sh_p[u][d] <= mul_sh_p[u][d-1];
@@ -239,16 +290,16 @@ module grape_force_pipe #(
             end
         end
         sqrt_sh_v[0] <= sqrt_valid_o;
-        sqrt_sh_p[0] <= ev_pair;
-        sqrt_sh_t[0] <= ev_tag;
+        sqrt_sh_p[0] <= sqrt_iss_p;
+        sqrt_sh_t[0] <= sqrt_iss_t;
         for (int d = 1; d < SQRT_LAT; d++) begin
             sqrt_sh_v[d] <= sqrt_sh_v[d-1];
             sqrt_sh_p[d] <= sqrt_sh_p[d-1];
             sqrt_sh_t[d] <= sqrt_sh_t[d-1];
         end
         rcp_sh_v[0] <= rcp_valid_o;
-        rcp_sh_p[0] <= ev_pair;
-        rcp_sh_t[0] <= ev_tag;
+        rcp_sh_p[0] <= rcp_iss_p;
+        rcp_sh_t[0] <= rcp_iss_t;
         for (int d = 1; d < RCP_LAT; d++) begin
             rcp_sh_v[d] <= rcp_sh_v[d-1];
             rcp_sh_p[d] <= rcp_sh_p[d-1];
