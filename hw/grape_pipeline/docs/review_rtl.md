@@ -39,3 +39,26 @@ two new findings). 4 new findings, all resolved (commit follows):
 Also swept clean: scr_fwd aliasing (impossible — single producer per tag), UNOPTFLAT (none),
 single-ADD-retire assumption (holds; SVA in place), shadow metadata at step_start (valids cleared).
 Open must: **0**. Total: 16 findings (2 passes).
+
+## Post-review synthesizability fixes (2026-09-05)
+
+The area gate exposed that `grape_force_pipe` as reviewed never finished Yosys synthesis (two
+runs killed at 4h11m and 2h, both stuck expanding `scr_fwd`). Three behavior-identical
+restructurings fixed it; Verilator lint stayed clean and no interface or scheduling semantics
+changed:
+
+1. **Constant-index `scr_fwd` reads** — the event loop read `scr_fwd[ev_pair][ev_tag - …]`
+   through module-level variables, so Yosys `mem2reg` expanded every read into a 200-way mux
+   (120,216 read cells, non-terminating). Reads now index via the schedule constants, which fold
+   per unrolled iteration.
+2. **Packed-vector schedule ROM** — the generated constant case-functions
+   (`sched_cycle/unit/pair/tag`) inlined a 200-entry case at every call site (AST explosion).
+   `docs/gen_reservation.py` now emits packed `localparam` vectors (`SCHED_*_V`); call sites use
+   `[e*W +: W]` constant part-selects. Same table, same 200 events, step 123.
+3. **`scr_fwd` view in its own `always_comb`** — built inside the 200-guard issue process, all
+   12,800 view bits were muxed through the whole decision tree (PROC_MUX at 44,706 items).
+   Split out, PROC_MUX drops to 3,216 items.
+
+Evidence: `grape_force_pipe` alone now synthesizes in 569 s, 0 errors, 305,612 generic cells
+(fp_probe2.log hash 832ae6093c). The cell count is dominated by the forwarding/mux fabric —
+flagged for the PPA stage.

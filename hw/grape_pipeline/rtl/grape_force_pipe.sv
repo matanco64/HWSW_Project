@@ -127,13 +127,40 @@ module grape_force_pipe #(
     logic [4:0]  rcp_iss_t;                            // RCP issue tag
     // Result-forwarded scratch view (review R2: the table schedules consumers at
     // parent_issue + LAT, the exact cycle the result retires — scratch is written at the end of
-    // that cycle, so reads go through this same-cycle forward).
+    // that cycle, so reads go through this same-cycle forward). scr_fwd reads in the event loop
+    // must index via the SCHED_*_V constant part-selects, never via the ev_* variables: with a
+    // constant e the select folds at elaboration, keeping every read a constant index — through
+    // ev_* Yosys mem2reg expands each read into a 200-way mux and synthesis does not terminate.
     logic [63:0] scr_fwd [N_PAIRS_MAX][N_TAGS];        // Scratch with retiring results forwarded
     logic [2:0]  bi;                                   // Body i of the pair
     logic [2:0]  bj;                                   // Body j of the pair
     logic [63:0] op_a;                                 // Selected operand a
     logic [63:0] op_b;                                 // Selected operand b
     logic        op_sub;                               // Subtract select for ADD ops
+
+    // Built in its own always_comb: inside the 200-guard issue process every scr_fwd bit
+    // would be muxed through the whole decision tree (PROC_MUX blow-up).
+    always_comb begin
+        for (int k = 0; k < N_PAIRS_MAX; k++) begin
+            for (int g = 0; g < N_TAGS; g++) begin
+                scr_fwd[k][g] = scratch[k][g];
+            end
+        end
+        for (int u = 0; u < 3; u++) begin
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
+                scr_fwd[add_sh_p[u][ADD_LAT-1]][add_sh_t[u][ADD_LAT-1]] = add_r_i[u*64 +: 64];
+            end
+            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
+                scr_fwd[mul_sh_p[u][MUL_LAT-1]][mul_sh_t[u][MUL_LAT-1]] = mul_r_i[u*64 +: 64];
+            end
+        end
+        if (sqrt_ovalid_i && sqrt_sh_v[SQRT_LAT-1]) begin
+            scr_fwd[sqrt_sh_p[SQRT_LAT-1]][sqrt_sh_t[SQRT_LAT-1]] = sqrt_r_i;
+        end
+        if (rcp_ovalid_i && rcp_sh_v[RCP_LAT-1]) begin
+            scr_fwd[rcp_sh_p[RCP_LAT-1]][rcp_sh_t[RCP_LAT-1]] = rcp_r_i;
+        end
+    end
 
     always_comb begin
         add_valid_o = 3'b000;
@@ -167,70 +194,51 @@ module grape_force_pipe #(
         op_a    = 64'd0;
         op_b    = 64'd0;
         op_sub  = 1'b0;
-        for (int k = 0; k < N_PAIRS_MAX; k++) begin
-            for (int g = 0; g < N_TAGS; g++) begin
-                scr_fwd[k][g] = scratch[k][g];
-            end
-        end
-        for (int u = 0; u < 3; u++) begin
-            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
-                scr_fwd[add_sh_p[u][ADD_LAT-1]][add_sh_t[u][ADD_LAT-1]] = add_r_i[u*64 +: 64];
-            end
-            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
-                scr_fwd[mul_sh_p[u][MUL_LAT-1]][mul_sh_t[u][MUL_LAT-1]] = mul_r_i[u*64 +: 64];
-            end
-        end
-        if (sqrt_ovalid_i && sqrt_sh_v[SQRT_LAT-1]) begin
-            scr_fwd[sqrt_sh_p[SQRT_LAT-1]][sqrt_sh_t[SQRT_LAT-1]] = sqrt_r_i;
-        end
-        if (rcp_ovalid_i && rcp_sh_v[RCP_LAT-1]) begin
-            scr_fwd[rcp_sh_p[RCP_LAT-1]][rcp_sh_t[RCP_LAT-1]] = rcp_r_i;
-        end
         for (int e = 0; e < SCHED_EVENTS; e++) begin
-            if (run_i && sched_cycle(e) == cyc) begin
-                ev_pair = sched_pair(e);
-                ev_tag  = sched_tag(e);
-                ev_unit = sched_unit(e);
+            if (run_i && SCHED_CYCLE_V[e*8 +: 8] == cyc) begin
+                ev_pair = SCHED_PAIR_V[e*4 +: 4];
+                ev_tag  = SCHED_TAG_V[e*5 +: 5];
+                ev_unit = SCHED_UNIT_V[e*3 +: 3];
                 bi = pairs_i[ev_pair*16 +: 3];
                 bj = pairs_i[ev_pair*16+8 +: 3];
                 op_sub = 1'b0;
                 op_a = 64'd0;
                 op_b = 64'd0;
-                if (ev_tag <= TAG_SUB_Z[4:0]) begin
+                if (SCHED_TAG_V[e*5 +: 5] <= TAG_SUB_Z[4:0]) begin
                     op_a   = body_field(working_flat_i, bi, ev_tag[2:0]);
                     op_b   = body_field(working_flat_i, bj, ev_tag[2:0]);
                     op_sub = 1'b1;
-                end else if (ev_tag <= TAG_SQ_Z[4:0]) begin
-                    op_a = scr_fwd[ev_pair][ev_tag - 5'd3];               // SQ_c -> SUB_c
+                end else if (SCHED_TAG_V[e*5 +: 5] <= TAG_SQ_Z[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][SCHED_TAG_V[e*5 +: 5] - 5'd3];               // SQ_c -> SUB_c
                     op_b = op_a;
-                end else if (ev_tag == TAG_A1[4:0]) begin
-                    op_a = scr_fwd[ev_pair][TAG_SQ_X];
-                    op_b = scr_fwd[ev_pair][TAG_SQ_Y];
-                end else if (ev_tag == TAG_DSQ[4:0]) begin
-                    op_a = scr_fwd[ev_pair][TAG_A1];
-                    op_b = scr_fwd[ev_pair][TAG_SQ_Z];
-                end else if (ev_tag == TAG_SQRT[4:0]) begin
-                    op_a = scr_fwd[ev_pair][TAG_DSQ];
-                end else if (ev_tag == TAG_D3[4:0]) begin
-                    op_a = scr_fwd[ev_pair][TAG_DSQ];
-                    op_b = scr_fwd[ev_pair][TAG_SQRT];
-                end else if (ev_tag == TAG_RCP[4:0]) begin
-                    op_a = scr_fwd[ev_pair][TAG_D3];
-                end else if (ev_tag == TAG_MAG[4:0]) begin
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_A1[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_SQ_X];
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_SQ_Y];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_DSQ[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_A1];
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_SQ_Z];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_SQRT[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_DSQ];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_D3[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_DSQ];
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_SQRT];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_RCP[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_D3];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_MAG[4:0]) begin
                     op_a = dt_i;
-                    op_b = scr_fwd[ev_pair][TAG_RCP];
-                end else if (ev_tag == TAG_B1M[4:0]) begin
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_RCP];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_B1M[4:0]) begin
                     op_a = body_field(working_flat_i, bi, 3'd6);
-                    op_b = scr_fwd[ev_pair][TAG_MAG];
-                end else if (ev_tag == TAG_B2M[4:0]) begin
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_MAG];
+                end else if (SCHED_TAG_V[e*5 +: 5] == TAG_B2M[4:0]) begin
                     op_a = body_field(working_flat_i, bj, 3'd6);
-                    op_b = scr_fwd[ev_pair][TAG_MAG];
-                end else if (ev_tag <= TAG_F_I_Z[4:0]) begin
-                    op_a = scr_fwd[ev_pair][ev_tag - 5'd14];              // F_I_c -> SUB_c (tag 14..16 -> 0..2)
-                    op_b = scr_fwd[ev_pair][TAG_B2M];
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_MAG];
+                end else if (SCHED_TAG_V[e*5 +: 5] <= TAG_F_I_Z[4:0]) begin
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][SCHED_TAG_V[e*5 +: 5] - 5'd14];              // F_I_c -> SUB_c (tag 14..16 -> 0..2)
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_B2M];
                 end else begin
-                    op_a = scr_fwd[ev_pair][ev_tag - 5'd17];              // F_J_c -> SUB_c (tag 17..19 -> 0..2)
-                    op_b = scr_fwd[ev_pair][TAG_B1M];
+                    op_a = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][SCHED_TAG_V[e*5 +: 5] - 5'd17];              // F_J_c -> SUB_c (tag 17..19 -> 0..2)
+                    op_b = scr_fwd[SCHED_PAIR_V[e*4 +: 4]][TAG_B1M];
                 end
                 if ({28'd0, ev_pair} < {24'd0, npairs_i}) begin
                     if (ev_unit <= 3'd2) begin

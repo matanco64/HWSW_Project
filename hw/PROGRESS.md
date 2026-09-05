@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-04 20:46 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-04 20:46 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-05 18:20 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-05 18:20 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,8 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd,mas,uarch done
+    class dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class prd,mas,uarch,rtl done
 ```
 
 ### `huffman_engine`
@@ -83,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -91,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **RTL** — todo
+- `grape_pipeline`: **DV testplan** — todo
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -123,6 +123,12 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] per-stage timing budget — docs/uarch.md §6: six rows, all ≤ 8 ns vs 20 ns @ 50 MHz
 - [x] latency/throughput derived and matches PRD KPI — docs/uarch.md §7 + docs/schedule_model.py: simulated 123 cycles/step nominal, 127 worst ≤ K1 128; 290-op graph, inventory sweep table
 - [x] hw-review resolved — docs/review_uarch.md: 17 findings (2 passes), 0 must open
+
+#### RTL — ✅ done (started 2026-09-04T20:46:48Z, finished 2026-09-05T18:20:49Z)
+
+- [x] make lint clean (verilator --lint-only -Wall) — make -C hw/grape_pipeline lint (11 files incl. TB wrapper) -> lint: clean, 2026-09-05
+- [x] Yosys synth succeeds (synthesizable subset) — synth/area.txt: 393367 sky130_fd_sc_hd cells, 2938435.7 um^2; yosys.log 0 errors (full flatten, post scr_fwd synthesizability fixes)
+- [x] agent code review resolved — docs/review_rtl.md: 16 findings (2 passes), 0 must open
 
 ### `huffman_engine`
 
@@ -164,6 +170,6 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
+| `grape_pipeline` | 0 | 0 | 0 | 0/0 | n/a | 393367 | 2938436 | 0 | 0 |
 | `huffman_engine` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
