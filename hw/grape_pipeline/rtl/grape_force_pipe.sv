@@ -85,16 +85,20 @@ module grape_force_pipe #(
 
     // ---- per-unit shadow delay lines (pair, tag, valid) ----------------------------------------
     // Depth covers the longest unit latency; entry written at issue, read at out_valid time.
-    typedef struct packed {
-        logic       v;                                 // Entry valid
-        logic [3:0] pair;                              // Pair slot
-        logic [4:0] tag;                               // Result tag
-    } shadow_t;
-
-    shadow_t add_sh  [3][ADD_LAT];                     // ADD shadow pipes
-    shadow_t mul_sh  [3][MUL_LAT];                     // MUL shadow pipes
-    shadow_t sqrt_sh [SQRT_LAT];                       // SQRT shadow pipe
-    shadow_t rcp_sh  [RCP_LAT];                        // RCP shadow pipe
+    // Shadow pipes as parallel arrays (Yosys 0.68 cannot parse struct members on unpacked
+    // array elements): _v valid, _p pair slot, _t result tag.
+    logic       add_sh_v [3][ADD_LAT];                 // ADD shadow valids
+    logic [3:0] add_sh_p [3][ADD_LAT];                 // ADD shadow pair slots
+    logic [4:0] add_sh_t [3][ADD_LAT];                 // ADD shadow tags
+    logic       mul_sh_v [3][MUL_LAT];                 // MUL shadow valids
+    logic [3:0] mul_sh_p [3][MUL_LAT];                 // MUL shadow pair slots
+    logic [4:0] mul_sh_t [3][MUL_LAT];                 // MUL shadow tags
+    logic       sqrt_sh_v [SQRT_LAT];                  // SQRT shadow valids
+    logic [3:0] sqrt_sh_p [SQRT_LAT];                  // SQRT shadow pair slots
+    logic [4:0] sqrt_sh_t [SQRT_LAT];                  // SQRT shadow tags
+    logic       rcp_sh_v [RCP_LAT];                    // RCP shadow valids
+    logic [3:0] rcp_sh_p [RCP_LAT];                    // RCP shadow pair slots
+    logic [4:0] rcp_sh_t [RCP_LAT];                    // RCP shadow tags
 
     // ---- operand selection ---------------------------------------------------------------------
     function automatic logic [63:0] body_field(input logic [N_BODIES*7*64-1:0] flat,
@@ -110,6 +114,7 @@ module grape_force_pipe #(
     // F_J_c a=SUB_c b=B1M.
     logic [3:0]  ev_pair;                              // Helper: current event pair
     logic [4:0]  ev_tag;                               // Helper: current event tag
+    logic [2:0]  ev_unit;                              // Helper: current event unit binding
     logic [2:0]  bi;                                   // Body i of the pair
     logic [2:0]  bj;                                   // Body j of the pair
     logic [63:0] op_a;                                 // Selected operand a
@@ -132,6 +137,7 @@ module grape_force_pipe #(
         mul_free_o  = 3'b111;
         ev_pair = 4'd0;
         ev_tag  = 5'd0;
+        ev_unit = 3'd0;
         bi      = 3'd0;
         bj      = 3'd0;
         op_a    = 64'd0;
@@ -141,6 +147,7 @@ module grape_force_pipe #(
             if (run_i && sched_cycle(e) == cyc) begin
                 ev_pair = sched_pair(e);
                 ev_tag  = sched_tag(e);
+                ev_unit = sched_unit(e);
                 bi = pairs_i[ev_pair*16 +: 3];
                 bj = pairs_i[ev_pair*16+8 +: 3];
                 op_sub = 1'b0;
@@ -183,16 +190,16 @@ module grape_force_pipe #(
                     op_b = scratch[ev_pair][TAG_B1M];
                 end
                 if ({28'd0, ev_pair} < {24'd0, npairs_i}) begin
-                    if (sched_unit(e) <= 3'd2) begin
-                        add_valid_o[sched_unit(e)[1:0]] = 1'b1;
-                        add_sub_o[sched_unit(e)[1:0]]   = op_sub;
-                        add_a_o[sched_unit(e)[1:0]*64 +: 64] = op_a;
-                        add_b_o[sched_unit(e)[1:0]*64 +: 64] = op_b;
-                    end else if (sched_unit(e) <= 3'd5) begin
-                        mul_valid_o[sched_unit(e)[1:0]] = 1'b1;
-                        mul_a_o[sched_unit(e)[1:0]*64 +: 64] = op_a;
-                        mul_b_o[sched_unit(e)[1:0]*64 +: 64] = op_b;
-                    end else if (sched_unit(e) == 3'd6) begin
+                    if (ev_unit <= 3'd2) begin
+                        add_valid_o[ev_unit[1:0]] = 1'b1;
+                        add_sub_o[ev_unit[1:0]]   = op_sub;
+                        add_a_o[ev_unit[1:0]*64 +: 64] = op_a;
+                        add_b_o[ev_unit[1:0]*64 +: 64] = op_b;
+                    end else if (ev_unit <= 3'd5) begin
+                        mul_valid_o[ev_unit[1:0]] = 1'b1;
+                        mul_a_o[ev_unit[1:0]*64 +: 64] = op_a;
+                        mul_b_o[ev_unit[1:0]*64 +: 64] = op_b;
+                    end else if (ev_unit == 3'd6) begin
                         sqrt_valid_o = 1'b1;
                         sqrt_a_o     = op_a;
                     end else begin
@@ -202,10 +209,10 @@ module grape_force_pipe #(
                 end
                 // Table ownership blocks accum use of the slot even when suppressed (keeps
                 // accum arbitration independent of NPAIRS).
-                if (sched_unit(e) <= 3'd2) begin
-                    add_free_o[sched_unit(e)[1:0]] = 1'b0;
-                end else if (sched_unit(e) <= 3'd5) begin
-                    mul_free_o[sched_unit(e)[1:0]] = 1'b0;
+                if (ev_unit <= 3'd2) begin
+                    add_free_o[ev_unit[1:0]] = 1'b0;
+                end else if (ev_unit <= 3'd5) begin
+                    mul_free_o[ev_unit[1:0]] = 1'b0;
                 end
             end
         end
@@ -214,47 +221,57 @@ module grape_force_pipe #(
     // ---- shadow pipes and result capture -------------------------------------------------------
     always_ff @(posedge clk) begin
         for (int u = 0; u < 3; u++) begin
-            add_sh[u][0] <= '{v: add_valid_o[u], pair: 4'd0, tag: 5'd0};
-            if (add_valid_o[u]) begin
-                add_sh[u][0] <= '{v: 1'b1, pair: ev_pair, tag: ev_tag};
-            end
+            add_sh_v[u][0] <= add_valid_o[u];
+            add_sh_p[u][0] <= ev_pair;
+            add_sh_t[u][0] <= ev_tag;
             for (int d = 1; d < ADD_LAT; d++) begin
-                add_sh[u][d] <= add_sh[u][d-1];
+                add_sh_v[u][d] <= add_sh_v[u][d-1];
+                add_sh_p[u][d] <= add_sh_p[u][d-1];
+                add_sh_t[u][d] <= add_sh_t[u][d-1];
             end
-            mul_sh[u][0] <= '{v: mul_valid_o[u], pair: 4'd0, tag: 5'd0};
-            if (mul_valid_o[u]) begin
-                mul_sh[u][0] <= '{v: 1'b1, pair: ev_pair, tag: ev_tag};
-            end
+            mul_sh_v[u][0] <= mul_valid_o[u];
+            mul_sh_p[u][0] <= ev_pair;
+            mul_sh_t[u][0] <= ev_tag;
             for (int d = 1; d < MUL_LAT; d++) begin
-                mul_sh[u][d] <= mul_sh[u][d-1];
+                mul_sh_v[u][d] <= mul_sh_v[u][d-1];
+                mul_sh_p[u][d] <= mul_sh_p[u][d-1];
+                mul_sh_t[u][d] <= mul_sh_t[u][d-1];
             end
         end
-        sqrt_sh[0] <= '{v: sqrt_valid_o, pair: ev_pair, tag: ev_tag};
+        sqrt_sh_v[0] <= sqrt_valid_o;
+        sqrt_sh_p[0] <= ev_pair;
+        sqrt_sh_t[0] <= ev_tag;
         for (int d = 1; d < SQRT_LAT; d++) begin
-            sqrt_sh[d] <= sqrt_sh[d-1];
+            sqrt_sh_v[d] <= sqrt_sh_v[d-1];
+            sqrt_sh_p[d] <= sqrt_sh_p[d-1];
+            sqrt_sh_t[d] <= sqrt_sh_t[d-1];
         end
-        rcp_sh[0] <= '{v: rcp_valid_o, pair: ev_pair, tag: ev_tag};
+        rcp_sh_v[0] <= rcp_valid_o;
+        rcp_sh_p[0] <= ev_pair;
+        rcp_sh_t[0] <= ev_tag;
         for (int d = 1; d < RCP_LAT; d++) begin
-            rcp_sh[d] <= rcp_sh[d-1];
+            rcp_sh_v[d] <= rcp_sh_v[d-1];
+            rcp_sh_p[d] <= rcp_sh_p[d-1];
+            rcp_sh_t[d] <= rcp_sh_t[d-1];
         end
         // Capture results into scratch
         for (int u = 0; u < 3; u++) begin
-            if (add_ovalid_i[u] && add_sh[u][ADD_LAT-1].v) begin
-                scratch[add_sh[u][ADD_LAT-1].pair][add_sh[u][ADD_LAT-1].tag] <= add_r_i[u*64 +: 64];
-                scr_v[add_sh[u][ADD_LAT-1].pair][add_sh[u][ADD_LAT-1].tag]   <= 1'b1;
+            if (add_ovalid_i[u] && add_sh_v[u][ADD_LAT-1]) begin
+                scratch[add_sh_p[u][ADD_LAT-1]][add_sh_t[u][ADD_LAT-1]] <= add_r_i[u*64 +: 64];
+                scr_v[add_sh_p[u][ADD_LAT-1]][add_sh_t[u][ADD_LAT-1]]   <= 1'b1;
             end
-            if (mul_ovalid_i[u] && mul_sh[u][MUL_LAT-1].v) begin
-                scratch[mul_sh[u][MUL_LAT-1].pair][mul_sh[u][MUL_LAT-1].tag] <= mul_r_i[u*64 +: 64];
-                scr_v[mul_sh[u][MUL_LAT-1].pair][mul_sh[u][MUL_LAT-1].tag]   <= 1'b1;
+            if (mul_ovalid_i[u] && mul_sh_v[u][MUL_LAT-1]) begin
+                scratch[mul_sh_p[u][MUL_LAT-1]][mul_sh_t[u][MUL_LAT-1]] <= mul_r_i[u*64 +: 64];
+                scr_v[mul_sh_p[u][MUL_LAT-1]][mul_sh_t[u][MUL_LAT-1]]   <= 1'b1;
             end
         end
-        if (sqrt_ovalid_i && sqrt_sh[SQRT_LAT-1].v) begin
-            scratch[sqrt_sh[SQRT_LAT-1].pair][sqrt_sh[SQRT_LAT-1].tag] <= sqrt_r_i;
-            scr_v[sqrt_sh[SQRT_LAT-1].pair][sqrt_sh[SQRT_LAT-1].tag]   <= 1'b1;
+        if (sqrt_ovalid_i && sqrt_sh_v[SQRT_LAT-1]) begin
+            scratch[sqrt_sh_p[SQRT_LAT-1]][sqrt_sh_t[SQRT_LAT-1]] <= sqrt_r_i;
+            scr_v[sqrt_sh_p[SQRT_LAT-1]][sqrt_sh_t[SQRT_LAT-1]]   <= 1'b1;
         end
-        if (rcp_ovalid_i && rcp_sh[RCP_LAT-1].v) begin
-            scratch[rcp_sh[RCP_LAT-1].pair][rcp_sh[RCP_LAT-1].tag] <= rcp_r_i;
-            scr_v[rcp_sh[RCP_LAT-1].pair][rcp_sh[RCP_LAT-1].tag]   <= 1'b1;
+        if (rcp_ovalid_i && rcp_sh_v[RCP_LAT-1]) begin
+            scratch[rcp_sh_p[RCP_LAT-1]][rcp_sh_t[RCP_LAT-1]] <= rcp_r_i;
+            scr_v[rcp_sh_p[RCP_LAT-1]][rcp_sh_t[RCP_LAT-1]]   <= 1'b1;
         end
         // Clear valids at step start
         if (step_start_i || !rst_n) begin
@@ -265,17 +282,17 @@ module grape_force_pipe #(
             end
             for (int u = 0; u < 3; u++) begin
                 for (int d = 0; d < ADD_LAT; d++) begin
-                    add_sh[u][d].v <= 1'b0;
+                    add_sh_v[u][d] <= 1'b0;
                 end
                 for (int d = 0; d < MUL_LAT; d++) begin
-                    mul_sh[u][d].v <= 1'b0;
+                    mul_sh_v[u][d] <= 1'b0;
                 end
             end
             for (int d = 0; d < SQRT_LAT; d++) begin
-                sqrt_sh[d].v <= 1'b0;
+                sqrt_sh_v[d] <= 1'b0;
             end
             for (int d = 0; d < RCP_LAT; d++) begin
-                rcp_sh[d].v <= 1'b0;
+                rcp_sh_v[d] <= 1'b0;
             end
         end
     end

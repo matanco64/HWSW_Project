@@ -29,7 +29,7 @@ def main() -> int:
     sources = [Path(s) for s in a.sources]
     build_args = []
     if a.sim == "verilator":
-        build_args += ["-Wno-fatal", "--timing"]
+        build_args += ["-Wno-fatal", "--timing", "--assert"]  # arm SVAs in regression (rcp/sqrt II guards)
         if a.cov:
             build_args += ["--coverage"]
         # Waves: runner adds --trace (VCD -> sim_build/dump.vcd). Native --trace-fst needs liblz4-dev
