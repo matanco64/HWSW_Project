@@ -107,7 +107,7 @@ this cheap; 3.10 — the version the course VM runs — has none of it.
   of return addresses like `0xfdfdfdfdfdfdfd00` — the `Py_DEBUG` freed-memory fill byte.
   Ubuntu's `python3-dbg` is built without frame pointers, so the unwinder was walking into
   freed stack memory. `--call-graph dwarf,16384` fixes it (0 such addresses, 105 unknowns) at
-  the cost of ~100× larger captures and ~20 minutes per profile. The flat self-percentages
+  the cost of \~100× larger captures and \~20 minutes per profile. The flat self-percentages
   above were always valid; only the call graph was affected.
 ]
 
@@ -170,6 +170,76 @@ We also disproved a widely-repeated micro-optimization recorded in our own resea
 semantic-no-op control, it is worth *1.005× — nothing*. The real win in that tier (1.12×) came
 from a different change: turning six subscript read-modify-writes into six plain stores.
 
+== 3c. Raising N: where partial evaluation stops being practical <bigN>
+
+The stock benchmark hard-codes five bodies. Since the emitter is generic in N, `--bodies N`
+appends N−5 further bodies on deterministic circular orbits — closed form, no RNG, semi-major
+axes from 40 AU outwards on golden-angle phases — and regenerates `advance()` for the larger
+system. The default is unchanged and checked structurally, not assumed: at N = 5 the emitted
+source is still byte-identical to what it was before the flag existed.
+
+This is worth doing because the technique has a cost that only shows up as N grows. Unrolling
+is O(N²) in *source size*: 10 pairs at N = 5, 4,950 at N = 100. The natural expectation is that
+the speedup collapses once the generated function outgrows the instruction cache.
+
+*It does not.* Measured against a stock kernel running the identical system, at constant total
+pair-updates:
+
+#table(
+  columns: (auto, auto, auto, auto, auto, auto),
+  align: (right, right, right, right, right, right),
+  table.header([*N*], [*pairs*], [*stock*], [*generated*], [*speedup*], [*Rust*]),
+  [5], [10], [139.9 ms], [99.4 ms], [1.51×], [23.4×],
+  [20], [190], [126.1 ms], [85.9 ms], [1.49×], [22.6×],
+  [50], [1,225], [136.1 ms], [87.6 ms], [1.46×], [25.7×],
+  [100], [4,950], [132.4 ms], [94.2 ms], [1.42×], [25.2×],
+  [200], [19,900], [139.8 ms], [94.1 ms], [1.41×], [26.9×],
+  [400], [79,800], [126.5 ms], [98.8 ms], [1.37×], [22.2×],
+)
+
+The win decays gently from \~1.5× to 1.37× and never approaches 1.0 up to N = 400, while Rust
+holds 22–27× flat — O(N²) in time but O(1) in code size, which is exactly the asymmetry that
+motivates moving this kernel off the interpreter entirely. Output stays bit-identical to stock
+at every N tested.
+
+What *does* become prohibitive is the bill partial evaluation moves to import time. `compile()`
+is linear in pairs, i.e. quadratic in N, at roughly 55–70 µs per pair: 0.5 ms at N = 5, 1.3 s at
+N = 200, 9 s at N = 500. Since `pyperf` spawns \~20 worker processes that each re-import the
+module, an A/B at N = 200 pays \~30 s of pure compilation. Peak compiler working set grows the
+same way — \~40 kB per emitted pair, 2.4 GB at N = 400 — and N ≈ 600 exhausts the machine. So the
+honest statement is not that unrolling stops being a *speedup*, but that it stops being
+*practical* around N = 100–200, because the cost it moves grows one order faster in N than the
+cost it removes.
+
+*The one real cliff, and the fix.* An early sweep showed a sharp, reproducible step between
+N = 30 and N = 32 — 1.45× dropping to 1.30× — which no cache argument explains at 67 kB of
+bytecode. The cause is an interpreter detail: `LOAD_FAST`/`STORE_FAST` carry a one-byte operand,
+so local slot ≥ 256 needs an `EXTENDED_ARG` prefix. The emitter uses 8 locals per body plus
+temporaries, so `nlocals` crosses 256 at exactly N = 31.
+
+#table(
+  columns: (auto, auto, auto, auto),
+  align: (right, right, right, right),
+  table.header([*N*], [*nlocals*], [*bytecodes / pair*], [*`EXTENDED_ARG`*]),
+  [30], [250], [77.4], [0.0%],
+  [31], [258], [85.2], [9.4%],
+  [32], [266], [103.5], [25.5%],
+  [200], [1,610], [114.3], [36.3%],
+)
+
+What made it hurt disproportionately was *ordering*. `co_varnames` is ordered by first binding,
+and `dx, dy, dz, mag, b1m, b2m` were bound inside the loop — last — so the six hottest names in
+the function, touched \~20 times per pair, were precisely the ones pushed past the boundary.
+Emitting one dead-store line at the top moves them to slots 3–8. It changes no arithmetic and is
+emitted only when `8·len(bodies) + 10 > 255`, so the shipped N = 5 source is untouched. Paired
+A/B: *1.12× at N = 32, 1.11× at N = 50, 1.13× at N = 200*, with N = 20 as a built-in control at
+1.002× because the fix is not emitted there. Note that 23% fewer bytecodes bought only 13% more
+speed — bytecode count is not the binding constraint at large N.
+
+This is the kind of finding that only appears when a knob is swept rather than reasoned about,
+and it is a concrete instance of the course's framing that the interpreter, not the physics, is
+the machine being programmed here.
+
 = 4. Performance comparison
 
 Stock and optimized were run back-to-back in the same session on the VM with
@@ -210,10 +280,29 @@ output is #emph[also] bit-for-bit identical, because `f64::powf(-1.5)` lowers to
 FFI crossing costs \~224 ns, or 2e-5 of one `advance()` call, which is why the coarse boundary
 is the right one.
 
-It is deliberately *not* wired into the measured benchmark: the pure-Python tier already
-clears the bar, and an optional import that silently falls back would make the measured
-configuration ambiguous. It stands as a tier — and, as §5 argues, as the accelerator's
-behavioural specification.
+*It is now wired into the benchmark, behind an explicit switch.* The original objection to an
+optional import — that a silent fallback makes the measured configuration ambiguous — is a real
+one, so the import is not silent. `HWSW_BACKEND` pins the back end to `auto`, `python` or
+`native`; `native` fails loudly rather than degrading if the extension is missing; and the back
+end that actually ran is written into the `pyperf` metadata of every result JSON, so a
+measurement cannot claim to be something it was not.
+
+What ships is the shape Lecture 5 ("Accelerator Design Patterns") prescribes for an accelerator's software
+interface. The user's command line does not change (Rule 1). Every native line is confined to a
+separate crate behind one call (Rule 2). A host without the wheel runs the Python path instead
+of breaking (Rule 3) — checked on a machine with no wheel installed, where the module imports,
+binds `None`, and still produces bit-identical output with the same energy. The stock-versus-
+optimized comparison in the table above remains the pure-Python A/B, because that is the
+software-optimization result the project asks for; the native number is reported as the tier on
+top of it, never folded into it.
+
+The boundary is coarse on purpose, and for the reason the TPU case study gives for preloading
+weights before streaming inputs: crossing the interface costs more than the work when the
+payload is small. The kernel owns the state for the whole run and `advance()` is a doorbell, so
+there is one crossing per call rather than 20,000. Marshalling 6N Python floats across the FFI
+every step would have cost more than the interpreter overhead being removed. As #link(<hw>)[§5]
+argues, that same object is the accelerator's register file, which is why the crate doubles as
+the behavioural specification.
 
 = 5. Hardware acceleration proposal <hw>
 
