@@ -10,7 +10,13 @@ venv/
 # hardware flow: local toolchain, venv, simulation & synthesis artifacts
 hw/tools/
 hw/.venv/
-hw/**/sim_build/
+hw/**/sim_build*/
+hw/**/synth/*.log
+hw/**/synth/*.gen.ys
+hw/**/synth/*.json
+hw/**/synth/area.txt
+hw/**/coverage.dat
+hw/**/coverage_annotated/
 hw/**/results.xml
 hw/**/*.vcd
 hw/**/*.fst

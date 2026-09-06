@@ -31,13 +31,19 @@ module grape_regs #(
     input  logic                     done_set_i,       // DONE pulse (last step committed)
     input  logic                     aborted_set_i,    // ABORTED pulse
     input  logic [3:0]               fp_flags_set_i,   // {invalid, divzero, overflow, underflow} pulses
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters; upper bits need 2^10..2^63-cycle runs.
     input  logic [31:0]              steps_done_i,     // Live steps counter (step FSM)
     input  logic [63:0]              cycles_i,         // Live busy-cycle counter (step FSM)
+    // verilator coverage_on
     // Latched configuration (valid from doorbell_o until the next one)
     output logic [63:0]              dt_o,             // dt, binary64
     output logic [31:0]              nsteps_o,         // Steps per invocation
     output logic [7:0]               npairs_o,         // Pairs per step
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): latched pair domain — indices are doorbell-validated < N_BODIES (3 bits); upper field bits unreachable past ERR_PARAM.
     output logic [N_PAIRS_MAX*16-1:0] pairs_o,         // Pair list: [7:0] i, [15:8] j per entry
+    // verilator coverage_on
     output logic [N_BODIES*7*64-1:0] body_pending_o,   // Pending body window (load into body RF)
     input  logic [N_BODIES*7*64-1:0] body_committed_i, // Committed bank (read while BUSY)
     // Interrupt
@@ -56,7 +62,10 @@ module grape_regs #(
     logic [63:0] dt_l;                                 // Latched DT
     logic [31:0] nsteps_l;                             // Latched NSTEPS
     logic [7:0]  npairs_l;                             // Latched NPAIRS
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): latched pair domain — indices are doorbell-validated < N_BODIES (3 bits); upper field bits unreachable past ERR_PARAM.
     logic [15:0] pairs_l [N_PAIRS_MAX];                // Latched pair list
+    // verilator coverage_on
     logic [15:0] sticky;                               // STATUS sticky bits [15:1] (bit 0 unused)
     logic [16:1] irq_en;                               // IRQ_EN mask (bit 16 writable but FP_DENORMAL
                                                        // is reserved: no STATUS source until the uArch
@@ -169,7 +178,10 @@ module grape_regs #(
     logic [63:0] dt_l_n;
     logic [31:0] nsteps_l_n;
     logic [7:0]  npairs_l_n;
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): latched pair domain — indices are doorbell-validated < N_BODIES (3 bits); upper field bits unreachable past ERR_PARAM.
     logic [15:0] pairs_l_n [N_PAIRS_MAX];
+    // verilator coverage_on
     logic [15:0] sticky_n;
     logic [16:1] irq_en_n;
     logic        irq_n;
@@ -181,10 +193,18 @@ module grape_regs #(
     logic [31:0] rd_data_n;
     logic        rd_err_n;
     // verilator lint_off UNUSEDSIGNAL
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): reserved bits of the staged 32-bit write word (RAZ/WI per MAS §4).
     logic [31:0] npairs_tmp;                           // apply_strb temp (Yosys: no fn-call slicing; upper bits unused)
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): reserved bits of the staged 32-bit write word (RAZ/WI per MAS §4).
     logic [31:0] pair_tmp;                             // apply_strb temp
+    // verilator coverage_on
     logic [31:0] w1c_tmp;                              // apply_strb temp
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): reserved bits of the staged 32-bit write word (RAZ/WI per MAS §4).
     logic [31:0] irqen_tmp;                            // apply_strb temp
+    // verilator coverage_on
     // verilator lint_on UNUSEDSIGNAL
 
     always_comb begin

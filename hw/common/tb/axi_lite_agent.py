@@ -87,12 +87,18 @@ class AxiLiteMonitor(uvm_monitor):
               "bvalid", "bready", "bresp", "arvalid", "arready", "araddr",
               "rvalid", "rready", "rdata", "rresp")}
         aw_q, w_q, ar_q = [], [], []
+        in_reset = False
         while True:
             await RisingEdge(self.clk)
             await ReadOnly()
             if not self.rst_n.value.is_resolvable or int(self.rst_n.value) == 0:
                 aw_q.clear(); w_q.clear(); ar_q.clear()
+                if not in_reset:                  # one event per reset assertion
+                    in_reset = True
+                    item = AxiLiteSeqItem("mon_rst", kind="reset")
+                    self.ap.write(item)
                 continue
+            in_reset = False
             if self._hs(s["awvalid"], s["awready"]):
                 aw_q.append(int(s["awaddr"].value))
             if self._hs(s["wvalid"], s["wready"]):

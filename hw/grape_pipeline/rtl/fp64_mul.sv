@@ -36,7 +36,10 @@ module fp64_mul (
   logic                zero_b;   // b is +/-0
   logic                sign_p;   // product sign (a.sign XOR b.sign)
   logic                spec;     // result comes from the special-case path
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] spec_res; // special-case result value
+  // verilator coverage_on
   logic                spec_inv; // special-case invalid flag (sNaN operand or 0 x inf)
   logic         [63:0] unp_a;    // {effective exponent, significand} of a
   logic         [63:0] unp_b;    // {effective exponent, significand} of b
@@ -94,7 +97,10 @@ module fp64_mul (
 
   // ---------------- stage 1 registers ----------------
   logic                s1_spec;      // special-case path selected
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] s1_spec_res;  // special-case result
+  // verilator coverage_on
   logic                s1_spec_inv;  // special-case invalid flag
   logic                s1_sign;      // product sign
   logic signed  [12:0] s1_es;        // biased result exponent for a product in [1, 2)
@@ -137,7 +143,10 @@ module fp64_mul (
 
   // ---------------- stage 2 registers ----------------
   logic                s2_spec;      // special-case path selected
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] s2_spec_res;  // special-case result
+  // verilator coverage_on
   logic                s2_spec_inv;  // special-case invalid flag
   logic                s2_sign;      // product sign
   logic signed  [12:0] s2_e;         // biased exponent of the leading 1

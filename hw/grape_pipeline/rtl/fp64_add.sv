@@ -32,7 +32,10 @@ module fp64_add (
   logic         [2:0]  cls_a;      // {nan, snan, inf} classification of a
   logic         [2:0]  cls_b;      // {nan, snan, inf} classification of b_eff
   logic                spec;       // result comes from the special-case path
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] spec_res;   // special-case result value
+  // verilator coverage_on
   logic                spec_inv;   // special-case invalid flag (sNaN operand or inf - inf)
   logic                a_ge_b;     // |a| >= |b_eff| (raw-bit magnitude compare)
   logic         [63:0] op_l;       // magnitude-larger operand
@@ -90,7 +93,10 @@ module fp64_add (
 
   // ---------------- stage 1 registers ----------------
   logic                s1_spec;      // special-case path selected
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] s1_spec_res;  // special-case result
+  // verilator coverage_on
   logic                s1_spec_inv;  // special-case invalid flag
   logic                s1_sign_l;    // sign of the magnitude-larger operand
   logic                s1_eff_sub;   // operand signs differ -> effective subtraction
@@ -131,7 +137,10 @@ module fp64_add (
 
   // ---------------- stage 2 registers ----------------
   logic                s2_spec;      // special-case path selected
+  // verilator coverage_off
+  // Toggle exclusion (testplan §5): special-path result carries only ±inf/±0/canonical-qNaN patterns; mid-mantissa bits constant by construction.
   logic         [63:0] s2_spec_res;  // special-case result
+  // verilator coverage_on
   logic                s2_spec_inv;  // special-case invalid flag
   logic                s2_sign;      // sign of the magnitude-larger operand
   logic                s2_eff_sub;   // effective subtraction (for the zero-sign rule)

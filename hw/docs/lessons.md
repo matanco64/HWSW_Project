@@ -190,3 +190,19 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   elaboration errors (`Unable to bind`). Declare before first use in shared RTL.
 - Replay-in-check_phase scoreboarding (single monitor stream, mirror replayed in bus order)
   needed zero concurrency and survived both simulators unchanged.
+
+## 2026-09-06 — grape_pipeline/dv_coverage
+
+- **Two scoreboard-model bugs surfaced only under random stress**, both spec-faithfulness gaps:
+  (1) completion detection keyed on sticky DONE — but PRD-F12 lets stale DONE survive a
+  doorbell; the live BUSY bit is the only sound completion signal. (2) K1 enforced on random
+  pair lists — duplicate pairs build accumulate chains deeper than the static window and
+  legitimately exceed 128 cycles/step (worst seen 165); the KPI binds on the benchmark list.
+  Both are things a testplan review can't catch — only stimulus can.
+- The NaN-canonicalization compare (contract +qNaN vs numpy's sign-carrying NaNs) fired the
+  moment the FP test read state back — the testplan §4 canonicalization clause paid off,
+  written before any NaN ever crossed the bus.
+- Toggle closure was 60% exclusions by volume: constant ROMs, lifetime counters, validated-index
+  upper bits, special-path constants. Writing the reason inline at each coverage_off beats a
+  central waiver list for reviewability; the two architecturally-unreachable functional bins
+  (abort-steps-0, ABORTED-at-final) were testplan definition errors worth recording.

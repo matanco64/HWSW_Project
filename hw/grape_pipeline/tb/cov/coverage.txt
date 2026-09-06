@@ -1,0 +1,1 @@
+cov (2026-09-06, 8 tests x Verilator --coverage): line 91.3% (220/241)  toggle 94.5% (31637/33486)  branch 95.5% (279/292); exclusions inline with reasons + docs/coverage_waivers.md

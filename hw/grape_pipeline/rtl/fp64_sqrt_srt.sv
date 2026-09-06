@@ -266,7 +266,10 @@ module fp64_sqrt_srt (
     // --------------------------------------------------------- round and pack -----
     logic [55:0] q_w;      // final root: floor(sqrt(x)·2^55), UQ56.0
     logic [59:0] remf_w;   // final remainder (exactness witness), UQ60.0
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): documented always-0 leftover, folded into sticky.
     logic [55:0] radf_w;   // radicand register leftover (always 0; folded into sticky)
+    // verilator coverage_on
     logic        sticky_w; // any non-zero residue below the round bit
     logic        rnd_w;    // RNE round-up decision
     logic [53:0] mant_w;   // rounded significand incl. hidden bit and carry-out

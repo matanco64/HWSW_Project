@@ -184,21 +184,28 @@
           }
         },
         "dv_coverage": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-05T19:50:09Z",
+          "finished": "2026-09-06T06:33:30Z",
           "gate": {
             "constrained-random sequences": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/sequences/random_{cfg,err,abort,fp}.py; 8/8 tests PASS incl. random_cfg 25 runs (seeded), abort x7, fp specials x6",
+              "at": "2026-09-06T06:33:29Z"
             },
             "line/toggle ≥ 90 %": {
               "result": "n/a",
               "evidence": ""
             },
             "all functional covergroups hit": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/cov/func_cov.txt: 58 bins all >=1; 3 waivers in docs/coverage_waivers.md (2 architecturally unreachable, nsteps.20000 deferred to signoff)",
+              "at": "2026-09-06T06:33:30Z"
+            },
+            "line/toggle >= 90 %": {
+              "result": "pass",
+              "evidence": "tb/cov/coverage.txt: line 91.3%, toggle 94.5% (branch 95.5%); inline coverage_off regions each carry a reason",
+              "at": "2026-09-06T06:33:30Z"
             }
           }
         },
@@ -274,11 +281,11 @@
       },
       "metrics": {
         "dv": {
-          "line_cov": 0,
-          "toggle_cov": 0,
-          "func_cov": 0,
-          "tests_run": 4,
-          "tests_pass": 4,
+          "line_cov": 91.3,
+          "toggle_cov": 94.5,
+          "func_cov": 100,
+          "tests_run": 8,
+          "tests_pass": 8,
           "formal": "n/a"
         },
         "ppa": {
@@ -827,5 +834,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-05T19:45:54Z"
+  "updated": "2026-09-06T06:33:30Z"
 }
