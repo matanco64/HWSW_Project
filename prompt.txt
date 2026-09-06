@@ -1404,3 +1404,47 @@ Prompt: "<task-notification>
 Note: all reviewed changes (RTL fixes, monitor, env/sequences) are currently uncommitted working-tree edits; env.py/smoke.py/test_grape_pipeline.py are untracked.</result>
 <usage><subagent_tokens>129427</subagent_tokens><tool_uses>23</tool_uses><duration_ms>575199</duration_ms></usage>
 </task-notification>"
+
+2026-09-06 — Flame graph trimming, Rust wiring, N sweep
+------------------------------------------------------
+(Logged by hand: the UserPromptSubmit hook invoked `python3`, which on Windows
+resolves to the Microsoft Store stub and exits non-zero. The hook was wired as
+`python3 ... 2>/dev/null || true`, so it silently recorded nothing from that
+machine. Fixed in this session via tools/run_py.sh.)
+
+Prompt: "please replace with the typst version, but also there is a really big
+peak in the current flamegraphs that make them take a whole page in each
+report, we should maybe cut it and note it, also we need to commit these
+flamegraphs, the png might not be needed"
+
+Prompt: "1. there were some updates by Yuval
+2. I want from each benchmark to leave only the top perfoming benchmark (no
+need for the tiers, try to keep it clean and simple
+3. I added for you the course material, I thinks the PDFs will be easier for
+you to read [CourseMaterial/] In my opinion we must incoparate low-level
+accelaration as part of the process, prefabbly in Rust, we did it for nbody but
+we should do it also for pyflate, add comments in the code for each accelration,
+and think of concepts from the course
+4. the Instructor told us we can increase n in nbody, but I don't think he liked
+FFM or Barnes-hut, I want you to launch an agent that will try to create a flag
+that will use n larger than 5 that we can compare the results there
+5. the server should be up now"
+
+Answers given to follow-up questions: cleanup scope = "deliverables only" (each
+benchmark exposes one path; dev/ keeps its tier ladder as measurement evidence);
+nbody Rust = "wire it the same way" as pyflate.
+
+Result:
+ - tools/trim_folded.py rewritten. The old version was a no-op (it required a
+   prefix shared by 100% of samples; perf never provides one). Two separate
+   causes found: py-spy samples taken during module import set the height of the
+   Python-level graphs, and the perf graphs have a genuine 97-104 frame shared
+   interpreter prefix that a 0.99 threshold missed. nbody report went 6 pages to
+   4; captions and a new appendix state what was cut and what it cost.
+ - Rust wired into BOTH deliverables (neither was actually importing its crate).
+   Byte/bit-exact on both; Rule 3 fallback verified on a host with no wheel.
+ - HWSW_BACKEND added to pin the back end, after the first native measurement
+   compared native against native (pyperf scrubs the worker environment).
+ - nbody --bodies N flag (agent). Found and fixed an EXTENDED_ARG cliff at N=31.
+ - Course VM, --rigorous: nbody 141ms -> 9.49ms (14.86x), pyflate 289ms -> 178ms
+   (1.62x).
