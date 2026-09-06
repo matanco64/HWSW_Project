@@ -1,0 +1,25 @@
+nbody_python_core_1: 151.367 ms/iter
+nbody_native_core_1: 9.478 ms/iter
+nbody_python_cache_1: 141.285 ms/iter
+nbody_native_cache_1: 9.472 ms/iter
+pyflate_python_core_1: 286.148 ms/iter
+pyflate_native_core_1: 172.944 ms/iter
+pyflate_python_cache_1: 287.608 ms/iter
+pyflate_native_cache_1: 174.079 ms/iter
+nbody_native_core_2: 9.473 ms/iter
+nbody_python_core_2: 140.287 ms/iter
+nbody_native_cache_2: 9.465 ms/iter
+nbody_python_cache_2: 141.129 ms/iter
+pyflate_native_core_2: 174.069 ms/iter
+pyflate_python_core_2: 286.147 ms/iter
+pyflate_native_cache_2: 173.962 ms/iter
+pyflate_python_cache_2: 286.362 ms/iter
+nbody_python_core_3: 140.135 ms/iter
+nbody_native_core_3: 9.454 ms/iter
+nbody_python_cache_3: 139.930 ms/iter
+nbody_native_cache_3: 9.515 ms/iter
+pyflate_python_core_3: 286.097 ms/iter
+pyflate_native_core_3: 176.858 ms/iter
+pyflate_python_cache_3: 285.521 ms/iter
+pyflate_native_cache_3: 172.784 ms/iter
+COUNTER_RUN_COMPLETE

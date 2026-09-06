@@ -1,0 +1,15 @@
+{
+  "rounds": 3,
+  "cpu": 0,
+  "passes": {
+    "core": "cycles:u,instructions:u,branches:u,branch-misses:u",
+    "cache": "cache-references:u,cache-misses:u,L1-dcache-loads:u,L1-dcache-load-misses:u"
+  },
+  "script_sha256": "f4518f4eefef343bb573c48c77473f155714807f478d2356c8dec6774f558ce1",
+  "perf": "perf version 5.15.209",
+  "scope": "warm measured loop, acknowledged enable/disable, user-mode events",
+  "loops": {
+    "nbody": 64,
+    "pyflate": 16
+  }
+}

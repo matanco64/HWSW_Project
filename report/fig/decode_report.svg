@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 235">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526b7e"/></marker></defs>
+<path d="M123 74V137" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M310 42H268V112H123V137" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M238 178H294" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M520 178H576" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M664 137V74" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M200 74V100H407V137" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="8" y="8" width="230" height="66" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="123.0" y="36.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">CPU: parse block headers</text>
+<text x="123.0" y="56.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">configure via AXI4-Lite</text>
+<rect x="310" y="8" width="442" height="66" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="531.0" y="36.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Platform DMA</text>
+<text x="531.0" y="56.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">32-bit bits + 8-bit selectors in; L-vector out</text>
+<rect x="8" y="137" width="230" height="82" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="123.0" y="163.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">huffman_engine</text>
+<text x="123.0" y="183.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">align / canonical decode</text>
+<text x="123.0" y="203.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">selector control</text>
+<rect x="294" y="137" width="226" height="82" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="407.0" y="163.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">mtf_cam</text>
+<text x="407.0" y="183.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">rank select / shift</text>
+<text x="407.0" y="203.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">run expander + FIFO</text>
+<rect x="576" y="137" width="176" height="82" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="664.0" y="163.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Output packer</text>
+<text x="664.0" y="183.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">64-bit data</text>
+<text x="664.0" y="203.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">+ byte enables</text>
+</svg>

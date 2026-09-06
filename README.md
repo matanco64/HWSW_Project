@@ -121,19 +121,25 @@ Prebuilt `cp310` manylinux wheels for the course VM are committed under
 
 ### `report/`
 
-One source per submitted benchmark plus `report_appendix.typ`, all rendered to
-`report_*.pdf` at the repo root by `./report/build.sh`. The appendix carries the
-measurement methodology both benchmark reports depend on -- what the guest PMU
-can and cannot do, the per-phase CPI stack, how the flame graphs were trimmed
-and what that cost -- rather than duplicating it in both. The course handout names the reports `.txt`, but the
-sections it asks for (Initial Analysis, Performance Comparison) require flame
-graphs and a block diagram, so they ship as PDFs.
+One Typst source per benchmark plus `report_appendix.typ`, with shared typography
+in `report/style.typ`. Both PDF and `.txt` companions are generated at the repo
+root; the text files fulfill the named course deliverables, while PDFs include
+figures and diagrams. The appendix records timing provenance, phase-counter
+scope, profile transformations, correctness checks and reproduction commands.
 
-Typst embeds the flame-graph SVGs from `results/` directly, so there is no
-rasterization step and no copies to keep in sync; `report/fig/` holds only the
-hand-drawn diagrams. Flame graphs are trimmed for height by
-`tools/trim_folded.py` (each report's appendix states exactly what was cut and
-what it cost); the untrimmed graphs are committed alongside as `*_full.svg`.
+Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
+
+```powershell
+./report/build.ps1 -Typst 'C:/path/to/typst.exe'
+```
+
+Both builds require Typst, Python and Poppler's `pdftotext`. They regenerate
+print figures with `report/make_figures.py`: source-line frames in saved py-spy
+SVGs are grouped by function and the benchmark subtree is shown with readable
+labels. Counts and source filenames are recorded in `report/fig/profile_counts.json`.
+The original profile SVGs and their `*_full.svg` counterparts remain in `results/`.
+The report also distinguishes current hardware implementation status from
+unverified clock, area and performance targets.
 
 ## How to reproduce
 

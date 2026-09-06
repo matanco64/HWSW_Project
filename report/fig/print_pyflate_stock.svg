@@ -1,0 +1,1452 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="480" viewBox="0 0 760 480">
+<rect width="100%" height="100%" fill="white"/>
+<text x="8" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Full recorded flame graph</text>
+<text x="240" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Highlighted regions - enlarged with surrounding frames</text>
+<svg x="8" y="38" width="205" height="181.425" viewBox="0 0 1200.0 1062.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="517" width="2.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="36.37" y="527.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_main (pyperf/_runner.py:463) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="965" width="1127.4" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<ns0:text x="65.57" y="975.5">_main (pyperf/_runner.py:463)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:230) (4 samples, 0.99%)</ns0:title><ns0:rect x="398.5" y="789" width="11.6" height="15.0" fill="rgb(226,99,23)" rx="2" ry="2" />
+<ns0:text x="401.47" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="693" width="5.8" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="36.37" y="703.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="981" width="38.0" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="24.68" y="991.5">_fi..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:1015) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="533" width="2.9" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<ns0:text x="56.81" y="543.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:454) (18 samples, 4.46%)</ns0:title><ns0:rect x="1093.6" y="805" width="52.6" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<ns0:text x="1096.61" y="815.5">decod..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="469" width="11.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="479.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="309" width="11.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="319.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_path_split (&lt;frozen importlib._bootstrap_external&gt;:134) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="501" width="2.9" height="15.0" fill="rgb(239,160,38)" rx="2" ry="2" />
+<ns0:text x="53.89" y="511.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_mask (run_benchmark.py:55) (3 samples, 0.74%)</ns0:title><ns0:rect x="503.6" y="757" width="8.8" height="15.0" fill="rgb(210,27,6)" rx="2" ry="2" />
+<ns0:text x="506.61" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="117" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="127.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="581" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="56.81" y="591.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (email/utils.py:49) (2 samples, 0.50%)</ns0:title><ns0:rect x="45.0" y="261" width="5.9" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<ns0:text x="48.05" y="271.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="741" width="3.0" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="59.73" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="37" width="2.9" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<ns0:text x="45.13" y="47.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="917" width="38.0" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="24.68" y="927.5">_ca..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_data (&lt;frozen importlib._bootstrap_external&gt;:1074) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="709" width="3.0" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<ns0:text x="59.73" y="719.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_parse_sub (sre_parse.py:444) (1 samples, 0.25%)</ns0:title><ns0:rect x="45.0" y="181" width="3.0" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<ns0:text x="48.05" y="191.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="373" width="11.7" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="42.21" y="383.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="565" width="11.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="549" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="36.37" y="559.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compile (sre_compile.py:792) (1 samples, 0.25%)</ns0:title><ns0:rect x="48.0" y="213" width="2.9" height="15.0" fill="rgb(239,158,37)" rx="2" ry="2" />
+<ns0:text x="50.97" y="223.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bench_time_func (pyperf/_runner.py:490) (1 samples, 0.25%)</ns0:title><ns0:rect x="59.7" y="981" width="2.9" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<ns0:text x="62.65" y="991.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>needbits (run_benchmark.py:51) (3 samples, 0.74%)</ns0:title><ns0:rect x="223.2" y="757" width="8.8" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<ns0:text x="226.22" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 0.99%)</ns0:title><ns0:rect x="21.7" y="885" width="11.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="24.68" y="895.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="117" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="45.13" y="127.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="517" width="11.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="527.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="821" width="3.0" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="33.45" y="831.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="405" width="11.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="415.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="181" width="5.8" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="191.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="965" width="38.0" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="24.68" y="975.5">_fi..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="517" width="2.9" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<ns0:text x="56.81" y="527.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (3 samples, 0.74%)</ns0:title><ns0:rect x="21.7" y="837" width="8.7" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="24.68" y="847.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="133" width="2.9" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="45.13" y="143.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="597" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="56.81" y="607.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:120) (9 samples, 2.23%)</ns0:title><ns0:rect x="486.1" y="773" width="26.3" height="15.0" fill="rgb(209,21,5)" rx="2" ry="2" />
+<ns0:text x="489.09" y="783.5">r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="597" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="53.89" y="607.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (psutil/__init__.py:39) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="613" width="2.9" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<ns0:text x="36.37" y="623.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="565" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="53.89" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>parse_args (argparse.py:1845) (1 samples, 0.25%)</ns0:title><ns0:rect x="59.7" y="933" width="2.9" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<ns0:text x="62.65" y="943.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>Process (psutil/_pslinux.py:1913) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="469" width="2.9" height="15.0" fill="rgb(229,110,26)" rx="2" ry="2" />
+<ns0:text x="39.29" y="479.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>move_to_front (run_benchmark.py:289) (61 samples, 15.10%)</ns0:title><ns0:rect x="617.5" y="789" width="178.2" height="15.0" fill="rgb(219,65,15)" rx="2" ry="2" />
+<ns0:text x="620.52" y="799.5">move_to_front (run_benc..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="565" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="39.29" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_info (sre_compile.py:616) (1 samples, 0.25%)</ns0:title><ns0:rect x="48.0" y="181" width="2.9" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<ns0:text x="50.97" y="191.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="869" width="26.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="36.37" y="879.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="677" width="17.5" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="687.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_get_literal_prefix (sre_compile.py:492) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="373" width="2.9" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<ns0:text x="39.29" y="383.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="837" width="3.0" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="33.45" y="847.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="149" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="159.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:438) (1 samples, 0.25%)</ns0:title><ns0:rect x="597.1" y="805" width="2.9" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
+<ns0:text x="600.08" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="949" width="38.0" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="24.68" y="959.5">_lo..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="517" width="2.9" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="39.29" y="527.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (run_benchmark.py:665) (387 samples, 95.79%)</ns0:title><ns0:rect x="59.7" y="997" width="1130.3" height="15.0" fill="rgb(223,82,19)" rx="2" ry="2" />
+<ns0:text x="62.65" y="1007.5">&lt;module&gt; (run_benchmark.py:665)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="581" width="2.9" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="39.29" y="591.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_code (sre_compile.py:628) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="405" width="2.9" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<ns0:text x="39.29" y="415.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:122) (2 samples, 0.50%)</ns0:title><ns0:rect x="68.4" y="773" width="5.9" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<ns0:text x="71.42" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="197" width="5.8" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="207.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>all (404 samples, 100%)</ns0:title><ns0:rect x="10.0" y="1013" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<ns0:text x="13.00" y="1023.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="565" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="56.81" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile (re.py:303) (2 samples, 0.50%)</ns0:title><ns0:rect x="45.0" y="229" width="5.9" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<ns0:text x="48.05" y="239.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:294) (11 samples, 2.72%)</ns0:title><ns0:rect x="819.1" y="773" width="32.1" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<ns0:text x="822.06" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>needbits (run_benchmark.py:52) (22 samples, 5.45%)</ns0:title><ns0:rect x="232.0" y="757" width="64.2" height="15.0" fill="rgb(243,178,42)" rx="2" ry="2" />
+<ns0:text x="234.98" y="767.5">needbit..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (importlib/metadata/__init__.py:26) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="613" width="2.9" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<ns0:text x="53.89" y="623.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_path_stat (&lt;frozen importlib._bootstrap_external&gt;:147) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="693" width="3.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<ns0:text x="33.45" y="703.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_parse (sre_parse.py:602) (1 samples, 0.25%)</ns0:title><ns0:rect x="45.0" y="165" width="3.0" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
+<ns0:text x="48.05" y="175.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (psutil/__init__.py:94) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="613" width="2.9" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<ns0:text x="39.29" y="623.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="549" width="11.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="559.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="453" width="11.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="463.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:233) (5 samples, 1.24%)</ns0:title><ns0:rect x="559.1" y="789" width="14.6" height="15.0" fill="rgb(207,10,2)" rx="2" ry="2" />
+<ns0:text x="562.11" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:975) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="725" width="3.0" height="15.0" fill="rgb(210,25,6)" rx="2" ry="2" />
+<ns0:text x="59.73" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/__init__.py:19) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="901" width="26.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<ns0:text x="36.37" y="911.5">&lt;..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:1015) (3 samples, 0.74%)</ns0:title><ns0:rect x="21.7" y="821" width="8.7" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<ns0:text x="24.68" y="831.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>cache_from_source (&lt;frozen importlib._bootstrap_external&gt;:406) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="517" width="2.9" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
+<ns0:text x="53.89" y="527.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (importlib/metadata/__init__.py:8) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="613" width="2.9" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
+<ns0:text x="56.81" y="623.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="581" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="53.89" y="591.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:1015) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="501" width="2.9" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<ns0:text x="36.37" y="511.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="501" width="11.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="511.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>parse_args (pyperf/_runner.py:387) (1 samples, 0.25%)</ns0:title><ns0:rect x="59.7" y="949" width="2.9" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<ns0:text x="62.65" y="959.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="229" width="5.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="239.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_code (sre_compile.py:628) (1 samples, 0.25%)</ns0:title><ns0:rect x="48.0" y="197" width="2.9" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<ns0:text x="50.97" y="207.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="629" width="17.5" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="639.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:228) (16 samples, 3.96%)</ns0:title><ns0:rect x="109.3" y="789" width="46.7" height="15.0" fill="rgb(231,121,28)" rx="2" ry="2" />
+<ns0:text x="112.31" y="799.5">find..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="533" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="36.37" y="543.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:479) (379 samples, 93.81%)</ns0:title><ns0:rect x="62.6" y="821" width="1107.0" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<ns0:text x="65.57" y="831.5">bzip2_main (run_benchmark.py:479)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="725" width="17.5" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 0.99%)</ns0:title><ns0:rect x="21.7" y="869" width="11.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="24.68" y="879.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:122) (16 samples, 3.96%)</ns0:title><ns0:rect x="512.4" y="773" width="46.7" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<ns0:text x="515.38" y="783.5">read..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_get_spec (&lt;frozen importlib._bootstrap_external&gt;:1411) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="725" width="3.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<ns0:text x="33.45" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (3 samples, 0.74%)</ns0:title><ns0:rect x="21.7" y="805" width="8.7" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<ns0:text x="24.68" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:1015) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="53" width="2.9" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<ns0:text x="45.13" y="63.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="661" width="5.8" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="36.37" y="671.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compute (pyperf/_worker.py:289) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="901" width="1127.4" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="65.57" y="911.5">compute (pyperf/_worker.py:289)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_mask (run_benchmark.py:55) (8 samples, 1.98%)</ns0:title><ns0:rect x="375.1" y="757" width="23.4" height="15.0" fill="rgb(210,27,6)" rx="2" ry="2" />
+<ns0:text x="378.10" y="767.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (run_benchmark.py:23) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="997" width="38.0" height="15.0" fill="rgb(210,25,6)" rx="2" ry="2" />
+<ns0:text x="24.68" y="1007.5">&lt;mo..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="565" width="2.9" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="36.37" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:109) (4 samples, 0.99%)</ns0:title><ns0:rect x="272.9" y="741" width="11.7" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<ns0:text x="275.87" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:964) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="533" width="2.9" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<ns0:text x="53.89" y="543.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="773" width="5.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="36.37" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_hooks.py:7) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="709" width="17.5" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<ns0:text x="42.21" y="719.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compile (sre_compile.py:792) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="421" width="2.9" height="15.0" fill="rgb(239,158,37)" rx="2" ry="2" />
+<ns0:text x="39.29" y="431.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="341" width="11.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="351.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_runner.py:14) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="805" width="17.5" height="15.0" fill="rgb(246,192,46)" rx="2" ry="2" />
+<ns0:text x="42.21" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="885" width="26.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="36.37" y="895.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:231) (16 samples, 3.96%)</ns0:title><ns0:rect x="410.1" y="789" width="46.8" height="15.0" fill="rgb(220,69,16)" rx="2" ry="2" />
+<ns0:text x="413.15" y="799.5">find..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:442) (63 samples, 15.59%)</ns0:title><ns0:rect x="611.7" y="805" width="184.0" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<ns0:text x="614.68" y="815.5">decode_huffman_block (r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:110) (4 samples, 0.99%)</ns0:title><ns0:rect x="284.6" y="741" width="11.6" height="15.0" fill="rgb(207,10,2)" rx="2" ry="2" />
+<ns0:text x="287.55" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="789" width="5.8" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="36.37" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 0.99%)</ns0:title><ns0:rect x="21.7" y="853" width="11.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="24.68" y="863.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="325" width="11.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="335.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:430) (2 samples, 0.50%)</ns0:title><ns0:rect x="585.4" y="805" width="5.8" height="15.0" fill="rgb(252,219,52)" rx="2" ry="2" />
+<ns0:text x="588.40" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:113) (8 samples, 1.98%)</ns0:title><ns0:rect x="188.2" y="773" width="23.3" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<ns0:text x="191.17" y="783.5">s..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_spec (&lt;frozen importlib._bootstrap&gt;:945) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="757" width="3.0" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<ns0:text x="33.45" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="725" width="5.8" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="36.37" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:107) (7 samples, 1.73%)</ns0:title><ns0:rect x="243.7" y="741" width="20.4" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
+<ns0:text x="246.66" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="101" width="2.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="42.21" y="111.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:485) (5 samples, 1.24%)</ns0:title><ns0:rect x="1169.6" y="821" width="14.6" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<ns0:text x="1172.55" y="831.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compile (re.py:251) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="453" width="2.9" height="15.0" fill="rgb(223,83,20)" rx="2" ry="2" />
+<ns0:text x="39.29" y="463.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:115) (35 samples, 8.66%)</ns0:title><ns0:rect x="296.2" y="773" width="102.3" height="15.0" fill="rgb(234,134,32)" rx="2" ry="2" />
+<ns0:text x="299.24" y="783.5">snoopbits (r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (13 samples, 3.22%)</ns0:title><ns0:rect x="21.7" y="933" width="38.0" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="24.68" y="943.5">exe..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="645" width="5.8" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="36.37" y="655.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="357" width="11.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="367.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_worker (pyperf/_runner.py:437) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="949" width="1127.4" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<ns0:text x="65.57" y="959.5">_worker (pyperf/_runner.py:437)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bench_time_func (pyperf/_runner.py:502) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="981" width="1127.4" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<ns0:text x="65.57" y="991.5">bench_time_func (pyperf/_runner.py:502)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:419) (1 samples, 0.25%)</ns0:title><ns0:rect x="74.3" y="805" width="2.9" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<ns0:text x="77.26" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="69" width="2.9" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<ns0:text x="42.21" y="79.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_info (sre_compile.py:576) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="389" width="2.9" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<ns0:text x="39.29" y="399.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:227) (3 samples, 0.74%)</ns0:title><ns0:rect x="100.5" y="789" width="8.8" height="15.0" fill="rgb(237,150,36)" rx="2" ry="2" />
+<ns0:text x="103.54" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="149" width="2.9" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="45.13" y="159.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compute_warmups_values (pyperf/_worker.py:271) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="885" width="1127.4" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<ns0:text x="65.57" y="895.5">compute_warmups_values (pyperf/_worker.py:271)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compute_values (pyperf/_worker.py:79) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="869" width="1127.4" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<ns0:text x="65.57" y="879.5">_compute_values (pyperf/_worker.py:79)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="485" width="2.9" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<ns0:text x="36.37" y="495.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile (re.py:303) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="437" width="2.9" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<ns0:text x="39.29" y="447.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compute (pyperf/_worker.py:364) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="917" width="1127.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<ns0:text x="65.57" y="927.5">compute (pyperf/_worker.py:364)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="533" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="39.29" y="543.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="597" width="2.9" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="39.29" y="607.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (importlib/metadata/_adapters.py:3) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="485" width="11.7" height="15.0" fill="rgb(242,171,41)" rx="2" ry="2" />
+<ns0:text x="42.21" y="495.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="581" width="2.9" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="36.37" y="591.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (psutil/_pslinux.py:1611) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="485" width="2.9" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<ns0:text x="39.29" y="495.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="133" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="143.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:302) (10 samples, 2.48%)</ns0:title><ns0:rect x="892.1" y="773" width="29.2" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<ns0:text x="895.08" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="629" width="5.8" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="36.37" y="639.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="773" width="17.5" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="42.21" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:309) (35 samples, 8.66%)</ns0:title><ns0:rect x="819.1" y="789" width="102.2" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="822.06" y="799.5">bwt_reverse ..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:300) (3 samples, 0.74%)</ns0:title><ns0:rect x="854.1" y="773" width="8.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<ns0:text x="857.11" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (email/charset.py:17) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="165" width="2.9" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<ns0:text x="45.13" y="175.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compile (re.py:251) (2 samples, 0.50%)</ns0:title><ns0:rect x="45.0" y="245" width="5.9" height="15.0" fill="rgb(223,83,20)" rx="2" ry="2" />
+<ns0:text x="48.05" y="255.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="853" width="26.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="36.37" y="863.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="661" width="17.5" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="671.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:301) (10 samples, 2.48%)</ns0:title><ns0:rect x="862.9" y="773" width="29.2" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<ns0:text x="865.87" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:450) (29 samples, 7.18%)</ns0:title><ns0:rect x="1008.9" y="805" width="84.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="1011.91" y="815.5">decode_hu..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="50.9" y="549" width="2.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="53.89" y="559.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_bench.py:1) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="805" width="3.0" height="15.0" fill="rgb(227,104,24)" rx="2" ry="2" />
+<ns0:text x="33.45" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:47) (1 samples, 0.25%)</ns0:title><ns0:rect x="261.2" y="725" width="2.9" height="15.0" fill="rgb(207,13,3)" rx="2" ry="2" />
+<ns0:text x="264.19" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compute_selectors_list (run_benchmark.py:362) (4 samples, 0.99%)</ns0:title><ns0:rect x="62.6" y="789" width="11.7" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<ns0:text x="65.57" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:114) (29 samples, 7.18%)</ns0:title><ns0:rect x="211.5" y="773" width="84.7" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<ns0:text x="214.53" y="783.5">snoopbits..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="245" width="5.8" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="255.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:425) (170 samples, 42.08%)</ns0:title><ns0:rect x="77.2" y="805" width="496.5" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<ns0:text x="80.18" y="815.5">decode_huffman_block (run_benchmark.py:425)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:427) (1 samples, 0.25%)</ns0:title><ns0:rect x="579.6" y="805" width="2.9" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<ns0:text x="582.55" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="501" width="2.9" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="39.29" y="511.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bench_pyflake (run_benchmark.py:645) (384 samples, 95.05%)</ns0:title><ns0:rect x="62.6" y="837" width="1121.6" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<ns0:text x="65.57" y="847.5">bench_pyflake (run_benchmark.py:645)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="741" width="5.8" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="36.37" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="757" width="17.5" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>parse (sre_parse.py:955) (1 samples, 0.25%)</ns0:title><ns0:rect x="45.0" y="197" width="3.0" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<ns0:text x="48.05" y="207.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_spec (&lt;frozen importlib._bootstrap_external&gt;:1544) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="709" width="3.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="33.45" y="719.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>task_func (pyperf/_runner.py:497) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="853" width="1127.4" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<ns0:text x="65.57" y="863.5">task_func (pyperf/_runner.py:497)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:426) (2 samples, 0.50%)</ns0:title><ns0:rect x="573.7" y="805" width="5.9" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<ns0:text x="576.71" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="533" width="11.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="543.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:225) (2 samples, 0.50%)</ns0:title><ns0:rect x="94.7" y="789" width="5.8" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<ns0:text x="97.70" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="69" width="2.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="45.13" y="79.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:229) (83 samples, 20.54%)</ns0:title><ns0:rect x="156.0" y="789" width="242.5" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<ns0:text x="159.04" y="799.5">find_next_symbol (run_benchmark...</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (email/message.py:15) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="389" width="11.7" height="15.0" fill="rgb(236,147,35)" rx="2" ry="2" />
+<ns0:text x="42.21" y="399.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="645" width="17.5" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="655.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (email/utils.py:40) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="261" width="5.8" height="15.0" fill="rgb(212,35,8)" rx="2" ry="2" />
+<ns0:text x="42.21" y="271.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:232) (35 samples, 8.66%)</ns0:title><ns0:rect x="456.9" y="789" width="102.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<ns0:text x="459.88" y="799.5">find_next_sy..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_cpu_utils.py:11) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="709" width="5.8" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
+<ns0:text x="36.37" y="719.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/__init__.py:16) (4 samples, 0.99%)</ns0:title><ns0:rect x="21.7" y="901" width="11.7" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
+<ns0:text x="24.68" y="911.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:118) (1 samples, 0.25%)</ns0:title><ns0:rect x="62.6" y="773" width="2.9" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<ns0:text x="65.57" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:44) (2 samples, 0.50%)</ns0:title><ns0:rect x="252.4" y="725" width="5.9" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<ns0:text x="255.43" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_runner.py:19) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="805" width="3.0" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<ns0:text x="59.73" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>parse_known_args (argparse.py:1861) (1 samples, 0.25%)</ns0:title><ns0:rect x="59.7" y="917" width="2.9" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<ns0:text x="62.65" y="927.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:446) (60 samples, 14.85%)</ns0:title><ns0:rect x="801.5" y="805" width="175.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<ns0:text x="804.53" y="815.5">decode_huffman_block (..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="277" width="11.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="287.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1002) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="773" width="3.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<ns0:text x="33.45" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:443) (2 samples, 0.50%)</ns0:title><ns0:rect x="795.7" y="805" width="5.8" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<ns0:text x="798.69" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:331) (9 samples, 2.23%)</ns0:title><ns0:rect x="950.5" y="789" width="26.3" height="15.0" fill="rgb(248,200,47)" rx="2" ry="2" />
+<ns0:text x="953.50" y="799.5">b..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_mask (run_benchmark.py:55) (1 samples, 0.25%)</ns0:title><ns0:rect x="556.2" y="757" width="2.9" height="15.0" fill="rgb(210,27,6)" rx="2" ry="2" />
+<ns0:text x="559.19" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="773" width="3.0" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="59.73" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.25%)</ns0:title><ns0:rect x="53.8" y="549" width="2.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<ns0:text x="56.81" y="559.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="85" width="2.9" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="45.13" y="95.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:118) (1 samples, 0.25%)</ns0:title><ns0:rect x="483.2" y="773" width="2.9" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<ns0:text x="486.17" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>compile (sre_compile.py:788) (1 samples, 0.25%)</ns0:title><ns0:rect x="45.0" y="213" width="3.0" height="15.0" fill="rgb(207,9,2)" rx="2" ry="2" />
+<ns0:text x="48.05" y="223.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="42.1" y="101" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="45.13" y="111.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="789" width="17.5" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="821" width="26.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="36.37" y="831.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="437" width="11.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="447.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:432) (2 samples, 0.50%)</ns0:title><ns0:rect x="591.2" y="805" width="5.9" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="594.24" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="789" width="3.0" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="33.45" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:449) (11 samples, 2.72%)</ns0:title><ns0:rect x="976.8" y="805" width="32.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<ns0:text x="979.78" y="815.5">de..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (9 samples, 2.23%)</ns0:title><ns0:rect x="33.4" y="837" width="26.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="36.37" y="847.5">e..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="421" width="11.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="431.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="581" width="11.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<ns0:text x="42.21" y="591.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="293" width="11.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="303.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (pyperf/_runner.py:10) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="805" width="5.8" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<ns0:text x="36.37" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:329) (6 samples, 1.49%)</ns0:title><ns0:rect x="921.3" y="789" width="17.5" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<ns0:text x="924.29" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:429) (1 samples, 0.25%)</ns0:title><ns0:rect x="582.5" y="805" width="2.9" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
+<ns0:text x="585.48" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 0.50%)</ns0:title><ns0:rect x="39.2" y="213" width="5.8" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="42.21" y="223.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (importlib/metadata/__init__.py:17) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="613" width="11.7" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<ns0:text x="42.21" y="623.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_spec (&lt;frozen importlib._bootstrap_external&gt;:1439) (1 samples, 0.25%)</ns0:title><ns0:rect x="30.4" y="741" width="3.0" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<ns0:text x="33.45" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>&lt;module&gt; (email/charset.py:15) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="165" width="2.9" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<ns0:text x="42.21" y="175.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.25%)</ns0:title><ns0:rect x="36.3" y="549" width="2.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="39.29" y="559.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="789" width="3.0" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="59.73" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_check_worker_task (pyperf/_runner.py:443) (1 samples, 0.25%)</ns0:title><ns0:rect x="59.7" y="965" width="2.9" height="15.0" fill="rgb(211,29,6)" rx="2" ry="2" />
+<ns0:text x="62.65" y="975.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="677" width="5.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<ns0:text x="36.37" y="687.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="741" width="17.5" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<ns0:text x="42.21" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:455) (8 samples, 1.98%)</ns0:title><ns0:rect x="1146.2" y="805" width="23.4" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<ns0:text x="1149.19" y="815.5">d..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.25%)</ns0:title><ns0:rect x="56.7" y="757" width="3.0" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="59.73" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:405) (4 samples, 0.99%)</ns0:title><ns0:rect x="62.6" y="805" width="11.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="65.57" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (4 samples, 0.99%)</ns0:title><ns0:rect x="39.2" y="597" width="11.7" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="42.21" y="607.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 0.50%)</ns0:title><ns0:rect x="33.4" y="757" width="5.8" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<ns0:text x="36.37" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bench_pyflake (run_benchmark.py:653) (2 samples, 0.50%)</ns0:title><ns0:rect x="1184.2" y="837" width="5.8" height="15.0" fill="rgb(250,209,49)" rx="2" ry="2" />
+<ns0:text x="1187.16" y="847.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:45) (1 samples, 0.25%)</ns0:title><ns0:rect x="258.3" y="725" width="2.9" height="15.0" fill="rgb(220,72,17)" rx="2" ry="2" />
+<ns0:text x="261.27" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (1 samples, 0.25%)</ns0:title><ns0:rect x="33.4" y="597" width="2.9" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<ns0:text x="36.37" y="607.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:330) (4 samples, 0.99%)</ns0:title><ns0:rect x="938.8" y="789" width="11.7" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<ns0:text x="941.81" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_compile_charset (sre_compile.py:290) (1 samples, 0.25%)</ns0:title><ns0:rect x="48.0" y="165" width="2.9" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<ns0:text x="50.97" y="175.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:297) (1 samples, 0.25%)</ns0:title><ns0:rect x="851.2" y="773" width="2.9" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<ns0:text x="854.19" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>create_run (pyperf/_worker.py:300) (386 samples, 95.54%)</ns0:title><ns0:rect x="62.6" y="933" width="1127.4" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<ns0:text x="65.57" y="943.5">create_run (pyperf/_worker.py:300)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:441) (4 samples, 0.99%)</ns0:title><ns0:rect x="600.0" y="805" width="11.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="603.00" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>readbits (run_benchmark.py:121) (1 samples, 0.25%)</ns0:title><ns0:rect x="65.5" y="773" width="2.9" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<ns0:text x="68.50" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (6 samples, 1.49%)</ns0:title><ns0:rect x="39.2" y="693" width="17.5" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="42.21" y="703.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:108) (3 samples, 0.74%)</ns0:title><ns0:rect x="264.1" y="741" width="8.8" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
+<ns0:text x="267.11" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>get_code (&lt;frozen importlib._bootstrap_external&gt;:1015) (1 samples, 0.25%)</ns0:title><ns0:rect x="39.2" y="85" width="2.9" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<ns0:text x="42.21" y="95.5" />
+</ns0:g>
+
+</g></svg>
+<rect x="33.650000000000006" y="171.7875" width="43.427083333333336" height="4.5625" fill="none" stroke="#00779d" stroke-width="2"/>
+<circle cx="55.36354166666668" cy="163.7875" r="8" fill="#00779d"/><text x="55.36354166666668" y="167.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">1</text>
+<text x="240" y="45.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. Huffman matcher</text>
+<text x="240" y="63.0" font-family="sans-serif" font-size="12" fill="#465969">find_next_symbol | this frame: 20.54% inclusive</text>
+<rect x="240" y="72.0" width="510" height="97.66666666666666" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="72.0" width="510" height="97.66666666666666" viewBox="121.0 734.0 332.5 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:230) (4 samples, 0.99%)</ns0:title><ns0:rect x="398.5" y="789" width="11.6" height="15.0" fill="rgb(226,99,23)" rx="2" ry="2" />
+<ns0:text x="401.47" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>needbits (run_benchmark.py:51) (3 samples, 0.74%)</ns0:title><ns0:rect x="223.2" y="757" width="8.8" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<ns0:text x="226.22" y="767.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>needbits (run_benchmark.py:52) (22 samples, 5.45%)</ns0:title><ns0:rect x="232.0" y="757" width="64.2" height="15.0" fill="rgb(243,178,42)" rx="2" ry="2" />
+<ns0:text x="234.98" y="767.5">needbit..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:228) (16 samples, 3.96%)</ns0:title><ns0:rect x="109.3" y="789" width="46.7" height="15.0" fill="rgb(231,121,28)" rx="2" ry="2" />
+<ns0:text x="112.31" y="799.5">find..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:479) (379 samples, 93.81%)</ns0:title><ns0:rect x="62.6" y="821" width="1107.0" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<ns0:text x="65.57" y="831.5">bzip2_main (run_benchmark.py:479)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_mask (run_benchmark.py:55) (8 samples, 1.98%)</ns0:title><ns0:rect x="375.1" y="757" width="23.4" height="15.0" fill="rgb(210,27,6)" rx="2" ry="2" />
+<ns0:text x="378.10" y="767.5">_..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:109) (4 samples, 0.99%)</ns0:title><ns0:rect x="272.9" y="741" width="11.7" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<ns0:text x="275.87" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:231) (16 samples, 3.96%)</ns0:title><ns0:rect x="410.1" y="789" width="46.8" height="15.0" fill="rgb(220,69,16)" rx="2" ry="2" />
+<ns0:text x="413.15" y="799.5">find..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:110) (4 samples, 0.99%)</ns0:title><ns0:rect x="284.6" y="741" width="11.6" height="15.0" fill="rgb(207,10,2)" rx="2" ry="2" />
+<ns0:text x="287.55" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:113) (8 samples, 1.98%)</ns0:title><ns0:rect x="188.2" y="773" width="23.3" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<ns0:text x="191.17" y="783.5">s..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:107) (7 samples, 1.73%)</ns0:title><ns0:rect x="243.7" y="741" width="20.4" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
+<ns0:text x="246.66" y="751.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:115) (35 samples, 8.66%)</ns0:title><ns0:rect x="296.2" y="773" width="102.3" height="15.0" fill="rgb(234,134,32)" rx="2" ry="2" />
+<ns0:text x="299.24" y="783.5">snoopbits (r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:47) (1 samples, 0.25%)</ns0:title><ns0:rect x="261.2" y="725" width="2.9" height="15.0" fill="rgb(207,13,3)" rx="2" ry="2" />
+<ns0:text x="264.19" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>snoopbits (run_benchmark.py:114) (29 samples, 7.18%)</ns0:title><ns0:rect x="211.5" y="773" width="84.7" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<ns0:text x="214.53" y="783.5">snoopbits..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:425) (170 samples, 42.08%)</ns0:title><ns0:rect x="77.2" y="805" width="496.5" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<ns0:text x="80.18" y="815.5">decode_huffman_block (run_benchmark.py:425)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>find_next_symbol (run_benchmark.py:229) (83 samples, 20.54%)</ns0:title><ns0:rect x="156.0" y="789" width="242.5" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<ns0:text x="159.04" y="799.5">find_next_symbol (run_benchmark...</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:44) (2 samples, 0.50%)</ns0:title><ns0:rect x="252.4" y="725" width="5.9" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<ns0:text x="255.43" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_read (run_benchmark.py:45) (1 samples, 0.25%)</ns0:title><ns0:rect x="258.3" y="725" width="2.9" height="15.0" fill="rgb(220,72,17)" rx="2" ry="2" />
+<ns0:text x="261.27" y="735.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>_more (run_benchmark.py:108) (3 samples, 0.74%)</ns0:title><ns0:rect x="264.1" y="741" width="8.8" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
+<ns0:text x="267.11" y="751.5" />
+</ns0:g>
+
+</g></svg>
+<rect x="366.81250000000006" y="125.71666666666667" width="236.84166666666664" height="14.649999999999999" fill="none" stroke="#00779d" stroke-width="2"/>
+<rect x="112.48958333333333" y="171.7875" width="32.442499999999995" height="4.5625" fill="none" stroke="#7c4285" stroke-width="2"/>
+<circle cx="128.71083333333334" cy="160.7875" r="8" fill="#7c4285"/><text x="128.71083333333334" y="164.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">2</text>
+<text x="240" y="191.66666666666666" font-family="sans-serif" font-size="14" font-weight="bold" fill="#7c4285">2. Alphabet updates</text>
+<text x="240" y="209.66666666666666" font-family="sans-serif" font-size="12" fill="#465969">move_to_front | this frame: 15.10% inclusive</text>
+<rect x="240" y="218.66666666666666" width="510" height="97.66666666666666" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="218.66666666666666" width="510" height="97.66666666666666" viewBox="582.5 734.0 300 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>move_to_front (run_benchmark.py:289) (61 samples, 15.10%)</ns0:title><ns0:rect x="617.5" y="789" width="178.2" height="15.0" fill="rgb(219,65,15)" rx="2" ry="2" />
+<ns0:text x="620.52" y="799.5">move_to_front (run_benc..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:438) (1 samples, 0.25%)</ns0:title><ns0:rect x="597.1" y="805" width="2.9" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
+<ns0:text x="600.08" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:294) (11 samples, 2.72%)</ns0:title><ns0:rect x="819.1" y="773" width="32.1" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<ns0:text x="822.06" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:479) (379 samples, 93.81%)</ns0:title><ns0:rect x="62.6" y="821" width="1107.0" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<ns0:text x="65.57" y="831.5">bzip2_main (run_benchmark.py:479)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:442) (63 samples, 15.59%)</ns0:title><ns0:rect x="611.7" y="805" width="184.0" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<ns0:text x="614.68" y="815.5">decode_huffman_block (r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:430) (2 samples, 0.50%)</ns0:title><ns0:rect x="585.4" y="805" width="5.8" height="15.0" fill="rgb(252,219,52)" rx="2" ry="2" />
+<ns0:text x="588.40" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:309) (35 samples, 8.66%)</ns0:title><ns0:rect x="819.1" y="789" width="102.2" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="822.06" y="799.5">bwt_reverse ..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:300) (3 samples, 0.74%)</ns0:title><ns0:rect x="854.1" y="773" width="8.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<ns0:text x="857.11" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:301) (10 samples, 2.48%)</ns0:title><ns0:rect x="862.9" y="773" width="29.2" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<ns0:text x="865.87" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:427) (1 samples, 0.25%)</ns0:title><ns0:rect x="579.6" y="805" width="2.9" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<ns0:text x="582.55" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:446) (60 samples, 14.85%)</ns0:title><ns0:rect x="801.5" y="805" width="175.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<ns0:text x="804.53" y="815.5">decode_huffman_block (..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:443) (2 samples, 0.50%)</ns0:title><ns0:rect x="795.7" y="805" width="5.8" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<ns0:text x="798.69" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:432) (2 samples, 0.50%)</ns0:title><ns0:rect x="591.2" y="805" width="5.9" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="594.24" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:429) (1 samples, 0.25%)</ns0:title><ns0:rect x="582.5" y="805" width="2.9" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
+<ns0:text x="585.48" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:297) (1 samples, 0.25%)</ns0:title><ns0:rect x="851.2" y="773" width="2.9" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<ns0:text x="854.19" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:441) (4 samples, 0.99%)</ns0:title><ns0:rect x="600.0" y="805" width="11.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="603.00" y="815.5" />
+</ns0:g>
+
+</g></svg>
+<rect x="382.68333333333334" y="272.3833333333333" width="174.04199999999997" height="14.649999999999999" fill="none" stroke="#7c4285" stroke-width="2"/>
+<rect x="146.92958333333334" y="171.7875" width="19.45916666666667" height="4.5625" fill="none" stroke="#bd512e" stroke-width="2"/>
+<circle cx="156.65916666666666" cy="157.7875" r="8" fill="#bd512e"/><text x="156.65916666666666" y="161.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">3</text>
+<text x="240" y="338.3333333333333" font-family="sans-serif" font-size="14" font-weight="bold" fill="#bd512e">3. Inverse BWT</text>
+<text x="240" y="356.3333333333333" font-family="sans-serif" font-size="12" fill="#465969">bwt_reverse | this frame: 8.66% inclusive</text>
+<rect x="240" y="365.3333333333333" width="510" height="97.66666666666666" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="365.3333333333333" width="510" height="97.66666666666666" viewBox="784.1 734.0 300 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>move_to_front (run_benchmark.py:289) (61 samples, 15.10%)</ns0:title><ns0:rect x="617.5" y="789" width="178.2" height="15.0" fill="rgb(219,65,15)" rx="2" ry="2" />
+<ns0:text x="620.52" y="799.5">move_to_front (run_benc..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:294) (11 samples, 2.72%)</ns0:title><ns0:rect x="819.1" y="773" width="32.1" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<ns0:text x="822.06" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:479) (379 samples, 93.81%)</ns0:title><ns0:rect x="62.6" y="821" width="1107.0" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<ns0:text x="65.57" y="831.5">bzip2_main (run_benchmark.py:479)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:442) (63 samples, 15.59%)</ns0:title><ns0:rect x="611.7" y="805" width="184.0" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<ns0:text x="614.68" y="815.5">decode_huffman_block (r..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:302) (10 samples, 2.48%)</ns0:title><ns0:rect x="892.1" y="773" width="29.2" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<ns0:text x="895.08" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:309) (35 samples, 8.66%)</ns0:title><ns0:rect x="819.1" y="789" width="102.2" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<ns0:text x="822.06" y="799.5">bwt_reverse ..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:300) (3 samples, 0.74%)</ns0:title><ns0:rect x="854.1" y="773" width="8.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<ns0:text x="857.11" y="783.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:301) (10 samples, 2.48%)</ns0:title><ns0:rect x="862.9" y="773" width="29.2" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<ns0:text x="865.87" y="783.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:450) (29 samples, 7.18%)</ns0:title><ns0:rect x="1008.9" y="805" width="84.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<ns0:text x="1011.91" y="815.5">decode_hu..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:446) (60 samples, 14.85%)</ns0:title><ns0:rect x="801.5" y="805" width="175.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<ns0:text x="804.53" y="815.5">decode_huffman_block (..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:443) (2 samples, 0.50%)</ns0:title><ns0:rect x="795.7" y="805" width="5.8" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<ns0:text x="798.69" y="815.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:331) (9 samples, 2.23%)</ns0:title><ns0:rect x="950.5" y="789" width="26.3" height="15.0" fill="rgb(248,200,47)" rx="2" ry="2" />
+<ns0:text x="953.50" y="799.5">b..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>decode_huffman_block (run_benchmark.py:449) (11 samples, 2.72%)</ns0:title><ns0:rect x="976.8" y="805" width="32.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<ns0:text x="979.78" y="815.5">de..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:329) (6 samples, 1.49%)</ns0:title><ns0:rect x="921.3" y="789" width="17.5" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<ns0:text x="924.29" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_reverse (run_benchmark.py:330) (4 samples, 0.99%)</ns0:title><ns0:rect x="938.8" y="789" width="11.7" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<ns0:text x="941.81" y="799.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:297) (1 samples, 0.25%)</ns0:title><ns0:rect x="851.2" y="773" width="2.9" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<ns0:text x="854.19" y="783.5" />
+</ns0:g>
+
+</g></svg>
+<rect x="382.68333333333334" y="419.04999999999995" width="99.81533333333333" height="14.649999999999999" fill="none" stroke="#bd512e" stroke-width="2"/>
+<text x="8" y="243.425" font-family="sans-serif" font-size="12" fill="#465969">Original widths and stack depth.</text>
+<text x="8" y="262.425" font-family="sans-serif" font-size="12" fill="#465969">Imports and harness retained.</text>
+<text x="8" y="281.425" font-family="sans-serif" font-size="12" fill="#465969">Each outline marks one call path.</text>
+<text x="8" y="300.425" font-family="sans-serif" font-size="12" fill="#465969">The same function may recur.</text>
+<text x="8" y="319.425" font-family="sans-serif" font-size="12" fill="#465969">Percentages are inclusive,</text>
+<text x="8" y="338.425" font-family="sans-serif" font-size="12" fill="#465969">not flat self-time totals.</text>
+</svg>
