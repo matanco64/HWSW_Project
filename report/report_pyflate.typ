@@ -56,11 +56,12 @@ byte. The pipeline per block:
   KVM on a Technion host. Timings are `pyperformance run --rigorous` (40 processes / 120
   values) on the release `python3`; profiles are recorded separately with `python3-dbg` for
   symbols and are never quoted as timings, since the debug build inflates interpreter-internal
-  frames \~2.5–3×. Guest quirks: the `cycles` PMU event records *zero* samples under KVM
-  #emph[in frequency mode], so sampling uses `-e cpu-clock` (a fixed period, `-e cycles -c
-  2000000`, does work — see #link(<pmu>)[the PMU note]); `perf stat` silently returns zeros past
-  four events, so
-  counters are taken in two passes.
+  frames \~2.5–3×. Sampling uses `-e cpu-clock`, a software timer that fires in proportion to
+  elapsed CPU time — the right event for attributing #emph[where] time goes. The hardware PMU
+  works too, with the caveat that hardware events need a fixed sample period (`-e cycles -c
+  2000000`); `perf stat` returns zeros past four events instead of multiplexing, so counters are
+  taken in two passes. Both are covered in the companion *report_appendix.pdf*, which also
+  carries the per-phase CPI stack §5c now rests on.
 ]
 
 Stock `pyflate` measures *1.13 s ± 0.02 s*. A `cProfile` of a single decode (3.19M calls)
@@ -86,8 +87,7 @@ attributes:
   `bwt_reverse` as the block on the right — the \~44% / \~17% / \~11% split, visible at a glance.
   CPython 3.10 has no `-X perf` trampoline, so `perf` cannot name Python functions; py-spy
   samples the interpreter's frame stack instead. 13 of 400 samples (3.3%) landed in module-import
-  machinery and are excluded, taking the figure from 61 rows to 18; see #link(<trim>)[the
-  appendix].],
+  machinery and are excluded, taking the figure from 61 rows to 18; see the companion appendix.],
 )
 
 *The obvious conclusion, and why it is wrong.* `find_next_symbol` is a linear scan over a
@@ -113,7 +113,7 @@ quantifies exactly that.
   samples — interpreter start-up and the pyperf harness — are elided: constant context, no
   information, every surviving width untouched. Stacks are then capped at depth 36, merging away
   the tips of 4.4% of samples; that one does discard detail. Uncut version:
-  `results/flame_pyflate_stock_full.svg`, and #link(<trim>)[the appendix] for the method.],
+  `results/flame_pyflate_stock_full.svg`, and the companion appendix for the method.],
 )
 
 = 3. Optimizations <opt>
@@ -331,13 +331,40 @@ it.
 == 5c. The part hardware cannot fix cheaply <bwt>
 
 After the software work, `bwt_reverse` is a co-equal hotspot, and after the Rust kernel it is
-*80% of what remains*. It is a 399 KB data-dependent pointer chase — `end = T[end]` repeated
-per output byte — and it is *irreducibly serial*: each step depends on the previous one.
-Neither Python, nor Rust, nor the engine above fixes it. The honest options are a
-processing-in-memory walker that cuts per-step latency by servicing the chase at row-buffer
-latency instead of a full CPU–DRAM round trip (it cannot parallelize a single chain, only
-shorten each hop), or accepting the Amdahl cap. Naming the limit explicitly is more useful than
-claiming a speedup the structure of the algorithm does not permit.
+*80% of what remains*. It is a 399 KB data-dependent chase — `end = T[end]` repeated per output
+byte — and it is *irreducibly serial*: each step depends on the previous one. That structural
+fact is not in question.
+
+*What we got wrong here, and how the measurement corrected it.* An earlier version of this
+section called the chase memory-bound and proposed a processing-in-memory walker to service it
+at row-buffer latency instead of a full CPU–DRAM round trip. That was reasoned from the source,
+never measured, because we believed the guest PMU could not sample. It can, and the per-phase
+CPI stack in the companion appendix says the opposite:
+
+#table(
+  columns: (auto, auto, auto, auto),
+  align: (left, right, right, right),
+  inset: 4pt,
+  table.header([*phase*], [*IPC*], [*LLC miss rate*], [*LLC misses / step*]),
+  [`decode` (native)], [1.49], [1.28%], [—],
+  [`chase` (isolated)], [*2.42*], [*0.84%*], [*0.035*],
+  [`rle4`], [2.89], [1.71%], [—],
+)
+
+The chase sustains 2.42 instructions per cycle and has the *lowest* last-level miss rate of any
+phase — it reaches DRAM about once every 29 steps. A DRAM-latency-bound dependent chain looks
+like the opposite: IPC well under 1, a miss on most steps. At this block size the `T` table
+fits comfortably in a 20 MB L3, so a PIM unit aimed at shortening DRAM round trips would be
+solving a problem this workload does not have. The 381 cycles per step are interpreter
+overhead — roughly 922 instructions per `end = T[end]`.
+
+What the measurement does support is narrower and better founded. The chase is
+*interpreter-bound today*, so the remaining software win is porting it to native code, exactly
+as the decode side already was; only *after* that does the serial dependency become the binding
+constraint, and then at L2/L3 latency rather than DRAM latency. The hardware that follows is a
+sequencer with `T` in tightly-coupled SRAM, not a DRAM-side PIM — and a PIM argument would
+only begin to apply at block sizes whose `T` table leaves cache. Naming the limit correctly is
+more useful than naming it dramatically.
 
 = 6. Conclusion
 
@@ -356,101 +383,10 @@ Intel's IAA. And the profile #emph[after] optimization — not before — is wha
 inverse BWT as the serial chase that bounds everything else, which is the difference between a
 hardware proposal that follows from evidence and one that follows from enthusiasm.
 
+= Appendix: measurement methodology
 
-= Appendix: how the flame graphs were trimmed <trim>
-
-A flame graph is exactly as tall as the single deepest stack in the profile, however rare that
-stack is, and ours were pathological that way. Left alone, the `perf` capture of stock `pyflate` ran to 176 rows and
-took more than a page on its own. Three reductions, applied by `tools/trim_folded.py` and
-recorded in `tools/vm_remake_flames.sh`, bring them down. They differ in how much they cost,
-and the distinction matters more than the sizes do.
-
-*Dropping import-time samples (py-spy figures).* py-spy starts sampling at process start, so it
-catches CPython importing `re`, `enum` and `collections` before the benchmark loop is entered.
-Those stacks are deep — `_find_and_load` → `_load_unlocked` → `exec_module` → `re._compile` —
-and there are only a handful of them, so they set the height while contributing nothing. In
-the optimized py-spy profile they are 6.7% of samples and take the figure from 60 rows to 15.
-This is not a truncation; it excludes a *phase* the figure was never meant to show.
-
-*Eliding the common prefix (`perf` figures).* The C-level captures begin with interpreter
-start-up and the pyperf harness — 104 frames present in ≥95% of samples. A frame in
-essentially every sample is constant context: it carries no information but costs a row. Every
-surviving frame keeps its exact sample count, so *no width in the plot changes*; only the
-y-origin moves. The threshold is 95% rather than 100% because roughly 1.7% of DWARF unwinds are
-partial and start mid-interpreter, and at 100% those few fragments block the trim entirely
-(178 rows became 168 — effectively nothing).
-
-*Capping depth (`perf` figures).* Even without the prefix, a thin tower of deep stacks kept the
-figure near a full page, so stacks are capped at the shallowest depth leaving 95% of samples
-whole. #emph[This one genuinely discards detail]: the tips of 4.4% of samples are merged
-into their ancestors. It is the only one of the three that loses information, which is why each
-affected caption states the cut depth and the truncated share, and why the uncut graph is
-committed beside it as `*_full.svg`.
-
-None of the three rescales anything, and no number quoted anywhere in this report is derived
-from a trimmed graph — the timings come from `pyperf`, and the self-time percentages from flat
-`perf report` output and cProfile, both taken on untrimmed data.
-
-
-= Appendix: what the guest PMU can and cannot do <pmu>
-
-The course VM is a QEMU/KVM guest, and we spent most of the project believing its hardware
-performance counters were unusable — our own scripts carried the comment "the `cycles` PMU event
-records zero samples — MUST use `-e cpu-clock`". That is wrong, and since a claim about hardware
-is exactly the kind a reader can check in one command, here is what is actually true.
-
-*Counting works, including `cycles`.* Three independent encodings of unhalted core cycles agree
-to within 1% on the same load:
-
-#table(
-  columns: (auto, auto, 1fr),
-  align: (left, right, left),
-  inset: 4pt,
-  table.header([*event*], [*count*], [*note*]),
-  [`cycles`], [180,523,907], [fixed counter],
-  [`ref-cycles`], [179,410,008], [reference clock],
-  [`r003c`], [178,709,534], [`CPU_CLK_UNHALTED.THREAD_P`, general-purpose counter],
-  [`instructions`], [538,815,265], [for scale],
-)
-
-The zeros that started the myth came from asking `perf stat` for *six* hardware events at once.
-The guest exposes *four* general-purpose counters (`generic registers: 4`), and rather than
-multiplexing, the vPMU returns 0 for the events that lose. Ask for four or fewer per pass and
-everything counts. Our scripts already split counters across two passes for this reason — the
-workaround was right, the explanation attached to it was not.
-
-*Sampling works too, but only with a fixed period.*
-
-#table(
-  columns: (auto, auto),
-  align: (left, right),
-  inset: 4pt,
-  table.header([*`perf record` invocation*], [*samples*]),
-  [`-e cycles -F 999`], [0],
-  [`-e cycles -F 4000`], [0],
-  [`-e cycles -c 1000000`], [2,315],
-  [`-e cycles -c 200000`], [9,735],
-  [`-e cpu-clock -F 999`], [1,022],
-)
-
-Frequency mode asks the kernel to *auto-tune* the sample period from observed counter feedback;
-that loop does not converge on the KVM vPMU, so the counter is never armed and the capture is
-silent. Pinning the period with `-c` sidesteps the tuning entirely and the overflow interrupt
-path works normally. The full production combination — `-e cycles -c 2000000 --call-graph
-dwarf,16384` against `python3-dbg` — yields 2,298 samples with call chains that resolve to real
-symbols end to end (`_start` → `Py_BytesMain` → `pymain_init` → ... → `__GI_setlocale`).
-
-*So this was a `perf` usage limitation, not a virtualization one*, and no change to the VM is
-needed. For completeness we checked the alternative: the host is bare metal (a Xeon E5-2630 v3),
-`kvm.enable_pmu` is `Y`, and the guest already reports `Haswell events, full-width counters,
-Intel PMU driver` with the host's full complement of counters — so relaunching QEMU with
-`-cpu host,pmu=on` would change nothing. The one host-side knob left is `nmi_watchdog=1`, which
-pins one counter per CPU and is the standard thing to disable for guest PMU work; that needs
-root on the host, which we do not have.
-
-*Why this matters beyond tidiness.* Lecture 4 pairs the two tools deliberately: a flame graph
-shows *where* time goes but not why, a CPI stack shows *why* but not where, and they are meant
-to be used together. `cpu-clock` is a software timer — it can only ever give the first half. The
-flame graphs in this report stay on `cpu-clock`, which is the correct event for attributing
-elapsed time, but the second half is now available rather than ruled out: real `cycles`,
-`instructions` and `cache-misses` sampling, four events per pass, fixed period.
+The machinery behind every number here — what the guest PMU can and cannot do,
+the per-phase CPI stack, how the flame graphs were trimmed and what that cost,
+and the standing rules about `python3-dbg`, DWARF unwinding and back-end
+pinning — is in the companion document *report_appendix.pdf*, shared with the
+other benchmark report rather than duplicated in both.
