@@ -134,12 +134,18 @@ Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Wind
 ```
 
 Both builds require Typst, Python and Poppler's `pdftotext`. They regenerate
-print figures with `report/make_figures.py`: source-line frames in saved py-spy
-SVGs are grouped by function and the benchmark subtree is shown with readable
-labels. Counts and source filenames are recorded in `report/fig/profile_counts.json`.
+print figures with `report/make_figures.py`: full original flame graphs retain
+their frame geometry and context, with numbered highlights and enlarged detail
+crops. Counts and source filenames are recorded in `report/fig/profile_counts.json`.
 The original profile SVGs and their `*_full.svg` counterparts remain in `results/`.
 The report also distinguishes current hardware implementation status from
 unverified clock, area and performance targets.
+
+Matched Python/native instruction, cycle, branch and generic cache counters are
+preserved in `results/native_counters_20260907/`; regenerate their validated summary
+with `python report/summarize_counters.py`. Invalid L1 events are explicitly excluded.
+`report/check_pyflate_backend.py /path/to/repo` verifies actual Rust dispatch and
+output in Python, native and auto modes using an interpreter with the wheel installed.
 
 ## How to reproduce
 

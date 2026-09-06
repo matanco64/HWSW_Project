@@ -32,7 +32,7 @@ _profile_one() {
     # --call-graph dwarf, NOT -g: Ubuntu's python3-dbg has no frame pointers, so
     # frame-pointer unwinding walks into freed memory and yields chains of
     # 0xfdfdfd.. (Py_DEBUG fill bytes) -- an unusable flame graph.
-    perf record -F 999 --call-graph dwarf,16384 -e cpu-clock -o "$RES/${BENCH}_$1.perf.data" -- \
+    HWSW_BACKEND=python perf record -F 999 --call-graph dwarf,16384 -e cpu-clock -o "$RES/${BENCH}_$1.perf.data" -- \
         python3-dbg "$2" --worker -l1 -w0 -n3
     perf report --stdio -i "$RES/${BENCH}_$1.perf.data" > "$RES/perf_report_${BENCH}_$1.txt"
     perf script -i "$RES/${BENCH}_$1.perf.data" \
@@ -44,11 +44,11 @@ _profile_one() {
     # and names the actual Python functions.
     PYSPY="$(command -v py-spy || echo "$HOME/.local/bin/py-spy")"
     if [ -x "$PYSPY" ]; then
-        sudo "$PYSPY" record -f flamegraph -o "$RES/pyspy_${BENCH}_$1.svg" -- python3 "$2" --worker -l1 -w0 -n3 || echo "py-spy failed ($1), non-fatal"
+        sudo env HWSW_BACKEND=python "$PYSPY" record -f flamegraph -o "$RES/pyspy_${BENCH}_$1.svg" -- python3 "$2" --worker -l1 -w0 -n3 || echo "py-spy failed ($1), non-fatal"
     fi
     # Hardware counters on release python3 (guest PMU counts <=4 events per pass).
-    { perf stat -e cycles:u,instructions:u -- python3 "$2" --fast 2>&1 | tail -20
-      perf stat -e cache-references,cache-misses,branches,branch-misses -- python3 "$2" --fast 2>&1 | tail -20
+    { HWSW_BACKEND=python perf stat -e cycles:u,instructions:u -- python3 "$2" --fast --inherit-environ HWSW_BACKEND 2>&1 | tail -20
+      HWSW_BACKEND=python perf stat -e cache-references,cache-misses,branches,branch-misses -- python3 "$2" --fast --inherit-environ HWSW_BACKEND 2>&1 | tail -20
     } > "$RES/perf_stat_${BENCH}_$1.txt"
 }
 
@@ -107,8 +107,8 @@ native() {
     local BM="$ROOT/benchmarks/bm_$BENCH/run_benchmark.py"
     if ! python3 -c "import ${BENCH}_rs" 2>/dev/null; then
         echo "native stage: ${BENCH}_rs is not installed. Build and install it:" >&2
-        echo "  cd $ROOT/rust/$BENCH && maturin build --release" >&2
-        echo "  sudo python3 -m pip install $ROOT/rust/$BENCH/wheels/*.whl" >&2
+        echo "  cd $ROOT/rust/$BENCH && maturin build --locked --release -i python3" >&2
+        echo "  sudo python3 -m pip install $ROOT/rust/$BENCH/target/wheels/*.whl" >&2
         return 1
     fi
     rm -f "$RES/native_$BENCH.json" "$RES/fallback_$BENCH.json"

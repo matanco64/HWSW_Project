@@ -47,8 +47,9 @@ indexing, loads and stores. These debug-build percentages locate costs to invest
 release-build timing establishes the optimization's benefit.
 
 #figure(image("fig/print_nbody_stock.svg", width: 100%),
-  caption: [Stock Python call stacks, grouped by function for print. Width is inclusive sample
-  count within `bench_nbody`; import and harness frames are excluded. See Appendix A3.])
+  caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
+  and enlarged. All original frames, widths and startup context are retained. Percentages
+  describe the selected inclusive call path, not a function's total self time.])
 
 == Specialize the fixed schedule
 
@@ -65,24 +66,12 @@ stock pair-update order. A square-root/division replacement changes rounding and
 in the exact software tier. The emitter accepts a body list and pair schedule, so the same
 transformation extends to larger systems.
 
-#figure(image("fig/print_nbody_opt.svg", width: 100%),
-  caption: [Optimized Python. Integration remains the hotspot, but runtime falls from 231 to
-  141 ms. Separately normalized flame graphs do not show the absolute speedup.])
-
-== Alternatives at five bodies
-
-Barnes-Hut is *3.92× slower* than direct force evaluation on the VM's five-body system.
-Tree construction and traversal do not pay off for ten pairs. Separate development experiments
-also found that struct-of-arrays and NumPy lose at this size: Python indexing and small-array
-dispatch outweigh their potential benefits. These experiments are documented in
-`dev/nbody/FINDINGS.md`; they are not additional VM headline results. FMM was not benchmarked,
-so no measured FMM speedup or lower bound is claimed.
-
 #pagebreak()
-= 3. Native execution and scaling
+= 3. Native execution: less work, not higher IPC
 
 The Rust/PyO3 kernel stores state in a `System` object and executes all 20,000 steps through
-one `advance(dt, n)` call. On the tested VM build, state and energy also compare exactly equal
+one `advance(dt, n)` call; both energy evaluations also run in Rust. On the tested VM build,
+state and energy also compare exactly equal
 to stock. This is evidence for the tested compiler, library and workload, not a portability
 guarantee for every floating-point build.
 
@@ -101,7 +90,45 @@ Backend selection is explicit: `HWSW_BACKEND=python|native|auto`. Native mode fa
 wheel is unavailable; auto mode falls back to Python. Pyperf workers must receive the variable
 through `--inherit-environ HWSW_BACKEND`; result metadata identifies what ran.
 
-== What changes when N grows?
+== Matched-work CPU counters
+
+A separate warm-loop experiment repeats the same timed work 64 times per run on a fixed
+guest CPU. The table reports medians of three runs, normalized to one 20,000-step iteration.
+Counters exclude initialization and warmup; Appendix A2 documents gating and event validation.
+
+#result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*Metric per iteration*], [*Python*], [*Native*]),
+  [Elapsed time], [140.29 ms], [9.473 ms],
+  [Instructions], [1,103.62 M], [41.32 M],
+  [Cycles], [334.56 M], [22.56 M],
+  [IPC], [3.30], [1.83],
+  [Branches], [185.97 M], [3.92 M],
+  [Branch misses (rate)], [585,719 (0.315%)], [61 (0.00156%)],
+  [Generic cache references], [2,980], [279],
+  [Generic cache misses (rate)], [37 (1.26%)], [12 (4.00%)],
+)
+
+*The main gain is 26.7× fewer instructions and 14.8× fewer cycles.* Compiled arithmetic
+avoids Python object handling and dispatch, removing most branches too. IPC actually falls:
+native execution retires fewer instructions per cycle, but needs far fewer instructions to
+finish. Higher IPC is not synonymous with a faster program.
+
+Generic cache misses are sparse in both runs. Native has fewer absolute misses even though
+its miss/reference ratio is higher; the denominator shrinks more. These small counts do not
+establish cache latency as the bottleneck. L1-load counts were invalid and are not reported.
+
+#pagebreak()
+= 4. What changes when N grows?
+
+#figure(image("fig/print_nbody_opt.svg", width: 100%),
+  caption: [Full optimized Python-frame profile with the integration call path enlarged.
+  Integration remains the hotspot. Independent normalization does not display the absolute
+  runtime reduction from 231 to 141 ms.])
+
+At five bodies, Barnes-Hut is *3.92× slower* than direct force evaluation on the VM.
+Tree construction and traversal do not pay off for ten pairs. Development experiments also
+found that struct-of-arrays and NumPy lose at this size (`dev/nbody/FINDINGS.md`). FMM was
+not benchmarked, so no measured FMM speedup or lower bound is claimed.
 
 The `--bodies N` extension adds deterministic outer orbits while preserving the five-body
 default. Source generation grows as O(N²), increasing compilation time and memory use.
@@ -127,7 +154,7 @@ rolled Python from N = 100 to 3,200. Step counts approximately equalize pair-upd
 integer rounding increasing work at the final row. Both sweeps are in `results/bigN_sweep.txt`.
 
 #pagebreak()
-= 4. Hardware acceleration: current design
+= 5. Hardware acceleration: current design
 
 `grape_pipeline` retains state on the device and executes a complete `advance(dt, n)` request.
 Force computation suits a scheduled datapath, while velocity accumulation must respect
@@ -165,7 +192,7 @@ against its own arithmetic model. Comparison with stock targets relative energy 
 and per-body position/velocity errors ≤ 2e-9 / 5e-11 at completion. These tolerance targets
 are distinct from the software tier's observed exact equality.
 
-= 5. Conclusion
+= 6. Conclusion
 
 Specializing a fixed schedule cuts Python runtime by 38.9% while preserving the tested state
 and energy exactly. Native execution removes more interpreter work through the same coarse

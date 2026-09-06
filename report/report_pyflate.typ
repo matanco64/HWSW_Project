@@ -11,8 +11,8 @@ place to start. Measuring it led us to improvements across the whole decoding pi
 = 1. Workload and result
 
 Despite its name, the measured `pyflate` workload is *bzip2*, not DEFLATE.
-Each iteration decompresses `interpreter.tar.bz2` from *67,562 bytes to 399,360 bytes* and
-checks the original MD5. The implementation uses standard-library Python rather than calling
+Each iteration decompresses `interpreter.tar.bz2` from *67,562 bytes to 399,360 bytes*;
+the harness checks the original MD5 outside the timer. The Python tier uses the standard library rather than calling
 a native decompression library. Its main structures are an integer bit buffer, Huffman tables,
 a move-to-front (MTF) alphabet, Burrows-Wheeler transform (BWT) index vectors and output buffers.
 
@@ -40,7 +40,7 @@ pyperformance 1.14.0; 120 measured values per configuration. Source:
 profiles and ablations use a different environment, labeled on the next page.]
 
 #pagebreak()
-= 2. Profiling and software changes
+= 2. Profiling: the whole decoding pipeline
 
 The stock Python-frame profile highlights Huffman decoding and bit-buffer work, with
 move-to-front and inverse BWT alongside them. Development instrumentation found a mean of
@@ -49,15 +49,17 @@ A lookup table can remove this scan, but the measured scan is short; per-symbol 
 work and the later transformations also deserve attention.
 
 #figure(image("fig/print_pyflate_stock.svg", width: 100%),
-  caption: [Stock Python call stacks, grouped by function. Width is inclusive samples within
-  `bzip2_main`; nested widths overlap and must not be added. See Appendix A3.])
+  caption: [Full stock Python-frame flame graph, retaining startup and harness context.
+  Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
+  percentages use the original whole-profile denominator; nested shares overlap.])
 
 A separate *Windows / CPython 3.12.6* cProfile run gives
 `find_next_symbol` 0.519 s cumulative out of 1.186 s (43.8%), including its bit-reader
 callees. `decode_huffman_block` has 0.241 s *self* time and 1.172 s *cumulative* time:
 most of its inclusive cost is in functions it calls. Source: `dev/pyflate/FINDINGS.md` §3.
 
-== Changes that shipped
+#pagebreak()
+= 3. Changes that shipped
 
 - *Reduce per-byte overhead:* read the compressed input once, refill the bit window in
   chunks, bind hot values to locals and accumulate bytes without allocating an object per byte.
@@ -80,8 +82,13 @@ These are development measurements, not VM timings. Each row reverts one compone
 the costs need not add. In this experiment, each back-end change contributes more than the
 primary Huffman table. This motivates optimizing the pipeline rather than the matcher alone.
 
+#figure(image("fig/print_pyflate_opt.svg", width: 100%),
+  caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
+  index-table construction remain visible. Matcher work was inlined, so its old function
+  frame disappears without implying that Huffman decoding is free.])
+
 #pagebreak()
-= 3. Native execution and the remaining work
+= 4. Native execution: what improves, what remains
 
 The Rust/PyO3 `BlockDecoder` handles the bit reader, Huffman decode, MTF and RUNA/RUNB
 expansion. Header parsing, inverse BWT, RLE4 and MD5 remain in Python. One block-level call
@@ -99,39 +106,48 @@ They measure the complete benchmark, not the isolated symbol loop.
 `HWSW_BACKEND=python|native|auto` selects the implementation; native mode requires the wheel,
 while auto mode falls back. Pyperf workers need `--inherit-environ HWSW_BACKEND`.
 
-#figure(image("fig/print_pyflate_opt.svg", width: 100%),
-  caption: [Optimized *Python* profile, before native offload. Separate matcher frames disappear
-  after inlining; inverse BWT is a substantial remaining component.])
+*Rust is already integrated.* A VM dispatch check observed one native decoder call in both
+`native` and `auto` modes, and none in `python` mode; every output passed MD5.
+`script_pyflate.sh native` measures this hybrid path. Its `optimized` stage runs the
+Python-only course comparison in pyperformance's separate environment.
 
-== Amdahl's law and the offload boundary
+== Matched-work CPU counters
 
-For baseline offload fraction $f$ and kernel speedup $s$,
-$S = 1 / ((1 - f) + f / s)$; an infinitely fast kernel gives $S_"max" = 1 / (1 - f)$.
-Here, $f$ is the symbol-loop share of optimized Python runtime, not its share in stock.
-The measured *1.62×* end-to-end speedup leaves the BWT and RLE4 stages in Python.
-Faster symbol decoding alone cannot remove their cost. A numerical cap requires a matched
-phase measurement on the same baseline; development measurements from another machine are
-kept separate in the appendix.
+These are medians of three warm-loop VM runs, each decoding the input 16 times, divided by
+16. Both backends produced the same output digest. They are a separate experiment from the
+rigorous timing table above, with acknowledged counter gating after setup (Appendix A2).
 
-== What the inverse-BWT measurements establish
+#result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*Metric per complete decode*], [*Python*], [*Hybrid native*]),
+  [Elapsed time], [286.15 ms], [174.07 ms],
+  [Instructions], [1,948.04 M], [1,172.25 M],
+  [Cycles], [670.33 M], [404.00 M],
+  [IPC], [2.91], [2.89],
+  [Branches], [349.36 M], [207.14 M],
+  [Branch misses (rate)], [555,538 (0.159%)], [303,573 (0.147%)],
+  [Generic cache references], [1.673 M], [1.593 M],
+  [Generic cache misses (rate)], [43,252 (2.586%)], [42,364 (2.654%)],
+)
 
-Inverse BWT contains both index-table construction and a dependent traversal.
-The saved VM phase experiment measures about *137.7 ms* for the whole inverse BWT and
-*47.8 ms* for the isolated traversal loop. Table construction therefore deserves optimization
-alongside traversal.
+Native decoding reduces instructions by *39.8%*, cycles by *39.7%* and branch misses by
+*45.4%*, while IPC is nearly unchanged. The approximately 1.64× speedup in this run comes
+from removing work, not increasing instruction throughput. Cache misses fall only *2.1%*:
+the remaining Python BWT/RLE4 pipeline still moves and transforms the block. This is
+consistent with a partial offload, but aggregate counters cannot attribute misses to a stage.
+L1-load counts were invalid and are excluded.
 
-Process-wide counters give the chase process IPC 2.41 and a generic cache-miss/reference
-ratio of 1.831%. They include setup and other interpreter work, so they do not identify an
-exact DRAM-access interval or partition cycles into memory and interpreter stalls.
-The L-vector is 336,184 bytes; the Python index list and its integer objects occupy additional
-memory.
+== Offload limits and the next target
 
-A useful next experiment is to port and profile the whole BWT stage in native code.
-The traversal dependency may then matter more, but its cache level and bottleneck require
-measurement. The current evidence does not justify a DRAM-side processing-in-memory claim.
+Amdahl's law gives $S = 1 / ((1 - f) + f / s)$ for kernel speedup $s$ and offloaded fraction
+$f$ of *optimized Python* runtime. Even infinite symbol-decoder speed leaves BWT and RLE4.
+Unlike nbody's native integration loop, this offload leaves over a billion instructions
+per decode in a largely Python pipeline. The next target is the *whole inverse BWT*, including table
+construction, not just its dependent traversal. Earlier VM phase timings put them at
+137.7 ms and 47.8 ms respectively (Appendix A3). A native port and working-set sweep would
+test whether memory latency then becomes limiting; the present data do not establish that.
 
 #pagebreak()
-= 4. Hardware acceleration: current proposal
+= 5. Hardware acceleration: current proposal
 
 The hardware boundary comprises `huffman_engine` followed by `mtf_cam`. Together they
 produce the same L-vector as the native decoder. Software keeps block headers, inverse BWT,
@@ -174,7 +190,7 @@ Microarchitecture, RTL, verification, PPA and integration are still open in the 
 hardware status. Formal MTF invariants are planned, not completed proofs. Drivers and
 platform DMA remain integration work. No measured area, clock or power benefit is claimed.]
 
-= 5. Conclusion
+= 6. Conclusion
 
 The Python changes deliver 3.93× over stock with byte-exact output. Native symbol decoding
 adds 1.62× over the optimized Python backend, leaving substantial work in BWT and RLE4.

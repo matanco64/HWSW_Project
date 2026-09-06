@@ -4,13 +4,10 @@
 #   ./build.sh                # build every report_*.typ (all three)
 #   ./build.sh report_nbody   # build one (with or without .typ)
 #
-# Typst is run with --root at the repo root so the sources can reference
-# /results/*.svg -- the flame graphs stay in results/ as the single source of
-# truth rather than being copied into report/fig/.
-#
-# Typst embeds the flamegraph.pl and py-spy SVGs directly; no rasterization is
-# needed. (Verified by rendering to PNG and looking at it -- an SVG that Typst
-# cannot draw still compiles without error, so "it compiled" proves nothing.)
+# Original profiles in results/ are the source evidence. The generator writes
+# full-frame overviews and annotated detail crops to report/fig/; geometry checks
+# run before compilation. Typst embeds these as vectors, without rasterization.
+# Render and visually review PDFs too: a successful build is not a layout check.
 #
 # Needs a typst binary. On the WSL dev box it lives at /root/bin/typst; override
 # with TYPST=/path/to/typst. Install: https://github.com/typst/typst/releases
@@ -35,6 +32,7 @@ build_one() {
 }
 
 python3 "$HERE/make_figures.py"
+python3 "$HERE/check_figures.py"
 if [ $# -gt 0 ]; then
     for f in "$@"; do build_one "$f"; done
 else
