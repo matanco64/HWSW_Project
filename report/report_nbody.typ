@@ -152,7 +152,9 @@ specializes the given workload rather than hard-coding an answer.
   Barnes–Hut (monopole, θ = 0.5, tree rebuilt every step, validated by driving θ→0 to
   reproduce direct summation to 1.2e-16) and measured the crossover: BH/direct is *3.39 at
   N = 5*, 1.58 at N = 100, and only drops below 1.0 near *N ≈ 300–400* — this benchmark runs
-  70× below that. At N = 5 the tree performs 18 force-term evaluations where direct summation
+  70× below that. Since #link(<bigN>)[§3c] adds a flag that #emph[can] run there, that
+  crossover is measured properly rather than left as an estimate, and the tree does eventually
+  win; §3c says what that costs and why we still do not take it. At N = 5 the tree performs 18 force-term evaluations where direct summation
   performs 10, and builds a 7-node tree 20,000 times on top. Note also that log#sub[2] 5 =
   2.3, so "O(N log N) beats O(N²)" compares 5 × 2.3 ≈ 12 against 25/2 ≈ 12: *there is no
   asymptotic gap to exploit at this size.* Barnes–Hut is the #emph[cheaper] tree code, so this
@@ -241,6 +243,81 @@ speed — bytecode count is not the binding constraint at large N.
 This is the kind of finding that only appears when a knob is swept rather than reasoned about,
 and it is a concrete instance of the course's framing that the interpreter, not the physics, is
 the machine being programmed here.
+
+*Beyond the unroll wall: the native kernel does not care.* Partial evaluation stops around
+N = 100–200 for the reasons above, so the benchmark now declines to unroll past 20,000 pairs and
+falls back to the rolled loop — same operations in the same order, still bit-identical, just
+without the specialization. That is a real limit of the technique, not of the workload, and the
+native kernel makes the distinction visible. Measured on the course VM, both columns being the
+same `run_benchmark.py` with `HWSW_BACKEND` pinned and the step count scaled to hold
+pair-updates constant:
+
+#table(
+  columns: (auto, auto, auto, auto, auto, auto),
+  align: (right, right, right, right, right, right),
+  table.header([*N*], [*pairs*], [*steps*], [*rolled Python*], [*native*], [*speedup*]),
+  [100], [4,950], [808], [3,904 ms], [181.1 ms], [21.6×],
+  [200], [19,900], [201], [3,887 ms], [181.5 ms], [21.4×],
+  [400], [79,800], [50], [3,907 ms], [181.4 ms], [21.5×],
+  [800], [319,600], [12], [3,813 ms], [174.9 ms], [21.8×],
+  [1,600], [1,279,200], [3], [3,902 ms], [175.3 ms], [22.3×],
+  [3,200], [5,118,400], [1], [5,094 ms], [233.6 ms], [21.8×],
+)
+
+The native speedup is *flat at 21–22× across a 32× range in N and a 1,000× range in pair
+count*. Both columns being flat is the harness's own control: at constant work they should be,
+and they are. This is the asymmetry that matters for #link(<hw>)[§5] — the kernel is O(N²) in
+time but O(1) in code size, so it goes wherever the workload goes, while the source-generation
+approach is O(N²) in code size and hits a wall the workload never does.
+
+== 3d. Barnes–Hut, measured where it actually wins <bh>
+
+§3b dismissed the tree codes at N = 5. That dismissal is easy to over-read, and now that
+`--bodies` can reach the crossover it would be dishonest to leave it as an estimate — so we
+measured it, on the *real* system. This matters: the earlier crossover run used a clustered blob
+in the unit sphere, a distribution its own docstring calls "favourable to the tree", whereas
+`--bodies N` produces nearly coplanar circular orbits marching outward from 40 AU around one
+dominant central mass. Spatial distribution is precisely what a tree code is sensitive to.
+
+#table(
+  columns: (auto, auto, auto, auto, auto),
+  align: (right, right, right, right, right),
+  table.header([*N*], [*direct*], [*Barnes–Hut*], [*BH / direct*], [*median rel. error*]),
+  [5], [0.020 ms], [0.077 ms], [3.92×], [0],
+  [50], [1.188 ms], [2.712 ms], [2.28×], [7.0e-6],
+  [100], [4.746 ms], [8.410 ms], [1.77×], [1.6e-5],
+  [200], [18.998 ms], [23.781 ms], [1.25×], [1.8e-5],
+  [300], [42.977 ms], [42.489 ms], [*0.99×*], [3.3e-5],
+  [400], [77.424 ms], [61.996 ms], [0.80×], [3.8e-5],
+  [800], [313.489 ms], [158.846 ms], [0.51×], [8.7e-5],
+  [1,600], [1,254.660 ms], [382.471 ms], [*0.30×*], [1.8e-4],
+)
+
+*The crossover is N ≈ 300, and past it the tree wins outright* — 3.3× faster by N = 1,600. Two
+things are worth saying plainly about that. First, it independently reproduces the N ≈ 300–400
+estimate from the blob measurement, on a completely different distribution, which is a stronger
+result than either run alone. Second, direct summation's times scale as exactly N² down the
+column (4.746 → 18.998 ms for 100 → 200), which is how we know the measurement is sound rather
+than noise — the same sweep on a contended WSL box produced direct summation running
+#emph[faster] at N = 300 than at N = 250, and was discarded.
+
+So why keep the exact O(N²) kernel? Three reasons, in increasing order of importance:
+
++ *At the benchmark's actual size the tree loses by 3.92×.* Everything above N ≈ 300 is a
+  workload we invented; the deliverable is N = 5.
++ *The tree is not free.* Its median relative acceleration error reaches 1.8e-4 at N = 1,600,
+  and this project's central claim is bit-identical output. Trading exactness for speed is a
+  different project, and it is the one the course staff explicitly steered away from.
++ *A tree code is the wrong thing to put in hardware.* This is the co-design argument and it
+  survives even in the regime where Barnes–Hut wins in software. Direct summation is a fixed
+  schedule of identical independent operations over a contiguous array — regular dataflow, no
+  data-dependent control. A tree walk is the opposite: pointer chasing through an irregular
+  structure, with a data-dependent opening criterion at every node, and the tree rebuilt every
+  step because the bodies move. Lecture 5's systolic array has *no control circuitry at all*,
+  and Lecture 4's warning that "pointer-based structures are a pain for caching" is the same
+  observation from the memory side. The algorithm that is asymptotically better in software is
+  the one that maps worst onto the accelerator we are proposing — which is exactly the kind of
+  trade-off this course is about, and it only becomes visible once you measure both.
 
 = 4. Performance comparison
 
