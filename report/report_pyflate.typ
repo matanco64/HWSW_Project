@@ -81,7 +81,7 @@ attributes:
   image("/results/pyspy_pyflate_stock.svg", width: 100%),
   caption: [*Before, Python frames* (py-spy). `decode_huffman_block` spans nearly the full
   width, with `find_next_symbol` and `snoopbits` beneath it, `move_to_front` beside them, and
-  `bwt_reverse` as the block on the right — the ~44% / ~17% / ~11% split, visible at a glance.
+  `bwt_reverse` as the block on the right — the \~44% / \~17% / \~11% split, visible at a glance.
   CPython 3.10 has no `-X perf` trampoline, so `perf` cannot name Python functions; py-spy
   samples the interpreter's frame stack instead. 13 of 400 samples (3.3%) landed in module-import
   machinery and are excluded, taking the figure from 61 rows to 18; see #link(<trim>)[the
@@ -221,6 +221,41 @@ Huffman, MTF, RUNA/RUNB — with header parsing, `bwt_reverse`, RLE4 and MD5 all
 claim "the decode side is no longer the problem" from an argument into a measurement, and it
 puts a number on what is left: the serial tail. `bwt_reverse` was deliberately not ported,
 for the reason §5c gives.
+
+*The kernel is wired into the shipped benchmark, behind an explicit switch.* This is the shape
+Lecture 5 ("Accelerator Design Patterns") prescribes for an accelerator's software interface,
+and the three rules map onto it directly:
+
+#table(
+  columns: (auto, 1fr),
+  align: (left, left),
+  inset: 4pt,
+  table.header([*Rule*], [*How the benchmark satisfies it*]),
+  [1 — do not make users change their code],
+  [Same CLI, same `pyperf` harness, same MD5 check. `run_benchmark.py` is still a drop-in
+   replacement for the stock benchmark of the same name.],
+  [2 — confine changes to a runtime/library],
+  [Every native line lives in a separate crate behind one call. The Python file gains an import
+   and a one-line dispatch.],
+  [3 — do not break the user's code],
+  [A missing wheel, a different CPython ABI or a non-x86 host all fall back to the pure-Python
+   decoder. Verified on a machine with no wheel installed: the module imports, binds `None`, and
+   still produces MD5 `afa004a630fe072901b1d9628b960974`.],
+)
+
+The one thing an optional import costs is clarity about what was measured, so it is not left
+optional in practice: `HWSW_BACKEND` pins the back end to `auto`, `python` or `native`, `native`
+fails loudly rather than degrading, and the back end that ran is written into the `pyperf`
+metadata of every result JSON. The stock-versus-optimized comparison of §4 remains the
+pure-Python A/B — that is the software-optimization result the project asks for — and the
+native number sits on top of it rather than being folded into it.
+
+Splitting the decoder this way also made the Python side better. `compute_tables()` used to fold
+table construction into the code-length bit loop and throw the raw lengths away; both back ends
+want the lengths, so it is now `read_code_lengths()` plus `build_huffman_table()`. Bit
+consumption is identical either way, which is what lets either back end pick the stream up
+mid-block — and that property is precisely what a real accelerator needs in order to hand work
+back to the CPU when it meets something it cannot do.
 
 = 5. Hardware acceleration proposal <hw>
 
