@@ -97,8 +97,13 @@ native() {
         return 1
     fi
     rm -f "$RES/native_$BENCH.json" "$RES/fallback_$BENCH.json"
-    HWSW_BACKEND=python python3 "$BM" --rigorous -o "$RES/fallback_$BENCH.json"
-    HWSW_BACKEND=native python3 "$BM" --rigorous -o "$RES/native_$BENCH.json"
+    # --inherit-environ is not optional here. pyperf re-executes each worker
+    # with a scrubbed environment, so without it HWSW_BACKEND never reaches the
+    # processes that do the timing and BOTH runs silently measure whatever the
+    # import found -- which is what happened the first time, and the recorded
+    # hwsw_backend metadata is what caught it.
+    HWSW_BACKEND=python python3 "$BM" --rigorous --inherit-environ HWSW_BACKEND         -o "$RES/fallback_$BENCH.json"
+    HWSW_BACKEND=native python3 "$BM" --rigorous --inherit-environ HWSW_BACKEND         -o "$RES/native_$BENCH.json"
     python3 -m pyperf compare_to "$RES/fallback_$BENCH.json" "$RES/native_$BENCH.json" \
         --table | tee "$RES/compare_${BENCH}_native.txt"
 }
