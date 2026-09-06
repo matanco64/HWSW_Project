@@ -63,6 +63,35 @@ import struct
 
 import pyperf
 
+# ---------------------------------------------------------------------------
+# NATIVE ACCELERATION (optional).
+#
+# `pyflate_rs` is our Rust/PyO3 build of the symbol-decode kernel (`rust/pyflate/`).
+# It is imported, never required.  The course's three rules for an accelerator's
+# HW/SW interface (Lecture 5, "Accelerator Design Patterns") are the reason this
+# is shaped as an import and not as a rewrite:
+#
+#   Rule 1  do not expect end users to change their code.  `run_benchmark.py`
+#           keeps the same CLI, the same pyperf harness and the same MD5 check
+#           whether or not the extension is present.
+#   Rule 2  if software must change, confine the change to a runtime/library.
+#           Every native line lives in a separate crate behind one call.
+#   Rule 3  do not break the user's code -- if the accelerator cannot handle an
+#           operation, run it on the CPU.  A missing wheel, a different CPython
+#           ABI, or a non-x86 host all land on the pure-Python path below, which
+#           is still the optimized decoder and still passes the same checks.
+#
+# The same rule is why the boundary sits where it does: the kernel covers bit
+# reader -> canonical Huffman -> MTF -> RUNA/RUNB, and hands the inverse BWT and
+# RLE4 back to Python.  That is not an arbitrary split.  It is exactly the
+# `huffman_engine` + `mtf_cam` boundary in `hw/`, so this crate doubles as the
+# golden model for the RTL, and the stages left in Python are the ones §5c of
+# the report argues hardware cannot fix cheaply either.
+try:
+    import pyflate_rs
+except ImportError:                                          # pragma: no cover
+    pyflate_rs = None
+
 
 int2byte = struct.Struct(">B").pack
 
@@ -582,35 +611,39 @@ def compute_selectors_list(b, huffman_groups):
     return selectors_list
 
 
-def compute_tables(b, huffman_groups, symbols_in_use):
-    tables = []
-    for j in range(huffman_groups):
+def read_code_lengths(b, huffman_groups, symbols_in_use):
+    """The delta-coded code-length bit loop, returning the raw lengths.
+
+    Stock folds table construction into this loop and throws the lengths away.
+    Both back ends want the lengths themselves -- the Rust kernel builds its own
+    tables from them, and the Python path calls `build_huffman_table()` below --
+    so they are returned rather than consumed here.  Bit consumption is
+    identical either way, which is what keeps the two paths interchangeable
+    mid-stream.
+    """
+    groups = []
+    for _ in range(huffman_groups):
         length = b.readbits(5)
         lengths = []
-        for i in range(symbols_in_use):
+        for _ in range(symbols_in_use):
             if not 0 <= length <= 20:
-                raise "Bzip2 Huffman length code outside range 0..20"
+                raise Exception("Bzip2 Huffman length code outside range 0..20")
             while b.readbits(1):
                 length -= (b.readbits(1) * 2) - 1
-            lengths += [length]
-        tables.append(build_huffman_table(lengths))
-    return tables
+            lengths.append(length)
+        groups.append(lengths)
+    return groups
 
 
-def decode_huffman_block(b, out):
-    randomised = b.readbits(1)
-    if randomised:
-        raise "Bzip2 randomised support not implemented"
-    pointer = b.readbits(24)
-    used = compute_used(b)
+def _decode_symbols_python(b, code_lengths, selectors_list, symbols_in_use,
+                           used):
+    """Symbol decode in pure Python: bit reader, Huffman, MTF, RUNA/RUNB.
 
-    huffman_groups = b.readbits(3)
-    if not 2 <= huffman_groups <= 6:
-        raise Exception("Bzip2: Number of Huffman groups not in range 2..6")
-
-    selectors_list = compute_selectors_list(b, huffman_groups)
-    symbols_in_use = sum(used) + 2  # remember RUN[AB] RLE symbols
-    tables = compute_tables(b, huffman_groups, symbols_in_use)
+    Returns `L`, the rank-mapped byte stream the inverse BWT consumes.  This is
+    the fallback back end (Rule 3): it runs whenever the native extension is
+    absent, and it is still the fully optimized decoder, not the stock loop.
+    """
+    tables = [build_huffman_table(lengths) for lengths in code_lengths]
 
     # OPTIMIZED: the move-to-front list holds plain ints and is kept in
     # REVERSE order, so the front of the list is favourites[-1] and rank r-1
@@ -684,7 +717,7 @@ def decode_huffman_block(b, out):
         elif repeat > 0:
             # Remember kids: If there is only one repeated
             # real symbol, it is encoded with *zero* Huffman
-            # bits and not output... so buffer[-1] doesn't work.
+            # bits and not output... so buffer[-1] does not work.
             buf_extend(bytes((favourites[-1],)) * repeat)
             repeat = 0
         if r == eob:
@@ -697,10 +730,91 @@ def decode_huffman_block(b, out):
     b.pos = pos
     b.bitfield = acc & MASK[nbits]
     b.bits = nbits
+    return buffer
+
+
+def _decode_symbols_native(b, code_lengths, selectors_list, symbols_in_use,
+                           used):
+    """The same stage, executed by the Rust kernel.  Returns the same `L`.
+
+    WHY THIS STAGE.  It is 44% of stock runtime and, unlike the inverse BWT
+    that follows it, it is not a serial pointer chase -- so it is the part
+    where leaving the interpreter actually buys something.
+
+    WHY NATIVE CODE WINS HERE, in the terms of Lecture 4 ("it is always the
+    memory").  The Python loop above is about as tight as CPython allows, and
+    what is left is not arithmetic, it is layout.  Every symbol touches
+    `favourites`, a Python list: an array of `PyObject*` pointing at boxed ints
+    scattered across the heap, so a move-to-front of mean rank 7.2 is seven
+    dependent dereferences into seven different cache lines.  The lecture puts
+    it as "pointer-based structures are a pain for caching", and that is the
+    whole story.  The Rust side holds the same list as a `[u8; 258]`: one cache
+    line, no indirection, and the memmove is a handful of bytes.  Same
+    algorithm, same mean rank, only the data layout changed -- the lecture's
+    "merging arrays" transformation applied to a structure Python cannot
+    express.
+
+    The kernel is configured per block and inside the timed region, exactly as
+    the Python path builds its six decode tables inside the timed region, so
+    neither back end is handed a setup freebie.
+
+    Bit-position contract: the decoder is told an absolute bit offset into the
+    stream and returns the offset one past the end-of-block symbol.  Getting
+    that back wrong would silently desynchronise the stream rather than raise,
+    so `dev/pyflate/rs_check.py` asserts the returned offset as well as the
+    bytes -- and the MD5 at the end of the benchmark is the backstop.
+    """
+    dec = pyflate_rs.BlockDecoder(
+        b.data,
+        [bytes(lengths) for lengths in code_lengths],
+        bytes(selectors_list),
+        symbols_in_use,
+        # front-first, unlike the reversed list the Python path keeps: that
+        # reversal is a `list.pop` micro-optimization with no analogue in an
+        # array.
+        bytes(i for i, x in enumerate(used) if x))
+
+    L, end = dec.decode(b.pos * 8 - b.bits)
+
+    # Restore the Python bit reader at the offset the kernel stopped on: drop
+    # the buffered window, jump to the containing byte, discard the sub-byte
+    # remainder.  After this the Python header parser resumes as if it had
+    # decoded the block itself.
+    b.pos = end >> 3
+    b.bits = 0
+    b.bitfield = 0
+    remainder = end & 7
+    if remainder:
+        b.readbits(remainder)
+    return L
+
+
+def decode_huffman_block(b, out):
+    randomised = b.readbits(1)
+    if randomised:
+        raise "Bzip2 randomised support not implemented"
+    pointer = b.readbits(24)
+    used = compute_used(b)
+
+    huffman_groups = b.readbits(3)
+    if not 2 <= huffman_groups <= 6:
+        raise Exception("Bzip2: Number of Huffman groups not in range 2..6")
+
+    selectors_list = compute_selectors_list(b, huffman_groups)
+    symbols_in_use = sum(used) + 2  # remember RUN[AB] RLE symbols
+    code_lengths = read_code_lengths(b, huffman_groups, symbols_in_use)
+
+    # Header parsing above is identical on both paths and stays in Python: it
+    # is a few hundred bits per block, i.e. nothing, and keeping it here is
+    # what lets either back end pick the stream up mid-block.
+    decode = (_decode_symbols_native if pyflate_rs is not None
+              else _decode_symbols_python)
+    buffer = decode(b, code_lengths, selectors_list, symbols_in_use, used)
 
     nearly_there = bwt_reverse(bytes(buffer), pointer)
     # Pointless/irritating run-length encoding step
     out.append(rle4_expand(nearly_there))
+
 
 # Sixteen bits of magic have been removed by the time we start decoding
 
