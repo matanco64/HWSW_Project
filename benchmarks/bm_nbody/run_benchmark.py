@@ -184,6 +184,49 @@ def _extra_bodies(n):
     return out
 
 
+# Above this many pairs, stop unrolling and use the rolled loop instead.
+#
+# Partial evaluation is O(N^2) in *source size*, and CPython's compiler needs
+# roughly 40 kB of working set per emitted pair. Measured peak RSS: 174 MB at
+# N = 100, 629 MB at N = 200, 2.44 GB at N = 400, and N = 700 OOM-killed a 7 GB
+# machine outright. Compile time grows the same way (~55-70 us per pair: 1.3 s
+# at N = 200, 9 s at N = 500) and every pyperf worker pays it again.
+#
+# 20,000 pairs is N = 200. Past that the technique is still a speedup -- it is
+# 1.37x at N = 400 -- but it stops being a sane thing to do, so the benchmark
+# declines to do it rather than trying and dying. Override with
+# NBODY_MAX_UNROLL_PAIRS to reproduce the wall deliberately.
+_MAX_UNROLL_PAIRS = int(os.environ.get("NBODY_MAX_UNROLL_PAIRS", 20000))
+
+
+def _advance_rolled(dt, n, bodies=SYSTEM, pairs=PAIRS):
+    """The stock rolled loop, verbatim, for N too large to unroll.
+
+    Same operations in the same order as the generated code, so results stay
+    bit-identical; it just pays the interpreter overhead the emitter exists to
+    remove. Only reachable above _MAX_UNROLL_PAIRS.
+    """
+    for _ in range(n):
+        for (((x1, y1, z1), v1, m1),
+             ((x2, y2, z2), v2, m2)) in pairs:
+            dx = x1 - x2
+            dy = y1 - y2
+            dz = z1 - z2
+            mag = dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
+            b1m = m1 * mag
+            b2m = m2 * mag
+            v1[0] -= dx * b2m
+            v1[1] -= dy * b2m
+            v1[2] -= dz * b2m
+            v2[0] += dx * b1m
+            v2[1] += dy * b1m
+            v2[2] += dz * b1m
+        for (r, [vx, vy, vz], m) in bodies:
+            r[0] += dt * vx
+            r[1] += dt * vy
+            r[2] += dt * vz
+
+
 def _configure(nbodies):
     """Re-derive SYSTEM / PAIRS / advance for --bodies N.  No-op at N = 5.
 
@@ -200,6 +243,16 @@ def _configure(nbodies):
     BODIES.update(_extra_bodies(nbodies))
     SYSTEM[:] = list(BODIES.values())
     PAIRS[:] = combinations(SYSTEM)
+
+    # Regenerating advance() is the expensive part, and it is pure waste on the
+    # native path, which never calls it -- the kernel owns the integration. Not
+    # skipping it here would make `--bodies 1000 HWSW_BACKEND=native` attempt a
+    # ~20 GB compile to build a function nothing invokes.
+    if nbody_rs is not None:
+        return
+    if len(PAIRS) > _MAX_UNROLL_PAIRS:
+        advance = _advance_rolled
+        return
     advance = _build_advance(SYSTEM, PAIRS)
 
 
