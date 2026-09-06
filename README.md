@@ -202,8 +202,18 @@ as a measurement.
 
 ### Measurement notes (KVM guest quirks)
 
-- `perf record` must use `-e cpu-clock` — the guest's `cycles` PMU event
-  records zero samples.
+- `perf record` uses `-e cpu-clock`, a software timer that samples in
+  proportion to elapsed CPU time — the right event for a "where does the time
+  go" flame graph. The hardware PMU is nonetheless available: `perf stat -e
+  cycles` counts correctly, and `perf record -e cycles -c 2000000` samples
+  correctly with clean symbols. What does *not* work is `perf record -e cycles
+  -F <n>`, which returns zero samples at any frequency, because perf's
+  frequency mode auto-tunes the period from counter feedback and that loop does
+  not converge on the KVM vPMU. Use a fixed period (`-c`) for hardware events.
+- `perf stat` silently returns zeros for events past the guest's **four**
+  general-purpose counters instead of multiplexing them, so request at most
+  four hardware events per pass. (This, not a missing PMU, is why `cycles` once
+  looked broken.)
 - `perf stat` silently returns **zeros past 4 events** in the guest, so counters
   are taken in **two passes** (`cycles:u,instructions:u`, then the
   cache/branch group) and concatenated into one `perf_stat_*` file.

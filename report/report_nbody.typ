@@ -54,7 +54,9 @@ iteration runs `report_energy()`, `advance(dt=0.01, n=20000)`, then `report_ener
   values) on the release `python3`. Profiles are recorded separately with `python3-dbg` for
   symbols and are *never* quoted as timings — the debug build's assertions and allocator hooks
   inflate interpreter-internal frames roughly 2.5–3×. Two guest quirks worth recording: the
-  `cycles` PMU event records *zero* samples under KVM, so sampling must use `-e cpu-clock`;
+  `cycles` PMU event records *zero* samples under KVM #emph[in frequency mode], so sampling uses
+  `-e cpu-clock` (a fixed period, `-e cycles -c 2000000`, does work — see #link(<pmu>)[the PMU
+  note]);
   and `perf stat` silently returns zeros past four events, so counters are taken in two passes.
 ]
 
@@ -418,3 +420,67 @@ committed beside it as `*_full.svg`.
 None of the three rescales anything, and no number quoted anywhere in this report is derived
 from a trimmed graph — the timings come from `pyperf`, and the self-time percentages from flat
 `perf report` output and cProfile, both taken on untrimmed data.
+
+
+= Appendix: what the guest PMU can and cannot do <pmu>
+
+The course VM is a QEMU/KVM guest, and we spent most of the project believing its hardware
+performance counters were unusable — our own scripts carried the comment "the `cycles` PMU event
+records zero samples — MUST use `-e cpu-clock`". That is wrong, and since a claim about hardware
+is exactly the kind a reader can check in one command, here is what is actually true.
+
+*Counting works, including `cycles`.* Three independent encodings of unhalted core cycles agree
+to within 1% on the same load:
+
+#table(
+  columns: (auto, auto, 1fr),
+  align: (left, right, left),
+  inset: 4pt,
+  table.header([*event*], [*count*], [*note*]),
+  [`cycles`], [180,523,907], [fixed counter],
+  [`ref-cycles`], [179,410,008], [reference clock],
+  [`r003c`], [178,709,534], [`CPU_CLK_UNHALTED.THREAD_P`, general-purpose counter],
+  [`instructions`], [538,815,265], [for scale],
+)
+
+The zeros that started the myth came from asking `perf stat` for *six* hardware events at once.
+The guest exposes *four* general-purpose counters (`generic registers: 4`), and rather than
+multiplexing, the vPMU returns 0 for the events that lose. Ask for four or fewer per pass and
+everything counts. Our scripts already split counters across two passes for this reason — the
+workaround was right, the explanation attached to it was not.
+
+*Sampling works too, but only with a fixed period.*
+
+#table(
+  columns: (auto, auto),
+  align: (left, right),
+  inset: 4pt,
+  table.header([*`perf record` invocation*], [*samples*]),
+  [`-e cycles -F 999`], [0],
+  [`-e cycles -F 4000`], [0],
+  [`-e cycles -c 1000000`], [2,315],
+  [`-e cycles -c 200000`], [9,735],
+  [`-e cpu-clock -F 999`], [1,022],
+)
+
+Frequency mode asks the kernel to *auto-tune* the sample period from observed counter feedback;
+that loop does not converge on the KVM vPMU, so the counter is never armed and the capture is
+silent. Pinning the period with `-c` sidesteps the tuning entirely and the overflow interrupt
+path works normally. The full production combination — `-e cycles -c 2000000 --call-graph
+dwarf,16384` against `python3-dbg` — yields 2,298 samples with call chains that resolve to real
+symbols end to end (`_start` → `Py_BytesMain` → `pymain_init` → ... → `__GI_setlocale`).
+
+*So this was a `perf` usage limitation, not a virtualization one*, and no change to the VM is
+needed. For completeness we checked the alternative: the host is bare metal (a Xeon E5-2630 v3),
+`kvm.enable_pmu` is `Y`, and the guest already reports `Haswell events, full-width counters,
+Intel PMU driver` with the host's full complement of counters — so relaunching QEMU with
+`-cpu host,pmu=on` would change nothing. The one host-side knob left is `nmi_watchdog=1`, which
+pins one counter per CPU and is the standard thing to disable for guest PMU work; that needs
+root on the host, which we do not have.
+
+*Why this matters beyond tidiness.* Lecture 4 pairs the two tools deliberately: a flame graph
+shows *where* time goes but not why, a CPI stack shows *why* but not where, and they are meant
+to be used together. `cpu-clock` is a software timer — it can only ever give the first half. The
+flame graphs in this report stay on `cpu-clock`, which is the correct event for attributing
+elapsed time, but the second half is now available rather than ruled out: real `cycles`,
+`instructions` and `cache-misses` sampling, four events per pass, fixed period.

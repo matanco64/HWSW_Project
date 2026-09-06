@@ -54,7 +54,22 @@ _profile_one() {
 
 profile() {
     # Profile shape with python3-dbg (symbols); timings here are NOT quotable.
-    # KVM guest: the 'cycles' PMU event records zero samples — MUST use -e cpu-clock.
+    # Event choice. cpu-clock is a software timer and samples in proportion to
+    # elapsed CPU time, which is what a "where does the time go" flame graph
+    # wants, so it stays the default here.
+    #
+    # The hardware PMU *is* available in the guest, contrary to what this
+    # comment used to claim. Two things are true and were previously conflated:
+    #   - `perf stat -e cycles` counts correctly (180,523,907 on a test load,
+    #     within 1% of ref-cycles and of the raw r003c encoding). Earlier zeros
+    #     came from requesting six events against the guest's four general
+    #     purpose counters, which multiplexes.
+    #   - `perf record -e cycles -F <n>` yields zero samples at any frequency,
+    #     but `-c <period>` works (2,298 samples at -c 2000000 with DWARF
+    #     unwinding and clean symbols). Frequency mode auto-tunes the period
+    #     from counter feedback and that loop does not converge on the KVM
+    #     vPMU; a fixed period sidesteps it.
+    # So for cycle-accurate or CPI-style work use: -e cycles -c 2000000.
     # NOTE: 'pyperf system tune' (setup) sets perf_event_max_sample_rate=1, which
     # throttles perf record to 1 Hz — restore a usable rate before recording.
     sudo sysctl -w kernel.perf_event_max_sample_rate=100000 \
