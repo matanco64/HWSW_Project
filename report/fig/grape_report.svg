@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 226">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526b7e"/></marker></defs>
+<path d="M178 44H230" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M488 44H540" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M646 80V108H110V132" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M212 172H260" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M540 172H590" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M710 132V80" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="8" y="8" width="170" height="72" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="93.0" y="39.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Python + driver</text>
+<text x="93.0" y="59.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">one advance(dt, n)</text>
+<rect x="230" y="8" width="258" height="72" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="359.0" y="39.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">AXI4-Lite config / status</text>
+<text x="359.0" y="59.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">FP64 state, DT, NSTEPS</text>
+<rect x="540" y="8" width="212" height="72" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="646.0" y="39.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">State registers</text>
+<text x="646.0" y="59.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">working + committed</text>
+<rect x="8" y="132" width="204" height="80" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="110.0" y="167.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Step / pair scheduler</text>
+<text x="110.0" y="187.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">issue control</text>
+<rect x="260" y="132" width="280" height="80" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="400.0" y="167.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Shared FP64 datapath</text>
+<text x="400.0" y="187.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">3 add, 3 mul, sqrt, reciprocal</text>
+<rect x="590" y="132" width="162" height="80" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="671.0" y="167.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Ordered accumulate</text>
+<text x="671.0" y="187.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">position / commit</text>
+</svg>

@@ -17,7 +17,10 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
-TYPST="${TYPST:-/root/bin/typst}"
+TYPST="${TYPST:-typst}"
+if ! command -v "$TYPST" >/dev/null 2>&1 && [ -x /root/bin/typst ]; then
+    TYPST=/root/bin/typst
+fi
 
 command -v "$TYPST" >/dev/null 2>&1 || [ -x "$TYPST" ] || {
     echo "typst not found at '$TYPST' (set TYPST=...)" >&2; exit 1; }
@@ -27,9 +30,11 @@ build_one() {
     local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
     "$TYPST" compile --root "$ROOT" "$src" "$ROOT/$base.pdf"
+    pdftotext -layout -enc UTF-8 "$ROOT/$base.pdf" "$ROOT/$base.txt"
     echo "wrote $base.pdf ($(stat -c%s "$ROOT/$base.pdf") bytes)"
 }
 
+python3 "$HERE/make_figures.py"
 if [ $# -gt 0 ]; then
     for f in "$@"; do build_one "$f"; done
 else

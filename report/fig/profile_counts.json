@@ -1,0 +1,124 @@
+[
+  {
+    "source": "flame_nbody_stock_full.svg",
+    "output": "print_nbody_stock.svg",
+    "source_frame_count": 16921,
+    "transformation": "full original frame geometry plus annotated context crops",
+    "highlights": [
+      {
+        "name": "list_ass_item",
+        "title": "list_ass_item (243,243,243 samples, 4.00%)",
+        "x": 878.9,
+        "y": 1269.0,
+        "w": 47.2,
+        "h": 15.0,
+        "weight": 243243243,
+        "share": 4.0
+      },
+      {
+        "name": "PyNumber_AsSsize_t",
+        "title": "PyNumber_AsSsize_t (160,160,160 samples, 2.63%)",
+        "x": 745.7,
+        "y": 1269.0,
+        "w": 31.0,
+        "h": 15.0,
+        "weight": 160160160,
+        "share": 2.63
+      },
+      {
+        "name": "binary_op1",
+        "title": "binary_op1 (632,632,632 samples, 10.40%)",
+        "x": 515.1,
+        "y": 1285.0,
+        "w": 122.8,
+        "h": 15.0,
+        "weight": 632632632,
+        "share": 10.4
+      }
+    ]
+  },
+  {
+    "source": "pyspy_nbody_opt_full.svg",
+    "output": "print_nbody_opt.svg",
+    "source_frame_count": 218,
+    "transformation": "full original frame geometry plus annotated context crops",
+    "highlights": [
+      {
+        "name": "advance",
+        "title": "advance (<nbody-advance>:94) (12 samples, 6.42%)",
+        "x": 1095.3,
+        "y": 501.0,
+        "w": 75.8,
+        "h": 15.0,
+        "weight": 12,
+        "share": 6.42
+      }
+    ]
+  },
+  {
+    "source": "pyspy_pyflate_stock_full.svg",
+    "output": "print_pyflate_stock.svg",
+    "source_frame_count": 232,
+    "transformation": "full original frame geometry plus annotated context crops",
+    "highlights": [
+      {
+        "name": "find_next_symbol",
+        "title": "find_next_symbol (run_benchmark.py:229) (83 samples, 20.54%)",
+        "x": 156.0,
+        "y": 789.0,
+        "w": 242.5,
+        "h": 15.0,
+        "weight": 83,
+        "share": 20.54
+      },
+      {
+        "name": "move_to_front",
+        "title": "move_to_front (run_benchmark.py:289) (61 samples, 15.10%)",
+        "x": 617.5,
+        "y": 789.0,
+        "w": 178.2,
+        "h": 15.0,
+        "weight": 61,
+        "share": 15.1
+      },
+      {
+        "name": "bwt_reverse",
+        "title": "bwt_reverse (run_benchmark.py:309) (35 samples, 8.66%)",
+        "x": 819.1,
+        "y": 789.0,
+        "w": 102.2,
+        "h": 15.0,
+        "weight": 35,
+        "share": 8.66
+      }
+    ]
+  },
+  {
+    "source": "pyspy_pyflate_opt_full.svg",
+    "output": "print_pyflate_opt.svg",
+    "source_frame_count": 214,
+    "transformation": "full original frame geometry plus annotated context crops",
+    "highlights": [
+      {
+        "name": "bwt_reverse",
+        "title": "bwt_reverse (run_benchmark.py:511) (25 samples, 24.04%)",
+        "x": 531.9,
+        "y": 773.0,
+        "w": 283.7,
+        "h": 15.0,
+        "weight": 25,
+        "share": 24.04
+      },
+      {
+        "name": "bwt_transform",
+        "title": "bwt_transform (run_benchmark.py:474) (10 samples, 9.62%)",
+        "x": 543.3,
+        "y": 757.0,
+        "w": 113.4,
+        "h": 15.0,
+        "weight": 10,
+        "share": 9.62
+      }
+    ]
+  }
+]
