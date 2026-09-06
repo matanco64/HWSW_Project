@@ -14,6 +14,8 @@ Contributed by Kevin Carson.
 Modified by Tupteq, Fredrik Johansson, and Daniel Nanz.
 """
 
+import os
+
 from math import cos, sin, sqrt
 
 import pyperf
@@ -28,10 +30,25 @@ import pyperf
 # the extension is missing -- no wheel, different CPython ABI, non-x86 host --
 # the work runs on the CPU instead of breaking (Rule 3).  The fallback is the
 # generated straight-line Python below, which is itself the optimized version.
+
+# Back-end selection.  "auto" (the default) prefers the native kernel and falls
+# back to Python; "python" and "native" pin it.  This exists because otherwise
+# what gets measured depends on what happens to be installed in whichever venv
+# pyperformance built -- two runs could measure different back ends and produce
+# JSON that looks the same.  The choice is recorded in the pyperf metadata.
+_BACKEND = os.environ.get("HWSW_BACKEND", "auto").lower()
+if _BACKEND not in ("auto", "python", "native"):
+    raise SystemExit("HWSW_BACKEND must be one of: auto, python, native")
+
 try:
     import nbody_rs
 except ImportError:                                          # pragma: no cover
     nbody_rs = None
+
+if _BACKEND == "python":
+    nbody_rs = None
+elif _BACKEND == "native" and nbody_rs is None:
+    raise SystemExit("HWSW_BACKEND=native but nbody_rs is not importable")
 
 __contact__ = "collinwinter@google.com (Collin Winter)"
 DEFAULT_ITERATIONS = 20000
@@ -433,6 +450,9 @@ def add_cmdline_args(cmd, args):
 if __name__ == '__main__':
     runner = pyperf.Runner(add_cmdline_args=add_cmdline_args)
     runner.metadata['description'] = "n-body benchmark"
+    # so the result JSON says which back end produced it
+    runner.metadata['hwsw_backend'] = ("native" if nbody_rs is not None
+                                       else "python")
     runner.argparser.add_argument("--iterations",
                                   type=int, default=DEFAULT_ITERATIONS,
                                   help="Number of nbody advance() iterations "

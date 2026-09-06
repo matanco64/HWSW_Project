@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # HWSW final project — nbody: setup, baseline, profiling + flame graph, optimized run, comparison.
 # Run INSIDE the course QEMU VM (Ubuntu 22.04, python3.10). Stages are selectable:
-#   ./script_nbody.sh setup|baseline|profile|optimized|compare|all
+#   ./script_nbody.sh setup|baseline|profile|optimized|compare|native|all
 set -euo pipefail
 BENCH=nbody
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -77,12 +77,39 @@ compare() {
         --table | tee "$RES/compare_$BENCH.txt"
 }
 
+native() {
+    # The native (Rust) back end measured against the pure-Python fallback of
+    # the SAME file, on the same interpreter, with the same pyperf harness and
+    # the same rigor -- so HWSW_BACKEND is the only difference between the two
+    # numbers.
+    #
+    # Deliberately NOT run through pyperformance: pyperformance builds its own
+    # venv, that venv has no extension wheel in it, and installing into a venv
+    # it manages and may discard is fragile. Running the deliverable directly
+    # under its own pyperf Runner keeps both sides identical. The baseline vs
+    # optimized comparison above stays the course A/B (stock vs our Python);
+    # this is the accelerator tier on top of it.
+    local BM="$ROOT/benchmarks/bm_$BENCH/run_benchmark.py"
+    if ! python3 -c "import ${BENCH}_rs" 2>/dev/null; then
+        echo "native stage: ${BENCH}_rs is not installed. Build and install it:" >&2
+        echo "  cd $ROOT/rust/$BENCH && maturin build --release" >&2
+        echo "  sudo python3 -m pip install $ROOT/rust/$BENCH/wheels/*.whl" >&2
+        return 1
+    fi
+    rm -f "$RES/native_$BENCH.json" "$RES/fallback_$BENCH.json"
+    HWSW_BACKEND=python python3 "$BM" --rigorous -o "$RES/fallback_$BENCH.json"
+    HWSW_BACKEND=native python3 "$BM" --rigorous -o "$RES/native_$BENCH.json"
+    python3 -m pyperf compare_to "$RES/fallback_$BENCH.json" "$RES/native_$BENCH.json" \
+        --table | tee "$RES/compare_${BENCH}_native.txt"
+}
+
 case "${1:-all}" in
     setup) setup ;;
     baseline) baseline ;;
     profile) profile ;;
     optimized) optimized ;;
     compare) compare ;;
-    all) setup; baseline; profile; optimized; compare ;;
-    *) echo "usage: $0 setup|baseline|profile|optimized|compare|all"; exit 1 ;;
+    native) native ;;
+    all) setup; baseline; profile; optimized; compare; native || true ;;
+    *) echo "usage: $0 setup|baseline|profile|optimized|compare|native|all"; exit 1 ;;
 esac

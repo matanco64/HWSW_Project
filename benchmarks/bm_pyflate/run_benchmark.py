@@ -87,10 +87,25 @@ import pyperf
 # `huffman_engine` + `mtf_cam` boundary in `hw/`, so this crate doubles as the
 # golden model for the RTL, and the stages left in Python are the ones §5c of
 # the report argues hardware cannot fix cheaply either.
+
+# Back-end selection.  "auto" (the default) prefers the native kernel and falls
+# back to Python; "python" and "native" pin it.  This exists because otherwise
+# what gets measured depends on what happens to be installed in whichever venv
+# pyperformance built -- two runs could measure different back ends and produce
+# JSON that looks the same.  The choice is recorded in the pyperf metadata.
+_BACKEND = os.environ.get("HWSW_BACKEND", "auto").lower()
+if _BACKEND not in ("auto", "python", "native"):
+    raise SystemExit("HWSW_BACKEND must be one of: auto, python, native")
+
 try:
     import pyflate_rs
 except ImportError:                                          # pragma: no cover
     pyflate_rs = None
+
+if _BACKEND == "python":
+    pyflate_rs = None
+elif _BACKEND == "native" and pyflate_rs is None:
+    raise SystemExit("HWSW_BACKEND=native but pyflate_rs is not importable")
 
 
 int2byte = struct.Struct(">B").pack
@@ -1020,6 +1035,9 @@ def bench_pyflake(loops, filename):
 if __name__ == '__main__':
     runner = pyperf.Runner()
     runner.metadata['description'] = "Pyflate benchmark"
+    # so the result JSON says which back end produced it
+    runner.metadata['hwsw_backend'] = ("native" if pyflate_rs is not None
+                                       else "python")
 
     filename = os.path.join(os.path.dirname(__file__),
                             "data", "interpreter.tar.bz2")
