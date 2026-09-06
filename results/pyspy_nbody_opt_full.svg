@@ -1,0 +1,1306 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="742" onload="init(evt)" viewBox="0 0 1200 742" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="742.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >nbody (opt, py-spy / Python frames) (full depth)</text>
+<text id="details" x="10.00" y="725" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="725" > </text>
+<g id="frames">
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="47.9" y="645" width="6.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="50.86" y="655.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="35.2" y="117" width="6.4" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="38.24" y="127.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:90) (1 samples, 0.53%)</title><rect x="1070.1" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1073.11" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 2.14%)</title><rect x="16.3" y="565" width="25.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="19.31" y="575.5" >_..</text>
+</g>
+<g >
+<title>&lt;module&gt; (psutil/__init__.py:39) (1 samples, 0.53%)</title><rect x="22.6" y="293" width="6.3" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="25.62" y="303.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 1.07%)</title><rect x="28.9" y="421" width="12.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="31.93" y="431.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="16.3" y="213" width="6.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="19.31" y="223.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.53%)</title><rect x="28.9" y="229" width="6.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="31.93" y="239.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="47.9" y="629" width="6.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="50.86" y="639.5" ></text>
+</g>
+<g >
+<title>create_run (pyperf/_worker.py:300) (180 samples, 96.26%)</title><rect x="54.2" y="613" width="1135.8" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="57.17" y="623.5" >create_run (pyperf/_worker.py:300)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:123) (1 samples, 0.53%)</title><rect x="262.4" y="501" width="6.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="265.41" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:122) (2 samples, 1.07%)</title><rect x="249.8" y="501" width="12.6" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="252.79" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;listcomp&gt; (enum.py:556) (1 samples, 0.53%)</title><rect x="16.3" y="165" width="6.3" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="19.31" y="175.5" ></text>
+</g>
+<g >
+<title>compute_warmups_values (pyperf/_worker.py:271) (179 samples, 95.72%)</title><rect x="54.2" y="565" width="1129.5" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="57.17" y="575.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="22.6" y="229" width="6.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="25.62" y="239.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:88) (1 samples, 0.53%)</title><rect x="1063.8" y="501" width="6.3" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
+<text  x="1066.80" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:129) (2 samples, 1.07%)</title><rect x="294.0" y="501" width="12.6" height="15.0" fill="rgb(205,4,1)" rx="2" ry="2" />
+<text  x="296.96" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:87) (2 samples, 1.07%)</title><rect x="1051.2" y="501" width="12.6" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1054.18" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:85) (1 samples, 0.53%)</title><rect x="1038.6" y="501" width="6.3" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="1041.56" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:128) (1 samples, 0.53%)</title><rect x="287.6" y="501" width="6.4" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="290.65" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (typing.py:534) (1 samples, 0.53%)</title><rect x="35.2" y="69" width="6.4" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="38.24" y="79.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:79) (1 samples, 0.53%)</title><rect x="981.8" y="501" width="6.3" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
+<text  x="984.76" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:20) (2 samples, 1.07%)</title><rect x="514.8" y="501" width="12.6" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="517.81" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:139) (1 samples, 0.53%)</title><rect x="394.9" y="501" width="6.3" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
+<text  x="397.92" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:72) (1 samples, 0.53%)</title><rect x="943.9" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="946.90" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:124) (2 samples, 1.07%)</title><rect x="268.7" y="501" width="12.6" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="271.72" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (importlib/metadata/_meta.py:1) (1 samples, 0.53%)</title><rect x="35.2" y="165" width="6.4" height="15.0" fill="rgb(226,99,23)" rx="2" ry="2" />
+<text  x="38.24" y="175.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (run_benchmark.py:231) (180 samples, 96.26%)</title><rect x="54.2" y="677" width="1135.8" height="15.0" fill="rgb(244,179,42)" rx="2" ry="2" />
+<text  x="57.17" y="687.5" >&lt;module&gt; (run_benchmark.py:231)</text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:289) (179 samples, 95.72%)</title><rect x="54.2" y="581" width="1129.5" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="57.17" y="591.5" >compute (pyperf/_worker.py:289)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:81) (1 samples, 0.53%)</title><rect x="988.1" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="991.07" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:151) (2 samples, 1.07%)</title><rect x="458.0" y="501" width="12.6" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="461.02" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (pyperf/__init__.py:19) (4 samples, 2.14%)</title><rect x="16.3" y="581" width="25.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="19.31" y="591.5" >&lt;..</text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 2.14%)</title><rect x="16.3" y="501" width="25.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="19.31" y="511.5" >_..</text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (4 samples, 2.14%)</title><rect x="16.3" y="597" width="25.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="19.31" y="607.5" >_..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:112) (1 samples, 0.53%)</title><rect x="161.4" y="501" width="6.4" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
+<text  x="164.44" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.53%)</title><rect x="16.3" y="229" width="6.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="19.31" y="239.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 1.07%)</title><rect x="16.3" y="469" width="12.6" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="19.31" y="479.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:879) (1 samples, 0.53%)</title><rect x="47.9" y="597" width="6.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="50.86" y="607.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:86) (1 samples, 0.53%)</title><rect x="1044.9" y="501" width="6.3" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="1047.87" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:75) (1 samples, 0.53%)</title><rect x="969.1" y="501" width="6.4" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="972.14" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:114) (2 samples, 1.07%)</title><rect x="174.1" y="501" width="12.6" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="177.06" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:70) (2 samples, 1.07%)</title><rect x="931.3" y="501" width="12.6" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="934.28" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:57) (1 samples, 0.53%)</title><rect x="824.0" y="501" width="6.3" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="827.01" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:83) (2 samples, 1.07%)</title><rect x="1019.6" y="501" width="12.6" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="1022.63" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:49) (1 samples, 0.53%)</title><rect x="792.5" y="501" width="6.3" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="795.46" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:147) (1 samples, 0.53%)</title><rect x="439.1" y="501" width="6.3" height="15.0" fill="rgb(205,4,1)" rx="2" ry="2" />
+<text  x="442.09" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (4 samples, 2.14%)</title><rect x="16.3" y="517" width="25.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="19.31" y="527.5" >e..</text>
+</g>
+<g >
+<title>get_hook_names (pyperf/_hooks.py:27) (1 samples, 0.53%)</title><rect x="41.6" y="645" width="6.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="44.55" y="655.5" ></text>
+</g>
+<g >
+<title>parse (sre_parse.py:955) (1 samples, 0.53%)</title><rect x="28.9" y="117" width="6.3" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<text  x="31.93" y="127.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:67) (1 samples, 0.53%)</title><rect x="912.4" y="501" width="6.3" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="915.35" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (pyperf/_runner.py:10) (2 samples, 1.07%)</title><rect x="16.3" y="485" width="12.6" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="19.31" y="495.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:130) (8 samples, 4.28%)</title><rect x="306.6" y="501" width="50.5" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
+<text  x="309.58" y="511.5" >advan..</text>
+</g>
+<g >
+<title>collect_python_metadata (pyperf/_collect_metadata.py:54) (1 samples, 0.53%)</title><rect x="1183.7" y="533" width="6.3" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
+<text  x="1186.69" y="543.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:146) (1 samples, 0.53%)</title><rect x="432.8" y="501" width="6.3" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="435.78" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:25) (1 samples, 0.53%)</title><rect x="559.0" y="501" width="6.3" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="561.98" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:31) (1 samples, 0.53%)</title><rect x="590.5" y="501" width="6.3" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="593.53" y="511.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 2.14%)</title><rect x="16.3" y="533" width="25.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="19.31" y="543.5" >_..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:153) (2 samples, 1.07%)</title><rect x="483.3" y="501" width="12.6" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="486.26" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 2.14%)</title><rect x="16.3" y="549" width="25.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="19.31" y="559.5" >_..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:60) (1 samples, 0.53%)</title><rect x="874.5" y="501" width="6.3" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="877.49" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:77) (1 samples, 0.53%)</title><rect x="975.5" y="501" width="6.3" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="978.45" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:121) (2 samples, 1.07%)</title><rect x="237.2" y="501" width="12.6" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
+<text  x="240.17" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="28.9" y="261" width="6.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="31.93" y="271.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 1.07%)</title><rect x="16.3" y="373" width="12.6" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="19.31" y="383.5" ></text>
+</g>
+<g >
+<title>__init__ (pyperf/_runner.py:93) (1 samples, 0.53%)</title><rect x="47.9" y="661" width="6.3" height="15.0" fill="rgb(241,168,40)" rx="2" ry="2" />
+<text  x="50.86" y="671.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="35.2" y="261" width="6.4" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="38.24" y="271.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 1.07%)</title><rect x="28.9" y="325" width="12.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="31.93" y="335.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 1.07%)</title><rect x="16.3" y="309" width="12.6" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="19.31" y="319.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="28.9" y="277" width="6.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="31.93" y="287.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 1.07%)</title><rect x="16.3" y="405" width="12.6" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="19.31" y="415.5" ></text>
+</g>
+<g >
+<title>bench_nbody (run_benchmark.py:208) (179 samples, 95.72%)</title><rect x="54.2" y="517" width="1129.5" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="57.17" y="527.5" >bench_nbody (run_benchmark.py:208)</text>
+</g>
+<g >
+<title>&lt;module&gt; (psutil/_ntuples.py:206) (1 samples, 0.53%)</title><rect x="22.6" y="165" width="6.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="25.62" y="175.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (importlib/metadata/__init__.py:10) (1 samples, 0.53%)</title><rect x="28.9" y="293" width="6.3" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="31.93" y="303.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:106) (5 samples, 2.67%)</title><rect x="92.0" y="501" width="31.6" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="95.03" y="511.5" >ad..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:38) (1 samples, 0.53%)</title><rect x="678.9" y="501" width="6.3" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="681.88" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:63) (1 samples, 0.53%)</title><rect x="887.1" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="890.11" y="511.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="35.2" y="85" width="6.4" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="38.24" y="95.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 1.07%)</title><rect x="28.9" y="453" width="12.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="31.93" y="463.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="35.2" y="149" width="6.4" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="38.24" y="159.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (psutil/__init__.py:27) (1 samples, 0.53%)</title><rect x="16.3" y="293" width="6.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="19.31" y="303.5" ></text>
+</g>
+<g >
+<title>_worker (pyperf/_runner.py:437) (180 samples, 96.26%)</title><rect x="54.2" y="629" width="1135.8" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<text  x="57.17" y="639.5" >_worker (pyperf/_runner.py:437)</text>
+</g>
+<g >
+<title>check_output (subprocess.py:421) (1 samples, 0.53%)</title><rect x="1183.7" y="485" width="6.3" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="1186.69" y="495.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:51) (2 samples, 1.07%)</title><rect x="805.1" y="501" width="12.6" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="808.08" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 1.07%)</title><rect x="28.9" y="469" width="12.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="31.93" y="479.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:141) (1 samples, 0.53%)</title><rect x="401.2" y="501" width="6.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="404.23" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 1.07%)</title><rect x="16.3" y="453" width="12.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="19.31" y="463.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:82) (4 samples, 2.14%)</title><rect x="994.4" y="501" width="25.2" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="997.39" y="511.5" >a..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:111) (2 samples, 1.07%)</title><rect x="148.8" y="501" width="12.6" height="15.0" fill="rgb(214,41,9)" rx="2" ry="2" />
+<text  x="151.82" y="511.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (4 samples, 2.14%)</title><rect x="16.3" y="629" width="25.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="19.31" y="639.5" >_..</text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 1.07%)</title><rect x="28.9" y="341" width="12.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="31.93" y="351.5" ></text>
+</g>
+<g >
+<title>all (187 samples, 100%)</title><rect x="10.0" y="693" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="703.5" ></text>
+</g>
+<g >
+<title>collect_metadata (pyperf/_worker.py:384) (1 samples, 0.53%)</title><rect x="1183.7" y="565" width="6.3" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="1186.69" y="575.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:142) (1 samples, 0.53%)</title><rect x="407.5" y="501" width="6.4" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="410.54" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:30) (1 samples, 0.53%)</title><rect x="584.2" y="501" width="6.3" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
+<text  x="587.22" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:34) (10 samples, 5.35%)</title><rect x="609.5" y="501" width="63.1" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="612.47" y="511.5" >advanc..</text>
+</g>
+<g >
+<title>__init__ (pyperf/_runner.py:250) (1 samples, 0.53%)</title><rect x="41.6" y="661" width="6.3" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
+<text  x="44.55" y="671.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (4 samples, 2.14%)</title><rect x="16.3" y="661" width="25.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="19.31" y="671.5" >_..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:100) (2 samples, 1.07%)</title><rect x="54.2" y="501" width="12.6" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
+<text  x="57.17" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (4 samples, 2.14%)</title><rect x="16.3" y="613" width="25.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="19.31" y="623.5" >e..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:42) (3 samples, 1.60%)</title><rect x="723.0" y="501" width="19.0" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="726.05" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:33) (2 samples, 1.07%)</title><rect x="596.8" y="501" width="12.7" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="599.84" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:144) (1 samples, 0.53%)</title><rect x="420.2" y="501" width="6.3" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="423.16" y="511.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="22.6" y="181" width="6.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="25.62" y="191.5" ></text>
+</g>
+<g >
+<title>entry_points (importlib/metadata/__init__.py:631) (1 samples, 0.53%)</title><rect x="41.6" y="565" width="6.3" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
+<text  x="44.55" y="575.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.53%)</title><rect x="22.6" y="197" width="6.3" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="25.62" y="207.5" ></text>
+</g>
+<g >
+<title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (1 samples, 0.53%)</title><rect x="35.2" y="277" width="6.4" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="38.24" y="287.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:26) (1 samples, 0.53%)</title><rect x="565.3" y="501" width="6.3" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="568.29" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:98) (2 samples, 1.07%)</title><rect x="1171.1" y="501" width="12.6" height="15.0" fill="rgb(233,132,31)" rx="2" ry="2" />
+<text  x="1174.07" y="511.5" ></text>
+</g>
+<g >
+<title>_convert_ (enum.py:553) (1 samples, 0.53%)</title><rect x="16.3" y="181" width="6.3" height="15.0" fill="rgb(224,89,21)" rx="2" ry="2" />
+<text  x="19.31" y="191.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:73) (1 samples, 0.53%)</title><rect x="950.2" y="501" width="6.3" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="953.21" y="511.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="28.9" y="245" width="6.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="31.93" y="255.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:59) (3 samples, 1.60%)</title><rect x="855.6" y="501" width="18.9" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="858.56" y="511.5" ></text>
+</g>
+<g >
+<title>compile (re.py:251) (1 samples, 0.53%)</title><rect x="28.9" y="165" width="6.3" height="15.0" fill="rgb(223,83,20)" rx="2" ry="2" />
+<text  x="31.93" y="175.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:115) (1 samples, 0.53%)</title><rect x="186.7" y="501" width="6.3" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="189.68" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:58) (4 samples, 2.14%)</title><rect x="830.3" y="501" width="25.3" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="833.32" y="511.5" >a..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:64) (2 samples, 1.07%)</title><rect x="893.4" y="501" width="12.6" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="896.42" y="511.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="28.9" y="213" width="6.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="31.93" y="223.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:125) (1 samples, 0.53%)</title><rect x="281.3" y="501" width="6.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="284.34" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (textwrap.py:17) (1 samples, 0.53%)</title><rect x="28.9" y="197" width="6.3" height="15.0" fill="rgb(241,170,40)" rx="2" ry="2" />
+<text  x="31.93" y="207.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:104) (1 samples, 0.53%)</title><rect x="79.4" y="501" width="6.3" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="82.41" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 1.07%)</title><rect x="28.9" y="357" width="12.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="31.93" y="367.5" ></text>
+</g>
+<g >
+<title>bench_time_func (pyperf/_runner.py:502) (180 samples, 96.26%)</title><rect x="54.2" y="661" width="1135.8" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="57.17" y="671.5" >bench_time_func (pyperf/_runner.py:502)</text>
+</g>
+<g >
+<title>architecture (platform.py:670) (1 samples, 0.53%)</title><rect x="1183.7" y="517" width="6.3" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="1186.69" y="527.5" ></text>
+</g>
+<g >
+<title>get_hooks (pyperf/_hooks.py:18) (1 samples, 0.53%)</title><rect x="41.6" y="629" width="6.3" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<text  x="44.55" y="639.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:47) (1 samples, 0.53%)</title><rect x="786.1" y="501" width="6.4" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="789.15" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (socket.py:75) (1 samples, 0.53%)</title><rect x="16.3" y="197" width="6.3" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="19.31" y="207.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="22.6" y="261" width="6.3" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="25.62" y="271.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:110) (2 samples, 1.07%)</title><rect x="136.2" y="501" width="12.6" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="139.20" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="35.2" y="229" width="6.4" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="38.24" y="239.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (pyperf/_hooks.py:7) (2 samples, 1.07%)</title><rect x="28.9" y="389" width="12.7" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<text  x="31.93" y="399.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:69) (1 samples, 0.53%)</title><rect x="925.0" y="501" width="6.3" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="927.97" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:108) (1 samples, 0.53%)</title><rect x="123.6" y="501" width="6.3" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="126.58" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 1.07%)</title><rect x="16.3" y="421" width="12.6" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="19.31" y="431.5" ></text>
+</g>
+<g >
+<title>_compile (re.py:303) (1 samples, 0.53%)</title><rect x="28.9" y="149" width="6.3" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="31.93" y="159.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (run_benchmark.py:19) (4 samples, 2.14%)</title><rect x="16.3" y="677" width="25.3" height="15.0" fill="rgb(228,107,25)" rx="2" ry="2" />
+<text  x="19.31" y="687.5" >&lt;..</text>
+</g>
+<g >
+<title>read_text (importlib/metadata/__init__.py:927) (1 samples, 0.53%)</title><rect x="41.6" y="549" width="6.3" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
+<text  x="44.55" y="559.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:152) (2 samples, 1.07%)</title><rect x="470.6" y="501" width="12.7" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="473.64" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:101) (2 samples, 1.07%)</title><rect x="66.8" y="501" width="12.6" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="69.79" y="511.5" ></text>
+</g>
+<g >
+<title>get_data (&lt;frozen importlib._bootstrap_external&gt;:1074) (1 samples, 0.53%)</title><rect x="47.9" y="565" width="6.3" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="50.86" y="575.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:27) (1 samples, 0.53%)</title><rect x="571.6" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="574.60" y="511.5" ></text>
+</g>
+<g >
+<title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1078) (1 samples, 0.53%)</title><rect x="22.6" y="277" width="6.3" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="25.62" y="287.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:84) (1 samples, 0.53%)</title><rect x="1032.2" y="501" width="6.4" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="1035.25" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:149) (1 samples, 0.53%)</title><rect x="445.4" y="501" width="6.3" height="15.0" fill="rgb(243,174,41)" rx="2" ry="2" />
+<text  x="448.40" y="511.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 1.07%)</title><rect x="28.9" y="405" width="12.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="31.93" y="415.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 1.07%)</title><rect x="16.3" y="341" width="12.6" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="19.31" y="351.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:41) (2 samples, 1.07%)</title><rect x="710.4" y="501" width="12.6" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="713.43" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:55) (1 samples, 0.53%)</title><rect x="817.7" y="501" width="6.3" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="820.70" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.53%)</title><rect x="35.2" y="197" width="6.4" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="38.24" y="207.5" ></text>
+</g>
+<g >
+<title>_parse (sre_parse.py:552) (1 samples, 0.53%)</title><rect x="28.9" y="85" width="6.3" height="15.0" fill="rgb(225,96,23)" rx="2" ry="2" />
+<text  x="31.93" y="95.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:94) (12 samples, 6.42%)</title><rect x="1095.3" y="501" width="75.8" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="1098.35" y="511.5" >advance ..</text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:292) (1 samples, 0.53%)</title><rect x="1183.7" y="581" width="6.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1186.69" y="591.5" ></text>
+</g>
+<g >
+<title>entry_points (importlib/metadata/__init__.py:1021) (1 samples, 0.53%)</title><rect x="41.6" y="613" width="6.3" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<text  x="44.55" y="623.5" ></text>
+</g>
+<g >
+<title>TextWrapper (textwrap.py:110) (1 samples, 0.53%)</title><rect x="28.9" y="181" width="6.3" height="15.0" fill="rgb(251,213,50)" rx="2" ry="2" />
+<text  x="31.93" y="191.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:50) (1 samples, 0.53%)</title><rect x="798.8" y="501" width="6.3" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="801.77" y="511.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="16.3" y="245" width="6.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="19.31" y="255.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (2 samples, 1.07%)</title><rect x="28.9" y="309" width="12.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="31.93" y="319.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="16.3" y="261" width="6.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="19.31" y="271.5" ></text>
+</g>
+<g >
+<title>__init__ (subprocess.py:971) (1 samples, 0.53%)</title><rect x="1183.7" y="453" width="6.3" height="15.0" fill="rgb(208,17,4)" rx="2" ry="2" />
+<text  x="1186.69" y="463.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (2 samples, 1.07%)</title><rect x="16.3" y="325" width="12.6" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="19.31" y="335.5" ></text>
+</g>
+<g >
+<title>get_code (&lt;frozen importlib._bootstrap_external&gt;:975) (1 samples, 0.53%)</title><rect x="47.9" y="581" width="6.3" height="15.0" fill="rgb(210,25,6)" rx="2" ry="2" />
+<text  x="50.86" y="591.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="22.6" y="213" width="6.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="25.62" y="223.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:109) (1 samples, 0.53%)</title><rect x="129.9" y="501" width="6.3" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="132.89" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:150) (1 samples, 0.53%)</title><rect x="451.7" y="501" width="6.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="454.71" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:65) (1 samples, 0.53%)</title><rect x="906.0" y="501" width="6.4" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="909.04" y="511.5" ></text>
+</g>
+<g >
+<title>_parse_sub (sre_parse.py:444) (1 samples, 0.53%)</title><rect x="28.9" y="101" width="6.3" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="31.93" y="111.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (2 samples, 1.07%)</title><rect x="16.3" y="357" width="12.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="19.31" y="367.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="35.2" y="213" width="6.4" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="38.24" y="223.5" ></text>
+</g>
+<g >
+<title>run (subprocess.py:503) (1 samples, 0.53%)</title><rect x="1183.7" y="469" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1186.69" y="479.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (pyperf/_cpu_utils.py:11) (2 samples, 1.07%)</title><rect x="16.3" y="389" width="12.6" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
+<text  x="19.31" y="399.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:68) (1 samples, 0.53%)</title><rect x="918.7" y="501" width="6.3" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="921.66" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:18) (1 samples, 0.53%)</title><rect x="495.9" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="498.88" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:21) (1 samples, 0.53%)</title><rect x="527.4" y="501" width="6.3" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
+<text  x="530.43" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (2 samples, 1.07%)</title><rect x="28.9" y="373" width="12.7" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="31.93" y="383.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="35.2" y="245" width="6.4" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="38.24" y="255.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:145) (1 samples, 0.53%)</title><rect x="426.5" y="501" width="6.3" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="429.47" y="511.5" ></text>
+</g>
+<g >
+<title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:883) (1 samples, 0.53%)</title><rect x="35.2" y="101" width="6.4" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="38.24" y="111.5" ></text>
+</g>
+<g >
+<title>&lt;lambda&gt; (socket.py:78) (1 samples, 0.53%)</title><rect x="16.3" y="149" width="6.3" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<text  x="19.31" y="159.5" ></text>
+</g>
+<g >
+<title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:241) (1 samples, 0.53%)</title><rect x="35.2" y="181" width="6.4" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="38.24" y="191.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:105) (1 samples, 0.53%)</title><rect x="85.7" y="501" width="6.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="88.72" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;genexpr&gt; (importlib/metadata/__init__.py:1018) (1 samples, 0.53%)</title><rect x="41.6" y="581" width="6.3" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="44.55" y="591.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (pyperf/_runner.py:14) (2 samples, 1.07%)</title><rect x="28.9" y="485" width="12.7" height="15.0" fill="rgb(246,192,46)" rx="2" ry="2" />
+<text  x="31.93" y="495.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="22.6" y="245" width="6.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="25.62" y="255.5" ></text>
+</g>
+<g >
+<title>namedtuple (collections/__init__.py:481) (1 samples, 0.53%)</title><rect x="22.6" y="149" width="6.3" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="25.62" y="159.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (1 samples, 0.53%)</title><rect x="47.9" y="613" width="6.3" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="50.86" y="623.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:45) (2 samples, 1.07%)</title><rect x="742.0" y="501" width="12.6" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="744.98" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:29) (1 samples, 0.53%)</title><rect x="577.9" y="501" width="6.3" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="580.91" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:113) (1 samples, 0.53%)</title><rect x="167.8" y="501" width="6.3" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="170.75" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:93) (3 samples, 1.60%)</title><rect x="1076.4" y="501" width="18.9" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="1079.42" y="511.5" ></text>
+</g>
+<g >
+<title>_syscmd_file (platform.py:619) (1 samples, 0.53%)</title><rect x="1183.7" y="501" width="6.3" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="1186.69" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (1 samples, 0.53%)</title><rect x="35.2" y="133" width="6.4" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="38.24" y="143.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (importlib/metadata/__init__.py:17) (1 samples, 0.53%)</title><rect x="35.2" y="293" width="6.4" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="38.24" y="303.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:19) (2 samples, 1.07%)</title><rect x="502.2" y="501" width="12.6" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="505.19" y="511.5" ></text>
+</g>
+<g >
+<title>_execute_child (subprocess.py:1817) (1 samples, 0.53%)</title><rect x="1183.7" y="437" width="6.3" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="1186.69" y="447.5" ></text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:364) (180 samples, 96.26%)</title><rect x="54.2" y="597" width="1135.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="57.17" y="607.5" >compute (pyperf/_worker.py:364)</text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 1.07%)</title><rect x="28.9" y="437" width="12.7" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="31.93" y="447.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:24) (1 samples, 0.53%)</title><rect x="552.7" y="501" width="6.3" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="555.67" y="511.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (run_benchmark.py:219) (2 samples, 1.07%)</title><rect x="41.6" y="677" width="12.6" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="44.55" y="687.5" ></text>
+</g>
+<g >
+<title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:688) (2 samples, 1.07%)</title><rect x="16.3" y="437" width="12.6" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="19.31" y="447.5" ></text>
+</g>
+<g >
+<title>compile (sre_compile.py:788) (1 samples, 0.53%)</title><rect x="28.9" y="133" width="6.3" height="15.0" fill="rgb(207,9,2)" rx="2" ry="2" />
+<text  x="31.93" y="143.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:22) (3 samples, 1.60%)</title><rect x="533.7" y="501" width="19.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="536.74" y="511.5" ></text>
+</g>
+<g >
+<title>update_wrapper (functools.py:58) (1 samples, 0.53%)</title><rect x="35.2" y="37" width="6.4" height="15.0" fill="rgb(228,108,25)" rx="2" ry="2" />
+<text  x="38.24" y="47.5" ></text>
+</g>
+<g >
+<title>read_text (pathlib.py:1133) (1 samples, 0.53%)</title><rect x="41.6" y="533" width="6.3" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="44.55" y="543.5" ></text>
+</g>
+<g >
+<title>collect_metadata (pyperf/_collect_metadata.py:419) (1 samples, 0.53%)</title><rect x="1183.7" y="549" width="6.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1186.69" y="559.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:40) (4 samples, 2.14%)</title><rect x="685.2" y="501" width="25.2" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="688.19" y="511.5" >a..</text>
+</g>
+<g >
+<title>decorator (typing.py:307) (1 samples, 0.53%)</title><rect x="35.2" y="53" width="6.4" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="38.24" y="63.5" ></text>
+</g>
+<g >
+<title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:1006) (4 samples, 2.14%)</title><rect x="16.3" y="645" width="25.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="19.31" y="655.5" >_..</text>
+</g>
+<g >
+<title>task_func (pyperf/_runner.py:497) (179 samples, 95.72%)</title><rect x="54.2" y="533" width="1129.5" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="57.17" y="543.5" >task_func (pyperf/_runner.py:497)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:62) (1 samples, 0.53%)</title><rect x="880.8" y="501" width="6.3" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="883.80" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:118) (7 samples, 3.74%)</title><rect x="193.0" y="501" width="44.2" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="195.99" y="511.5" >adva..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:143) (1 samples, 0.53%)</title><rect x="413.9" y="501" width="6.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="416.85" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:36) (1 samples, 0.53%)</title><rect x="672.6" y="501" width="6.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="675.57" y="511.5" ></text>
+</g>
+<g >
+<title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:1027) (1 samples, 0.53%)</title><rect x="16.3" y="277" width="6.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="19.31" y="287.5" ></text>
+</g>
+<g >
+<title>load (importlib/metadata/__init__.py:459) (1 samples, 0.53%)</title><rect x="41.6" y="597" width="6.3" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="44.55" y="607.5" ></text>
+</g>
+<g >
+<title>_compute_values (pyperf/_worker.py:79) (179 samples, 95.72%)</title><rect x="54.2" y="549" width="1129.5" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="57.17" y="559.5" >_compute_values (pyperf/_worker.py:79)</text>
+</g>
+<g >
+<title>_main (pyperf/_runner.py:463) (180 samples, 96.26%)</title><rect x="54.2" y="645" width="1135.8" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="57.17" y="655.5" >_main (pyperf/_runner.py:463)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:74) (2 samples, 1.07%)</title><rect x="956.5" y="501" width="12.6" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="959.52" y="511.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:137) (6 samples, 3.21%)</title><rect x="357.1" y="501" width="37.8" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="360.06" y="511.5" >adv..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:46) (5 samples, 2.67%)</title><rect x="754.6" y="501" width="31.5" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="757.60" y="511.5" >ad..</text>
+</g>
+</g>
+</svg>

@@ -85,16 +85,20 @@ this cheap; 3.10 — the version the course VM runs — has none of it.
   image("/results/pyspy_nbody_stock.svg", width: 100%),
   caption: [*Before, Python frames* (py-spy). CPython 3.10 has no `-X perf` trampoline, so
   `perf` cannot name Python functions; py-spy samples the interpreter's own frame stack.
-  `advance` is the single wide plateau under `bench_nbody`.],
+  `advance` is the single wide plateau under `bench_nbody`. 5 of 303 samples (1.6%) were taken
+  while CPython was still importing modules and are excluded, which is what takes the figure
+  from 36 rows to 12; see #link(<trim>)[the appendix].],
 )
 
 #figure(
   image("/results/flame_nbody_stock.svg", width: 100%),
-  caption: [*Before, C frames* (`perf`, DWARF unwinding, `python3-dbg`). The common
-  interpreter start-up prefix — present in 100% of samples and therefore carrying no
-  information — is elided so the informative band fits the page; every width is unchanged.
-  The leaves are the cost groups tabulated above. Full-depth version:
-  `results/flame_nbody_stock_full.svg`.],
+  caption: [*Before, C frames* (`perf`, DWARF unwinding, `python3-dbg`). 178 rows reduced to
+  9 by two cuts that are #emph[not] equally innocent. The 97 leading frames shared by ≥95% of
+  samples — interpreter start-up and the pyperf harness — are elided: constant context, no
+  information, and every surviving width is untouched. Stacks are then capped at depth 9, which
+  merges away the tips of 4.5% of samples; that one does discard detail. The leaves that remain
+  are the cost groups tabulated above. Uncut version: `results/flame_nbody_stock_full.svg`, and
+  #link(<trim>)[the appendix] for the method.],
 )
 
 #block(fill: rgb("#f5f7fa"), inset: 6pt, radius: 2pt, width: 100%)[
@@ -192,7 +196,8 @@ interpreter should be expected to give a smaller number, and that is not a regre
 #figure(
   image("/results/pyspy_nbody_opt.svg", width: 100%),
   caption: [*After, Python frames.* Same sampling settings and workload flags as the "before"
-  pair, so the comparison is direct.],
+  pair, so the comparison is direct — and the same 2.7% of import-time samples excluded, taking
+  it from 41 rows to 16.],
 )
 
 == A native tier, for scale
@@ -273,3 +278,38 @@ widely-repeated micro-optimization is worth statistically nothing. Each cost les
 than the effort it redirected. The same discipline paid a second time in hardware: the measured
 95% share of `advance()` is what makes a step-count register worth building, and the measured
 residual cost of `pow` is what puts the rsqrt unit at the centre of the design.
+
+
+= Appendix: how the flame graphs were trimmed <trim>
+
+A flame graph is exactly as tall as the single deepest stack in the profile, however rare that
+stack is, and ours were pathological that way. Left alone, the `perf` capture of stock `nbody` ran to 178 rows and
+took more than a page on its own. Three reductions, applied by `tools/trim_folded.py` and
+recorded in `tools/vm_remake_flames.sh`, bring them down. They differ in how much they cost,
+and the distinction matters more than the sizes do.
+
+*Dropping import-time samples (py-spy figures).* py-spy starts sampling at process start, so it
+catches CPython importing `re`, `enum` and `collections` before the benchmark loop is entered.
+Those stacks are deep — `_find_and_load` → `_load_unlocked` → `exec_module` → `re._compile` —
+and there are only a handful of them, so they set the height while contributing nothing. In
+the optimized py-spy profile they are 2.7% of samples and take the figure from 41 rows to 16.
+This is not a truncation; it excludes a *phase* the figure was never meant to show.
+
+*Eliding the common prefix (`perf` figures).* The C-level captures begin with interpreter
+start-up and the pyperf harness — 97 frames present in ≥95% of samples. A frame in
+essentially every sample is constant context: it carries no information but costs a row. Every
+surviving frame keeps its exact sample count, so *no width in the plot changes*; only the
+y-origin moves. The threshold is 95% rather than 100% because roughly 1.7% of DWARF unwinds are
+partial and start mid-interpreter, and at 100% those few fragments block the trim entirely
+(178 rows became 168 — effectively nothing).
+
+*Capping depth (`perf` figures).* Even without the prefix, a thin tower of deep stacks kept the
+figure near a full page, so stacks are capped at the shallowest depth leaving 95% of samples
+whole. #emph[This one genuinely discards detail]: the tips of 4.5% of samples are merged
+into their ancestors. It is the only one of the three that loses information, which is why each
+affected caption states the cut depth and the truncated share, and why the uncut graph is
+committed beside it as `*_full.svg`.
+
+None of the three rescales anything, and no number quoted anywhere in this report is derived
+from a trimmed graph — the timings come from `pyperf`, and the self-time percentages from flat
+`perf report` output and cProfile, both taken on untrimmed data.
