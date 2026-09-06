@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build the per-benchmark reports with Typst.
+# Build the reports with Typst (two benchmark reports + the shared appendix).
 #
-#   ./build.sh                # build every report_*.typ
+#   ./build.sh                # build every report_*.typ (all three)
 #   ./build.sh report_nbody   # build one (with or without .typ)
 #
 # Typst is run with --root at the repo root so the sources can reference

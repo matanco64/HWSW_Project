@@ -121,8 +121,11 @@ Prebuilt `cp310` manylinux wheels for the course VM are committed under
 
 ### `report/`
 
-One source per submitted benchmark, rendered to `report_<bench>.pdf` at the repo
-root by `./report/build.sh`. The course handout names the reports `.txt`, but the
+One source per submitted benchmark plus `report_appendix.typ`, all rendered to
+`report_*.pdf` at the repo root by `./report/build.sh`. The appendix carries the
+measurement methodology both benchmark reports depend on -- what the guest PMU
+can and cannot do, the per-phase CPI stack, how the flame graphs were trimmed
+and what that cost -- rather than duplicating it in both. The course handout names the reports `.txt`, but the
 sections it asks for (Initial Analysis, Performance Comparison) require flame
 graphs and a block diagram, so they ship as PDFs.
 
