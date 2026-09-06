@@ -23,3 +23,6 @@ hw/.advisor/
 hw/**/coverage_annotated/
 hw/**/sim_build_icarus/
 hw/common/synth/area.txt
+
+# local-only notes (Technion infra detail) - never commit
+*.local.md
