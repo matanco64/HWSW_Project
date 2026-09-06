@@ -212,10 +212,16 @@ Huffman, MTF, RUNA/RUNB — with header parsing, `bwt_reverse`, RLE4 and MD5 all
   inset: 4pt,
   [Kernel speedup], [*25×* (43.4 ms → 1.73 ms)],
   [End to end vs pure-Python T3], [*1.68×* (111.3 ms → 66.1 ms)],
+  [Whole benchmark, course VM, `--rigorous`], [*1.62×* (289 ms → 178 ms)],
   [Amdahl cap for that boundary], [*1.73×* — 97–98% of it achieved on every run],
   [Residual], [80% inverse BWT, 15% RLE4],
   [Correctness], [byte-exact: `L` and end bit position identical to Python, output identical to `bz2`],
 )
+
+The last row is the same two back ends of the same file measured through `pyperf --rigorous`
+(41 processes a side) on the course VM, and it agrees with the T3 micro-measurement to within
+4%. That agreement matters: the micro-benchmark and the whole benchmark are bounded by the same
+serial tail, so they should agree, and they do.
 
 *Reaching 97% of the Amdahl cap is the result worth quoting*, not the 25×. It converts the
 claim "the decode side is no longer the problem" from an argument into a measurement, and it
