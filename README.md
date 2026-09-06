@@ -43,8 +43,10 @@ dev/
   ENVIRONMENT.md                        The local WSL2 measurement environment (interpreters, perf, Rust)
   <bench>/                              Optimization ladder T0..T3, verification + analysis scripts,
                                         FINDINGS.md — working notes, not a deliverable
-rust/nbody/                             PyO3 crate: native advance(). Built and measured, deliberately
-                                        NOT wired into the measured benchmark (see below)
+rust/nbody/                             PyO3 crate: native advance(). Imported by the benchmark when
+                                        available; pure-Python fallback otherwise (see below)
+rust/pyflate/                           PyO3 crate: native symbol decode (bit reader, Huffman, MTF,
+                                        RUNA/RUNB). Same wiring; also the golden model for hw/
 report/                                 Report sources (report_<bench>.typ, figures) + build.sh
 results/                                Authoritative course-VM measurements (see below)
 results/wsl/                            SUPERSEDED WSL2 cross-check runs — never quote as a result
@@ -77,16 +79,45 @@ interpreters, perf setup, and the edit-here/measure-there rule are documented in
 **`dev/ENVIRONMENT.md`**. WSL numbers are provisional by construction — the
 quotable numbers all come from the course VM.
 
-### `rust/nbody/` — built, measured, not wired in
+### `rust/` — the native tier, and how it is selected
 
-A PyO3 crate implementing `advance()` natively: **~24x on the kernel**, output
-**bit-for-bit identical** to CPython after 20,000 steps (`dev/nbody/rs_check.py`).
-It is deliberately **not** imported by `benchmarks/bm_nbody/run_benchmark.py`.
-The pure-Python tier already clears the required speedup on its own, and an
-optional import with a silent Python fallback would make the measured
-configuration ambiguous — the number would depend on whether a wheel happened to
-be installed. It is kept as an optimization tier and as the behavioural spec for
-the GRAPE-style accelerator in `hw/`.
+Two PyO3 crates, both **bit/byte-exact** against the Python they replace:
+
+| crate | replaces | checked by |
+|---|---|---|
+| `rust/nbody` | `advance()` — state resident in a `#[pyclass] System` | `dev/nbody/rs_check.py` |
+| `rust/pyflate` | bit reader → canonical Huffman → MTF → RUNA/RUNB | `dev/pyflate/rs_check.py` |
+
+Both are **imported, never required**. This is the accelerator interface the
+course's Lecture 5 prescribes: the user's command line does not change (Rule 1),
+all native code sits in a separate crate behind one call (Rule 2), and a host
+without the wheel runs the Python path instead of failing (Rule 3).
+
+An optional import does cost clarity about *what was measured*, so the choice is
+explicit and recorded:
+
+```bash
+HWSW_BACKEND=auto     # default: prefer native, fall back to Python
+HWSW_BACKEND=python   # force the pure-Python path
+HWSW_BACKEND=native   # force native; fails loudly if the wheel is missing
+```
+
+The back end that actually ran is written into the `hwsw_backend` field of every
+result JSON's pyperf metadata. That is not decoration — the first native run
+compared native against native, because `pyperf` re-executes its workers with a
+scrubbed environment and `HWSW_BACKEND` never reached them. Anything invoking the
+benchmark with this variable must pass `--inherit-environ HWSW_BACKEND`, as the
+`native` stage in the scripts does.
+
+To build and install a wheel (Linux, CPython 3.10):
+
+```bash
+cd rust/pyflate && maturin build --release      # or rust/nbody
+sudo python3 -m pip install wheels/*.whl
+```
+
+Prebuilt `cp310` manylinux wheels for the course VM are committed under
+`rust/<crate>/wheels/`.
 
 ### `report/`
 
@@ -95,8 +126,11 @@ root by `./report/build.sh`. The course handout names the reports `.txt`, but th
 sections it asks for (Initial Analysis, Performance Comparison) require flame
 graphs and a block diagram, so they ship as PDFs.
 
-`report/make_figs.sh` rasterizes the perf flame graphs from `results/` into
-`report/fig/` — run it after re-recording profiles.
+Typst embeds the flame-graph SVGs from `results/` directly, so there is no
+rasterization step and no copies to keep in sync; `report/fig/` holds only the
+hand-drawn diagrams. Flame graphs are trimmed for height by
+`tools/trim_folded.py` (each report's appendix states exactly what was cut and
+what it cost); the untrimmed graphs are committed alongside as `*_full.svg`.
 
 ## How to reproduce
 
@@ -109,13 +143,19 @@ python3-dbg, perf, pyperformance 1.14.0):
 ./script_mdp.sh all
 ```
 
-Stages can be run individually: `setup | baseline | profile | optimized | compare`.
+Stages can be run individually:
+`setup | baseline | profile | optimized | compare | native`.
 
 - **Baseline** = stock benchmark via `pyperformance run --rigorous`.
 - **Optimized** = this repo's `benchmarks/` via `--manifest benchmarks/MANIFEST`
   (same benchmark names, so the comparison matches by name).
+- **Native** = the Rust back end against the pure-Python fallback *of the same
+  file*, same interpreter and same rigor, so `HWSW_BACKEND` is the only
+  difference. Not run through `pyperformance`, which builds its own venv that has
+  no extension wheel in it.
 - **Evidence** = `results/compare_<bench>.txt`: mean ± std dev for both runs,
   the speedup factor, and pyperf's t-test significance verdict.
+  `results/compare_<bench>_native.txt` is the same for the native tier.
 
 ### Driving the VM remotely
 
