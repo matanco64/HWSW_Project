@@ -20,7 +20,7 @@ class AbortSeq(GrapeBaseSeq):
     async def poll_end(self, max_polls=400):
         for _ in range(max_polls):
             st = await self.rd(STATUS)
-            if st & (ST_DONE | ST_ABORTED):
+            if (st & (ST_DONE | ST_ABORTED)) and not (st & 1):
                 return st
         raise AssertionError("neither DONE nor ABORTED seen")
 

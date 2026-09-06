@@ -156,10 +156,10 @@ module grape_regs_tb_top #(
         .load_en_i        (doorbell_o),
         .load_flat_i      (body_pending),
         .working_flat_o   (working_flat_o),
-        .wr_en_i          (bwr_en_i),
-        .wr_body_i        (bwr_body_i),
-        .wr_field_i       (bwr_field_i),
-        .wr_data_i        (bwr_data_i),
+        .wr_en_i          ({2'b00, bwr_en_i}),       // TB drives port 0 only
+        .wr_body_i        ({6'd0, bwr_body_i}),
+        .wr_field_i       ({6'd0, bwr_field_i}),
+        .wr_data_i        ({128'd0, bwr_data_i}),
         .commit_en_i      (commit_en_i),
         .committed_flat_o (body_committed)
     );

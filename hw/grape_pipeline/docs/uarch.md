@@ -13,7 +13,7 @@ ADR-0007 (own FP64 units, 3 add / 3 mul / sqrt / rcp, no FMA). Research:
 | top | `grape_top.sv` | wires everything; parameters N_BODIES=5, N_PAIRS_MAX=10 |
 | AXI handshake | `../common/rtl/axi_lite_if.sv` | AXI4-Lite ⇄ simple register bus + `wr_resp_hold` (MAS §4.1; shared cell, built at hw-rtl) |
 | register file | `grape_regs.sv` | MAS §4 map: decode, pending/latched config, STATUS W1C, IRQ, counters, committed-state read mux |
-| body register file | `grape_body_rf.sv` | working + committed copies, 2 × 5 × 7 × 64 b flops; 2 read ports (pair i, j), 1 write port (accumulate/integrate/commit) |
+| body register file | `grape_body_rf.sv` | working + committed copies, 2 × 5 × 7 × 64 b flops; 2 read ports (pair i, j), 3 write ports (one per ADD unit; retire targets provably distinct) (accumulate/integrate/commit) |
 | step FSM | `grape_step_fsm.sv` | Q5 states; pair sequencer; ABORT/ERR handling; counters |
 | force pipeline | `grape_force_pipe.sv` | issues each pair's op graph to the shared units; II = 2 (static reservation from `docs/schedule_model.py`) |
 | accumulate sequencer | `grape_accum.sv` | ordered velocity add/sub of pre-rounded force terms on the ADD units; 5 × 3 chain scoreboard; drives the integrate mul+add micro-ops |
@@ -96,6 +96,21 @@ scoreboard holds a busy bit per (body, component), set at issue, cleared at reti
 the same (body, component) is preserved by in-order issue per chain; everything else overlaps.
 INTEG is mul-then-add (two roundings, exactly Python's `r[c] += dt*v[c]`): 15 muls on the MUL
 units then 15 dependent adds on the ADD units, dependency-scheduled like every other op.
+
+### 3.4 Accumulate/integrate issue width (dv_signoff amendment, 2026-09-06)
+
+The sign-off K1 measurement (162 cycles/step) exposed that the original single-issue
+sequencer under-implemented §3.3's "everything else overlaps". As built now: the 60-op
+accumulate sequence is scanned in program order every cycle and up to THREE ops issue into
+free ADD slots — an op issues when its pair is force_ready, its (body, component) lane has no
+earlier unissued op (lane_hold) and is not in flight (busy_bc, with the retire-cycle bypass),
+and a slot remains. At most one op per lane per cycle; order within a lane is exact
+(PRD-F2/F3). Integrate is per-lane (§3.1): a lane's dt·v mul issues as soon as its own
+accumulate chain is issued and retired, up to all free MUL slots per cycle; integrate adds
+fill remaining ADD slots. The body RF working bank has 3 write ports (one per ADD unit);
+retiring targets are pairwise distinct because at most one op per (body, field) is in flight.
+Measured after the widening: benchmark-shaped smoke 111 cycles/step (model 123 assumed the
+same overlap).
 
 ## 4. Number formats
 

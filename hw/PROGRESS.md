@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-06 06:33 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-06 06:33 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-06 22:12 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-06 22:12 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,7 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class dv_signoff,ppa,integration todo
+    class ppa,integration todo
+    class dv_signoff review
     class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage done
 ```
 
@@ -83,7 +84,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟠 | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -91,7 +92,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **DV sign-off** — todo (checkpoint — needs human approval)
+- `grape_pipeline`: **DV sign-off** — review (checkpoint — needs human approval)
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -127,7 +128,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 #### RTL — ✅ done (started 2026-09-04T20:46:48Z, finished 2026-09-05T18:20:49Z)
 
 - [x] make lint clean (verilator --lint-only -Wall) — make -C hw/grape_pipeline lint (11 files incl. TB wrapper) -> lint: clean, 2026-09-05
-- [x] Yosys synth succeeds (synthesizable subset) — synth/area.txt: 393367 sky130_fd_sc_hd cells, 2938435.7 um^2; yosys.log 0 errors (full flatten, post scr_fwd synthesizability fixes)
+- [x] Yosys synth succeeds (synthesizable subset) — synth/area.txt (post K1 fix): 584454 sky130_fd_sc_hd cells, 4075030.8 um^2, yosys.log 0 errors (was 393367 / 2.94mm^2 single-issue — the 3-wide fabric costs +39% area for K1 162->124)
 - [x] agent code review resolved — docs/review_rtl.md: 16 findings (2 passes), 0 must open
 
 #### DV testplan — ✅ done (started 2026-09-05T18:24:42Z, finished 2026-09-05T18:41:33Z)
@@ -151,6 +152,16 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [ ] line/toggle ≥ 90 %
 - [x] all functional covergroups hit — tb/cov/func_cov.txt: 58 bins all >=1; 3 waivers in docs/coverage_waivers.md (2 architecturally unreachable, nsteps.20000 deferred to signoff)
 - [x] line/toggle >= 90 % — tb/cov/coverage.txt: line 91.3%, toggle 94.5% (branch 95.5%); inline coverage_off regions each carry a reason
+
+#### DV sign-off — 🟠 review (started 2026-09-06T06:45:43Z)
+> K1 fail on benchmark list: 162.0 cycles/step > 128 (test_full_benchmark; equivalence itself passed: bit-exact, dE/E 1.7e-14)
+
+- [x] golden equivalence on the full benchmark input — test_full_benchmark PASS: 20000 steps bit-exact vs emulation.advance (75 items 0 mismatches); vs nbody_ref: dE/E 1.674e-14 <= 1e-12, r 2.1e-12 <= 2e-9, v 2.1e-12 <= 5e-11; K1 = 124.0 <= 128
+- [x] directed + random suites pass — make sim: TESTS=9 PASS=9 (incl. full_benchmark) in one run, regress_final.log
+- [x] coverage goals — final RTL: line 91.7% toggle 96.0% branch 94.8%; func_cov 59/59 bins incl. nsteps.20000 and done_wins
+- [x] lint clean — make lint: 12 files, lint: clean
+- [x] Icarus 4-state run X-free after reset — make sim-icarus: TESTS=9 PASS=9; monitor is_resolvable asserts on every handshake, none fired
+- [x] formal (sby) where listed — synth/formal.sby: bmc PASS (depth 40) + cover PASS (5/5 states) on fsm_arcs; bresp_hold/w1c take testplan §6 fallback (regs 3x2240b beyond smtbmc; test_regs 11/11 + protocol agent)
 
 ### `huffman_engine`
 
@@ -192,6 +203,6 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 91.3 | 94.5 | 100 | 8/8 | n/a | 393367 | 2938436 | 0 | 0 |
+| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 0 | 0 |
 | `huffman_engine` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
