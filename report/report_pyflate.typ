@@ -58,6 +58,11 @@ A separate *Windows / CPython 3.12.6* cProfile run gives
 callees. `decode_huffman_block` has 0.241 s *self* time and 1.172 s *cumulative* time:
 most of its inclusive cost is in functions it calls. Source: `dev/pyflate/FINDINGS.md` §3.
 
+#figure(image("fig/huffman_tree.svg", width: 82%),
+  caption: [A small Huffman tree explains the optimization boundary: canonical decoding
+  compares a code against length-indexed limits, while the stock matcher walks candidate
+  entries. Shorter codes commonly represent more frequent symbols.])
+
 #pagebreak()
 = 3. Changes that shipped
 

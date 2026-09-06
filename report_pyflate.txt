@@ -48,20 +48,20 @@ deviation is 0.94%.
 
 
                                                            1
-        HWSW Final Project                                                                                                                                                                                                                               Benchmark Report: pyflate
+        HWSW Final Project                                                                                                                                                                                                                                                   Benchmark Report: pyflate
 
         2. Profiling: the whole decoding pipeline
         The stock Python-frame profile highlights Huffman decoding and bit-buffer work, with move-to-front and
         inverse BWT alongside them. Development instrumentation found a mean of about five entries visited by the
         symbol matcher, despite its table capacity of 258. A lookup table can remove this scan, but the measured scan
         is short; per-symbol interpreter work and the later transformations also deserve attention.
-         Full recorded flame graph                                                                                                                                                         Highlighted regions - enlarged with surrounding frames
-                                                                                                                                                                                           1. Huffman matcher
-                                                                                                                                                                                           find_next_symbol | this frame: 20.54% inclusive
+         Full recorded flame graph                                                                                                                                                           Highlighted regions - enlarged with surrounding frames
+                                                                                                                                                                                             1. Huffman matcher
+                                                                                                                                                                                             find_next_symbol | this frame: 20.54% inclusive
 
                                                                                                                                                                                                                       needbit..               _..
                                                                                                                                                                                                                s.. snoopbits..  snoopbits (r..
-                                                                                                                                                                                                 find.. find_next_symbol (run_benchmark...                   find..
+                                                                                                                                                                                                 find.. find_next_symbol (run_benchmark...                                       find..
                       1                                                                             2                                                                  3
                                                                                                                                                                                            decode_huffman_block (run_benchmark.py:425)
                                            needbit..
@@ -95,7 +95,7 @@ deviation is 0.94%.
 
 
 
-                                                                                                                                                                                           move_to_front | this frame: 15.10% inclusive
+                                                                                                                                                                                             move_to_front | this frame: 15.10% inclusive
           _lo.. _worker (pyperf/_runner.py:437)
           _fi.. _main (pyperf/_runner.py:463)
           _fi.. bench_time_func (pyperf/_runner.py:502)
@@ -105,18 +105,18 @@ deviation is 0.94%.
 
 
          Original widths and stack depth.
-         Imports and harness retained.                                                                                                                                                                                                                bw..  bw..
-         Each outline marks one call path.                                                                                                                                                                         move_to_front (run_benc..          bwt_reverse ..
-         The same function may recur.                                                                                                                                                                             decode_huffman_block (r..         decode_huffman_block (..
+         Imports and harness retained.                                                                                                                                                                                                                                  bw..  bw..
+         Each outline marks one call path.                                                                                                                                                                           move_to_front (run_benc..                          bwt_reverse ..
+         The same function may recur.                                                                                                                                                                               decode_huffman_block (r..                         decode_huffman_block (..
 :479)    Percentages are inclusive,
-         not flat self-time totals.                                                                                                                                                        3. Inverse BWT
-                                                                                                                                                                                           bwt_reverse | this frame: 8.66% inclusive
+         not flat self-time totals.                                                                                                                                                          3. Inverse BWT
+                                                                                                                                                                                             bwt_reverse | this frame: 8.66% inclusive
 
 
 
-                                                                                                                                                                                                                 bw..  bw.. bw..
-                                                                                                     move_to_front (run_benc..                                                                                   bwt_reverse ..      b..
-                                                                                                    decode_huffman_block (r..                                                                                  decode_huffman_block (.. de.. decode_hu..
+                                                                                                                                                                                                                   bw..  bw.. bw..
+                                                                                                     move_to_front (run_benc..                                                                                     bwt_reverse ..      b..
+                                                                                                    decode_huffman_block (r..                                                                                    decode_huffman_block (.. de.. decode_hu..
 
 
          Figure 2: Full stock Python-frame flame graph, retaining startup and harness context. Numbered outlines identify exactly the
@@ -125,10 +125,25 @@ deviation is 0.94%.
         s (43.8%), including its bit-reader callees. decode_huffman_block has 0.241 s self time and 1.172 s
         cumulative time: most of its inclusive cost is in functions it calls. Source: dev/pyflate/FINDINGS.md §3.
 
+                                                                                     codes                                                                                                               0                      1
+                                                                                                                                                                                                                                                        canonical form
+                                                                                     a = 00                                                                                                                                                             len 2: first=00
+                                                                                     b = 01                                                                                                                                                             len 3: first=100
+                                                                                     c = 11                                                                                                  0          1                           0           1       decode = compare
+                                                                                     d = 100                                                                                                                                                            against 2 numbers,
+                                                                                     e = 101                                                                                             a                   b                                      c   not walk 258
+                                                                                                                                                                                                                        0               1               table entries
+                                                                                     shorter code
+                                                                                     = commoner symbol                                                                                                              d                       e
+
+
+            Figure 3: A small Huffman tree explains the optimization boundary: canonical decoding compares a code against length-
+          indexed limits, while the stock matcher walks candidate entries. Shorter codes commonly represent more frequent symbols.
 
 
 
-                                                                                                                                                                                                                       2
+
+                                                                                                                                                                                                                            2
           HWSW Final Project                                                                                                                                                                                                                             Benchmark Report: pyflate
 
           3. Changes that shipped
@@ -232,7 +247,7 @@ py:725)
                                                                                                                                                                                  bwt_reverse (run_benchmark.py:511)
                                                                                                                                                                          decode_huffman_block (run_benchmark.py:701)
 
-              Figure 3: Full optimized Python profile, before native offload. Inverse BWT and its index-table construction remain visible.
+              Figure 4: Full optimized Python profile, before native offload. Inverse BWT and its index-table construction remain visible.
                    Matcher work was inlined, so its old function frame disappears without implying that Huffman decoding is free.
 
 
@@ -306,7 +321,7 @@ decoder datapath and a coarse block-level submission are the main co-design oppo
              selector control                          run expander + FIFO                               + byte enables
 
 
-   Figure 4: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays on chip. Platform DMA
+   Figure 5: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays on chip. Platform DMA
                                               returns the L-vector to software.
 
 Huffman engine

@@ -228,17 +228,25 @@ after 20,000 steps. Pyflate's Python and hybrid outputs matched `bz2`; the L-vec
 ending bit position matched too. These checks corroborate functionality and approximate
 performance, but do not replace the saved 120-value comparisons.
 
-The remote working tree contained existing changes, and its saved
-`baseline_pyflate.json` was missing. No synchronization or replacement of remote results
-was performed. The local baseline JSON remains the source for the report's stock comparison.
+== Fresh VM rerun
 
-== Source references
+On 2026-09-07 we reran one rigorous pyperf job per backend pair on the course VM, using
+explicit `HWSW_BACKEND` settings and new temporary result files. The benchmark source
+SHA-256 values matched this checkout (`nbody` `226c5b9f...a47b5`, `pyflate`
+`76c2361c...e4c494`). The VM working tree also contained unrelated existing edits; no files
+were synchronized or replaced.
 
-#text(size: 9.5pt)[
-- Python: #link("https://docs.python.org/3.10/library/profile.html")[self versus cumulative profile time].
-- Python: #link("https://docs.python.org/3/library/dis.html")[bytecode is version-specific].
-- Reproduction scripts and raw data: #link("https://github.com/matanco64/HWSW_Project")[project repository].
-- The two benchmark PDFs contain workload results and hardware boundaries; their matching
-  `report_*.txt` files are generated text companions. Build with `report/build.ps1` on Windows
-  or `report/build.sh` on Linux/WSL.
-]
+#result-table(columns: (1.8fr, 1fr, 1fr, 1fr), align: (left, right, right, right),
+  table.header([*Fresh VM run*], [*Python*], [*Native*], [*Ratio*]),
+  [Nbody], [142 ms], [9.48 ms], [15.0×],
+  [Pyflate], [286 ms], [172 ms], [1.66×],
+)
+
+The fresh values are consistent with the saved 120-value distributions but are not merged
+into them: one rigorous job is useful as a revalidation, while the saved distributions remain
+the report's headline estimates and uncertainty values.
+
+#text(size: 8.5pt)[*References:* Python
+#link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
+#link("https://docs.python.org/3/library/dis.html")[version-specific bytecode];
+#link("https://github.com/matanco64/HWSW_Project")[repository and raw data].]
