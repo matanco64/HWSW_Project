@@ -43,22 +43,184 @@ state comparison is the stronger equivalence check.
 
 
                                                             1
-HWSW Final Project                                                                                    Benchmark Report: nbody
+HWSW Final Project                                                                                                                                                                                                        Benchmark Report: nbody
 
 2. Profiling and optimization
 Python-frame sampling places almost all benchmark work in advance(). The C-level debug-build profile
 identifies list access, generic arithmetic dispatch and float allocation as substantial costs. Its list-access
-symbols sum to about 14.4% of sampled self time. This covers indexing, loads and stores across all
-coordinates, not computing the constant zero. A debug-build share is not an exact release-build runtime
-fraction.
- bench_nbody: 297 selected samples | inclusive widths
+symbols sum to about 14.4% of sampled self time across coordinate indexing, loads and stores. These debug-
+build percentages locate costs to investigate; release-build timing establishes the optimization’s benefit.
+ Full recorded flame graph                                                                                                                                  Highlighted regions - enlarged with surrounding frames
+                                                                                                                                                            1. List stores
+                                                                                                                                                            list_ass_item | this frame: 4.00% inclusive
 
-  advance (297)
 
-  bench_nbody (297)
 
-   Figure 2: Stock Python call stacks, grouped by function for print. Width is inclusive sample count within bench_nbody;
-                                   import and harness frames are excluded. See Appendix A3.
+
+                                                                                                                                                          _P..
+                                                                                                                                                   P.. list..                                             f..
+                                                                                                                                               list_ass_su..                                             _Py_..          _Py..
+                                                                                                                                            PyObject_SetItem                                   _Py_DECREF       _Py_I.. _Py..
+                                                                                                                                                            2. Index conversion
+               3                                             2                                                                           1                  PyNumber_AsSsize_t | this frame: 2.63% inclusive
+                                         f..  bi..              Py..       _..                                  _P..
+                                      bin..  bi..        float_mul      flo.. bi..       Py..            P.. list..               f..
+                                    binar.. bin..  binary_op1          tern.. bi..    list_su..      list_ass_su..               _Py_..          _Py..
+                                   PyNumb..PyN.. PyNumber_Multiply     PyNu.. Py.. PyObject_..    PyObject_SetItem     _Py_DECREF       _Py_I.. _Py..
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      PyVectorcall_Call
+
+
+
+
+                                                                                                                                                                                                              _P..
+      _PyObject_Call
+      PyObject_Call
+      do_call_core
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+
+
+
+
+                                                                                                                                                          bi..      Py..                               P.. list..
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+
+
+
+
+                                                                                                                                                         bi..    list_su..                         list_ass_su..
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+
+
+
+
+                                                                                                                                                         Py.. PyObject_..                       PyObject_SetItem          _Py_DECREF
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+
+
+
+
+                                                                                                                                                            3. Generic arithmetic dispatch
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+
+
+
+
+                                                                                                                                                            binary_op1 | this frame: 10.40% inclusive
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+
+
+
+
+                                                                                                                                                             bi..              Py..                                _..
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      _PyFunction_Vectorcall
+      _PyObject_VectorcallTstate
+      PyObject_Vectorcall
+
+
+
+
+                                                                                                                                                            bi..        float_mul                               flo.. bi..       Py..
+      call_function
+      _PyEval_EvalFrameDefault
+      _PyEval_EvalFrame
+      _PyEval_Vector
+      PyEval_EvalCode
+      run_eval_code_obj
+      run_mod
+      pyrun_file
+      _PyRun_SimpleFileObject
+      _PyRun_AnyFileObject
+
+
+
+
+                                                                                                                                                           bin..  binary_op1                                   tern.. bi..    list_su..
+      pymain_run_file_obj
+      pymain_run_file
+      pymain_run_python
+     Py_RunMain
+     pymain_main
+     Py_BytesMain
+     main
+     __libc_start_call_main
+     __libc_start_main_impl
+     _start
+
+
+
+
+                                                                                                                                                           PyN.. PyNumber_Multiply                             PyNu.. Py.. PyObject_..
+ python3-dbg
+
+
+
+
+  Figure 2: Full stock C-frame profile (debug CPython), with the same call paths outlined and enlarged. All original frames,
+ widths and startup context are retained. Percentages describe the selected inclusive call path, not a function’s total self time.
 
 Specialize the fixed schedule
 The original loop revisits the same pairs and masses on every step. At import time, the optimized version
@@ -66,62 +228,106 @@ emits an advance() function with the pair loop unrolled, coordinates in Python l
 It loads state before the step loop and writes it back afterwards, so energy reporting still observes the original
 body objects.
 This removes list subscripting from the generated step loop and avoids repeated pair unpacking. List
-operations remain at function entry and exit. Earlier bytecode counts used sys.monitoring on newer
-CPython versions and a short counting workload; they are not version-independent counts for the VM’s
-CPython 3.10.
+operations remain at function entry and exit, amortized over 20,000 steps.
 Correctness constrains the arithmetic. The kernel retains dt * (dsq ** -1.5) and the stock pair-update
 order. A square-root/division replacement changes rounding and is not used in the exact software tier. The
-emitter accepts a body list and pair schedule rather than hard-coding the benchmark’s answer.
- bench_nbody: 179 selected samples | inclusive widths
-
-  advance (179)
-
-  bench_nbody (179)
-
-  Figure 3: Optimized Python. Integration remains the hotspot, but runtime falls from 231 to 141 ms. Separately normalized
-                                      flame graphs do not show the absolute speedup.
-
-Alternatives at five bodies
-Barnes-Hut is 3.92× slower than direct force evaluation on the VM’s five-body system. Tree construction
-and traversal do not pay off for ten pairs. Separate development experiments also found that struct-of-arrays
-and NumPy lose at this size: Python indexing and small-array dispatch outweigh their potential benefits.
-These experiments are documented in dev/nbody/FINDINGS.md; they are not additional VM headline results.
-FMM was not benchmarked, so no measured FMM speedup or lower bound is claimed.
+emitter accepts a body list and pair schedule, so the same transformation extends to larger systems.
 
 
 
 
-                                                             2
-HWSW Final Project                                                                           Benchmark Report: nbody
+                                                                                                                                                                                         2
+HWSW Final Project                                                                          Benchmark Report: nbody
 
-3. Native execution and scaling
+3. Native execution: less work, not higher IPC
 The Rust/PyO3 kernel stores state in a System object and executes all 20,000 steps through one advance(dt,
-n) call. On the tested VM build, state and energy also compare exactly equal to stock. This is evidence for the
-tested compiler, library and workload, not a portability guarantee for every floating-point build.
- Same benchmark file                                                  Mean ± SD                       vs Python
- Python backend                                                   141.08 ± 1.91 ms                          1.00×
- Native backend                                                   9.493 ± 0.047 ms                         14.86×
+n) call; both energy evaluations also run in Rust. On the tested VM build, state and energy also compare
+exactly equal to stock. This is evidence for the tested compiler, library and workload, not a portability
+guarantee for every floating-point build.
+ Same benchmark file                                                 Mean ± SD                       vs Python
+ Python backend                                                  141.08 ± 1.91 ms                          1.00×
+ Native backend                                                  9.493 ± 0.047 ms                         14.86×
 These are 120-value VM measurements from fallback_nbody.json and native_nbody.json. The separate
-kernel experiment (228.49 → 9.48 ms, 24.1×) uses stock Python as its baseline. Its larger ratio primarily
-reflects that different denominator; it does not establish that energy reporting consumes the difference
-between 24.1× and 14.86×.
+kernel experiment (228.49 → 9.48 ms, 24.1×) compares native execution with stock Python. The table
+compares it with the already optimized Python implementation. Both the baseline and timing protocol must
+be specified when comparing these ratios.
 Backend selection is explicit: HWSW_BACKEND=python|native|auto. Native mode fails if the wheel is
 unavailable; auto mode falls back to Python. Pyperf workers must receive the variable through --inherit-
 environ HWSW_BACKEND; result metadata identifies what ran.
 
-What changes when N grows?
+Matched-work CPU counters
+A separate warm-loop experiment repeats the same timed work 64 times per run on a fixed guest CPU. The
+table reports medians of three runs, normalized to one 20,000-step iteration. Counters exclude initialization
+and warmup; Appendix A2 documents gating and event validation.
+ Metric per iteration                                                    Python                          Native
+ Elapsed time                                                           140.29 ms                       9.473 ms
+ Instructions                                                          1,103.62 M                        41.32 M
+ Cycles                                                                  334.56 M                        22.56 M
+ IPC                                                                          3.30                           1.83
+ Branches                                                                185.97 M                         3.92 M
+ Branch misses (rate)                                             585,719 (0.315%)                 61 (0.00156%)
+ Generic cache references                                                   2,980                            279
+ Generic cache misses (rate)                                            37 (1.26%)                    12 (4.00%)
+The main gain is 26.7× fewer instructions and 14.8× fewer cycles. Compiled arithmetic avoids Python
+object handling and dispatch, removing most branches too. IPC actually falls: native execution retires fewer
+instructions per cycle, but needs far fewer instructions to finish. Higher IPC is not synonymous with a faster
+program.
+Generic cache misses are sparse in both runs. Native has fewer absolute misses even though its miss/
+reference ratio is higher; the denominator shrinks more. These small counts do not establish cache latency as
+the bottleneck. L1-load counts were invalid and are not reported.
+
+
+
+
+                                                       3
+HWSW Final Project                                                                                                                                                              Benchmark Report: nbody
+
+4. What changes when N grows?
+ Full recorded flame graph                                                                                        Highlighted regions - enlarged with surrounding frames
+                                                                                                                  1. Generated integration loop
+                                                                                                                  advance | this frame: 6.42% inclusive
+
+
+                                                                                                        1
+ _..         ad..            adva..           advan.. adv..   advanc..   a..   ad..   a..      a..   advance ..
+ e..   bench_nbody (run_benchmark.py:208)
+ _..   task_func (pyperf/_runner.py:497)
+ _..   _compute_values (pyperf/_worker.py:79)
+ _..   compute_warmups_values (pyperf/_worker.py:271)
+ <..   compute (pyperf/_worker.py:289)
+ _..   compute (pyperf/_worker.py:364)
+ e..   create_run (pyperf/_worker.py:300)
+ _..   _worker (pyperf/_runner.py:437)
+ _..   _main (pyperf/_runner.py:463)
+ _..   bench_time_func (pyperf/_runner.py:502)
+ <..   <module> (run_benchmark.py:231)
+
+
+
+
+                                                                                                                                                    a..                     advance ..
+
+
+
+
+                 Figure 3: Full optimized Python-frame profile with the integration call path enlarged. Integration remains the hotspot.
+                            Independent normalization does not display the absolute runtime reduction from 231 to 141 ms.
+At five bodies, Barnes-Hut is 3.92× slower than direct force evaluation on the VM. Tree construction and
+traversal do not pay off for ten pairs. Development experiments also found that struct-of-arrays and NumPy
+lose at this size (dev/nbody/FINDINGS.md). FMM was not benchmarked, so no measured FMM speedup or
+lower bound is claimed.
 The --bodies N extension adds deterministic outer orbits while preserving the five-body default. Source
 generation grows as O(N²), increasing compilation time and memory use. The shipped implementation falls
 back to a rolled loop above 20,000 pairs. Detailed unrolling and local-slot experiments used WSL2 / CPython
 3.10.21; their timings and memory limits are development observations, not VM results.
 The VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each evaluation (θ = 0.5, best of
 seven). It evaluates an extended workload, not the required N = 5 benchmark.
-    N                     Direct                       BH                  BH/direct          Median rel. error
-     5                  0.020 ms                  0.077 ms                       3.92×                           0
-   100                  4.746 ms                  8.410 ms                       1.77×                      1.6e-5
-   300                 42.977 ms                 42.489 ms                       0.99×                      3.3e-5
-   800                313.489 ms                158.846 ms                       0.51×                      8.7e-5
- 1,600               1,254.660 ms               382.471 ms                       0.30×                      1.8e-4
+                N                                                                             Direct                                         BH               BH/direct          Median rel. error
+                    5                                                                        0.020 ms                                  0.077 ms                     3.92×                           0
+       100                                                                                   4.746 ms                                  8.410 ms                     1.77×                      1.6e-5
+       300                                                                                  42.977 ms                                42.489 ms                      0.99×                      3.3e-5
+       800                                                                            313.489 ms                                    158.846 ms                      0.51×                      8.7e-5
+ 1,600                                                                          1,254.660 ms                                        382.471 ms                      0.30×                      1.8e-4
 The crossover is near N = 300 for this distribution. Median relative acceleration error is not a worst-case or
 trajectory-error bound. The separate VM native sweep gives 21–22× over rolled Python from N = 100 to
 3,200. Step counts approximately equalize pair-updates, with integer rounding increasing work at the final
@@ -130,10 +336,10 @@ row. Both sweeps are in results/bigN_sweep.txt.
 
 
 
-                                                       3
+                                                                                                                                              4
 HWSW Final Project                                                                                   Benchmark Report: nbody
 
-4. Hardware acceleration: current design
+5. Hardware acceleration: current design
 grape_pipeline retains state on the device and executes a complete advance(dt, n) request. Force
 computation suits a scheduled datapath, while velocity accumulation must respect dependencies between
 pairs sharing a body. Steps remain serial.
@@ -144,8 +350,8 @@ pairs sharing a body. Steps remain serial.
 
 
 
-         Step / pair scheduler                        Shared FP64 datapath                           Position update
-        ordered accumulation                       3 add, 3 mul, sqrt, reciprocal                     commit step
+        Step / pair scheduler                         Shared FP64 datapath                         Ordered accumulate
+            issue control                          3 add, 3 mul, sqrt, reciprocal                   position / commit
 
 
 
@@ -169,10 +375,11 @@ At that design point, modeled execution is about 4.6× faster than stock Python 
 Python, but slower than the 9.49 ms native implementation. More units, a higher achieved clock, or
 reduced precision require measured area/timing trade-offs. No measured power advantage is claimed.
 The hardware’s square-root/reciprocal expression differs from stock pow. RTL is checked against its own
-arithmetic model; comparison with stock uses documented state and energy tolerances. Software equality
-must not be presented as hardware bit equality with stock.
+arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12 and per-body position/velocity
+errors ≤ 2e-9 / 5e-11 at completion. These tolerance targets are distinct from the software tier’s observed
+exact equality.
 
-5. Conclusion
+6. Conclusion
 Specializing a fixed schedule cuts Python runtime by 38.9% while preserving the tested state and energy
 exactly. Native execution removes more interpreter work through the same coarse interface. The hardware
 design implements that boundary, but its benefit over native software depends on achieving a better latency/
@@ -183,5 +390,5 @@ Evidence: hw/grape_pipeline/docs/uarch.md, prd.md, testplan.md, and hw/PROGRESS.
 
 
 
-                                                             4
+                                                             5
 

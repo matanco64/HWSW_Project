@@ -84610,16 +84610,12 @@
 
 </g></svg>
 <rect x="157.14541666666668" y="253.7875" width="10.063333333333334" height="4.5625" fill="none" stroke="#00779d" stroke-width="2"/>
-<circle cx="162.17708333333334" cy="245.7875" r="8" fill="#00779d"/><text x="162.17708333333334" y="249.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">1</text>
+<path d="M193.0 244.7875L162.17708333333334 254.7875" fill="none" stroke="#00779d" stroke-width="1"/>
+<circle cx="193.0" cy="236.7875" r="8" fill="#00779d"/><text x="193.0" y="240.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">1</text>
 <text x="240" y="45.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. List stores</text>
 <text x="240" y="63.0" font-family="sans-serif" font-size="12" fill="#465969">list_ass_item | this frame: 4.00% inclusive</text>
 <rect x="240" y="72.0" width="510" height="131.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="72.0" width="510" height="131.0" viewBox="843.9 1214.0 300 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyMem_DebugCheckGIL (1,001,001 samples, 0.02%)</ns0:title><ns0:rect x="1050.6" y="1205" width="0.2" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
-<ns0:text x="1053.56" y="1215.5" />
-</ns0:g>
-
+<svg x="240" y="72.0" width="510" height="131.0" viewBox="843.9 1229.0 300 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_INCREF (11,011,011 samples, 0.18%)</ns0:title><ns0:rect x="868.6" y="1237" width="2.1" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
 <ns0:text x="871.59" y="1247.5" />
@@ -84656,11 +84652,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>get_float_state (12,012,012 samples, 0.20%)</ns0:title><ns0:rect x="920.4" y="1205" width="2.4" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
-<ns0:text x="923.44" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>float_dealloc (54,054,054 samples, 0.89%)</ns0:title><ns0:rect x="1142.4" y="1253" width="10.5" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
 <ns0:text x="1145.42" y="1263.5" />
 </ns0:g>
@@ -84668,11 +84659,6 @@
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_INCREF (17,017,017 samples, 0.28%)</ns0:title><ns0:rect x="922.8" y="1253" width="3.3" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
 <ns0:text x="925.77" y="1263.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyMem_DebugRawFree (48,048,048 samples, 0.79%)</ns0:title><ns0:rect x="1050.8" y="1205" width="9.3" height="15.0" fill="rgb(219,65,15)" rx="2" ry="2" />
-<ns0:text x="1053.75" y="1215.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -84746,11 +84732,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyRuntimeState_GetThreadState (8,008,008 samples, 0.13%)</ns0:title><ns0:rect x="1047.8" y="1205" width="1.6" height="15.0" fill="rgb(243,175,42)" rx="2" ry="2" />
-<ns0:text x="1050.84" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_DECREF (189,189,189 samples, 3.11%)</ns0:title><ns0:rect x="1120.5" y="1285" width="36.7" height="15.0" fill="rgb(242,171,41)" rx="2" ry="2" />
 <ns0:text x="1123.47" y="1295.5">_Py..</ns0:text>
 </ns0:g>
@@ -84768,11 +84749,6 @@
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>PyNumber_AsSsize_t (143,143,143 samples, 2.35%)</ns0:title><ns0:rect x="846.6" y="1269" width="27.8" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
 <ns0:text x="849.64" y="1279.5">P..</ns0:text>
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyThreadState_GET (1,001,001 samples, 0.02%)</ns0:title><ns0:rect x="1060.1" y="1205" width="0.2" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
-<ns0:text x="1063.08" y="1215.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -84801,11 +84777,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_SET_TYPE (2,002,002 samples, 0.03%)</ns0:title><ns0:rect x="920.1" y="1205" width="0.3" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
-<ns0:text x="923.05" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_Dealloc (248,248,248 samples, 4.08%)</ns0:title><ns0:rect x="1012.3" y="1285" width="48.2" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
 <ns0:text x="1015.30" y="1295.5">_Py_..</ns0:text>
 </ns0:g>
@@ -84816,13 +84787,14 @@
 </ns0:g>
 
 </g></svg>
-<rect x="344.35" y="144.05" width="61.83200000000001" height="19.650000000000002" fill="none" stroke="#00779d" stroke-width="2"/>
+<rect x="306.6875" y="137.5" width="77.29" height="24.5625" fill="none" stroke="#00779d" stroke-width="2"/>
 <rect x="134.39041666666668" y="253.7875" width="7.295833333333333" height="4.5625" fill="none" stroke="#7c4285" stroke-width="2"/>
-<circle cx="138.03833333333336" cy="242.7875" r="8" fill="#7c4285"/><text x="138.03833333333336" y="246.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">2</text>
+<path d="M110.5 244.7875L138.03833333333336 254.7875" fill="none" stroke="#7c4285" stroke-width="1"/>
+<circle cx="110.5" cy="236.7875" r="8" fill="#7c4285"/><text x="110.5" y="240.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">2</text>
 <text x="240" y="225.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#7c4285">2. Index conversion</text>
 <text x="240" y="243.0" font-family="sans-serif" font-size="12" fill="#465969">PyNumber_AsSsize_t | this frame: 2.63% inclusive</text>
 <rect x="240" y="252.0" width="510" height="131.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="252.0" width="510" height="131.0" viewBox="710.7 1214.0 300 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<svg x="240" y="252.0" width="510" height="131.0" viewBox="710.7 1229.0 300 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_INCREF (11,011,011 samples, 0.18%)</ns0:title><ns0:rect x="868.6" y="1237" width="2.1" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
 <ns0:text x="871.59" y="1247.5" />
@@ -84844,28 +84816,13 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_NewReference (9,009,009 samples, 0.15%)</ns0:title><ns0:rect x="712.3" y="1205" width="1.7" height="15.0" fill="rgb(227,104,24)" rx="2" ry="2" />
-<ns0:text x="715.25" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_DECREF (19,019,019 samples, 0.31%)</ns0:title><ns0:rect x="870.7" y="1253" width="3.7" height="15.0" fill="rgb(242,171,41)" rx="2" ry="2" />
 <ns0:text x="873.72" y="1263.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyMem_DebugMalloc (23,023,023 samples, 0.38%)</ns0:title><ns0:rect x="802.0" y="1205" width="4.4" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
-<ns0:text x="804.97" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_PyObject_GC_Malloc (28,028,028 samples, 0.46%)</ns0:title><ns0:rect x="801.0" y="1253" width="5.4" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
 <ns0:text x="804.00" y="1263.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>get_float_state (12,012,012 samples, 0.20%)</ns0:title><ns0:rect x="920.4" y="1205" width="2.4" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
-<ns0:text x="923.44" y="1215.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85034,11 +84991,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_SET_TYPE (4,004,004 samples, 0.07%)</ns0:title><ns0:rect x="714.0" y="1205" width="0.8" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
-<ns0:text x="717.00" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>PyObject_Malloc (23,023,023 samples, 0.38%)</ns0:title><ns0:rect x="802.0" y="1221" width="4.4" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
 <ns0:text x="804.97" y="1231.5" />
 </ns0:g>
@@ -85064,28 +85016,19 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_SET_TYPE (2,002,002 samples, 0.03%)</ns0:title><ns0:rect x="920.1" y="1205" width="0.3" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
-<ns0:text x="923.05" y="1215.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>PyObject_SetItem (613,613,613 samples, 10.09%)</ns0:title><ns0:rect x="807.0" y="1301" width="119.1" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
 <ns0:text x="810.02" y="1311.5">PyObject_SetItem</ns0:text>
 </ns0:g>
 
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyInterpreterState_GET (2,002,002 samples, 0.03%)</ns0:title><ns0:rect x="714.8" y="1205" width="0.4" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
-<ns0:text x="717.78" y="1215.5" />
-</ns0:g>
-
 </g></svg>
-<rect x="344.35" y="324.05" width="40.61" height="19.650000000000002" fill="none" stroke="#7c4285" stroke-width="2"/>
+<rect x="306.6875" y="317.5" width="50.762499999999996" height="24.5625" fill="none" stroke="#7c4285" stroke-width="2"/>
 <rect x="94.99625" y="256.52083333333337" width="22.97833333333333" height="4.5625" fill="none" stroke="#bd512e" stroke-width="2"/>
-<circle cx="106.48541666666667" cy="242.52083333333337" r="8" fill="#bd512e"/><text x="106.48541666666667" y="246.52083333333337" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">3</text>
+<path d="M28.0 244.7875L106.48541666666667 257.52083333333337" fill="none" stroke="#bd512e" stroke-width="1"/>
+<circle cx="28.0" cy="236.7875" r="8" fill="#bd512e"/><text x="28.0" y="240.7875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">3</text>
 <text x="240" y="405.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#bd512e">3. Generic arithmetic dispatch</text>
 <text x="240" y="423.0" font-family="sans-serif" font-size="12" fill="#465969">binary_op1 | this frame: 10.40% inclusive</text>
 <rect x="240" y="432.0" width="510" height="131.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="432.0" width="510" height="131.0" viewBox="480.1 1230.0 300 100" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<svg x="240" y="432.0" width="510" height="131.0" viewBox="480.1 1245.0 300 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_PyEval_EvalFrameDefault (5,824,824,819 samples, 95.77%)</ns0:title><ns0:rect x="41.1" y="1317" width="1130.1" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
 <ns0:text x="44.07" y="1327.5">_PyEval_EvalFrameDefault</ns0:text>
@@ -85102,18 +85045,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>PyFloat_FromDouble (31,031,031 samples, 0.51%)</ns0:title><ns0:rect x="497.3" y="1221" width="6.0" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
-<ns0:text x="500.26" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>float_sub (100,100,100 samples, 1.65%)</ns0:title><ns0:rect x="695.9" y="1253" width="19.5" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
 <ns0:text x="698.94" y="1263.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_NewReference (5,005,005 samples, 0.08%)</ns0:title><ns0:rect x="656.1" y="1221" width="1.0" height="15.0" fill="rgb(227,104,24)" rx="2" ry="2" />
-<ns0:text x="659.13" y="1231.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85142,11 +85075,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>exp_inline (53,053,053 samples, 0.87%)</ns0:title><ns0:rect x="661.8" y="1221" width="10.3" height="15.0" fill="rgb(220,72,17)" rx="2" ry="2" />
-<ns0:text x="664.76" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>__pow (114,114,114 samples, 1.88%)</ns0:title><ns0:rect x="659.6" y="1253" width="22.2" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
 <ns0:text x="662.62" y="1263.5">_..</ns0:text>
 </ns0:g>
@@ -85154,11 +85082,6 @@
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_Py_CheckSlotResult (8,008,008 samples, 0.13%)</ns0:title><ns0:rect x="694.4" y="1253" width="1.5" height="15.0" fill="rgb(221,77,18)" rx="2" ry="2" />
 <ns0:text x="697.38" y="1263.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_SET_TYPE (12,012,012 samples, 0.20%)</ns0:title><ns0:rect x="625.8" y="1221" width="2.4" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
-<ns0:text x="628.83" y="1231.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85184,11 +85107,6 @@
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>binary_op1 (149,149,149 samples, 2.45%)</ns0:title><ns0:rect x="475.5" y="1253" width="29.0" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
 <ns0:text x="478.51" y="1263.5">bi..</ns0:text>
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyRuntimeState_GetThreadState (1,001,001 samples, 0.02%)</ns0:title><ns0:rect x="695.7" y="1221" width="0.2" height="15.0" fill="rgb(243,175,42)" rx="2" ry="2" />
-<ns0:text x="698.74" y="1231.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85222,18 +85140,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyThreadState_GET (4,004,004 samples, 0.07%)</ns0:title><ns0:rect x="484.4" y="1221" width="0.8" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
-<ns0:text x="487.45" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>PyObject_GetItem (437,437,437 samples, 7.19%)</ns0:title><ns0:rect x="715.4" y="1301" width="84.8" height="15.0" fill="rgb(244,179,42)" rx="2" ry="2" />
 <ns0:text x="718.36" y="1311.5">PyObject_..</ns0:text>
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyInterpreterState_GET (14,014,014 samples, 0.23%)</ns0:title><ns0:rect x="628.2" y="1221" width="2.7" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
-<ns0:text x="631.16" y="1231.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85317,11 +85225,6 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_Py_NewReference (41,041,041 samples, 0.67%)</ns0:title><ns0:rect x="617.9" y="1221" width="7.9" height="15.0" fill="rgb(227,104,24)" rx="2" ry="2" />
-<ns0:text x="620.87" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>__GI___errno_location (1,001,001 samples, 0.02%)</ns0:title><ns0:rect x="659.4" y="1253" width="0.2" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
 <ns0:text x="662.43" y="1263.5" />
 </ns0:g>
@@ -85332,28 +85235,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>get_float_state (2,002,002 samples, 0.03%)</ns0:title><ns0:rect x="714.8" y="1221" width="0.4" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
-<ns0:text x="717.78" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_PyNumber_Index (44,044,044 samples, 0.72%)</ns0:title><ns0:rect x="765.3" y="1253" width="8.5" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
 <ns0:text x="768.27" y="1263.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyObject_Init (18,018,018 samples, 0.30%)</ns0:title><ns0:rect x="711.3" y="1221" width="3.5" height="15.0" fill="rgb(208,15,3)" rx="2" ry="2" />
-<ns0:text x="714.28" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>_PyObject_TypeCheck (6,006,006 samples, 0.10%)</ns0:title><ns0:rect x="503.3" y="1221" width="1.2" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
-<ns0:text x="506.29" y="1231.5" />
-</ns0:g>
-
-<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>log_inline (50,050,050 samples, 0.82%)</ns0:title><ns0:rect x="672.1" y="1221" width="9.7" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
-<ns0:text x="675.05" y="1231.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -85387,5 +85270,5 @@
 </ns0:g>
 
 </g></svg>
-<rect x="344.35" y="504.05" width="160.868" height="19.650000000000002" fill="none" stroke="#bd512e" stroke-width="2"/>
+<rect x="306.6875" y="497.5" width="201.08499999999998" height="24.5625" fill="none" stroke="#bd512e" stroke-width="2"/>
 </svg>

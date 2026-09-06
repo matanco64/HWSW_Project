@@ -4,7 +4,8 @@ Run this file from any directory with --repo pointing at the project. All raw
 perf output and worker metadata go to a NEW output directory. No saved result
 or benchmark source is overwritten. perf's acknowledged FIFO control excludes
 imports, initialization and warmup. Counts include the small enable/disable
-handshake boundary. Four user-mode events per pass avoid vPMU oversubscription.
+handshake boundary. At most four user-mode events are requested per pass;
+validate actual counts because guest PMU availability is event-dependent.
 """
 import argparse
 import gc
@@ -22,7 +23,10 @@ import time
 
 PASSES = {
     'core': 'cycles:u,instructions:u,branches:u,branch-misses:u',
-    'cache': 'cache-references:u,cache-misses:u,L1-dcache-loads:u,L1-dcache-load-misses:u',
+    # L1 loads returned invalid zeros in the first capture. Do not request those
+    # unsupported events in fresh captures; its original protocol.json preserves
+    # the four-event cache request for provenance.
+    'cache': 'cache-references:u,cache-misses:u',
 }
 
 

@@ -62,7 +62,61 @@ byte-representation test (for example, signed zeros). Pyflate checks the decoded
 `bz2.decompress`, the original MD5, the intermediate L-vector and the ending bit position.
 
 #pagebreak()
-= A2. Phase counters: evidence and limits
+= A2. Matched Python/native CPU counters
+
+The new counter tables use `report/measure_native_counters.py` and the raw files in
+`results/native_counters_20260907/`. Release CPython 3.10.12 executes the same benchmark
+source in explicit Python and native modes, on one fixed guest CPU. Each configuration has
+three runs per event pass; backend order alternates between rounds. Every run warms up before
+measurement. Nbody resets state afterwards and executes 64 iterations of energy, 20,000
+steps and energy; pyflate executes 16 complete decompressions. Output checks follow the timer.
+
+*Counter scope.* `perf stat --delay=-1 --control fifo:...` starts with counters disabled.
+The worker enables counting after imports, setup, warmup and garbage collection, waits for
+acknowledgement, then times the loop. It disables counting afterwards and waits for a second
+acknowledgement. Counts include the small control-boundary overhead but exclude setup and
+output validation. The internal elapsed timer covers the loop only. Both core and generic
+cache events request user mode (`:u`); separate event passes are separate executions.
+
+#result-table(columns: (1fr, 2.4fr),
+  table.header([*Pass*], [*Events and validation*]),
+  [Core], [Cycles, instructions, branches, branch misses: retained; reported running time 100%.],
+  [Cache], [Generic cache references/misses: retained; reported running time 100%.],
+  [Excluded], [L1 data-load counts were zero, despite reported 100% running time. Both L1 events are excluded; no L1 miss rate is inferred.],
+)
+
+The summarizer checks source SHA-256 hashes, requested backends, output SHA-256 equality
+across all 24 runs, nonzero denominators and counter running time. A separate dispatch check
+(`report/check_pyflate_backend.py`) observed zero native calls for Python and one per block for
+native/auto, with identical MD5 and output length. The measured extension predates the subsequent
+source-only Rust module refactor; these timings are not a measurement of the rebuilt refactor.
+
+Reported counts are normalized per completed benchmark iteration. Each displayed value is
+the median of three observations, including rates calculated *within each run*. Thus a ratio
+of displayed median counts may differ slightly from the displayed median rate. `summary.json`
+also retains the individual values and minimum/maximum. Three runs support a descriptive
+comparison, not a formal significance claim; the rigorous 120-value timing experiments remain
+the headline evidence.
+
+*Interpretation.* IPC is retired instructions per counted cycle, not work completed per
+cycle. Removing interpreter instructions can lower IPC while improving runtime substantially.
+Generic cache events do not represent all memory accesses or identify stall cycles, a specific
+cache level, or DRAM latency. Nbody's very small miss counts are particularly sensitive to
+boundary overhead and run-to-run variation. Pyflate's larger remaining counts cannot be
+assigned to BWT without an isolated phase measurement.
+
+To regenerate the validated summaries from the preserved capture:
+```sh
+python3 report/summarize_counters.py
+```
+For a new capture on Linux, choose a fresh output directory:
+```sh
+python3 report/measure_native_counters.py --repo /path/to/repo \
+    --out /tmp/new-native-counters
+```
+
+#pagebreak()
+= A3. Earlier phase counters: evidence and limits
 
 `dev/pyflate/phase_cpi.py` repeats one phase after preparing its input. The internal wall timer
 covers the repeated phase; `perf stat` wraps the *entire process*, including imports and input
@@ -118,24 +172,30 @@ subtract setup with a justified method, and sweep working-set size. The current 
 are insufficient for a measured SRAM-versus-DRAM accelerator comparison.
 
 #pagebreak()
-= A3. Readable profiles and review checks
+= A4. Full profiles and review checks
 
-The main reports use print views derived from the saved, startup-filtered py-spy SVGs.
-`report/make_figures.py` reconstructs their call trees from rectangle nesting, merges sibling
-frames with the same function name across source lines, and draws the benchmark subtree.
-It conserves each selected subtree's sample counts, checks child-count bounds, and records
-the selected root and sample count in `report/fig/profile_counts.json`.
+The reports show full original flame graphs beside enlarged context crops.
+`report/make_figures.py` copies every recorded frame rectangle at its original coordinates;
+it does not merge functions, filter startup, cap stack depth or renormalize widths. Numbered
+outlines mark the same frame in the overview and its detail crop. Selected-frame titles,
+coordinates, sample weights and source filenames are recorded in `report/fig/profile_counts.json`.
 
-Grouping removes source-line detail; selecting a benchmark root removes harness context.
-Widths are normalized to that selected root and show *inclusive* counts. A child's samples
-are included in its parent; widths on different rows must not be added. Small boxes may
-omit labels, with full titles retained in the SVG. The original `results/pyspy_*.svg` files
-remain the source evidence. These figures summarize a few hundred samples and should not
-be treated as precise estimates of small differences.
+Stock nbody uses the C-frame debug profile to expose interpreter operations. Optimized nbody
+and both pyflate figures use Python-frame py-spy profiles. The tall C graph needs a small
+overview to retain its complete context; the enlarged regions carry readable local detail.
+Original SVGs in `results/` remain available for arbitrary zoom and inspection.
+
+Widths show *inclusive* samples for a call path, relative to the original whole profile.
+The C graph's weights sum sampled event periods, not a count of individual interrupts.
+A function may appear at several locations; the highlighted occurrence is not its aggregate
+self time. Children overlap their parents, so widths on different rows must not be added.
+Independent graphs are independently normalized: a narrower-looking stack is not evidence
+of an absolute speedup. Python-frame views have only a few hundred samples and are used to
+locate work, not resolve small percentage differences.
 
 == Earlier flame-graph trimming
 
-The committed py-spy views exclude startup samples; the original `*_full.svg` files preserve
+Older trimmed py-spy views exclude startup samples; the original `*_full.svg` files preserve
 them. The C-frame figures in `results/flame_*.svg` also elide leading context and cap depth.
 Recorded caps are depth 9 / 4.5% affected samples for stock nbody and depth 36 / 4.4% for stock
 pyflate. Capping loses leaf detail. Removing samples can change the normalization, and

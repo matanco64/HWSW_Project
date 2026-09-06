@@ -1,0 +1,404 @@
+{
+  "protocol": {
+    "rounds": 3,
+    "cpu": 0,
+    "passes": {
+      "core": "cycles:u,instructions:u,branches:u,branch-misses:u",
+      "cache": "cache-references:u,cache-misses:u,L1-dcache-loads:u,L1-dcache-load-misses:u"
+    },
+    "script_sha256": "f4518f4eefef343bb573c48c77473f155714807f478d2356c8dec6774f558ce1",
+    "perf": "perf version 5.15.209",
+    "scope": "warm measured loop, acknowledged enable/disable, user-mode events",
+    "loops": {
+      "nbody": 64,
+      "pyflate": 16
+    }
+  },
+  "benchmarks": {
+    "nbody": {
+      "python": {
+        "median": {
+          "core_ms": 140.28722367220325,
+          "cycles:u": 334556435.71875,
+          "instructions:u": 1103617361.703125,
+          "branches:u": 185971580.890625,
+          "branch-misses:u": 585718.9375,
+          "cache_ms": 141.12949051559553,
+          "cache-references:u": 2980.1875,
+          "cache-misses:u": 36.984375,
+          "ipc": 3.298747286334966,
+          "branch_miss_pct": 0.31494978872129586,
+          "cache_miss_pct": 1.2604072730323177
+        },
+        "min": {
+          "core_ms": 140.1352041248174,
+          "cycles:u": 334115446.0625,
+          "instructions:u": 1103617134.453125,
+          "branches:u": 185971524.71875,
+          "branch-misses:u": 583712.28125,
+          "cache_ms": 139.92973351560067,
+          "cache-references:u": 2756.390625,
+          "cache-misses:u": 36.171875,
+          "ipc": 3.0600023138667956,
+          "branch_miss_pct": 0.31387185867985146,
+          "cache_miss_pct": 0.9014189636918952
+        },
+        "max": {
+          "core_ms": 151.36748470104067,
+          "cycles:u": 360658995.8125,
+          "instructions:u": 1103618461.640625,
+          "branches:u": 185972163.96875,
+          "branch-misses:u": 589491.875,
+          "cache_ms": 141.28506520137307,
+          "cache-references:u": 4102.90625,
+          "cache-misses:u": 37.5625,
+          "ipc": 3.3031051830934537,
+          "branch_miss_pct": 0.3169795471850596,
+          "cache_miss_pct": 1.3122913230050621
+        },
+        "runs": [
+          {
+            "core_ms": 151.36748470104067,
+            "cycles:u": 360658995.8125,
+            "instructions:u": 1103617361.703125,
+            "branches:u": 185971580.890625,
+            "branch-misses:u": 589491.875,
+            "cache_ms": 141.28506520137307,
+            "cache-references:u": 4102.90625,
+            "cache-misses:u": 36.984375,
+            "ipc": 3.0600023138667956,
+            "branch_miss_pct": 0.3169795471850596,
+            "cache_miss_pct": 0.9014189636918952
+          },
+          {
+            "core_ms": 140.28722367220325,
+            "cycles:u": 334556435.71875,
+            "instructions:u": 1103617134.453125,
+            "branches:u": 185971524.71875,
+            "branch-misses:u": 583712.28125,
+            "cache_ms": 141.12949051559553,
+            "cache-references:u": 2756.390625,
+            "cache-misses:u": 36.171875,
+            "ipc": 3.298747286334966,
+            "branch_miss_pct": 0.31387185867985146,
+            "cache_miss_pct": 1.3122913230050621
+          },
+          {
+            "core_ms": 140.1352041248174,
+            "cycles:u": 334115446.0625,
+            "instructions:u": 1103618461.640625,
+            "branches:u": 185972163.96875,
+            "branch-misses:u": 585718.9375,
+            "cache_ms": 139.92973351560067,
+            "cache-references:u": 2980.1875,
+            "cache-misses:u": 37.5625,
+            "ipc": 3.3031051830934537,
+            "branch_miss_pct": 0.31494978872129586,
+            "cache_miss_pct": 1.2604072730323177
+          }
+        ]
+      },
+      "native": {
+        "median": {
+          "core_ms": 9.472520810959395,
+          "cycles:u": 22563362.421875,
+          "instructions:u": 41323426.875,
+          "branches:u": 3920555.125,
+          "branch-misses:u": 61.09375,
+          "cache_ms": 9.472453388298163,
+          "cache-references:u": 279.25,
+          "cache-misses:u": 11.625,
+          "ipc": 1.8314392200223344,
+          "branch_miss_pct": 0.0015582933552043857,
+          "cache_miss_pct": 4.0015059430968645
+        },
+        "min": {
+          "core_ms": 9.453759237658232,
+          "cycles:u": 22554595.5,
+          "instructions:u": 41323426.4375,
+          "branches:u": 3920555.03125,
+          "branch-misses:u": 56.984375,
+          "cache_ms": 9.464857936109183,
+          "cache-references:u": 257.671875,
+          "cache-misses:u": 2.8125,
+          "ipc": 1.8287467677469609,
+          "branch_miss_pct": 0.0014534770414951874,
+          "cache_miss_pct": 1.0071620411817368
+        },
+        "max": {
+          "core_ms": 9.477928375417832,
+          "cycles:u": 22596582.078125,
+          "instructions:u": 41323429.625,
+          "branches:u": 3920555.5625,
+          "branch-misses:u": 63.3125,
+          "cache_ms": 9.515298686892493,
+          "cache-references:u": 290.515625,
+          "cache-misses:u": 16.453125,
+          "ipc": 1.8321512183625728,
+          "branch_miss_pct": 0.0016148861448276603,
+          "cache_miss_pct": 6.385301073312716
+        },
+        "runs": [
+          {
+            "core_ms": 9.477928375417832,
+            "cycles:u": 22596582.078125,
+            "instructions:u": 41323426.4375,
+            "branches:u": 3920555.03125,
+            "branch-misses:u": 63.3125,
+            "cache_ms": 9.472453388298163,
+            "cache-references:u": 290.515625,
+            "cache-misses:u": 11.625,
+            "ipc": 1.8287467677469609,
+            "branch_miss_pct": 0.0016148861448276603,
+            "cache_miss_pct": 4.0015059430968645
+          },
+          {
+            "core_ms": 9.472520810959395,
+            "cycles:u": 22563362.421875,
+            "instructions:u": 41323426.875,
+            "branches:u": 3920555.125,
+            "branch-misses:u": 61.09375,
+            "cache_ms": 9.464857936109183,
+            "cache-references:u": 257.671875,
+            "cache-misses:u": 16.453125,
+            "ipc": 1.8314392200223344,
+            "branch_miss_pct": 0.0015582933552043857,
+            "cache_miss_pct": 6.385301073312716
+          },
+          {
+            "core_ms": 9.453759237658232,
+            "cycles:u": 22554595.5,
+            "instructions:u": 41323429.625,
+            "branches:u": 3920555.5625,
+            "branch-misses:u": 56.984375,
+            "cache_ms": 9.515298686892493,
+            "cache-references:u": 279.25,
+            "cache-misses:u": 2.8125,
+            "ipc": 1.8321512183625728,
+            "branch_miss_pct": 0.0014534770414951874,
+            "cache_miss_pct": 1.0071620411817368
+          }
+        ]
+      },
+      "output_sha256": "31fa324f991b94c10b2bdcfa676af60b4c57dc8d734398c1fcff21dd2e1aedfa"
+    },
+    "pyflate": {
+      "python": {
+        "median": {
+          "core_ms": 286.14704075152986,
+          "cycles:u": 670332802.6875,
+          "instructions:u": 1948044965.375,
+          "branches:u": 349360471.1875,
+          "branch-misses:u": 555538.375,
+          "cache_ms": 286.36209724936634,
+          "cache-references:u": 1672807.625,
+          "cache-misses:u": 43252.4375,
+          "ipc": 2.9054364339685295,
+          "branch_miss_pct": 0.15923320908362154,
+          "cache_miss_pct": 2.5856193416143713
+        },
+        "min": {
+          "core_ms": 286.09695412160363,
+          "cycles:u": 669832671.875,
+          "instructions:u": 1947609347.8125,
+          "branches:u": 348883488.6875,
+          "branch-misses:u": 541664.875,
+          "cache_ms": 285.52131306787487,
+          "cache-references:u": 1660170.25,
+          "cache-misses:u": 40632.0625,
+          "ipc": 2.9035100443368753,
+          "branch_miss_pct": 0.15485842410382442,
+          "cache_miss_pct": 2.3648253432620305
+        },
+        "max": {
+          "core_ms": 286.1479673156282,
+          "cycles:u": 670927579.25,
+          "instructions:u": 1949472205.3125,
+          "branches:u": 349780696.875,
+          "branch-misses:u": 560265.625,
+          "cache_ms": 287.6077708788216,
+          "cache-references:u": 1718184.5,
+          "cache-misses:u": 49650.5,
+          "ipc": 2.910386858042509,
+          "branch_miss_pct": 0.16036892299109257,
+          "cache_miss_pct": 2.9906872502985764
+        },
+        "runs": [
+          {
+            "core_ms": 286.1479673156282,
+            "cycles:u": 669832671.875,
+            "instructions:u": 1949472205.3125,
+            "branches:u": 349780696.875,
+            "branch-misses:u": 541664.875,
+            "cache_ms": 287.6077708788216,
+            "cache-references:u": 1718184.5,
+            "cache-misses:u": 40632.0625,
+            "ipc": 2.910386858042509,
+            "branch_miss_pct": 0.15485842410382442,
+            "cache_miss_pct": 2.3648253432620305
+          },
+          {
+            "core_ms": 286.14704075152986,
+            "cycles:u": 670927579.25,
+            "instructions:u": 1948044965.375,
+            "branches:u": 349360471.1875,
+            "branch-misses:u": 560265.625,
+            "cache_ms": 286.36209724936634,
+            "cache-references:u": 1660170.25,
+            "cache-misses:u": 49650.5,
+            "ipc": 2.9035100443368753,
+            "branch_miss_pct": 0.16036892299109257,
+            "cache_miss_pct": 2.9906872502985764
+          },
+          {
+            "core_ms": 286.09695412160363,
+            "cycles:u": 670332802.6875,
+            "instructions:u": 1947609347.8125,
+            "branches:u": 348883488.6875,
+            "branch-misses:u": 555538.375,
+            "cache_ms": 285.52131306787487,
+            "cache-references:u": 1672807.625,
+            "cache-misses:u": 43252.4375,
+            "ipc": 2.9054364339685295,
+            "branch_miss_pct": 0.15923320908362154,
+            "cache_miss_pct": 2.5856193416143713
+          }
+        ]
+      },
+      "native": {
+        "median": {
+          "core_ms": 174.06937487248797,
+          "cycles:u": 403997011.875,
+          "instructions:u": 1172252344.25,
+          "branches:u": 207137350.8125,
+          "branch-misses:u": 303573.375,
+          "cache_ms": 173.96221081435215,
+          "cache-references:u": 1592688.6875,
+          "cache-misses:u": 42363.625,
+          "ipc": 2.893616659469754,
+          "branch_miss_pct": 0.14655655960126357,
+          "cache_miss_pct": 2.6536141652723946
+        },
+        "min": {
+          "core_ms": 172.94417388620786,
+          "cycles:u": 400936416.3125,
+          "instructions:u": 1169012483.9375,
+          "branches:u": 205520825.5625,
+          "branch-misses:u": 303302.25,
+          "cache_ms": 172.78441350208595,
+          "cache-references:u": 1591464.375,
+          "cache-misses:u": 41085.375,
+          "ipc": 2.85669157985703,
+          "branch_miss_pct": 0.14641372288642743,
+          "cache_miss_pct": 2.581608212247918
+        },
+        "max": {
+          "core_ms": 176.85840674676,
+          "cycles:u": 410353204.5,
+          "instructions:u": 1172252544.0625,
+          "branches:u": 207154250.3125,
+          "branch-misses:u": 355203.875,
+          "cache_ms": 174.0786869340809,
+          "cache-references:u": 1596450.0625,
+          "cache-misses:u": 46146.8125,
+          "ipc": 2.923786157993483,
+          "branch_miss_pct": 0.172831086109072,
+          "cache_miss_pct": 2.897415726135118
+        },
+        "runs": [
+          {
+            "core_ms": 172.94417388620786,
+            "cycles:u": 400936416.3125,
+            "instructions:u": 1172252344.25,
+            "branches:u": 207154250.3125,
+            "branch-misses:u": 303302.25,
+            "cache_ms": 174.0786869340809,
+            "cache-references:u": 1591464.375,
+            "cache-misses:u": 41085.375,
+            "ipc": 2.923786157993483,
+            "branch_miss_pct": 0.14641372288642743,
+            "cache_miss_pct": 2.581608212247918
+          },
+          {
+            "core_ms": 174.06937487248797,
+            "cycles:u": 403997011.875,
+            "instructions:u": 1169012483.9375,
+            "branches:u": 205520825.5625,
+            "branch-misses:u": 355203.875,
+            "cache_ms": 173.96221081435215,
+            "cache-references:u": 1592688.6875,
+            "cache-misses:u": 46146.8125,
+            "ipc": 2.893616659469754,
+            "branch_miss_pct": 0.172831086109072,
+            "cache_miss_pct": 2.897415726135118
+          },
+          {
+            "core_ms": 176.85840674676,
+            "cycles:u": 410353204.5,
+            "instructions:u": 1172252544.0625,
+            "branches:u": 207137350.8125,
+            "branch-misses:u": 303573.375,
+            "cache_ms": 172.78441350208595,
+            "cache-references:u": 1596450.0625,
+            "cache-misses:u": 42363.625,
+            "ipc": 2.85669157985703,
+            "branch_miss_pct": 0.14655655960126357,
+            "cache_miss_pct": 2.6536141652723946
+          }
+        ]
+      },
+      "output_sha256": "86dea2452c818fd8f52536c364eab095e6b0a7bc9fa33b874b10872e401e622f"
+    }
+  },
+  "excluded_events": {
+    "nbody_python_cache_1": [
+      "0;;L1-dcache-loads;9045642175;100.00;;",
+      "2759385;;L1-dcache-load-misses;9045642175;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "nbody_python_cache_2": [
+      "0;;L1-dcache-loads;9030342054;100.00;;",
+      "2569026;;L1-dcache-load-misses;9030342054;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "nbody_python_cache_3": [
+      "0;;L1-dcache-loads;8953326203;100.00;;",
+      "2653820;;L1-dcache-load-misses;8953326203;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "nbody_native_cache_1": [
+      "0;;L1-dcache-loads;606308495;100.00;;",
+      "108632;;L1-dcache-load-misses;606308495;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "nbody_native_cache_2": [
+      "0;;L1-dcache-loads;605778097;100.00;;",
+      "97382;;L1-dcache-load-misses;605778097;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "nbody_native_cache_3": [
+      "0;;L1-dcache-loads;609071790;100.00;;",
+      "106527;;L1-dcache-load-misses;609071790;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_python_cache_1": [
+      "0;;L1-dcache-loads;4600097355;100.00;;",
+      "50063820;;L1-dcache-load-misses;4600097355;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_python_cache_2": [
+      "0;;L1-dcache-loads;4580761524;100.00;;",
+      "51277608;;L1-dcache-load-misses;4580761524;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_python_cache_3": [
+      "0;;L1-dcache-loads;4566889860;100.00;;",
+      "49468234;;L1-dcache-load-misses;4566889860;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_native_cache_1": [
+      "0;;L1-dcache-loads;2784740624;100.00;;",
+      "44120237;;L1-dcache-load-misses;2784740624;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_native_cache_2": [
+      "0;;L1-dcache-loads;2782581019;100.00;;",
+      "44249726;;L1-dcache-load-misses;2782581019;100.00;0.00;of all L1-dcache accesses"
+    ],
+    "pyflate_native_cache_3": [
+      "0;;L1-dcache-loads;2764180182;100.00;;",
+      "43905148;;L1-dcache-load-misses;2764180182;100.00;0.00;of all L1-dcache accesses"
+    ]
+  },
+  "scope_note": "L1 load denominator is zero in this capture; exclude both L1 events. Retain independently valid core and generic cache events."
+}

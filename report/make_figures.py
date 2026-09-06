@@ -15,7 +15,7 @@ OUT = ROOT / 'report' / 'fig'
 NS = '{http://www.w3.org/2000/svg}'
 
 
-def flame(source, target, root_name, highlights):
+def flame(source, target, highlights):
     """Full original geometry at left; highlighted context crops at right."""
     tree = ET.parse(ROOT / 'results' / source)
     source_root = tree.getroot()
@@ -40,7 +40,7 @@ def flame(source, target, root_name, highlights):
             raise ValueError(f'Missing {name} in {source}')
         selected.append((max(candidates, key=lambda f: f['w']), label))
     colors = ['#00779d', '#7c4285', '#bd512e']
-    height = 580 if sh > 2000 else 480
+    height = 580 if sh > 2000 else (310 if len(selected) == 1 else 480)
     overview_w = 205
     overview_h = min(height - 65, sh / sw * overview_w)
     overview_y = 38
@@ -66,13 +66,21 @@ def flame(source, target, root_name, highlights):
     summary = []
     row_h = (height - 40) / len(selected)
     scale = overview_w / sw
+    centers = [f['x'] + f['w']/2 for f, _ in selected]
+    badge_order = sorted(range(len(selected)), key=centers.__getitem__)
+    badge_top = overview_y + min(f['y'] for f, _ in selected)*scale - 18
     for index, (f, label) in enumerate(selected):
         color = colors[index % len(colors)]
         # The exact same frame is outlined in full view and detail view.
         ox, oy = 8 + f['x']*scale, overview_y + f['y']*scale
         parts.append(f'<rect x="{ox-1}" y="{oy-1}" width="{max(3,f["w"]*scale)+2}" '
                      f'height="{f["h"]*scale+2}" fill="none" stroke="{color}" stroke-width="2"/>')
-        badge_x, badge_y = ox + f['w']*scale/2, oy-9-index*3
+        rank = badge_order.index(index)
+        badge_x = (ox + f['w']*scale/2 if len(selected) == 1 else
+                   28 + rank*(overview_w-40)/(len(selected)-1))
+        badge_y = badge_top
+        parts.append(f'<path d="M{badge_x} {badge_y+8}L{ox+f["w"]*scale/2} {oy}" '
+                     f'fill="none" stroke="{color}" stroke-width="1"/>')
         parts.append(f'<circle cx="{badge_x}" cy="{badge_y}" r="8" fill="{color}"/>'
                      f'<text x="{badge_x}" y="{badge_y+4}" text-anchor="middle" '
                      f'font-family="sans-serif" font-size="11" fill="white">{index+1}</text>')
@@ -82,9 +90,9 @@ def flame(source, target, root_name, highlights):
         parts.append(f'<text x="240" y="{top+28}" font-family="sans-serif" font-size="12" '
                      f'fill="#465969">{html.escape(f["name"])} | this frame: {f["share"]:.2f}% inclusive</text>')
         cw = min(540, max(300, f['w']+90))
-        ch = 100
+        ch = 80
         cx = max(0, min(sw-cw, f['x']-35))
-        cy = max(0, f['y']-55)
+        cy = max(0, f['y']-40)
         px, py, pw, ph = 240, top+37, 510, row_h-49
         # Fit without stretching; duplicate transform for the overlay rectangle.
         s = min(pw/cw, ph/ch)
@@ -96,7 +104,7 @@ def flame(source, target, root_name, highlights):
                      f'width="{f["w"]*s}" height="{f["h"]*s}" fill="none" '
                      f'stroke="{color}" stroke-width="2"/>')
         summary.append({k: v for k, v in f.items() if k != 'element'})
-    if sh < 2000:
+    if sh < 2000 and len(selected) > 1:
         y = overview_y+overview_h+24
         for line in ['Original widths and stack depth.', 'Imports and harness retained.',
                      'Each outline marks one call path.', 'The same function may recur.',
@@ -146,7 +154,7 @@ def main():
             ('bwt_reverse', 'Inverse BWT'), ('bwt_transform', 'Index-table construction')]),
     ]
     for source, target, highlights in profiles:
-        summaries.append(flame(source, target, None, highlights))
+        summaries.append(flame(source, target, highlights))
     (OUT / 'profile_counts.json').write_text(json.dumps(summaries, indent=2) + '\n', encoding='utf-8')
     diagram('grape_report.svg', 226, [
         (8, 8, 170, 72, ['Python + driver', 'one advance(dt, n)'], False),
