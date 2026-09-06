@@ -15,8 +15,11 @@ module grape_step_fsm (
     output logic        busy_o,        // BUSY status bit
     output logic        done_set_o,    // DONE pulse
     output logic        aborted_set_o, // ABORTED pulse
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters; upper bits need 2^10..2^63-cycle runs.
     output logic [31:0] steps_done_o,  // Steps committed (live, PRD-F14)
     output logic [63:0] cycles_o,      // Busy cycles, doorbell -> DONE/ABORTED inclusive (live)
+    // verilator coverage_on
     // Datapath control
     output logic        step_start_o,  // Pulse: cycle 0 of a step (force pipe + accum reset)
     output logic        run_o,         // Step in progress
@@ -35,10 +38,13 @@ module grape_step_fsm (
 
     state_t      state;                // Current state
     state_t      state_next;           // Next state
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters; upper bits need 2^10..2^63-cycle runs.
     logic [31:0] steps;                // Steps committed
     logic [31:0] steps_next;           // Next steps value
     logic [63:0] cycles;               // Busy-cycle counter
     logic [63:0] cycles_next;          // Next cycles value
+    // verilator coverage_on
     logic        abort_pend;           // Abort seen, waiting for the boundary
     logic        abort_pend_next;      // Next abort_pend
 

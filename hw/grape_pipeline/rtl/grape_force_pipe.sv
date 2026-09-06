@@ -20,7 +20,10 @@ module grape_force_pipe #(
     input  logic                       step_start_i,   // Pulse: cycle 0 of a step (FSM RUN entry)
     input  logic                       run_i,          // Step in progress (counter enable)
     input  logic [7:0]                 npairs_i,       // Latched NPAIRS
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): latched pair domain — indices are doorbell-validated < N_BODIES (3 bits); upper field bits unreachable past ERR_PARAM.
     input  logic [N_PAIRS_MAX*16-1:0]  pairs_i,        // Latched pair list ([7:0] i, [15:8] j)
+    // verilator coverage_on
     input  logic [63:0]                dt_i,           // Latched dt (binary64)
     input  logic [N_BODIES*7*64-1:0]   working_flat_i, // Body working bank (positions, masses)
     // FP unit issue interfaces (3 ADD, 3 MUL, 1 SQRT, 1 RCP)

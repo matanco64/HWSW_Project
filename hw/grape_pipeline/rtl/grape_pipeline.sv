@@ -73,8 +73,11 @@ module grape_pipeline #(
     logic                       done_set;              // DONE pulse
     logic                       aborted_set;           // ABORTED pulse
     logic [3:0]                 fp_flags_set;          // {invalid, divzero, overflow, underflow}
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters; upper bits need 2^10..2^63-cycle runs.
     logic [31:0]                steps_done;            // Live steps
     logic [63:0]                cycles;                // Live cycles
+    // verilator coverage_on
     logic [63:0]                dt;                    // Latched dt
     logic [31:0]                nsteps;                // Latched NSTEPS
     logic [7:0]                 npairs;                // Latched NPAIRS

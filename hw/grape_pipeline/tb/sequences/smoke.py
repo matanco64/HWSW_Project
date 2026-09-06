@@ -6,7 +6,7 @@ import struct
 from axi_lite_agent import AxiLiteSeqItem
 from pyuvm import uvm_sequence
 
-CTRL, STATUS = 0x008, 0x00C
+CTRL, STATUS, IRQ_EN = 0x008, 0x00C, 0x010
 CYCLES_LO, CYCLES_HI, STEPS_DONE = 0x040, 0x044, 0x048
 DT_LO, DT_HI, NSTEPS, NPAIRS = 0x100, 0x104, 0x108, 0x10C
 BODY_BASE, BODY_STRIDE, PAIR_BASE = 0x200, 0x40, 0x400
