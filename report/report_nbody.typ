@@ -296,6 +296,22 @@ optimized comparison in the table above remains the pure-Python A/B, because tha
 software-optimization result the project asks for; the native number is reported as the tier on
 top of it, never folded into it.
 
+Measured end to end on the course VM, `pyperf --rigorous` (41 processes a side), the two back
+ends of the *same file* on the *same* interpreter, differing only in `HWSW_BACKEND`:
+
+#table(
+  columns: (1fr, auto, auto, auto),
+  align: (left, right, right, right),
+  inset: 4pt,
+  table.header([*Whole benchmark, course VM*], [*Python*], [*native*], [*speedup*]),
+  [`nbody`, 20,000 steps], [141 ms], [9.49 ms], [*14.86×*],
+)
+
+The whole-benchmark figure (14.86×) is smaller than the kernel figure (24.1×) and that gap is
+the honest part: `report_energy()` is still the stock O(N²) Python loop and is called twice per
+iteration, so it is un-accelerated on both sides and drags the ratio down. Quoting the kernel
+number alone would hide it.
+
 The boundary is coarse on purpose, and for the reason the TPU case study gives for preloading
 weights before streaming inputs: crossing the interface costs more than the work when the
 payload is small. The kernel owns the state for the whole run and `advance()` is a doorbell, so
