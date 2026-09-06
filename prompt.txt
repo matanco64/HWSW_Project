@@ -1404,3 +1404,159 @@ Prompt: "<task-notification>
 Note: all reviewed changes (RTL fixes, monitor, env/sequences) are currently uncommitted working-tree edits; env.py/smoke.py/test_grape_pipeline.py are untracked.</result>
 <usage><subagent_tokens>129427</subagent_tokens><tool_uses>23</tool_uses><duration_ms>575199</duration_ms></usage>
 </task-notification>"
+
+2026-09-06T07:13:15Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a4746ff967963a4e6</task-id>
+<tool-use-id>toolu_01RtG4JBBnFJELoVhUWi3A9h</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a4746ff967963a4e6.output</output-file>
+<status>completed</status>
+<summary>Agent "dv_signoff RTL-mode review" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. Findings written to `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/docs/review_signoff.md` (created; no reviewed files touched).
+
+### Summary: 2 must / 5 should / 4 nit
+
+**Must findings:**
+
+- **S1 — ErrSeq cases 4-7 are vacuous** (`tb/sequences/random_err.py:33-67`, `smoke.py:run_to_done`, `env.py:172/187/220`). `run_to_done` polls sticky DONE, and case 3's DONE is never W1C'd before case 4 — so `run_to_done(3)` returns on its first poll mid-run. The scoreboard mirror then sticks at `busy=True` for the rest of the test (no later STATUS read observes BUSY fall), which gates off every subsequent check: the case-7 "readback proves ignored writes really were ignored" reads, the case-5 PRD-F7 full-width round-trip reads, and all sticky compares are silently skipped. The test passes while checking nothing after line 43. Fix: W1C DONE between cases 3 and 4 (or poll on BUSY-fall), plus an end-of-test `assert not self.busy and not self.aborted_wait_steps` in the scoreboard so any future desync fails loudly.
+
+- **S2 — IRQ_EN round-trip claim is vacuous independently of S1** (`random_err.py:47-58`, `env.py:194-197`). IRQ_EN (0x010) is not in the scoreboard's `cfg_set`, so its full-mask readback is compared by nobody; a full-width IRQ_EN storage bug would sign off. The irq-pin test only exercises bit 1.
+
+**Should:** S3 stale-ABORTED can misclassify completion disposition and mask a no-completion-bit RTL bug (latent — current sequences always W1C); S4 `aborted_wait_steps` window is an unguarded blind spot (W1C/cfg writes in the window corrupt the deferred replay; an unread STEPS_DONE makes the rest of the test vacuous); S5 the full-benchmark PRD-F4/F5 chain rests on the scoreboard's 70 BODY-word compares but nothing asserts they happened (reference path itself verified equivalent to `bench_nbody()`); S6 CYCLES is toggle-waived on all 64 bits *and* has no functional lower bound — a dead counter passes; S7 formal delivered at depth 40 vs testplan's "depth 300", `bresp_hold.sv`/`w1c.sv` listed but absent (fallback must be recorded at sign-off), unbounded arc claim on BMC-only evidence.
+
+**Verified clean:** both coverage-waiver "unreachable" claims are true per `grape_step_fsm.sv`; every `coverage_off` region contains only declarations or the pure-data rcp seed ROM (no live statement excluded); the fsm_arcs decode is unique per state and its LATCH arc assert does catch a hypothetical busy-but-nothing-asserted hang; formal src copies match current RTL, bmc+cover PASS 5/5; NaN canonicalization and k1_enforce gating are sound.</result>
+<usage><subagent_tokens>129709</subagent_tokens><tool_uses>31</tool_uses><duration_ms>1327327</duration_ms></usage>
+</task-notification>"
+
+2026-09-06T18:02:19Z — Claude Code session (auto-logged)
+Prompt: "I have 2 monitors active - are any of them live? both stale?"
+
+2026-09-06T18:08:56Z — Claude Code session (auto-logged)
+Prompt: "Fix the RTL  — widen grape_accum's issue picker to fill up to 3 free ADD slots per cycle across independent (body,component) chains, keeping in-order issue within each chain."
+
+2026-09-06T18:19:38Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bey5ecgc8</task-id>
+<summary>Monitor event: "benchmark run on 3-wide accum (log-based watch)"</summary>
+<event>54016120.00ns INFO     ..e/tb/test_grape_pipeline.py(228) [uvm_test_top]: full benchmark: |dE/E| = 1.674e-14 (&lt;= 1e-12), r dev 2.123e-12 (&lt;= 2e-9), v dev 2.146e-12 (&lt;= 5e-11)
+54016220.00ns ERROR    ..hw/grape_pipeline/tb/env.py(140) [uvm_test_top.env.scoreboard]: mismatch: K1: 2700002/20000 = 135.0 &gt; 128
+AssertionError: scoreboard: 1 mismatches
+** test_grape_pipeline.full_benchmark   FAIL    54016220.00         328.82     164274.00  **
+** TESTS=1 PASS=0 FAIL=1 SKIP=0                 54016220.00         328.82     164271.89  **
+FAIL test_grape_pipeline.full_benchmark</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-06T18:24:17Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a779f1e545cfdc246</task-id>
+<tool-use-id>toolu_01UNdCYxKoediYWUXrpAs4XB</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a779f1e545cfdc246.output</output-file>
+<status>completed</status>
+<summary>Agent "Review 3-wide accum rewrite" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass 2 review complete and appended to `/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/docs/review_signoff.md` (section "## Pass 2 (2026-09-06, agent — 3-wide accumulate rewrite)").
+
+**Counts: 1 must / 2 should / 3 nit — no functional bug found in the rewrite.**
+
+**Must open:**
+- **A1** — Sign-off evidence incomplete: `synth/yosys.log` elaborates the new code (references `grape_accum.sv:359`, reaches opt_clean) but is truncated mid-run with no final stats — it cannot be cited; and the rewrite adds a new critical-path candidate (60-iteration serial scan: per-op pairs mux + `lane_hold`/`slots_used` carried between iterations + 64-bit operand steering through `slot_q[slots_used]` + 3-way bypass compare) plus a 3-deep write mux on all 35 working-bank words. Close with a completed `yosys_area.gen.ys` rerun (area/timing delta recorded) and the pending 20,000-step K1 result vs KPI 128.
+
+**Should:** A2 — integrate phase is still single-issue (1 mul/cycle, 1 add/cycle) while the §7 model schedules the 15+15 integrate tail on 3 units (~10 cycles adrift; abort case sits at exactly 128 with zero margin) — this is the named bottleneck if the 20k rerun misses 128. A3 — uArch drift: §1 table still says "1 write port"; §3.3 doesn't state the 3-wide width, bitmap scan, or the one-op-per-lane invariant the write-port distinctness proof rests on.
+
+**Every hunted trap came back clean, with proofs recorded in a Verified-clean list:** `slots_used` cannot wrap (increment guarded by `slots_used &lt; nslots`, max written value 2'd3, guard then false — the feared 3→0 over-issue is unreachable); `lane_hold` is set for issued-this-cycle ops too (line 219, outside the issue-condition), so ≤1 op/lane/cycle and no overtake; `busy_bc &lt;= (busy_bc &amp; ~bc_clr) | bc_set` keeps a retire+bypass-reissue lane busy (no holes); one-op-per-lane-in-flight makes the bypass unit unique and the 3-port retire targets pairwise distinct (accumulate fields 3-5 vs integrate 0-2; ≤1 integrate add retire/cycle by fixed latency); `force_flat_i[e*64+:64]` and all decodes are bit-identical to the old `(pair*6+op)` engine; `acc_valid_mask` compare is unsigned-safe and combinational `acc_done` is only posedge-sampled with `run_i` low during the step_start cycle (FSM pulses it from S_LATCH/S_COMMIT); TB zero-extension preserves test_regs semantics exactly; no Yosys 0.68 potholes (no block-local decls/struct arrays; variable-index array writes elaborated). RTL untouched, as instructed.</result>
+<usage><subagent_tokens>112536</subagent_tokens><tool_uses>18</tool_uses><duration_ms>567919</duration_ms></usage>
+</task-notification>"
+
+2026-09-06T18:26:12Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b3m3yg5gt</task-id>
+<summary>Monitor event: "benchmark on per-lane integrate engine"</summary>
+<event>49616120.00ns INFO     ..e/tb/test_grape_pipeline.py(228) [uvm_test_top]: full benchmark: |dE/E| = 1.674e-14 (&lt;= 1e-12), r dev 2.123e-12 (&lt;= 2e-9), v dev 2.146e-12 (&lt;= 5e-11)
+49616220.00ns INFO     ..hw/grape_pipeline/tb/env.py(278) [uvm_test_top.env.scoreboard]: scoreboard: compared 75 items, 0 mismatches (golden=emulation.advance, 1 run(s), K1 worst 124.0)
+** TESTS=1 PASS=1 FAIL=0 SKIP=0                 49616220.00         248.67     199530.02  **</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-06T18:30:57Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ba1fcrjmv</task-id>
+<summary>Monitor event: "final regression + coverage completion"</summary>
+<event>REGRESSION:
+** TESTS=9 PASS=9 FAIL=0 SKIP=0                 50475580.01         257.47     196046.81  **
+COVERAGE:</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-06T18:30:57Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ba1fcrjmv</task-id>
+<tool-use-id>toolu_01SM6LF8jz9eea87QfJqiiBP</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/ba1fcrjmv.output</output-file>
+<status>completed</status>
+<summary>Monitor "final regression + coverage completion" stream ended</summary>
+</task-notification>"
+
+2026-09-06T18:40:17Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bryfq2ark</task-id>
+<summary>Monitor event: "coverage rerun completion"</summary>
+<event>** TESTS=9 PASS=9 FAIL=0 SKIP=0                 50475580.01         515.66      97885.43  **
+cov: line 91.7% (231/252)  toggle 96.0% (34233/35666)  branch 94.8% (256/270)</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-06T19:23:37Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bp9tr3uda</task-id>
+<summary>Monitor event: "final area synthesis (log-based watch)"</summary>
+<event>[Monitor timed out — re-arm if needed.]</event>
+</task-notification>"
+
+2026-09-06T19:46:16Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b3fs1d8em</task-id>
+<summary>Monitor event: "final area synth completion (pid-based, exact pid)"</summary>
+<event>0</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-06T19:58:21Z — Claude Code session (auto-logged)
+Prompt: "status?"
+
+2026-09-06T20:06:44Z — Claude Code session (auto-logged)
+Prompt: "we have another agent working in parallel.
+I want you to create a quick summary (html?) of where we stand in terms of hw development for this project. what do we want to achieve, what did we plan, what do we have, where are we aiming for."
+
+2026-09-06T20:46:22Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b36xt9oe4</task-id>
+<summary>Monitor event: "area synth completion via make exit line"</summary>
+<event>[Monitor timed out — re-arm if needed.]</event>
+</task-notification>"
+
+2026-09-06T20:55:27Z — Claude Code session (auto-logged)
+Prompt: "did you finish? and  /hw-advisor"
+
+2026-09-06T21:13:03Z — Claude Code session (auto-logged)
+Prompt: "use @VM_GUIDE.local.md to connect to the server and run the shortest sw benchmark"
+
+2026-09-06T21:45:59Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b7ag1pn0x</task-id>
+<summary>Monitor event: "area synth completion, second watch window"</summary>
+<event>[Monitor timed out — re-arm if needed.]</event>
+</task-notification>"
+
+2026-09-06T21:48:52Z — Claude Code session (auto-logged)
+Prompt: "finished  the first abc?"
+
+2026-09-06T22:11:44Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>boctx5set</task-id>
+<summary>Monitor event: "area synth completion, third window (liberty abc phase)"</summary>
+<event>AREA DONE:
+area: 584454 sky130_fd_sc_hd cells, 4075030.777599 um^2 -&gt; synth/area.txt</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"

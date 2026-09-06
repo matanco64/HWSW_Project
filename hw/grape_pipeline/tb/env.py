@@ -67,6 +67,10 @@ class GrapeScoreboard(uvm_scoreboard):
         self.golden = ConfigDB().get(self, "", "golden")  # module with .advance
         self.k1_enforce = (ConfigDB().get(self, "", "k1_enforce")
                            if ConfigDB().exists(self, "", "k1_enforce") else False)
+        self.min_body_compares = (ConfigDB().get(self, "", "min_body_compares")
+                                  if ConfigDB().exists(self, "", "min_body_compares") else 0)
+        self.body_words_compared = 0
+        self.irq_en = 0
         self.compared = 0
         self.mismatches = 0
         self.runs = 0
@@ -204,6 +208,8 @@ class GrapeScoreboard(uvm_scoreboard):
                 cov("cg_axi", f"wr.resp{it.resp}")
                 if it.addr == CTRL:
                     self._on_ctrl_write(it.data)
+                elif it.addr == IRQ_EN and it.strb == 0xF:
+                    self.irq_en = it.data & 0x1FFFE   # bits 16:1; writable while BUSY (MAS §4)
                 elif it.addr in cfg_set:
                     if self.busy:
                         self.sticky |= ST_ERR_BUSY
@@ -217,8 +223,13 @@ class GrapeScoreboard(uvm_scoreboard):
                 cov("cg_axi", f"rd.resp{it.resp}")
                 if it.addr == STATUS:
                     self._on_status_read(it.data)
+                elif it.addr == IRQ_EN:
+                    self._check(it.data == self.irq_en,
+                                f"IRQ_EN read 0x{it.data:08x} expected 0x{self.irq_en:08x}")
                 elif it.addr in cfg_set and not self.busy and not self.aborted_wait_steps:
                     exp = self._cfg(it.addr)
+                    if BODY_BASE <= it.addr < BODY_BASE + N_BODIES * BODY_STRIDE:
+                        self.body_words_compared += 1
                     self._check(it.data == exp,
                                 f"@0x{it.addr:03x}: read 0x{it.data:08x} expected 0x{exp:08x}")
                 elif it.addr == STEPS_DONE and not self.busy:
@@ -236,10 +247,13 @@ class GrapeScoreboard(uvm_scoreboard):
                                     f"STEPS_DONE {it.data} != {self.steps_final}")
                 elif it.addr == CYCLES_LO and not self.busy and self.steps_final is not None:
                     if self.latched is not None and self.latched[1] == 0:
-                        self._check(it.data <= 4, f"PRD-F8: NSTEPS=0 CYCLES {it.data} > 4")
+                        self._check(1 <= it.data <= 4,
+                                    f"PRD-F8: NSTEPS=0 CYCLES {it.data} not in 1..4")
                     elif self.steps_final:
                         per_step = it.data / self.steps_final
                         self.k1_worst = max(self.k1_worst, per_step)
+                        self._check(it.data >= self.steps_final,
+                                    f"CYCLES {it.data} < steps {self.steps_final} (dead counter)")
                         if self.k1_enforce:
                             # K1 binds on the benchmark pair list (PRD KPI). Random lists with
                             # duplicate pairs build accumulate chains deeper than the static
@@ -255,6 +269,11 @@ class GrapeScoreboard(uvm_scoreboard):
                 items.append(it)
         self._replay(items)
         assert self.compared > 0, "scoreboard: nothing compared"
+        assert not self.busy and not self.aborted_wait_steps, \
+            "scoreboard: mirror desync at end of test (busy/abort-pending) — checks were skipped"
+        assert self.body_words_compared >= self.min_body_compares, \
+            f"scoreboard: only {self.body_words_compared} BODY words compared, " \
+            f"need {self.min_body_compares}"
         if self.mismatches == 0:
             self.logger.info(f"scoreboard: compared {self.compared} items, 0 mismatches "
                              f"(golden=emulation.advance, {self.runs} run(s), "

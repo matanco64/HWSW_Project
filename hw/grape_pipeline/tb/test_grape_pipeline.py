@@ -185,3 +185,55 @@ class GrapeResetTest(GrapeBaseTest):
 @cocotb.test()
 async def reset_midrun(_dut):
     await uvm_root().run_test("GrapeResetTest")
+
+
+class GrapeFullBenchTest(GrapeBaseTest):
+    """Sign-off equivalence (testplan §4): the whole benchmark call through the DUT, then the
+    PRD-F4/F5 tolerances against nbody_ref (the benchmark's own libm-pow advance)."""
+    k1_enforce = True
+
+    def build_phase(self):
+        ConfigDB().set(None, "*", "min_body_compares", 70)   # review S5: the F-04/F-05 chain
+        super().build_phase()                                # rests on these compares happening
+
+    async def main(self):
+        from full_bench import FullBenchSeq
+
+        bodies, pair_objs = nbody_ref.benchmark_system()
+        idx = {id(b): i for i, b in enumerate(bodies)}
+        pairs = [(idx[id(b1)], idx[id(b2)]) for (b1, b2) in pair_objs]
+        await FullBenchSeq("full_bench", bodies=copy.deepcopy(bodies), pairs=pairs,
+                           nsteps=20000).start(self.env.agent.sequencer)
+        # DUT-equivalent state: emulation model (scoreboard proves DUT == emulation bit-exact)
+        em = copy.deepcopy(bodies)
+        em_pairs = [(em[i], em[j]) for (i, j) in pairs]
+        emulation.advance(0.01, 20000, em, em_pairs)
+        # Reference: the benchmark's own module-level SYSTEM through its generated advance()
+        ref_sys = nbody_ref._bm.SYSTEM
+        nbody_ref.offset_momentum(ref_sys[0], ref_sys)
+        nbody_ref.advance(0.01, 20000)
+        e_ref = nbody_ref.report_energy()
+        e_hw = nbody_ref.report_energy(bodies=em, pairs=nbody_ref.combinations(em))
+        rel_e = abs(e_hw - e_ref) / abs(e_ref)
+        assert rel_e <= 1e-12, f"PRD-F4: |dE/E| = {rel_e:.3e} > 1e-12"
+        worst_r = worst_v = 0.0
+        for (r_h, v_h, _), (r_r, v_r, _) in zip(em, ref_sys):
+            nr = max(sum(x * x for x in r_r) ** 0.5, 1e-300)
+            nv = max(sum(x * x for x in v_r) ** 0.5, 1e-300)
+            dr = sum((a - b) ** 2 for a, b in zip(r_h, r_r)) ** 0.5 / nr
+            dv = sum((a - b) ** 2 for a, b in zip(v_h, v_r)) ** 0.5 / nv
+            worst_r, worst_v = max(worst_r, dr), max(worst_v, dv)
+        assert worst_r <= 2e-9, f"PRD-F5: r deviation {worst_r:.3e} > 2e-9"
+        assert worst_v <= 5e-11, f"PRD-F5: v deviation {worst_v:.3e} > 5e-11"
+        self.logger.info(f"full benchmark: |dE/E| = {rel_e:.3e} (<= 1e-12), "
+                         f"r dev {worst_r:.3e} (<= 2e-9), v dev {worst_v:.3e} (<= 5e-11)")
+
+
+@cocotb.test()
+async def full_benchmark(_dut):
+    import cocotb as _c
+    if "icarus" in _c.SIM_NAME.lower():
+        _c.log.info("full_benchmark: Verilator-only (Icarus ~8x slower; 4-state X-check "
+                    "covered by the 8-test suite)")
+        return
+    await uvm_root().run_test("GrapeFullBenchTest")

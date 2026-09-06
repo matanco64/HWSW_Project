@@ -115,8 +115,8 @@
             },
             "Yosys synth succeeds (synthesizable subset)": {
               "result": "pass",
-              "evidence": "synth/area.txt: 393367 sky130_fd_sc_hd cells, 2938435.7 um^2; yosys.log 0 errors (full flatten, post scr_fwd synthesizability fixes)",
-              "at": "2026-09-05T18:20:48Z"
+              "evidence": "synth/area.txt (post K1 fix): 584454 sky130_fd_sc_hd cells, 4075030.8 um^2, yosys.log 0 errors (was 393367 / 2.94mm^2 single-issue — the 3-wide fabric costs +39% area for K1 162->124)",
+              "at": "2026-09-06T22:12:11Z"
             },
             "agent code review resolved": {
               "result": "pass",
@@ -210,35 +210,42 @@
           }
         },
         "dv_signoff": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-09-06T06:45:43Z",
           "finished": "",
           "gate": {
             "golden equivalence on the full benchmark input": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "test_full_benchmark PASS: 20000 steps bit-exact vs emulation.advance (75 items 0 mismatches); vs nbody_ref: dE/E 1.674e-14 <= 1e-12, r 2.1e-12 <= 2e-9, v 2.1e-12 <= 5e-11; K1 = 124.0 <= 128",
+              "at": "2026-09-06T19:47:15Z"
             },
             "directed + random suites pass": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim: TESTS=9 PASS=9 (incl. full_benchmark) in one run, regress_final.log",
+              "at": "2026-09-06T19:47:15Z"
             },
             "coverage goals": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "final RTL: line 91.7% toggle 96.0% branch 94.8%; func_cov 59/59 bins incl. nsteps.20000 and done_wins",
+              "at": "2026-09-06T19:47:15Z"
             },
             "lint clean": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make lint: 12 files, lint: clean",
+              "at": "2026-09-06T19:47:15Z"
             },
             "Icarus 4-state run X-free after reset": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim-icarus: TESTS=9 PASS=9; monitor is_resolvable asserts on every handshake, none fired",
+              "at": "2026-09-06T19:47:15Z"
             },
             "formal (sby) where listed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/formal.sby: bmc PASS (depth 40) + cover PASS (5/5 states) on fsm_arcs; bresp_hold/w1c take testplan §6 fallback (regs 3x2240b beyond smtbmc; test_regs 11/11 + protocol agent)",
+              "at": "2026-09-06T19:47:15Z"
             }
-          }
+          },
+          "reason": "K1 fail on benchmark list: 162.0 cycles/step > 128 (test_full_benchmark; equivalence itself passed: bit-exact, dE/E 1.7e-14)"
         },
         "ppa": {
           "state": "todo",
@@ -281,16 +288,16 @@
       },
       "metrics": {
         "dv": {
-          "line_cov": 91.3,
-          "toggle_cov": 94.5,
+          "line_cov": 91.7,
+          "toggle_cov": 96,
           "func_cov": 100,
-          "tests_run": 8,
-          "tests_pass": 8,
-          "formal": "n/a"
+          "tests_run": 9,
+          "tests_pass": 9,
+          "formal": "pass"
         },
         "ppa": {
-          "cells": 393367,
-          "area_um2": 2938436,
+          "cells": 584454,
+          "area_um2": 4075031,
           "fmax_mhz": 0,
           "power_mw": 0
         }
@@ -834,5 +841,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-06T06:33:30Z"
+  "updated": "2026-09-06T22:12:11Z"
 }

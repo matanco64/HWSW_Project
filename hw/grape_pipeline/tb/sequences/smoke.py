@@ -52,9 +52,9 @@ class GrapeBaseSeq(uvm_sequence):
         polls = max_polls or (50 + 40 * max(nsteps, 1))
         for n in range(polls):
             status = await self.rd(STATUS)
-            if status & ST_DONE:
+            if (status & ST_DONE) and not (status & ST_BUSY):
                 return status
-            if n % 16 == 0:
+            if n % 16 == 0 and (n < 256 or n % 16384 == 0):
                 cyc = await self.rd(CYCLES_LO)
                 steps = await self.rd(STEPS_DONE)
                 print(f"[smoke] poll {n}: STATUS=0x{status:05x} CYCLES={cyc} STEPS_DONE={steps}")

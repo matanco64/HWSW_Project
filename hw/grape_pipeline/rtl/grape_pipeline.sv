@@ -116,10 +116,10 @@ module grape_pipeline #(
     );
 
     // ---- body RF -------------------------------------------------------------------------------
-    logic        rf_wr_en;                             // Accum write enable
-    logic [2:0]  rf_wr_body;                           // Accum write body
-    logic [2:0]  rf_wr_field;                          // Accum write field
-    logic [63:0] rf_wr_data;                           // Accum write data
+    logic [2:0]   rf_wr_en;                            // Accum write enables (per ADD unit)
+    logic [8:0]   rf_wr_body;                          // Accum write bodies
+    logic [8:0]   rf_wr_field;                         // Accum write fields
+    logic [191:0] rf_wr_data;                          // Accum write data
 
     grape_body_rf #(
         .N_BODIES(N_BODIES)

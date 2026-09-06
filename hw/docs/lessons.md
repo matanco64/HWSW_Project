@@ -206,3 +206,25 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   upper bits, special-path constants. Writing the reason inline at each coverage_off beats a
   central waiver list for reviewability; the two architecturally-unreachable functional bins
   (abort-steps-0, ABORTED-at-final) were testplan definition errors worth recording.
+
+## 2026-09-06 — grape_pipeline/dv_signoff
+
+- **The KPI failed only on the real workload**: K1 measured 162 cycles/step at sign-off after
+  every earlier stage was green — smoke (126) used NPAIRS=2 where the static table hides the
+  accumulate phase; the model's 123 assumed uArch §3.3's "everything else overlaps", which the
+  RTL didn't implement (single-issue accumulate AND single-issue globally-gated integrate).
+  Two widenings (3-wide in-order accumulate scan; per-lane multi-issue integrate) landed K1 at
+  124 — inside the model's 123..127 window. Lesson for `hw-dv-bringup`: measure the KPI on the
+  full-shape workload (all pairs) at bring-up, not only the tiny smoke — the gap was visible a
+  stage earlier for anyone who ran 10 pairs.
+- **`pgrep -f` self-matching burned four separate process-management rounds**: monitors
+  watching for a command string matched each other and their own wrapper shells; kills hit
+  wrong pids; two concurrent synths overwrote one log. Rules now: watch a LOG outcome line,
+  never a process-name pattern; capture the real worker pid (not the setsid wrapper) if a pid
+  is needed; one synth per module directory at a time.
+- Review pass-2 on the rewrite found zero functional bugs but produced a proof list
+  (slots_used wrap impossible, lane_hold covers issued-this-cycle, busy_bc no holes) that went
+  straight into uArch §3.4 — reviews that prove invariants are documentation.
+- cocotb poll budgets: a fixed max_polls sized for the expected cycle count expired 1% short
+  of the finish line and cost a 5-minute rerun; budget 2x the estimate, poll on BUSY-fall not
+  sticky DONE (stale-sticky vacuity, review S1).

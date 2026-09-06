@@ -120,6 +120,11 @@ flags = golden.emulation.advance(dt, nsteps, bodies, pairs)   # in-place on bodi
 | doorbell BRESP hold ≤ 4 cycles | `formal/bresp_hold.sv` | regs block only, unconstrained AXI |
 | W1C: STATUS sticky bit falls only on matching W1C write or reset | `formal/w1c.sv` | regs block only |
 
+**Amendment (dv_signoff, 2026-09-06):** `fsm_arcs.sv` delivered and PASS at BMC depth 40 with
+a cover task reaching all five states (the 6-state FSM's diameter is << 40; the original
+"depth 300" predates implementation). `bresp_hold.sv`/`w1c.sv` take the fallback below —
+smtbmc cannot carry the regs block's 3x2240-bit body copies.
+
 The datapath (FP64 units, schedule) is out of formal scope: correctness there is bit-exact
 simulation vs the executable oracle; state space is far beyond smtbmc depth. If the three
 properties above prove too heavy for sby on the flattened regs block, the fallback recorded at

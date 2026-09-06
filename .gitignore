@@ -29,3 +29,4 @@ hw/.advisor/
 hw/**/coverage_annotated/
 hw/**/sim_build_icarus/
 hw/common/synth/area.txt
+*.local.md
