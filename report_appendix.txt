@@ -144,7 +144,7 @@ SRAM-versus-DRAM accelerator comparison.
 
 
                                                         3
-HWSW Final Project                                                                     Appendix: Measurement Methodology
+HWSW Final Project                                                                                       Appendix: Measurement Methodology
 
 A4. Full profiles and review checks
 The reports show full original flame graphs beside enlarged context crops. report/make_figures.py copies
@@ -176,26 +176,28 @@ Review spot checks, 2026-09-07
 Short checks were rerun on the course VM using the repository’s existing scripts. SHA-256 hashes matched
 the local copies for both shipped benchmark files and both rs_check.py scripts. The following timings are
 minimums of three interleaved rounds, not new rigorous benchmark results:
- Comparison                                                                 Python                  Native / hybrid
- Nbody stock integration                                                 231.552 ms                          9.458 ms
- Pyflate T3 symbol loop                                                  115.873 ms                          3.201 ms
- Pyflate T3 complete decode                                              278.244 ms                        161.072 ms
+ Comparison                                                                                 Python                    Native / hybrid
+ Nbody stock integration                                                                  231.552 ms                           9.458 ms
+ Pyflate T3 symbol loop                                                                   115.873 ms                           3.201 ms
+ Pyflate T3 complete decode                                                               278.244 ms                         161.072 ms
 Nbody’s shipped Python kernel and its Rust kernel matched stock state and energy exactly after 20,000 steps.
 Pyflate’s Python and hybrid outputs matched bz2; the L-vector and ending bit position matched too. These
 checks corroborate functionality and approximate performance, but do not replace the saved 120-value
 comparisons.
-The remote working tree contained existing changes, and its saved baseline_pyflate.json was missing. No
-synchronization or replacement of remote results was performed. The local baseline JSON remains the source
-for the report’s stock comparison.
-Source references
-• Python: self versus cumulative profile time.
-• Python: bytecode is version-specific.
-• Reproduction scripts and raw data: project repository.
-• The two benchmark PDFs contain workload results and hardware boundaries; their matching report_*.txt files are
-  generated text companions. Build with report/build.ps1 on Windows or report/build.sh on Linux/WSL.
+Fresh VM rerun
+On 2026-09-07 we reran one rigorous pyperf job per backend pair on the course VM, using explicit
+HWSW_BACKEND settings and new temporary result files. The benchmark source SHA-256 values matched this
+checkout (nbody 226c5b9f...a47b5, pyflate 76c2361c...e4c494). The VM working tree also contained
+unrelated existing edits; no files were synchronized or replaced.
+ Fresh VM run                                                           Python                         Native                     Ratio
+ Nbody                                                                  142 ms                         9.48 ms                     15.0×
+ Pyflate                                                                286 ms                         172 ms                      1.66×
+The fresh values are consistent with the saved 120-value distributions but are not merged into them: one
+rigorous job is useful as a revalidation, while the saved distributions remain the report’s headline estimates
+and uncertainty values.
+References: Python profile semantics version-specific bytecode repository and raw data.
 
 
 
-
-                                                          4
+                                                                    4
 
