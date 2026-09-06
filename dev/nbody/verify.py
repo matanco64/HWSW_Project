@@ -15,7 +15,13 @@ Also checks the *landed* benchmark file (benchmarks/bm_nbody/run_benchmark.py)
 against the stock pyperformance file, which is the claim that actually has to
 hold for the report.
 
-    python verify.py [--steps 20000]
+    python verify.py [--steps 20000] [--bodies 5[,10,20,...]]
+
+`--bodies` takes a comma-separated list of body counts.  For each N it checks
+(a) that dev/nbody/common.py's `extra_bodies()` and the landed benchmark's
+`_extra_bodies()` emit bit-identical body tables, and (b) that the landed
+benchmark's generated `advance()` is still bit-exact against the stock kernel
+at that N.  N = 5 additionally runs the full tier ladder.
 """
 import argparse
 import importlib.machinery
@@ -23,6 +29,7 @@ import importlib.util
 import os
 import sys
 
+import common
 import t0_stock
 import t1_micro
 import t2_soa
@@ -106,6 +113,86 @@ def _load(path, name):
     return mod
 
 
+def _paths():
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.dirname(os.path.dirname(here))
+    stock = os.path.join(
+        os.path.dirname(repo), "pyperformance", "pyperformance", "data-files",
+        "benchmarks", "bm_nbody", "run_benchmark.py")
+    if not os.path.exists(stock):
+        stock = os.path.join(here, "stock_run_benchmark.py.bak")
+    opt = os.path.join(repo, "benchmarks", "bm_nbody", "run_benchmark.py")
+    return stock, opt
+
+
+def _scale_stock_module(mod, n):
+    """Give an *unmodified* stock run_benchmark module the N > 5 system.
+
+    Does by hand exactly what the optimized file's `_configure()` does, so the
+    stock reference at N is the stock kernel run on the identical bodies --
+    no edit to the pristine stock source required.
+    """
+    if n == common.DEFAULT_BODIES:
+        return
+    for k, (r, v, m) in enumerate(common.extra_bodies(n), 1):
+        mod.BODIES['b%03d' % k] = (r, v, m)
+    mod.SYSTEM[:] = list(mod.BODIES.values())
+    mod.PAIRS[:] = mod.combinations(mod.SYSTEM)
+
+
+def check_generators(n):
+    """common.extra_bodies(n) must equal the landed file's _extra_bodies(n)."""
+    _, opt_path = _paths()
+    opt = _load(opt_path, "_nbody_opt_gen_%d" % n)
+    mine = common.extra_bodies(n)
+    theirs = [[list(r), list(v), m]
+              for (r, v, m) in opt._extra_bodies(n).values()]
+    ok = (mine == theirs)
+    print("  body generators (common.py vs run_benchmark.py): "
+          "%d extra bodies, identical=%s" % (len(mine), ok))
+    return ok
+
+
+def check_landed_n(steps, n):
+    """Stock kernel vs the landed benchmark at --bodies N, bit for bit."""
+    stock_path, opt_path = _paths()
+    if not os.path.exists(stock_path):
+        print("  (stock source not found -- skipping)")
+        return True
+    stock = _load(stock_path, "_nbody_stock_%d" % n)
+    opt = _load(opt_path, "_nbody_opt_%d" % n)
+    _scale_stock_module(stock, n)
+    opt._configure(n)
+    assert len(stock.SYSTEM) == len(opt.SYSTEM) == n
+
+    def flat(m):
+        out = []
+        for (r, v, mass) in m.SYSTEM:
+            out.extend(r)
+            out.extend(v)
+            out.append(mass)
+        return out
+
+    for m in (stock, opt):
+        m.offset_momentum(m.BODIES[m.DEFAULT_REFERENCE])
+    # the initial condition itself must match or nothing below means much
+    if flat(stock) != flat(opt):
+        print("  *** FAIL: initial conditions differ at N=%d" % n)
+        return False
+    e0s, e0o = stock.report_energy(), opt.report_energy()
+    stock.advance(0.01, steps)
+    opt.advance(0.01, steps)
+    ok0, _ = compare("  initial energy", [e0s], e0s, [e0o], e0o)
+    st, se = flat(stock), stock.report_energy()
+    ok1, _ = compare("  after %d steps" % steps, st, se, flat(opt),
+                     opt.report_energy())
+    finite = all(x == x and abs(x) != float("inf") for x in st)
+    drift = abs(se - e0s) / abs(e0s)
+    print("  physical sanity: all finite=%s | energy drift over %d steps "
+          "= %.2e relative" % (finite, steps, drift))
+    return ok0 and ok1 and finite
+
+
 def check_landed(steps):
     here = os.path.dirname(os.path.abspath(__file__))
     repo = os.path.dirname(os.path.dirname(here))
@@ -149,7 +236,21 @@ def check_landed(steps):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=20000)
+    ap.add_argument("--bodies", type=str, default="5",
+                    help="comma-separated body counts, e.g. 5,10,20,50")
     a = ap.parse_args()
+    counts = [int(x) for x in a.bodies.split(",") if x.strip()]
+
+    if counts != [5]:
+        all_ok = True
+        for n in counts:
+            print("\n=== N = %d (%d pairs), %d steps ==="
+                  % (n, n * (n - 1) // 2, a.steps))
+            all_ok &= check_generators(n)
+            all_ok &= check_landed_n(a.steps, n)
+        print("\n%s" % ("BIT-EXACT AT EVERY N TESTED" if all_ok
+                        else "*** FAILED AT SOME N ***"))
+        return 0 if all_ok else 1
 
     ref = t0_stock.make_state()
     t0_stock.advance(ref, 0.01, a.steps)

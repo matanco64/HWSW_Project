@@ -56,11 +56,54 @@ BODIES = {
 
 NAMES = list(BODIES)
 REFERENCE = 'sun'
+DEFAULT_BODIES = 5
+
+# ---------------------------------------------------------------------------
+# Scaling to N > 5.
+#
+# This is the SAME closed form as `_extra_bodies()` in
+# benchmarks/bm_nbody/run_benchmark.py, duplicated here rather than imported
+# because the landed benchmark has to stay a self-contained pyperformance
+# drop-in (pyperformance copies the single file), while these dev modules must
+# not import it (importing it runs the code generator).  `verify.py --bodies N`
+# asserts the two generators produce bit-identical tables, so the duplication
+# is checked rather than trusted.
+#
+# See the block comment in run_benchmark.py for why this placement: circular
+# Kepler orbits, semi-major axis 40 + 3(k-1) AU, golden-angle phase, small
+# inclination, so |r_i - r_j| >= 3 AU for the whole run and nothing can blow
+# up through `dsq ** -1.5`.
+# ---------------------------------------------------------------------------
+
+_GOLDEN_ANGLE = PI * (3.0 - 5.0 ** 0.5)
 
 
-def fresh_bodies():
-    """A brand new AoS body list: [ [pos3], [vel3], mass ] per body."""
-    return [[list(r), list(v), m] for (r, v, m) in BODIES.values()]
+def extra_bodies(n):
+    """The n-5 bodies appended at N > 5, as [[pos3], [vel3], mass] entries."""
+    from math import cos, sin, sqrt
+    out = []
+    for k in range(1, n - DEFAULT_BODIES + 1):
+        a = 40.0 + 3.0 * (k - 1)
+        th = k * _GOLDEN_ANGLE
+        inc = 0.05 * (k % 5)
+        v = sqrt(SOLAR_MASS / a)
+        ct, st = cos(th), sin(th)
+        ci, si = cos(inc), sin(inc)
+        out.append([[a * ct, a * st * ci, a * st * si],
+                    [-v * st, v * ct * ci, v * ct * si],
+                    SOLAR_MASS * 1e-5 * (1.0 + (k % 8) / 8.0)])
+    return out
+
+
+def fresh_bodies(n=DEFAULT_BODIES):
+    """A brand new AoS body list: [ [pos3], [vel3], mass ] per body.
+
+    n == 5 (the default) is the stock system, unchanged.
+    """
+    if n < DEFAULT_BODIES:
+        raise ValueError("n must be >= %d" % DEFAULT_BODIES)
+    return ([[list(r), list(v), m] for (r, v, m) in BODIES.values()]
+            + extra_bodies(n))
 
 
 def pair_indices(n):

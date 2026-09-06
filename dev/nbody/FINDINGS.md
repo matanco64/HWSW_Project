@@ -526,3 +526,241 @@ number.
 | `run_benchmark_sqrt.py` | landed benchmark with `_BIT_EXACT = False`, for A/B |
 | `rs_check.py` | Rust wheel correctness + speed check (section 3.1) |
 | `measure_ab.sh` | non-rigorous pyperf A/B driver (stock vs shipped vs sqrt) |
+| `sweep_n.py` | the N sweep: codegen cost, kernel timing, emitter A/B (section 7) |
+| `stock_n_benchmark.py` | pristine stock + `--bodies`, the pyperf-level reference at N > 5 |
+| `measure_ab_n.sh` | pyperf A/B driver at a given N |
+
+---
+
+## 7. Raising N: how far does full unrolling scale?
+
+The instructor allowed increasing N. FMM/Barnes-Hut stay rejected (section 1);
+this is the **same exact O(N^2) all-pairs algorithm**, only N changes. The
+question worth asking is not "is O(N^2) still O(N^2)" -- it is what happens to a
+*partial-evaluation* optimization when the thing being partially evaluated grows
+quadratically in **source size**.
+
+### 7.1 The interface
+
+`benchmarks/bm_nbody/run_benchmark.py --bodies N`, default 5.
+`_configure(5)` returns before touching anything, so the default path -- and
+therefore every existing headline number and `pyperf compare_to` run -- is the
+module exactly as it was. Verified structurally: the emitted source at N = 5 is
+still 163 lines / 2244 bytes of bytecode, byte-identical to before the flag
+existed.
+
+Placement of the extra bodies is closed-form and RNG-free: body k sits on an
+exactly circular Kepler orbit of semi-major axis `40 + 3(k-1)` AU, phase
+`k * golden angle`, plane tilt `0.05*(k mod 5)` rad, speed `sqrt(SOLAR_MASS/a)`,
+mass `1e-5..1.9e-5` solar masses. Because the orbits are circular, `|r_k| = a_k`
+for the whole run, so any two added bodies stay >= 3 AU apart and every added
+body stays >= 10 AU outside Neptune -- there is no close encounter that could
+make `dsq ** -1.5` blow up. In fact the closest pair in the initial condition
+is 4.98 AU at every N tested, and that pair is Jupiter/Saturn -- the stock
+system's own minimum, not anything added. Measured: no inf/nan at any N, and
+total energy drift after 20,000 steps is 7.9e-5 at N = 200 against 8.3e-5 for
+the stock 5-body system, i.e. the added bodies contribute essentially nothing
+to the error budget (their orbits are wide, so dt = 0.01 over-resolves them).
+`offset_momentum()` is untouched and still zeroes the total momentum: the
+sun's resulting speed is 3.298e-3 AU/yr at N = 5 and 3.293e-3 at N = 200,
+because the golden-angle phases make the added momenta cancel each other.
+
+The same generator is in `dev/nbody/common.py` and drives `t0_stock.py` and
+`stock_n_benchmark.py` (pristine stock + the identical flag, built from
+`stock_run_benchmark.py.bak` by pure text insertion). `verify.py --bodies N`
+asserts the two generators emit bit-identical tables before comparing anything.
+
+### 7.2 Bit-exactness holds at every N
+
+`python verify.py --steps 20000 --bodies 5,10,20,31,32,50,100,200`
+
+Every N: `max |delta| = 0.00e+00` on the full 7N-float state vector **and** on
+`report_energy()`, `bit-identical=True`. The claim that survives at N = 5
+survives everywhere. No caveat, no tolerance.
+
+### 7.3 The measured curve (CPython 3.10.21, WSL2, pinned, min of 21 rounds)
+
+Iterations are scaled as `steps = 400000 / pairs`, so every row does the same
+total pair-updates and the stock column should be -- and is -- flat. Stock, opt
+and Rust are interleaved round-robin *across N as well as across
+implementations*: measuring one N to completion and then the next let machine
+drift masquerade as an N effect, and the first version of this sweep duly
+reported N = 100 as 70% slower than N = 200 at identical work, which is
+impossible. `opt x` is the paired within-round median ratio, which is immune to
+drift.
+
+| N | pairs | steps | stock ms | opt ms | rust ms | **opt x** | rust x | bit-exact |
+|---:|---:|---:|---:|---:|---:|---:|---:|:--:|
+| 5 | 10 | 40000 | 139.9 | 99.4 | 5.98 | **1.51x** | 23.4x | yes |
+| 10 | 45 | 8889 | 132.3 | 90.9 | 5.65 | **1.57x** | 23.4x | yes |
+| 20 | 190 | 2105 | 126.1 | 85.9 | 5.59 | **1.49x** | 22.6x | yes |
+| 30 | 435 | 920 | 126.5 | 92.3 | 5.46 | **1.59x** | 23.2x | yes |
+| 50 | 1225 | 327 | 136.1 | 87.6 | 5.30 | **1.46x** | 25.7x | yes |
+| 100 | 4950 | 81 | 132.4 | 94.2 | 5.26 | **1.42x** | 25.2x | yes |
+| 200 | 19900 | 20 | 139.8 | 94.1 | 5.20 | **1.41x** | 26.9x | yes |
+| 400 | 79800 | 5 | 126.5 | 98.8 | 5.69 | **1.37x** | 22.2x | yes |
+
+**There is no crossover up to N = 400.** The prediction that full unrolling
+would stop paying is wrong, at least on this interpreter: the win decays, from
+~1.55x to 1.37x, but it decays *gently* and never approaches 1.0. Run-to-run
+noise on this shared box is about +/-0.08x, so the honest statement is "roughly
+1.5x below N ~ 30, roughly 1.4x above it, with a shallow monotone tail".
+
+The Rust column is the point of the exercise: **22-27x at every N**, flat.
+Rust is O(N^2) in time and O(1) in code size, so nothing about growing N touches
+its instruction footprint. The codegen tier and the compiled tier start 15x
+apart and the gap widens slightly with N. That is the argument for the hardware
+chapter in one row of a table.
+
+### 7.4 The import-time bill, which is the real cost of the approach
+
+One process, `sweep_n.py --build-only --bodies 5,...,500`, so the columns are
+internally consistent:
+
+| N | pairs | src lines | src MB | co_code B | bytecodes/pair | nlocals | EXTENDED_ARG | gen ms | **compile ms** | us/pair |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 10 | 163 | 0.005 | 2,244 | 112.2 | 50 | 0.1% | 0.0 | **0.5** | 50 |
+| 10 | 45 | 623 | 0.019 | 8,066 | 89.6 | 90 | 0.0% | 0.1 | **2.4** | 53 |
+| 20 | 190 | 2,443 | 0.074 | 30,506 | 80.3 | 170 | 0.0% | 0.4 | **9.8** | 52 |
+| 30 | 435 | 5,463 | 0.165 | 67,346 | 77.4 | 250 | 0.0% | 0.8 | **31.7** | 73 |
+| 50 | 1225 | 15,104 | 0.458 | 202,544 | 82.7 | 410 | 9.0% | 3.5 | **162.6** | 133 |
+| 100 | 4950 | 60,204 | 1.83 | 856,644 | 86.5 | 810 | 15.0% | 9.9 | **307.9** | 62 |
+| 200 | 19900 | 240,404 | 7.42 | 3,514,844 | 88.3 | 1610 | 17.6% | 46.1 | **1,311** | 66 |
+| 300 | 44850 | 540,604 | 16.8 | 8,242,328 | 91.9 | 2410 | 21.1% | 130 | **2,870** | 64 |
+| 400 | 79800 | 960,804 | 29.9 | 14,710,628 | 92.2 | 3210 | 21.5% | 196 | **4,457** | 56 |
+| 500 | 124750 | 1,501,004 | 46.7 | 23,038,928 | 92.3 | 4010 | 21.7% | 333 | **9,028** | 72 |
+| 600 | 179700 | 2,161,204 | 67.4 | 33,227,228 | 92.5 | 4810 | 21.8% | 511 | **33,915** | 189 |
+
+(N = 600 is from a separate process; that box was swapping by then, which is
+what the 189 us/pair is. Compile timings on this shared machine wander by
+roughly a factor of 2 run to run -- the N = 50 row is visibly an outlier -- so
+read the *slope*, not any single cell.)
+
+Emitting the source is cheap and stays cheap (string formatting, ~2.5 us per
+pair). `compile()` is the bill, and it is essentially **linear in pair count**
+at ~55-70 us per pair -- so **quadratic in N**, one order faster than the thing
+it is optimizing. At the benchmark's N = 5 it is 0.5 ms and invisible. At
+N = 200 it is 1.3 s per process, and pyperf spawns ~20 worker processes, so a
+single `--fast` A/B pays ~30 s of pure compile. At N = 600 it is 34 s per
+process and the approach has become absurd -- even though it still *works* and
+is still faster once compiled.
+
+This is the honest characterisation of partial evaluation: **it moves cost from
+the timed region into import, and that cost grows one order faster in N than the
+thing it is optimizing.** At the benchmark's own N it is free. It stops being
+free somewhere around N = 50-100 for interactive use, long before it stops being
+a speedup.
+
+### 7.5 The hard limit is RAM, not CPython
+
+CPython 3.10 raised no error at any N tried. There is no `SystemError`, no
+"too many locals", no jump-offset overflow -- `EXTENDED_ARG` covers a 32-bit
+oparg and the function is a single basic block plus one loop, so none of the
+usual compiler limits are anywhere near.
+
+What kills it is compile-time memory, which scales as N^2 like everything else:
+
+| N | peak RSS of the compiling process |
+|---:|---:|
+| 100 | 174 MB |
+| 200 | 629 MB |
+| 300 | 1.36 GB |
+| 400 | 2.44 GB |
+| 500 | 4.01 GB |
+| 600 | 5.35 GB (swapping) |
+| 700 | **exceeded the 7 GB WSL box -- the OOM killer took down the whole distro** |
+
+So the ceiling on this machine is **N ~ 600**, and it is a property of the host,
+not of CPython. On a 64 GB machine the same curve would run to N ~ 1800 before
+dying, at ~5 minutes of `compile()` per process. Report it as "memory-bound at
+about 40 kB of compiler working set per emitted pair", which is the
+machine-independent form.
+
+### 7.6 The one real cliff, and the fix (a result the sweep found)
+
+The first version of this sweep showed a sharp, reproducible step **exactly
+between N = 30 and N = 32** -- speedup 1.45x -> 1.30x -- that no cache argument
+explains at 67 kB of bytecode. The `EXTENDED_ARG` census found it:
+
+| N | nlocals | bytecodes/pair | EXTENDED_ARG |
+|---:|---:|---:|---:|
+| 30 | 250 | 77.4 | 0.0% |
+| 31 | 258 | 85.2 | **9.4%** |
+| 32 | 266 | 103.5 | **25.5%** |
+| 200 | 1610 | 114.3 | **36.3%** |
+
+`LOAD_FAST` / `STORE_FAST` carry a **one-byte oparg**, so a local in slot >= 256
+needs an `EXTENDED_ARG` prefix -- a whole extra dispatch, every time it is
+touched. The emitter uses 8 locals per body plus ~10 temporaries, so `nlocals`
+crosses 256 at exactly N = 31.
+
+The reason it hurt so much is the *ordering*. `co_varnames` is ordered by first
+binding, and the emitter bound `dx, dy, dz, mag, b1m, b2m` inside the loop --
+i.e. last. So the six **hottest** names in the entire function, touched ~20
+times per pair, were precisely the ones pushed over the boundary. Above N = 31,
+a quarter of all executed bytecodes were `EXTENDED_ARG` prefixes on the six
+temporaries.
+
+**Fix:** emit one dead-store line, `dx = dy = dz = mag = b1m = b2m = 0.0`, at
+the top of the function, which moves them to slots 3..8. It changes no
+arithmetic (they are overwritten before every use), and it is emitted only when
+`8*len(bodies) + 10 > 255`, so the shipped N = 5 source is untouched.
+
+Paired A/B of the two emitter variants, both built from the landed file's own
+`_advance_source(..., hoist=)` (`sweep_n.py --emitter-ab`, min of 15 rounds):
+
+| N | plain ms | hoisted ms | gain | EXT_ARG plain | EXT_ARG hoisted |
+|---:|---:|---:|---:|---:|---:|
+| 20 | 87.76 | 87.60 | **1.002x** (control: not emitted) | 0.0% | 0.0% |
+| 32 | 103.52 | 92.16 | **1.123x** | 25.5% | 1.0% |
+| 50 | 102.33 | 92.10 | **1.111x** | 30.7% | 9.0% |
+| 100 | 106.29 | 97.91 | **1.086x** | 34.6% | 15.0% |
+| 200 | 107.49 | 95.03 | **1.131x** | 36.3% | 17.6% |
+
+N = 20 is a built-in control: the hoist is not emitted there and reads 1.002x.
+With the fix the N = 31 cliff disappears entirely and the curve in 7.3 is the
+smooth one. The residual 17.6% at N = 200 is intrinsic -- those are the body
+components themselves, and no ordering can put 1,610 locals in 256 slots.
+
+Worth a slide on its own: *a 23% reduction in executed bytecodes bought a 13%
+speedup, and the whole thing was one line of dead stores found by counting
+opcodes rather than by profiling.* It is also a clean example of a cost that
+exists only because the code is generated -- a hand-written loop never has 1,610
+locals.
+
+### 7.7 Benchmark-level pyperf A/B
+
+`bash dev/nbody/measure_ab_n.sh /root/hwsw-env/py310/bin/python --fast 5 20 50 100 200`
+(iterations scaled so each N does the stock benchmark's 200,000 pair-updates):
+
+| N | iterations | stock | optimized | speedup |
+|---:|---:|---|---|---:|
+| 5 | 20000 | 93.6 ms +- 13.7 ms | 60.5 ms +- 8.0 ms | 1.55x |
+| 20 | 1052 | 73.5 ms +- 4.7 ms | 50.9 ms +- 4.6 ms | 1.44x |
+| 50 | 163 | 97.6 ms +- 18.5 ms | 56.7 ms +- 8.6 ms | 1.72x |
+| 100 | 40 | 88.1 ms +- 19.3 ms | 57.4 ms +- 4.8 ms | 1.53x |
+| 200 | 10 | 105 ms +- 16 ms | 62.7 ms +- 7.8 ms | 1.67x |
+
+These are `--fast` on a contended box and the std devs (+-8% to +-20%) swamp the
+N dependence, so **the kernel sweep in 7.3, not this table, is the measurement**.
+What this table does establish is that the flag works end to end through pyperf,
+including propagation to worker processes, and that nothing about large N breaks
+the harness. Note also a confound that gets worse with N: `report_energy()` is
+still the stock O(N^2) Python loop in *both* builds and is called twice per
+benchmark iteration, so at N = 200 with 10 iterations it is ~17% of the pair work
+and un-optimized on both sides, which drags the benchmark-level ratio toward 1.
+
+### 7.8 What this says for the report
+
+1. **The optimization is not a 5-body trick.** It was measured at N up to 400,
+   bit-exact at every one, still 1.37x at the top.
+2. **Its cost model is inverted from the kernel's.** The kernel is O(N^2) in
+   time; the optimization is O(N^2) in *compile time and compiler memory*, paid
+   once. That is the actual limit of partial evaluation as a technique, and it
+   is a more interesting thing to say than "unrolling is good".
+3. **Rust is flat at 22-27x across the whole sweep**, because its code size does
+   not depend on N. Codegen buys ~1.4x and then fights the compiler; compilation
+   buys 25x and does not care. That contrast is the motivation for the
+   accelerator, stated as data rather than as an assertion.
+4. **The 256-slot cliff** is a concrete, mechanistic, one-line-fix story about
+   the difference between "fewer operations" and "cheaper operations".
