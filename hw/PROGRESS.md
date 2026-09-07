@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-06 22:12 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-06 22:12 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-07 20:30 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-07 20:30 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -26,8 +26,7 @@ flowchart LR
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
     class ppa,integration todo
-    class dv_signoff review
-    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage done
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff done
 ```
 
 ### `huffman_engine`
@@ -84,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟠 | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ |
 | `huffman_engine` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -92,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **DV sign-off** — review (checkpoint — needs human approval)
+- `grape_pipeline`: **PPA** — todo
 - `huffman_engine`: **uArch** — todo (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -153,8 +152,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] all functional covergroups hit — tb/cov/func_cov.txt: 58 bins all >=1; 3 waivers in docs/coverage_waivers.md (2 architecturally unreachable, nsteps.20000 deferred to signoff)
 - [x] line/toggle >= 90 % — tb/cov/coverage.txt: line 91.3%, toggle 94.5% (branch 95.5%); inline coverage_off regions each carry a reason
 
-#### DV sign-off — 🟠 review (started 2026-09-06T06:45:43Z)
-> K1 fail on benchmark list: 162.0 cycles/step > 128 (test_full_benchmark; equivalence itself passed: bit-exact, dE/E 1.7e-14)
+#### DV sign-off — ✅ done (started 2026-09-06T06:45:43Z, finished 2026-09-07T20:30:54Z)
 
 - [x] golden equivalence on the full benchmark input — test_full_benchmark PASS: 20000 steps bit-exact vs emulation.advance (75 items 0 mismatches); vs nbody_ref: dE/E 1.674e-14 <= 1e-12, r 2.1e-12 <= 2e-9, v 2.1e-12 <= 5e-11; K1 = 124.0 <= 128
 - [x] directed + random suites pass — make sim: TESTS=9 PASS=9 (incl. full_benchmark) in one run, regress_final.log

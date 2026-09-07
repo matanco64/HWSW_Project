@@ -1560,3 +1560,9 @@ Prompt: "<task-notification>
 area: 584454 sky130_fd_sc_hd cells, 4075030.777599 um^2 -&gt; synth/area.txt</event>
 If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
 </task-notification>"
+
+2026-09-07T20:30:31Z — Claude Code session (auto-logged)
+Prompt: "approve dv_signoff done
+accept  Advisor diffs 
+/hw-flow huffman_engine"
+[2026-09-07] [hw-advisor] dv_signoff advisor: applied hw-dv-bringup diff (KPI on full-shape config at bring-up) and hw-dv-signoff diff (log-line watching, 2x poll budgets, BUSY-fall polls)

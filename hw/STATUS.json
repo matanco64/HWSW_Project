@@ -210,9 +210,9 @@
           }
         },
         "dv_signoff": {
-          "state": "review",
+          "state": "done",
           "started": "2026-09-06T06:45:43Z",
-          "finished": "",
+          "finished": "2026-09-07T20:30:54Z",
           "gate": {
             "golden equivalence on the full benchmark input": {
               "result": "pass",
@@ -244,8 +244,7 @@
               "evidence": "synth/formal.sby: bmc PASS (depth 40) + cover PASS (5/5 states) on fsm_arcs; bresp_hold/w1c take testplan §6 fallback (regs 3x2240b beyond smtbmc; test_regs 11/11 + protocol agent)",
               "at": "2026-09-06T19:47:15Z"
             }
-          },
-          "reason": "K1 fail on benchmark list: 162.0 cycles/step > 128 (test_full_benchmark; equivalence itself passed: bit-exact, dE/E 1.7e-14)"
+          }
         },
         "ppa": {
           "state": "todo",
@@ -841,5 +840,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-06T22:12:11Z"
+  "updated": "2026-09-07T20:30:54Z"
 }
