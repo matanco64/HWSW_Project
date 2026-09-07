@@ -369,9 +369,9 @@
           }
         },
         "uarch": {
-          "state": "review",
+          "state": "done",
           "started": "2026-09-07T20:31:12Z",
-          "finished": "",
+          "finished": "2026-09-07T22:03:04Z",
           "gate": {
             "pipeline/FSM diagrams": {
               "result": "pass",
@@ -406,8 +406,8 @@
           }
         },
         "rtl": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-07T22:03:04Z",
           "finished": "",
           "gate": {
             "make lint clean (verilator --lint-only -Wall)": {
@@ -846,5 +846,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-07T21:52:04Z"
+  "updated": "2026-09-07T22:03:04Z"
 }

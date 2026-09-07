@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-07 21:52 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-07 21:52 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-07 22:03 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-07 22:03 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -49,9 +49,9 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class uarch review
-    class prd,mas done
+    class dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class rtl in_progress
+    class prd,mas,uarch done
 ```
 
 ### `mtf_cam`
@@ -85,7 +85,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ |
-| `huffman_engine` | ✅ | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `huffman_engine` | ✅ | ✅ | ✅ | 🔵 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
@@ -93,7 +93,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 ## Next up
 
 - `grape_pipeline`: **PPA** — todo
-- `huffman_engine`: **uArch** — review (checkpoint — needs human approval)
+- `huffman_engine`: **RTL** — in_progress
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
 ## Gates
@@ -180,7 +180,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] block diagram — docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML
 - [x] hw-review resolved — docs/review_mas.md: 23 findings (2 passes), 0 must open
 
-#### uArch — 🟠 review (started 2026-09-07T20:31:12Z)
+#### uArch — ✅ done (started 2026-09-07T20:31:12Z, finished 2026-09-07T22:03:04Z)
 
 - [x] pipeline/FSM diagrams — docs/uarch.md §2 C0/C1/C2 flowchart + §3.1/§3.2/§3.3 stateDiagrams
 - [x] number formats fixed — docs/uarch.md §4: UQn.0 for every signal incl. limit_la UQ21.0 left-aligned compare form (U1/N1-proven)
@@ -188,6 +188,12 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] per-stage timing budget — docs/uarch.md §6: C0 loop ~13ns worst of 20ns @ 50MHz; II=2 retreat documented (ADR-0008 #1)
 - [x] latency/throughput derived and matches PRD KPI — docs/decode_model.py on the real 148,271-symbol trace: K1=1.0068 (worst sweep 1.0317) <= 1.1; K2=167 <= 314; first symbol 1,004; K4a 2.99ms <= 3.06ms
 - [x] hw-review resolved — docs/review_uarch.md: 24 findings over 3 passes (9+13+2), all musts resolved incl. U1 compare direction and U2 phantom decodes, 0 must open
+
+#### RTL — 🔵 in_progress (started 2026-09-07T22:03:04Z)
+
+- [ ] make lint clean (verilator --lint-only -Wall)
+- [ ] Yosys synth succeeds (synthesizable subset)
+- [ ] agent code review resolved
 
 ### `mtf_cam`
 
