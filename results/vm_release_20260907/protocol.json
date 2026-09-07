@@ -1,0 +1,28 @@
+{
+  "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",
+  "cpu": 0,
+  "source_sha256": {
+    "rust/pyflate/Cargo.lock": "0b29f3c5f23aacf2d3bdab63a65a033016751ab2a8e48cbe3db8b2cf16d2fad8",
+    "rust/pyflate/Cargo.toml": "f2ef920548a64fef55e53b166237507ee546118fb1e2279938758c38300489e6",
+    "rust/pyflate/README.md": "bbf333fabbc573faec7f1dffb5591f8ffb47f81bd94c5a43a9e01476c276965c",
+    "rust/pyflate/pyproject.toml": "ded6ff904a404097095943d7ff96de1d6e1dbc8d18ab91829774559fd9c54944",
+    "rust/pyflate/src/bindings.rs": "1a424256fb196af4855bec5672229aa8da2cddb742009169eb492879fb852d03",
+    "rust/pyflate/src/bit_reader.rs": "17c43831aac365134c4d91bf0c5212a189d7cd6055e3c87682d090361467b707",
+    "rust/pyflate/src/decoder.rs": "24bee403dc15b470051bebff848d21f83733bf024b15409e2a8c0cbfddc67328",
+    "rust/pyflate/src/huffman.rs": "7fec38ef15d6e9eed66158570f85dbc435e1f5840f03370d9de2e43587e16c78",
+    "rust/pyflate/src/lib.rs": "56338ba61646c47cf12e48d16dee16c0c8f3fd72e38935a47656d6252a5f5f0a",
+    "rust/pyflate/src/trace.rs": "61110cd423ed6a7906e3d6bba7cc42b6e9bf018042685132343cd24fc9a89126",
+    "rust/pyflate/tests/kernel.rs": "73ca3b6d398b18425689e6ffba6d6773bb44f94dacbcfd288b56d15e89bfd43f",
+    "rust/pyflate/tests/python_api.py": "b3db759bca241db324e5bc3a6a8886734bccd61b46a6d830ba9046ed2cc0a97c"
+  },
+  "benchmark_sha256": {
+    "nbody": "226c5b9f79b4a14ade7a5cab5e4ef561f745175ddd871c19eddf4522175a47b5",
+    "pyflate": "76c2361cda5af5ff47e34633d21e7d2db7aa4e31f4ac74b0a0b147c245e4c494"
+  },
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "protocol": "Sequential rigorous jobs; fixed guest CPU; explicit backend and inherited PYTHONPATH",
+  "extension_sha256": "b43a3c9bd03e9488caead0f405b9892d539ab445807483930727fa2d3dde3f0a",
+  "extension_file": "native/pyflate_rs.so",
+  "stock_sha256": "ec5347c7045af86ba33e1b2c6f64bc4b506d0ade3b77391d7e41863fe25fb464"
+}

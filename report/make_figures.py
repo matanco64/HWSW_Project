@@ -167,7 +167,7 @@ def main():
         'M212 172H260', 'M540 172H590', 'M710 132V80'])
     diagram('pyflate_stages.svg', 185, [
         (8, 8, 170, 65, ['Compressed bytes', '67,562 B'], False),
-        (230, 8, 300, 65, ['Bit reader + Huffman', 'MTF + RUNA/RUNB'], True),
+        (230, 8, 300, 65, ['Rust extension', 'Bit reader + Huffman', 'MTF + RUNA/RUNB'], True),
         (584, 8, 168, 65, ['L-vector', '336,184 B'], False),
         (420, 112, 332, 60, ['Inverse BWT + RLE4', 'Python'], False),
         (8, 112, 340, 60, ['Output + MD5 check', '399,360 B'], False),

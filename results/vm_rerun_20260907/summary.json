@@ -1,0 +1,46 @@
+{
+  "nbody_python": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 142.18542443122715,
+    "sd_ms": 4.4769260361085825,
+    "relative_sd_pct": 3.148653284271062,
+    "backend": "python",
+    "python": "3.10.12 (64-bit)",
+    "affinity": null,
+    "file_sha256": "fd632c8e4c88d35fe553fdc67c2d71971176442aeaf2179e3daf26f067ab75cd"
+  },
+  "nbody_native": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 9.476676593112643,
+    "sd_ms": 0.030491302917939438,
+    "relative_sd_pct": 0.32175101279808976,
+    "backend": "native",
+    "python": "3.10.12 (64-bit)",
+    "affinity": null,
+    "file_sha256": "e1e92425b442bf8ccdec4e72b4f48a8f22607d9d88005df7ef11ecee930a4cb2"
+  },
+  "pyflate_python": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 285.6439030282976,
+    "sd_ms": 3.035098834985385,
+    "relative_sd_pct": 1.062546339273592,
+    "backend": "python",
+    "python": "3.10.12 (64-bit)",
+    "affinity": null,
+    "file_sha256": "5fdb5a855af40e9d7788439d3b446346a7b8abb871699f4c1d982bdc1d3a3ce7"
+  },
+  "pyflate_native": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 171.88930337433703,
+    "sd_ms": 2.1994434082302363,
+    "relative_sd_pct": 1.2795696794700093,
+    "backend": "native",
+    "python": "3.10.12 (64-bit)",
+    "affinity": null,
+    "file_sha256": "9110d0c2711369a96ad4f76d61657ff4465738a6f6d3ead87e2cfd203d7a8cf6"
+  }
+}

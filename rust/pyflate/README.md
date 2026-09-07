@@ -121,7 +121,8 @@ codes, invalid tables/configuration, selector changes, MTF/run expansion,
 repeatability, and trace bytes. The Python suite checks the course input plus
 four deterministic fixtures, including a three-block stream, against both
 Python T3 and `bz2`; it checks both decode APIs, traces, and exact end offsets.
-These checks passed after the refactor on WSL CPython 3.12.3.
+These checks passed after the refactor on WSL CPython 3.12.3 and on the
+course VM under CPython 3.10.12.
 
 `Cargo.lock` is tracked to make dependency resolution reproducible. To build
 a wheel for the measured interpreter:
@@ -133,9 +134,12 @@ maturin build --locked --release -i /path/to/python3.10
 /path/to/python3.10 ../../dev/pyflate/rs_check.py
 ```
 
-The existing wheel in `wheels/` and the installed course-VM wheel predate this
-refactor; neither was replaced. The report's VM timing/counter measurements
-therefore describe that earlier binary, not the new WSL test build.
+The report now measures the refactored source built on the course VM. An
+isolated `cargo build --locked --release` produces `pyflate_rs.so`, selected
+through `PYTHONPATH` and inherited by pyperf workers. Raw three-tier timing
+JSONs, counter passes, correctness logs, toolchain versions, and source/binary
+hashes are preserved in `results/vm_release_20260907/`. The installed VM wheel
+and the historical wheel in `wheels/` were not replaced.
 
 ## Historical performance: CPython 3.10.21, WSL2
 
