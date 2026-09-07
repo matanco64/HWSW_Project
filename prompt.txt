@@ -1566,3 +1566,99 @@ Prompt: "approve dv_signoff done
 accept  Advisor diffs 
 /hw-flow huffman_engine"
 [2026-09-07] [hw-advisor] dv_signoff advisor: applied hw-dv-bringup diff (KPI on full-shape config at bring-up) and hw-dv-signoff diff (log-line watching, 2x poll budgets, BUSY-fall polls)
+
+2026-09-07T20:42:18Z — Claude Code session (auto-logged)
+Prompt: "1. a, b as the documented retreat
+2.  confirm.
+3. a
+4. fold.
+5.  6 sets, confirm.
+6. sub-FSM; fold later only if a DEFLATE KPI ever appears.
+7. confirm.
+/hw-advisor"
+
+2026-09-07T21:19:24Z — Claude Code session (auto-logged)
+Prompt: "continue"
+
+2026-09-07T21:33:38Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ab3f244f352fe659c</task-id>
+<tool-use-id>toolu_018Tn46bMNPrRCxthj1yDE7X</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/ab3f244f352fe659c.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman uArch review pass 1" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. Findings written to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_uarch.md` (uarch.md untouched). Model re-run confirmed §7's printed numbers are faithfully quoted (149,275 cy, 1.0068, 1002, 1.185, 1.2568, 167/308).
+
+**Summary: 9 must / 8 should / 5 nit**
+
+Must list:
+
+- **U1 — Compare direction is wrong.** §4's `window[19:20−l] ≥ first_code[l]` + §2's "shortest match wins" decodes every multi-length table incorrectly: for a true length-L code, all l ≤ L satisfy the ≥ compare (prefix ≥ first_code[l]+count[l] by the canonical recurrence), so the priority encoder picks l=1 always. Correct one-sided forms: `&lt;` against limit (first_code[l]+count[l]) with shortest-wins, or `≥` first_code with longest-wins. Verified with a concrete 3-symbol counterexample.
+- **U2 — Symbol-value events (EOB, ERR_SYMBOL, ERR_LIMIT, DEFLATE extra-bit trigger) are known only at C1/C2**, but C0 free-runs — 1-2 phantom decodes past EOB corrupt BITS (breaks PRD-F4/F13 exactness), can pop an extra selector, and can raise spurious ERR_NOCODE. No C0-detect (e.g. per-table EOB (len,code) latch) or rewind is specified.
+- **U3 — `count[]` is one 20×9b array** but six per-table builds need six count sets; a shared array holds the sum over all tables and every PREFIX pass is wrong.
+- **U4 — Folded counts can't attribute a LEN write to (table, bin)**: attribution needs ALPHABET/MODE, which are *pending* registers at write time; no ordering/full-rewrite contract exists, and shrinking configs leave stale counts.
+- **U5 — Lengths window sized 288×5b; actual is 1,728×5b** (288 words × 6 fields) — 6× under-sized; §5's ≈22 kbit total is mis-derived.
+- **U6 — ERR_STARVED and ERR_LEN are phantom flags** absent from MAS §4/PRD; ERR_STARVED contradicts PRD-F6/F10 (tvalid-low = stall; TLAST-consumed = ERR_SELECTOR) and can't fire in DEFLATE anyway (s_sel never popped).
+- **U7 — No mechanism for four MAS §8/PRD-F10 rows**: build-time over-subscription ERR_TABLE (the count pass that computed Kraft was removed by ADR-0008 #4), ERR_UNDERRUN (no last-valid-bit/TKEEP tracking), ERR_SYMBOL, ERR_LIMIT (no SYMBOL_LIMIT logic anywhere).
+- **U8 — SKIP handles only START_BIT mod 32**; the ~278-word discard for the benchmark's ~8.9k-bit START_BIT is unspecified and un-modeled (only 4 beats prefetch during build per MAS), so "first symbol ≤ 1,006 cycles" is unsound (~1,28x real) and the 149,275/2.99 ms figures exclude these cycles.
+- **U9 — OVERFETCH ≤ 4 is violable**: 64b buffer + 4-beat FIFO hold up to ~191 unconsumed bits = 5-6 wholly-unconsumed accepted beats at EOB (the benchmark has ~9k bits after EOB, so this fires on `test_full_benchmark`); no accept-stop invariant is given.
+
+Key shoulds: the "input beat dropped every 8 cycles: unchanged" sweep is vacuous (the stall knob sits inside a never-entered wait loop; steady-state refill is unconditional — verified by code reading and identical output), and the model gates on `occ ≥ ln` while hardware gates on `occ ≥ MAXLEN`; DEFLATE 16..20 non-match/table-toggle/extra-bit extraction unspecified; 12 count-bin RMWs + partial-wstrb per LEN write unbudgeted; DRAIN lacks the s_sel-to-TLAST drain and abort-during-drain arc; DBG_DATA contends with the symtab 1R port; withdrawal makes SYMBOLS &lt; "symbols before the error"; 21-bit alignment ambiguity ({1'b0,window} right, {window,1'b0} wrong) plus a literal "+?" placeholder in §4.</result>
+<usage><subagent_token
+... [truncated, 4113 chars total]"
+
+2026-09-07T21:45:56Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ad83f2f6172ea24e0</task-id>
+<tool-use-id>toolu_01CkNmeuWwQ3skqeEHcFQDcy</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/ad83f2f6172ea24e0.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman uArch review pass 2" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass 2 appended to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_uarch.md` (uarch.md and decode_model.py untouched).
+
+**Verdict: 7 of 9 pass-1 musts resolved, 1 partial (U2), 1 not resolved (U4). 13 new findings: 5 must / 5 should / 3 nit. 5 musts open.**
+
+Verification highlights:
+- **U1 resolved (bzip2)** — the math checks out: `la(fc[l]) = (fc[l-1]+cnt[l-1])&lt;&lt;(MAXLEN-(l-1)) = limit_la[l-1]`, so the per-length ranges tile and smallest-l-wins is exact; the {1,2,2} example decodes C correctly; empty lengths can match the comparator but can never be the smallest match (induction); `w ≥ limit_la[20]` correctly yields ERR_NOCODE only for incomplete trees.
+- **U9 resolved** — proved the refill invariant: with the FIFO non-empty, occ ∈ [20,64] is closed under 20-bit consumes (occ≤52 → +12; occ&gt;52 → −20 ≥ 33), so zero steady-state stalls; the benchmark's 1 stall is the post-PREP initial fill, bounded.
+- **Model** — runs clean, all §7 numbers reproduced (149,276 cy / 1.0068; sweeps 1.0068/1.0236/1.2568; K2 167/314, 308/596); tick/refill order can't double-count; tail gate can't deadlock.
+
+Open musts (new):
+- **N1** — DEFLATE window "upper 5 zero" is low-aligned, misaligning every compare against the MAXLEN=20-aligned limit_la by 5 bits; must be top-aligned (low 5 zero), which also rescues the lengths-16..20 zero-count rule.
+- **N2** — the (eob_len, eob_code) latch is never invalidated: the DEFLATE distance set and any table with EOB len=0 keep the previous invocation's latch → false EOB mid-decode. Needs eob_len:=0 at PREP.
+- **N3** — ERR_LIMIT on the C0 *issued* count contradicts MAS 0x110's *emitted* semantics (withdrawal leaves SYMBOLS at LIMIT−1..−4 under backpressure), and the EOB-at-LIMIT → DONE tie-break has no stated C0 priority.
+- **N4** — U4's fix cites a per-table fixed-stride LEN layout and an "MAS §6" driver-zeroing note that don't exist; MAS §4 is packed-continuous (words straddle tables) and says out-of-range entries are *ignored*. Requires a real MAS amendment (48-word strides fit the existing 288-word window) plus driver changes.
+- **N5** — the new DRAIN→ABORT_S arc sets ABORTED unconditionally; MAS §8 requires DONE when abort lands after the EOB beat handshake (during the s_sel drain).
+
+Notable shoulds: N8 (model cadence sweeps don't throttle skip-word delivery — corrected K1 ≈ 1.009/1.032, still passing), N7 (SKIP∥BUILD accepts ~277 beats vs MAS "prefetch ≤ 4" wording), N9 (lengths 21..31 have no count bin; U17's doorbell-time MAXLEN check still mechanism-less), N13 (DBG "idle-only" vs MAS live-during-build).</result>
+<usage><subagent_tokens>94714</subagent_tokens><tool_uses>8</tool_uses><duration_ms>511607</duration_ms></usage>
+</task-notification>"
+
+2026-09-07T21:51:37Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a1538a680a285d166</task-id>
+<tool-use-id>toolu_01VXfiT6DTnAWazUZFvbeYnR</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a1538a680a285d166.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman uArch pass 3 verify" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass 3 appended to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_uarch.md` (reviewed files untouched).
+
+**Summary: 2 must open.**
+
+Resolved (5 of the 6 checks):
+- **N1 yes** — w[19:5] top-aligned/low-5-zero is exactly right: `w &lt; limit_la[l]` ⟺ `w&gt;&gt;(20−l) &lt; fc+cnt` for l ≤ 15, `code_l = w &gt;&gt; (MAXLEN−l)` extracts the code bits, and the zero-count rule for 16..20 now actually works.
+- **N2 yes** — PREP-entry clear of all six `eob_len := 0` plus the len≠0-qualified latch covers stale sets, the DEFLATE distance set, and len-0 EOB; decoded l ≥ 1 never matches len 0.
+- **N4 yes** — the MAS amendment is real and arithmetically exact (48 words × 6 fields = 288/table, 6 × 48 = 288 words = the existing 0x400..0x87C window), with the driver zero-on-shrink and wstrb rules; uarch §3.2 cites the amendment, no phantom reference. Minor MAS-wording residual (stale packed-continuous text in the LEN row and bit-10's "ignored" clause) noted as should.
+- **N5 yes** — the DRAIN arc split (abort before EOB handshake → ABORT_S, after → DONE_S) matches MAS §8's DONE-wins row.
+- **N8 yes** — model re-run reproduces §7 verbatim: 1.0068 benchmark, **1.0093** @ beat-every-5, **1.0317** @ beat-every-8, all ≤ 1.1.
+
+Still open:
+- **N3 no (narrowed)** — the EOB-wins tie and stop-issuing-at-LIMIT intent now match MAS 0x110, but §8's withdrawal row still says "skid flush on ERR/ABORT/doorbell" with no ERR_LIMIT exemption and §3.1 keeps a direct DECODE→ERR_S arc, so as written the in-flight beats get withdrawn and SYMBOLS &lt; LIMIT — needs one sentence (raise ERR_LIMIT only after the LIMIT'th handshake; exempt it from the flush).
+- **N14 new must** — the fresh contradiction from the scan: §3.2's invalid-bin doorbell check raises **ERR_PARAM**, but MAS bit-10 and its §8 rejection row mandate **ERR_TABLE** for length &gt; MAXLEN (and the driver corner injects ERR_TABLE). One-word fix; related N9 residual (DEFLATE 16..20 bins check) still unstated.
+
+Both open items are one-sentence/one-word spec fixes, not re-architecture.</result>
+<usage><subagent_tokens>83538</subagent_tokens><tool_uses>7</tool_uses><duration_ms>229095</duration_ms></usage>
+</task-notification>"
