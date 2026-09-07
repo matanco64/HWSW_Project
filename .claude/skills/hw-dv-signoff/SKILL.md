@@ -34,7 +34,11 @@ coverage part to `done` before starting sign-off.
 1. `set <module> dv_signoff in_progress`.
 2. **Full-benchmark equivalence**: `test_full_benchmark` streams the entire input through the DUT
    and compares with the golden trace under the testplan tolerance
-   (`make sim TESTCASE=test_full_benchmark`). `huffman_engine`/`mtf_cam`: every block of
+   (`make sim TESTCASE=test_full_benchmark`).
+   Long runs: launch detached and watch the LOG's terminal line (`TESTS=`), never a
+   process-name pattern (`pgrep -f` matches its own watchers); size poll budgets at 2x the
+   cycle estimate; TB completion polls key on the live BUSY bit falling, not sticky DONE
+   (sticky bits survive doorbells — a stale DONE makes later checks silently vacuous). `huffman_engine`/`mtf_cam`: every block of
    `interpreter.tar.bz2`; `grape_pipeline`: 20,000 steps, energy check.
 3. Full regression: `make sim` (all tests), `make sim-icarus` (4-state, X-free after reset),
    `make lint`, `make formal` where the testplan lists properties (sby `PASS`).
