@@ -9,14 +9,18 @@ the selection process, but it has no report and is not part of the submission.
 
 | Benchmark | What it is | Baseline | Optimized | Speedup | |
 |---|---|---|---|---|---|
-| **pyflate** | pure-Python bzip2 decompressor | 1.13 s | 288 ms | **3.93x** | submitted |
+| **pyflate** | bzip2, optimized Python + Rust decoder | 1.13 s | 173.59 ms | **6.51x** | submitted |
+| pyflate (Python tier) | optimized Python decoder | 1.13 s | 288.00 ms | 3.92x | supporting comparison |
 | **nbody**   | N-body gravity simulation | 231 ms | 141 ms | **1.64x** | submitted |
 | mdp         | exact-arithmetic Markov decision process solver | 4.98 s | 914 ms | 5.44x | candidate only |
 
-Course VM (Ubuntu 22.04, CPython 3.10.12), `pyperformance run --rigorous`, all
-three significant under pyperf's t-test; see `results/compare_<bench>.txt`. The
-requirement is a 7% improvement on two benchmarks: pyflate cuts runtime 74.5%
-and nbody 39.0%, i.e. 10.6x and 5.6x the bar.
+Course VM (Ubuntu 22.04, CPython 3.10.12), rigorous pyperf measurements. Pyflate's
+latest three-tier run uses the refactored Rust extension rebuilt on the VM:
+`results/vm_release_20260907/` contains all 120-value JSONs and comparisons.
+The combined Python/Rust path cuts runtime **84.6%**; Rust adds **1.66x** over
+optimized Python. The Python tier alone cuts 74.5%, and nbody's Python changes
+cut 38.9%, both exceeding the course's 7% requirement. Earlier nbody/mdp
+comparisons remain in `results/compare_<bench>.txt`.
 
 The pair was chosen on the hardware story rather than the software margin — mdp
 has the larger speedup, but pyflate and nbody map onto the three accelerator
@@ -142,10 +146,16 @@ The report also distinguishes current hardware implementation status from
 unverified clock, area and performance targets.
 
 Matched Python/native instruction, cycle, branch and generic cache counters are
-preserved in `results/native_counters_20260907/`; regenerate their validated summary
-with `python report/summarize_counters.py`. Invalid L1 events are explicitly excluded.
+preserved in `results/vm_release_20260907/counters/`; regenerate their validated summary
+with `python report/summarize_counters.py --directory results/vm_release_20260907/counters`.
+The earlier capture remains in `results/native_counters_20260907/`; invalid L1 events
+from that capture are excluded and were not requested in the new one.
 `report/check_pyflate_backend.py /path/to/repo` verifies actual Rust dispatch and
 output in Python, native and auto modes using an interpreter with the wheel installed.
+
+`python report/summarize_refresh.py` validates the latest timing metadata and source hashes.
+`report/vm_refresh.py` starts an isolated remote build/run and fetches the resulting evidence;
+connection details are CLI arguments, with private access instructions in `VM_GUIDE.local.md`.
 
 ## How to reproduce
 

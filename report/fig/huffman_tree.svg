@@ -1,38 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 168" style="max-width:520px" role="img"
-     aria-label="Huffman tree with codes and the canonical decode idea">
-  <g stroke="#7d8796" stroke-width="1.3" fill="none">
-    <path d="M250,18 L180,58"/><path d="M250,18 L320,58"/>
-    <path d="M180,58 L140,100"/><path d="M180,58 L220,100"/>
-    <path d="M320,58 L285,100"/><path d="M320,58 L355,100"/>
-    <path d="M285,100 L258,140"/><path d="M285,100 L312,140"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 180" role="img"
+     aria-label="Canonical Huffman example: a 00, b 01, c 10, d 110, e 111">
+  <g stroke="#8298a9" stroke-width="1.5" fill="none">
+    <path d="M290 20L215 64 M290 20L365 64"/>
+    <path d="M215 64L175 108 M215 64L255 108"/>
+    <path d="M365 64L325 108 M365 64L405 108"/>
+    <path d="M405 108L375 152 M405 108L435 152"/>
   </g>
-  <g font-size="9.5" fill="#9b1c1c" font-family="monospace">
-    <text x="207" y="35">0</text><text x="288" y="35">1</text>
-    <text x="152" y="80">0</text><text x="205" y="80">1</text>
-    <text x="295" y="80">0</text><text x="342" y="80">1</text>
-    <text x="264" y="122">0</text><text x="305" y="122">1</text>
+  <g font-size="12" fill="#00779d" font-family="monospace">
+    <text x="242" y="41">0</text><text x="331" y="41">1</text>
+    <text x="185" y="85">0</text><text x="242" y="85">1</text>
+    <text x="336" y="85">0</text><text x="392" y="85">1</text>
+    <text x="381" y="129">0</text><text x="428" y="129">1</text>
   </g>
-  <g><circle cx="250" cy="18" r="6" fill="#7d8796"/><circle cx="180" cy="58" r="6" fill="#7d8796"/>
-     <circle cx="320" cy="58" r="6" fill="#7d8796"/><circle cx="285" cy="100" r="6" fill="#7d8796"/></g>
-  <g font-family="monospace" font-size="11">
-    <rect x="124" y="92" width="32" height="17" fill="#eef1f5" stroke="#c8cdd6"/><text x="140" y="105" text-anchor="middle">a</text>
-    <rect x="204" y="92" width="32" height="17" fill="#eef1f5" stroke="#c8cdd6"/><text x="220" y="105" text-anchor="middle">b</text>
-    <rect x="339" y="92" width="32" height="17" fill="#eef1f5" stroke="#c8cdd6"/><text x="355" y="105" text-anchor="middle">c</text>
-    <rect x="242" y="132" width="32" height="17" fill="#eef1f5" stroke="#c8cdd6"/><text x="258" y="145" text-anchor="middle">d</text>
-    <rect x="296" y="132" width="32" height="17" fill="#eef1f5" stroke="#c8cdd6"/><text x="312" y="145" text-anchor="middle">e</text>
+  <g fill="#8298a9">
+    <circle cx="290" cy="20" r="6"/><circle cx="215" cy="64" r="6"/>
+    <circle cx="365" cy="64" r="6"/><circle cx="405" cy="108" r="6"/>
   </g>
-  <g font-family="monospace" font-size="10" fill="#3d4450">
-    <text x="20" y="30" font-family="sans-serif" font-weight="600" fill="#16181d">codes</text>
-    <text x="20" y="48">a = 00</text><text x="20" y="63">b = 01</text><text x="20" y="78">c = 11</text>
-    <text x="20" y="93">d = 100</text><text x="20" y="108">e = 101</text>
-    <text x="20" y="132" font-family="sans-serif" fill="#9b1c1c">shorter code</text>
-    <text x="20" y="145" font-family="sans-serif" fill="#9b1c1c">= commoner symbol</text>
+  <g fill="#eef3f7" stroke="#8298a9">
+    <rect x="158" y="99" width="34" height="22" rx="3"/>
+    <rect x="238" y="99" width="34" height="22" rx="3"/>
+    <rect x="308" y="99" width="34" height="22" rx="3"/>
+    <rect x="358" y="143" width="34" height="22" rx="3"/>
+    <rect x="418" y="143" width="34" height="22" rx="3"/>
   </g>
-  <g font-family="sans-serif" font-size="10" fill="#16181d">
-    <text x="410" y="30" font-weight="600">canonical form</text>
-    <text x="410" y="47" font-family="monospace" font-size="9.5">len 2: first=00</text>
-    <text x="410" y="61" font-family="monospace" font-size="9.5">len 3: first=100</text>
-    <text x="410" y="80">decode = compare</text><text x="410" y="94">against 2 numbers,</text>
-    <text x="410" y="108">not walk 258</text><text x="410" y="122">table entries</text>
+  <g font-family="monospace" font-size="14" fill="#18344a" text-anchor="middle">
+    <text x="175" y="115">a</text><text x="255" y="115">b</text>
+    <text x="325" y="115">c</text><text x="375" y="159">d</text>
+    <text x="435" y="159">e</text>
+  </g>
+  <g font-family="monospace" font-size="13" fill="#18344a">
+    <text x="12" y="24" font-family="sans-serif" font-weight="bold">Example codes</text>
+    <text x="12" y="48">a = 00</text><text x="12" y="68">b = 01</text>
+    <text x="12" y="88">c = 10</text><text x="12" y="108">d = 110</text>
+    <text x="12" y="128">e = 111</text>
+  </g>
+  <g font-family="sans-serif" font-size="13" fill="#18344a">
+    <text x="483" y="24" font-weight="bold">Canonical ranges</text>
+    <text x="483" y="48" font-family="monospace">len 2: 00..10</text>
+    <text x="483" y="68" font-family="monospace">len 3: 110..111</text>
+    <text x="483" y="99">Match a length range,</text>
+    <text x="483" y="118">then index the symbol.</text>
+    <text x="483" y="147" fill="#00779d">Example: 110 decodes to d.</text>
   </g>
 </svg>

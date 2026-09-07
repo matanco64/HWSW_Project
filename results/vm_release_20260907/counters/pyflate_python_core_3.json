@@ -1,0 +1,11 @@
+{
+  "benchmark": "pyflate",
+  "backend": "python",
+  "loops": 16,
+  "cpu": 0,
+  "elapsed_s": 4.623001309111714,
+  "ms_per_iteration": 288.93758181948215,
+  "output_sha256": "86dea2452c818fd8f52536c364eab095e6b0a7bc9fa33b874b10872e401e622f",
+  "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",
+  "source_sha256": "76c2361cda5af5ff47e34633d21e7d2db7aa4e31f4ac74b0a0b147c245e4c494"
+}

@@ -77,11 +77,12 @@ guarantee for every floating-point build.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
-  [Python backend], [141.08 ± 1.91 ms], [1.00×],
-  [Native backend], [9.493 ± 0.047 ms], [*14.86×*],
+  [Python backend], [142.19 ± 4.48 ms], [1.00×],
+  [Native backend], [9.477 ± 0.030 ms], [*15.00×*],
 )
 
-These are 120-value VM measurements from `fallback_nbody.json` and `native_nbody.json`.
+These are the latest 120-value VM measurements, preserved as
+`vm_rerun_20260907/fresh2_nbody_{python,native}.json` under `results/`.
 The separate kernel experiment (228.49 → 9.48 ms, 24.1×) compares native execution with
 *stock* Python. The table compares it with the already optimized Python implementation.
 Both the baseline and timing protocol must be specified when comparing these ratios.
@@ -98,24 +99,25 @@ Counters exclude initialization and warmup; Appendix A2 documents gating and eve
 
 #result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Metric per iteration*], [*Python*], [*Native*]),
-  [Elapsed time], [140.29 ms], [9.473 ms],
+  [Elapsed time], [141.08 ms], [9.462 ms],
   [Instructions], [1,103.62 M], [41.32 M],
-  [Cycles], [334.56 M], [22.56 M],
-  [IPC], [3.30], [1.83],
+  [Cycles], [336.24 M], [22.55 M],
+  [IPC], [3.28], [1.83],
   [Branches], [185.97 M], [3.92 M],
-  [Branch misses (rate)], [585,719 (0.315%)], [61 (0.00156%)],
-  [Generic cache references], [2,980], [279],
-  [Generic cache misses (rate)], [37 (1.26%)], [12 (4.00%)],
+  [Branch misses (rate)], [583,560 (0.314%)], [60 (0.00153%)],
+  [Generic cache references], [3,006], [255],
+  [Generic cache misses (rate)], [59.6 (2.245%)], [2.5 (1.134%)],
 )
 
-*The main gain is 26.7× fewer instructions and 14.8× fewer cycles.* Compiled arithmetic
+*The main gain is 26.7× fewer instructions and 14.9× fewer cycles.* Compiled arithmetic
 avoids Python object handling and dispatch, removing most branches too. IPC actually falls:
 native execution retires fewer instructions per cycle, but needs far fewer instructions to
 finish. Higher IPC is not synonymous with a faster program.
 
-Generic cache misses are sparse in both runs. Native has fewer absolute misses even though
-its miss/reference ratio is higher; the denominator shrinks more. These small counts do not
-establish cache latency as the bottleneck. L1-load counts were invalid and are not reported.
+Generic cache misses are sparse in both runs, with fewer references and misses in native
+execution. Counts vary: Python records 59–94 misses per iteration and native 2–10 across
+the three runs. These small counts do not establish cache latency as the bottleneck.
+L1 events are omitted because an earlier capture returned invalid load counts.
 
 #pagebreak()
 = 4. What changes when N grows?
@@ -183,7 +185,7 @@ The Rust object demonstrates this boundary; it is not a completed hardware drive
 )
 
 At that design point, modeled execution is about 4.6× faster than stock Python and 2.8×
-faster than optimized Python, but *slower than the 9.49 ms native implementation*.
+faster than optimized Python, but *slower than the 9.48 ms native implementation*.
 More units, a higher achieved clock, or reduced precision require measured area/timing
 trade-offs. No measured power advantage is claimed.
 

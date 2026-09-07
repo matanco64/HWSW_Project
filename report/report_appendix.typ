@@ -5,7 +5,7 @@
 = A1. Timing and provenance
 
 The headline results use the course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12
-and pyperformance 1.14.0. Each JSON contains 120 measured values (40 value-bearing worker
+and pyperformance 1.14.0 with pyperf 2.10.0. Each JSON contains 120 measured values (40 value-bearing worker
 runs, three values each); calibration is separate. Reported uncertainty is sample standard
 deviation across those values, not a confidence interval. Use the full-precision JSON means
 to calculate ratios, rather than rounded display values.
@@ -13,14 +13,15 @@ to calculate ratios, rather than rounded display values.
 #result-table(columns: (1fr, 2fr),
   table.header([*Comparison*], [*Files in the results directory*]),
   [Nbody stock / Python], [`baseline_nbody.json` / `optimized_nbody.json`],
-  [Pyflate stock / Python], [`baseline_pyflate.json` / `optimized_pyflate.json`],
-  [Nbody Python / native], [`fallback_nbody.json` / `native_nbody.json`],
-  [Pyflate Python / native], [`fallback_pyflate.json` / `native_pyflate.json`],
+  [Nbody Python / native], [`vm_rerun_20260907/fresh2_nbody_{python,native}.json`],
+  [Pyflate all three tiers], [`vm_release_20260907/pyflate_{stock,python,native}.json`],
 )
 
-The stock/optimized and fallback/native comparisons were separate experiments. Older
-stock/optimized JSONs lack backend metadata; the later fallback/native files explicitly
-record `python` and `native`. The pure-Python means agree closely across the two experiments.
+Nbody's stock/optimized and Python/native pairs are separate experiments. Its older
+stock/optimized JSONs lack backend metadata; the latest pair explicitly records `python`
+and `native`. Pyflate's three tiers were rerun sequentially on one fixed guest CPU, using
+the same release interpreter and the refactored Rust source built on that VM. These three
+files supply its updated headline results. Earlier captures remain available for comparison.
 
 *Development evidence is labeled separately.* Pyflate's ablation and cProfile tables come
 from Windows / CPython 3.12.6. Nbody's detailed unrolling sweep and pyflate's older 25× native
@@ -36,8 +37,8 @@ From the repository root, compare saved data without changing it:
 ```sh
 python3 -m pyperf compare_to results/baseline_nbody.json \
     results/optimized_nbody.json
-python3 -m pyperf compare_to results/fallback_pyflate.json \
-    results/native_pyflate.json
+python3 -m pyperf compare_to results/vm_release_20260907/pyflate_python.json \
+    results/vm_release_20260907/pyflate_native.json
 ```
 
 For fresh native/Python comparisons, use the same interpreter with the wheels installed:
@@ -64,8 +65,8 @@ byte-representation test (for example, signed zeros). Pyflate checks the decoded
 #pagebreak()
 = A2. Matched Python/native CPU counters
 
-The new counter tables use `report/measure_native_counters.py` and the raw files in
-`results/native_counters_20260907/`. Release CPython 3.10.12 executes the same benchmark
+The counter tables use `report/measure_native_counters.py` and the raw files in
+`results/vm_release_20260907/counters/`. Release CPython 3.10.12 executes the same benchmark
 source in explicit Python and native modes, on one fixed guest CPU. Each configuration has
 three runs per event pass; backend order alternates between rounds. Every run warms up before
 measurement. Nbody resets state afterwards and executes 64 iterations of energy, 20,000
@@ -82,14 +83,15 @@ cache events request user mode (`:u`); separate event passes are separate execut
   table.header([*Pass*], [*Events and validation*]),
   [Core], [Cycles, instructions, branches, branch misses: retained; reported running time 100%.],
   [Cache], [Generic cache references/misses: retained; reported running time 100%.],
-  [Excluded], [L1 data-load counts were zero, despite reported 100% running time. Both L1 events are excluded; no L1 miss rate is inferred.],
+  [L1 events], [Not requested: an earlier capture returned invalid zero load counts. No L1 miss-rate claim is made.],
 )
 
 The summarizer checks source SHA-256 hashes, requested backends, output SHA-256 equality
 across all 24 runs, nonzero denominators and counter running time. A separate dispatch check
 (`report/check_pyflate_backend.py`) observed zero native calls for Python and one per block for
-native/auto, with identical MD5 and output length. The measured extension predates the subsequent
-source-only Rust module refactor; these timings are not a measurement of the rebuilt refactor.
+native/auto, with identical MD5 and output length. The measured pyflate extension is the
+refactored build; its binary hash, Rust toolchain version and source hashes are recorded in
+`vm_release_20260907/protocol.json`. Correctness logs identify the loaded extension path.
 
 Reported counts are normalized per completed benchmark iteration. Each displayed value is
 the median of three observations, including rates calculated *within each run*. Thus a ratio
@@ -107,7 +109,8 @@ assigned to BWT without an isolated phase measurement.
 
 To regenerate the validated summaries from the preserved capture:
 ```sh
-python3 report/summarize_counters.py
+python3 report/summarize_counters.py \
+    --directory results/vm_release_20260907/counters
 ```
 For a new capture on Linux, choose a fresh output directory:
 ```sh
@@ -172,7 +175,7 @@ subtract setup with a justified method, and sweep working-set size. The current 
 are insufficient for a measured SRAM-versus-DRAM accelerator comparison.
 
 #pagebreak()
-= A4. Full profiles and review checks
+= A4. Full profiles and release verification
 
 The reports show full original flame graphs beside enlarged context crops.
 `report/make_figures.py` copies every recorded frame rectangle at its original coordinates;
@@ -193,58 +196,37 @@ Independent graphs are independently normalized: a narrower-looking stack is not
 of an absolute speedup. Python-frame views have only a few hundred samples and are used to
 locate work, not resolve small percentage differences.
 
-== Earlier flame-graph trimming
+Older trimmed views in `results/` remove startup or cap stack depth. The reports use the
+`*_full.svg` originals, including the four C-level `flame_{nbody,pyflate}_{stock,opt}_full.svg`
+profiles. Flat self-time evidence is in `perf_report_*.txt`; headline timings come from JSON.
 
-Older trimmed py-spy views exclude startup samples; the original `*_full.svg` files preserve
-them. The C-frame figures in `results/flame_*.svg` also elide leading context and cap depth.
-Recorded caps are depth 9 / 4.5% affected samples for stock nbody and depth 36 / 4.4% for stock
-pyflate. Capping loses leaf detail. Removing samples can change the normalization, and
-merging frames can change individual box widths, even when surviving sample counts are
-preserved.
-
-The C-level profiles remain available as supporting evidence:
-`results/flame_nbody_stock_full.svg`, `flame_nbody_opt_full.svg`,
-`flame_pyflate_stock_full.svg` and `flame_pyflate_opt_full.svg`.
-Flat self-time output is in the corresponding `perf_report_*.txt` files.
-Timings and headline speedups come from JSON measurements, not from graphical widths.
-
-== Review spot checks, 2026-09-07
-
-Short checks were rerun on the course VM using the repository's existing scripts.
-SHA-256 hashes matched the local copies for both shipped benchmark files and both
-`rs_check.py` scripts. The following timings are *minimums of three interleaved rounds*,
-not new rigorous benchmark results:
-
-#result-table(columns: (1.7fr, 1fr, 1fr),
-  align: (left, right, right),
-  table.header([*Comparison*], [*Python*], [*Native / hybrid*]),
-  [Nbody stock integration], [231.552 ms], [9.458 ms],
-  [Pyflate T3 symbol loop], [115.873 ms], [3.201 ms],
-  [Pyflate T3 complete decode], [278.244 ms], [161.072 ms],
-)
+== VM correctness checks, 2026-09-07
 
 Nbody's shipped Python kernel and its Rust kernel matched stock state and energy exactly
 after 20,000 steps. Pyflate's Python and hybrid outputs matched `bz2`; the L-vector and
-ending bit position matched too. These checks corroborate functionality and approximate
-performance, but do not replace the saved 120-value comparisons.
+ending bit position matched too. Benchmark and checker source hashes matched the local copies.
 
 == Fresh VM rerun
 
-On 2026-09-07 we reran one rigorous pyperf job per backend pair on the course VM, using
-explicit `HWSW_BACKEND` settings and new temporary result files. The benchmark source
-SHA-256 values matched this checkout (`nbody` `226c5b9f...a47b5`, `pyflate`
-`76c2361c...e4c494`). The VM working tree also contained unrelated existing edits; no files
-were synchronized or replaced.
+The four earlier rerun JSONs are preserved in `results/vm_rerun_20260907/`. Each contains
+*120 measured values from 40 workers*, with the expected backend metadata. A rigorous job
+already contains multiple workers and values; these runs have the same sample count as the
+older headline files. Benchmark source hashes match this checkout. These pyflate measurements
+used the previously installed extension, before the refactored source was rebuilt.
 
-#result-table(columns: (1.8fr, 1fr, 1fr, 1fr), align: (left, right, right, right),
-  table.header([*Fresh VM run*], [*Python*], [*Native*], [*Ratio*]),
-  [Nbody], [142 ms], [9.48 ms], [15.0×],
-  [Pyflate], [286 ms], [172 ms], [1.66×],
+#result-table(columns: (1fr, 1.5fr, 1.5fr, 0.7fr), align: (left, right, right, right),
+  table.header([*Earlier VM rerun*], [*Python mean ± SD*], [*Native mean ± SD*], [*Ratio*]),
+  [Nbody], [142.19 ± 4.48 ms], [9.477 ± 0.030 ms], [15.00×],
+  [Pyflate], [285.64 ± 3.04 ms], [171.89 ± 2.20 ms], [1.66×],
 )
 
-The fresh values are consistent with the saved 120-value distributions but are not merged
-into them: one rigorous job is useful as a revalidation, while the saved distributions remain
-the report's headline estimates and uncertainty values.
+The nbody native comparison now uses this verified rerun. Pyflate uses the subsequent
+three-tier experiment in `vm_release_20260907/`, which builds the current crate with
+`cargo build --locked --release` for CPython 3.10.12. Ten Rust tests and seven blocks
+across five fixtures pass; both decode APIs, traces and exact ending offsets are checked.
+The isolated build is selected through inherited `PYTHONPATH`; installed wheels and the
+existing VM checkout remain intact. `report/summarize_refresh.py` validates source hashes,
+backend metadata and sample counts. Independent captures are retained separately.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
