@@ -369,33 +369,39 @@
           }
         },
         "uarch": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-09-07T20:31:12Z",
           "finished": "",
           "gate": {
             "pipeline/FSM diagrams": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §2 C0/C1/C2 flowchart + §3.1/§3.2/§3.3 stateDiagrams",
+              "at": "2026-09-07T21:52:04Z"
             },
             "number formats fixed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §4: UQn.0 for every signal incl. limit_la UQ21.0 left-aligned compare form (U1/N1-proven)",
+              "at": "2026-09-07T21:52:04Z"
             },
             "memories sized": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §5: 8 memories, ~34 kbit flops, DBG arbitration noted",
+              "at": "2026-09-07T21:52:04Z"
             },
             "per-stage timing budget": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §6: C0 loop ~13ns worst of 20ns @ 50MHz; II=2 retreat documented (ADR-0008 #1)",
+              "at": "2026-09-07T21:52:04Z"
             },
             "latency/throughput derived and matches PRD KPI": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/decode_model.py on the real 148,271-symbol trace: K1=1.0068 (worst sweep 1.0317) <= 1.1; K2=167 <= 314; first symbol 1,004; K4a 2.99ms <= 3.06ms",
+              "at": "2026-09-07T21:52:04Z"
             },
             "hw-review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_uarch.md: 24 findings over 3 passes (9+13+2), all musts resolved incl. U1 compare direction and U2 phantom decodes, 0 must open",
+              "at": "2026-09-07T21:52:04Z"
             }
           }
         },
@@ -840,5 +846,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-07T20:30:54Z"
+  "updated": "2026-09-07T21:52:04Z"
 }

@@ -197,3 +197,11 @@ See `docs/review_mas.md` (written by `hw-review`).
   within its ABORT/ERR bound (a beat presented but not handshaken is withdrawn) and emits nothing
   until its next accepted doorbell; likewise an accepted doorbell withdraws any pending beat. This
   is what lets the chained `mtf_cam` start every invocation with an empty `s_sym`.
+- 2026-09-08 (uArch review pass 2, N4/N7/N13 — enables the folded-counts build, ADR-0008 #4):
+  (1) the lengths window is laid out **per table at fixed 48-word strides** (table t's lengths
+  occupy words LEN_BASE + 48·t .. +47; 288 words total as before, 6 × 5-bit fields per word,
+  fields beyond ALPHABET must be written 0 — `HuffmanDriver.decode_block()` zeroes trailing
+  fields when the alphabet shrinks); a lengths write with `wstrb ≠ 4'hF` is ignored whole.
+  (2) The "prefetch ≤ 4 beats" bound governs **accepted-but-unconsumed** data (buffer + FIFO
+  ≤ 128 bits); words discarded by the START_BIT skip are consumed and not counted against it.
+  (3) `DBG_DATA` symtab reads are valid outside build FILL cycles; during FILL they return 0.

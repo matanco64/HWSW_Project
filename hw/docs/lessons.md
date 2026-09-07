@@ -228,3 +228,20 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - cocotb poll budgets: a fixed max_polls sized for the expected cycle count expired 1% short
   of the finish line and cost a 5-minute rerun; budget 2x the estimate, poll on BUSY-fall not
   sticky DONE (stale-sticky vacuity, review S1).
+
+## 2026-09-08 — huffman_engine/uarch
+
+- **The reviewer caught an inverted comparator before a single line of RTL existed** (U1: the
+  ≥-first_code form decodes every table as length-1; the correct one-sided form is
+  <-limit_la with smallest-match-wins, proven with a counterexample and then re-proven in
+  pass 2 via the canonical recurrence). Two more passes drove 24 findings to zero — the
+  document now carries the invariant proofs the RTL will be reviewed against.
+- The C0-visibility question ("which decode-stopping events can the loop know about in its
+  own cycle?") reshaped the design twice (per-set EOB latch; DEFLATE demoted to II=2). Asking
+  it explicitly at uArch beats discovering it as a hang at bring-up (grape's retired-count
+  lesson, applied a stage earlier — the loop tightens).
+- A uArch fix reached BACK into the MAS (lengths-window strides amendment) — address-based
+  attribution needed a layout the approved MAS didn't have. Post-approval amendments with
+  dated bullets worked; the alternative (pending-register attribution) was unfixable.
+- Folding derived state into write paths (counts, invalid bins) keeps buying margin: K2 went
+  from zero-margin to 1.88x, and the doorbell-time MAXLEN/Kraft checks fell out for free.
