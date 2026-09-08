@@ -22,9 +22,13 @@ KPI. Outputs: `hw/<module>/docs/ppa.md`, `hw/<module>/synth/` (`yosys.ys`, `area
    width; `mtf_cam`: shift-register CAM vs RAM+shift). Run step 2 per point with
    `make area PARAMS="-D..."`; keep each `area_<point>.txt`.
 4. **Sign-off numbers — OpenLane 2.** Write `synth/config.json` (`DESIGN_NAME`, `VERILOG_FILES`,
-   `CLOCK_PORT`, `CLOCK_PERIOD` from MAS, `FP_CORE_UTIL`). When step 2 reported ≳ 300 k cells,
-   add `"SYNTH_HIERARCHY_MODE": "deferred_flatten"` — flat wide-arith techmap OOMs silently on
-   a ≤ 16 GB host, and the only symptom is a log frozen at the same byte count run after run.
+   `CLOCK_PORT`, `CLOCK_PERIOD` from MAS, `FP_CORE_UTIL`). Budget memory before launching:
+   OpenLane's synlig-loaded yosys peaks ~3× plain Yosys on the same RTL (grape: 7.5 → >20 GB),
+   and one yosys process holds the whole design in every SYNTH_HIERARCHY_MODE — hierarchy knobs
+   move when flatten runs, not the peak. When 3× the step-2 yosys peak approaches host RAM,
+   raise the host first (WSL defaults to 50 % of physical RAM; `.wslconfig` memory=/swap= then
+   `wsl --shutdown`) and sample yosys RSS alongside the run. An OOM shows as a log frozen at
+   the same byte count (modulo log-head config echo) at the same elapsed time, run after run.
    Run `make -C hw/<module> openlane` (= `openlane synth/config.json`). Within a minute of
    launch, confirm the config took: the log head has no `WARNING ... configuration variable`
    line and `synth/runs/<tag>/resolved.json` holds every variable you set (OpenLane 1 names

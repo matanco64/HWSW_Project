@@ -293,3 +293,19 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   step-2 fast gate reports ≳ 300 k cells. Skill: `hw-ppa` step 4.
 - (Runs 1–2 died with session restarts — the setsid-survival and log-watching lessons from
   dv_signoff apply unchanged; no new instruction.)
+
+## 2026-09-08 (late) — grape_pipeline/ppa (run 5 falsifies the run-4 lesson)
+
+- **The deferred_flatten remedy was wrong in mechanism**: run 5 (deferred_flatten, verified in
+  resolved.json) died at the SAME point as run 4 — ~18 min in, mid-techmap, logs 486 B apart
+  (exactly run 4's deprecation-warning block). One yosys process holds the whole design in
+  every SYNTH_HIERARCHY_MODE; the knob moves WHEN flatten runs, not the peak. Per-module
+  plain-yosys measurements (3.3 GB) predicted nothing about OpenLane's process. The durable
+  rule is a memory BUDGET, not a hierarchy knob: OpenLane's synlig-loaded yosys peaked ~3× plain
+  Yosys on the same RTL (7.5 → >20 GB); when 3× the plain-yosys peak approaches host RAM, raise
+  the host first (WSL: 50%-of-RAM default; `.wslconfig` memory=/swap= + `wsl --shutdown`).
+  Skill: `hw-ppa` step 4 (corrects the entry applied earlier today).
+- **Instrument before re-running a suspected OOM**: two runs were spent inferring memory death
+  from frozen byte counts; a 5-line RSS sampler alongside the launch turns the next failure
+  into a number. When comparing frozen log sizes across runs, subtract the log-head config
+  echo first — 486 B of deprecation warning nearly masked that runs 4 and 5 died identically.
