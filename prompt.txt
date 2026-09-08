@@ -1911,3 +1911,28 @@ Prompt: "<task-notification>
 <event>area: 151058 sky130_fd_sc_hd cells, 1634516.380800 um^2 -&gt; synth/area.txt</event>
 If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
 </task-notification>"
+
+2026-09-08T07:44:03Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ac15181ec53aa5899</task-id>
+<tool-use-id>toolu_019kcR45gKkpdhaRtr6Umfqx</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/ac15181ec53aa5899.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman testplan review" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. Written to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_testplan.md` (testplan.md untouched).
+
+**Counts: 5 must / 8 should / 4 nit**
+
+**Musts:**
+- **T1 — EOB off-by-one in §4's golden interface.** Verified by executing the golden: `decode_bzip2_symbols` appends the EOB to `syms` before breaking, and `trace_benchmark()`'s 148,271 symbols include the EOB (last entry = 146 = ALPHABET−1, start_bit 8,844, BITS 531,571 all confirmed live). The plan's `SYMBOLS = len(syms) + 1` inflates every expectation by one (K1 denominator 148,272 vs the correct 148,271), and "TYPE 0 per symbol + final TYPE 3 EOB" both double-emits the EOB and produces a TYPE-0 beat carrying the EOB value, which MAS §2 explicitly forbids. Contradicts the plan's own F-12/F-30 checkers.
+- **T2 — Reset never verified.** PRD-F16, PRD-F11's reset clause, and the MAS §8 reset row have no test/row/covergroup; §7 traceability silently drops PRD-F14/F15/F16. Grape has `test_reset` + `cg_reset` as a must for the analogous requirement.
+- **T3 — ERR_SYMBOL (must-priority PRD-F10 clause, MAS §8 row, STATUS bit 13) only reachable via the gated, should-priority `test_deflate`;** cg_err bins omit SYMBOL entirely. Answering the brief: yes, the R23 gate leaves a MUST clause unverified, with §5 pre-authorizing the waiver.
+- **T4 — Doorbell-time ERR_TABLE (length &gt; MAXLEN, 21..31) has no test.** F-03's `kraft` covers only the build-time over-subscription half; the errata keeps length&gt;MAXLEN doorbell-time; the MAS §8 build-time row's dispositions are also unitemized.
+- **T5 — MAS 0x110 assigns "the emulation model gets the same check at hw-dv-testplan" (SYMBOL_LIMIT), but the frozen golden has no limit parameter and the plan neither schedules the model change nor derives the exactly-LIMIT / EOB-tie expectations any other way.**
+
+Notable shoulds: F-09's checker restates the pre-errata "no IRQ" rule the errata overrode; golden error-prefix retrieval is impossible as documented (exceptions discard partial output, out-of-range selector raises bare IndexError); F-24 will fail against open RTL deviations N11/N12 without acknowledgment; the R23 gate contradicts the header's "resolve HERE" with no exit condition; cg_irq has no bins vs grape's `test_irq`; PRD §7 corners (18,002 selectors, EOB-as-symbol-0, SYMBOL_LIMIT=2^27 accept) unmapped.
+
+Cleared: the §4 call shape (5 args, 3-tuple) matches the real signature; `trace_benchmark()` provides everything §3 Vectors claims; F-30's K1 formula itself matches PRD/uArch; carry-ins R1/R3/R7/R9/N1/N4/N10/R18 are genuinely encoded; the formal list is feasible with the fallback pre-recorded.</result>
+<usage><subagent_tokens>126215</subagent_tokens><tool_uses>12</tool_uses><duration_ms>402932</duration_ms></usage>
+</task-notification>"

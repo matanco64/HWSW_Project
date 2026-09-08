@@ -247,13 +247,14 @@
           }
         },
         "ppa": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-08T07:37:27Z",
           "finished": "",
           "gate": {
             "Yosys+Liberty area + cell counts": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/area.txt: 584454 cells, 4075030.8 um^2 (sky130_fd_sc_hd tt); docs/ppa.md tables",
+              "at": "2026-09-08T07:38:49Z"
             },
             "OpenLane 2 run: Fmax, area µm², power": {
               "result": "n/a",
@@ -262,6 +263,11 @@
             "trade-off table (≥2 design points)": {
               "result": "n/a",
               "evidence": ""
+            },
+            "trade-off table (>= 2 design points)": {
+              "result": "pass",
+              "evidence": "docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff fix as the design knob",
+              "at": "2026-09-08T07:38:49Z"
             }
           }
         },
@@ -428,21 +434,33 @@
           }
         },
         "dv_testplan": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-08T07:35:49Z",
+          "finished": "2026-09-08T07:45:19Z",
           "gate": {
             "features ↔ tests ↔ covergroups ↔ checkers matrix": {
               "result": "n/a",
               "evidence": ""
             },
             "golden-model interface defined": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/testplan.md §4: decode_bzip2_symbols trace-exact per beat (EOB counting execution-verified, T1), SYMBOL_LIMIT derivation, R23 bring-up gate",
+              "at": "2026-09-08T07:45:19Z"
             },
             "formal properties listed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/testplan.md §6: ctrl_arcs + skid + aligner-cap sby properties with recorded fallback",
+              "at": "2026-09-08T07:45:19Z"
+            },
+            "features <-> tests <-> covergroups <-> checkers matrix": {
+              "result": "pass",
+              "evidence": "docs/testplan.md §2: 26 rows (F-01..15 = PRD-F1..16, F-20..26 arcs/boundaries/errors, F-30..32 KPIs), no empty cell",
+              "at": "2026-09-08T07:45:19Z"
+            },
+            "hw-review resolved": {
+              "result": "pass",
+              "evidence": "docs/review_testplan.md: 17 findings (5 must incl. executed-golden EOB catch), all musts resolved, 0 open",
+              "at": "2026-09-08T07:45:19Z"
             }
           }
         },
@@ -849,5 +867,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-08T06:42:12Z"
+  "updated": "2026-09-08T07:45:19Z"
 }

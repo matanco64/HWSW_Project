@@ -262,3 +262,15 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - Reviewer-driven TB additions (boundary_refill_stall) are the regression the next module
   inherits; a reviewer that says "the unit tests can't see this" should trigger a test, not
   just a fix.
+
+## 2026-09-08 — huffman_engine/dv_testplan + grape_pipeline/ppa (partial)
+
+- **The testplan reviewer executed the golden model** and caught an EOB double-count that
+  three careful readings missed (`syms` already ends with the EOB; the plan added one more).
+  New bar for testplan reviews: every golden-interface claim gets run, not read.
+- A must-priority error flag reachable only through a gated should-priority test (ERR_SYMBOL
+  behind the DEFLATE gate) is a waiver hiding in a schedule; the fix is to commit the gate's
+  resolution as the first bring-up task and lift the test to must.
+- PPA trade-off tables are best built from MEASURED points that already exist in git history:
+  the K1-fix pair (393k/2.94mm²/K1=162 vs 584k/4.08mm²/K1=124) is a stronger §7 exhibit than
+  any synthetic parameter sweep — both points fully verified when they were HEAD.
