@@ -1993,3 +1993,21 @@ Prompt: "<task-notification>
 2026-09-08T17:25:26Z — Claude Code session (auto-logged)
 Prompt: "where do we stand? did we learn something fromthe process? /hw-advisor"
 [hw-advisor] 2026-09-08 grape_pipeline/ppa: two lessons from the 4-run OpenLane saga applied to .claude/skills/hw-ppa/SKILL.md step 4 — (1) SYNTH_NO_FLAT is OpenLane-1 vocabulary, warned-and-ignored by OpenLane 2 (use SYNTH_HIERARCHY_MODE; verify the log head + resolved.json within a minute of launch); (2) flat synthesis of a >=0.5M-cell design on a 15GB host is a silent deterministic OOM (log frozen at identical byte counts) — deferred_flatten synthesizes per-module (3.3GB peak) and still yields a flat netlist. Lessons appended to hw/docs/lessons.md.
+
+2026-09-08T17:34:54Z — Claude Code session (auto-logged)
+Prompt: "is the  run-5 watcher running?"
+
+2026-09-08T20:15:52Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bbbgrgixm</task-id>
+<tool-use-id>toolu_01HBRDXQgH8PyTwyNxCDQrQ9</tool-use-id>
+<status>stopped</status>
+<summary>No completion record was found for this background shell command from the previous session. It may have been stopped (via the UI, Monitor timeout, or agent teardown — these leave no transcript marker), or it may have been running when the previous Claude Code process exited. Check the output file for partial results before assuming it completed.</summary>
+</task-notification>"
+
+2026-09-08T20:17:54Z — Claude Code session (auto-logged)
+Prompt: "continue"
+
+2026-09-08T20:31:16Z — Claude Code session (auto-logged)
+Prompt: "done. what's next? anything /hw-advisor needs to learn?"
+[hw-advisor] 2026-09-08 (late) grape_pipeline/ppa: run 5 falsified the morning lesson — SYNTH_HIERARCHY_MODE=deferred_flatten died at the identical OOM point as run 4 (one yosys process holds the whole design in every mode). hw-ppa step 4 corrected: memory-budget rule (OpenLane synlig-yosys ~3x plain-yosys peak; raise WSL via .wslconfig when 3x approaches host RAM) + sample yosys RSS alongside runs + compare frozen log sizes modulo log-head config echo. Host raised 15.7->24GB (+16GB swap); run 6 relaunched. Lessons in hw/docs/lessons.md.
