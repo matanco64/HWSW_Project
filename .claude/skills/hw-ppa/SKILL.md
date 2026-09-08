@@ -22,8 +22,13 @@ KPI. Outputs: `hw/<module>/docs/ppa.md`, `hw/<module>/synth/` (`yosys.ys`, `area
    width; `mtf_cam`: shift-register CAM vs RAM+shift). Run step 2 per point with
    `make area PARAMS="-D..."`; keep each `area_<point>.txt`.
 4. **Sign-off numbers — OpenLane 2.** Write `synth/config.json` (`DESIGN_NAME`, `VERILOG_FILES`,
-   `CLOCK_PORT`, `CLOCK_PERIOD` from MAS, `FP_CORE_UTIL`). Run `make -C hw/<module> openlane`
-   (= `openlane synth/config.json`). Read `synth/runs/<run>/final/metrics.json`:
+   `CLOCK_PORT`, `CLOCK_PERIOD` from MAS, `FP_CORE_UTIL`). When step 2 reported ≳ 300 k cells,
+   add `"SYNTH_HIERARCHY_MODE": "deferred_flatten"` — flat wide-arith techmap OOMs silently on
+   a ≤ 16 GB host, and the only symptom is a log frozen at the same byte count run after run.
+   Run `make -C hw/<module> openlane` (= `openlane synth/config.json`). Within a minute of
+   launch, confirm the config took: the log head has no `WARNING ... configuration variable`
+   line and `synth/runs/<tag>/resolved.json` holds every variable you set (OpenLane 1 names
+   such as `SYNTH_NO_FLAT` are warned-and-ignored). Read `synth/runs/<run>/final/metrics.json`:
    `timing__setup__ws` → Fmax = 1/(period − ws); `design__instance__area`; `power__total`
    (from the STA/power step); DRC/LVS counts. Record `ppa.fmax_mhz`, `ppa.power_mw`.
 5. **Die shot.** `final/gds` rendered with klayout (`klayout -z -rd input=... -r
