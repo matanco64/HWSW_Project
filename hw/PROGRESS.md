@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-08 06:42 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-08 06:42 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-08 07:45 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-08 07:45 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,7 +25,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class ppa,integration todo
+    class integration todo
+    class ppa in_progress
     class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff done
 ```
 
@@ -49,8 +50,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd,mas,uarch,rtl done
+    class dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class prd,mas,uarch,rtl,dv_testplan done
 ```
 
 ### `mtf_cam`
@@ -83,16 +84,16 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ |
-| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔵 | ⬜ |
+| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
 ## Next up
 
-- `grape_pipeline`: **PPA** — todo
-- `huffman_engine`: **DV testplan** — todo
+- `grape_pipeline`: **PPA** — in_progress
+- `huffman_engine`: **DV bring-up** — todo
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
 ## Gates
@@ -161,6 +162,13 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] Icarus 4-state run X-free after reset — make sim-icarus: TESTS=9 PASS=9; monitor is_resolvable asserts on every handshake, none fired
 - [x] formal (sby) where listed — synth/formal.sby: bmc PASS (depth 40) + cover PASS (5/5 states) on fsm_arcs; bresp_hold/w1c take testplan §6 fallback (regs 3x2240b beyond smtbmc; test_regs 11/11 + protocol agent)
 
+#### PPA — 🔵 in_progress (started 2026-09-08T07:37:27Z)
+
+- [x] Yosys+Liberty area + cell counts — synth/area.txt: 584454 cells, 4075030.8 um^2 (sky130_fd_sc_hd tt); docs/ppa.md tables
+- [ ] OpenLane 2 run: Fmax, area µm², power
+- [ ] trade-off table (≥2 design points)
+- [x] trade-off table (>= 2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff fix as the design knob
+
 ### `huffman_engine`
 
 #### PRD — ✅ done (started 2026-08-28T19:34:34Z, finished 2026-08-28T20:54:29Z)
@@ -193,6 +201,14 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] make lint clean (verilator --lint-only -Wall) — 13 files, lint: clean
 - [x] Yosys synth succeeds (synthesizable subset) — synth/area.txt: 151058 sky130_fd_sc_hd cells, 1634516.4 um^2, 0 errors (K5 soft ceiling 1.0mm^2 exceeded — flagged for PPA per PRD)
 - [x] agent code review resolved — docs/review_rtl.md: 3 passes, 19 must-level findings all resolved (incl. fixes-of-fixes N4/N10), 0 must open; 37 unit+smoke tests green incl. full-chip smoke
+
+#### DV testplan — ✅ done (started 2026-09-08T07:35:49Z, finished 2026-09-08T07:45:19Z)
+
+- [ ] features ↔ tests ↔ covergroups ↔ checkers matrix
+- [x] golden-model interface defined — docs/testplan.md §4: decode_bzip2_symbols trace-exact per beat (EOB counting execution-verified, T1), SYMBOL_LIMIT derivation, R23 bring-up gate
+- [x] formal properties listed — docs/testplan.md §6: ctrl_arcs + skid + aligner-cap sby properties with recorded fallback
+- [x] features <-> tests <-> covergroups <-> checkers matrix — docs/testplan.md §2: 26 rows (F-01..15 = PRD-F1..16, F-20..26 arcs/boundaries/errors, F-30..32 KPIs), no empty cell
+- [x] hw-review resolved — docs/review_testplan.md: 17 findings (5 must incl. executed-golden EOB catch), all musts resolved, 0 open
 
 ### `mtf_cam`
 
