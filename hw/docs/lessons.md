@@ -274,3 +274,22 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - PPA trade-off tables are best built from MEASURED points that already exist in git history:
   the K1-fix pair (393k/2.94mm²/K1=162 vs 584k/4.08mm²/K1=124) is a stronger §7 exhibit than
   any synthetic parameter sweep — both points fully verified when they were HEAD.
+
+## 2026-09-08 — grape_pipeline/ppa (OpenLane runs 1–4)
+
+- **A config variable set blind cost a full run**: `SYNTH_NO_FLAT` is OpenLane 1 vocabulary;
+  OpenLane 2 warned "deprecated ... see SYNTH_HIERARCHY_MODE" in the log's first three lines,
+  ignored it, and flattened anyway — run 4 marched 2.5 h into the identical OOM as runs 2–3.
+  The tell was available twice at launch time (the WARNING, and the variable's absence from
+  `runs/<tag>/resolved.json`) and nobody looked. New bar for any long background EDA run:
+  within a minute of launch, read the log head for config warnings and confirm every variable
+  you set appears in the tool's resolved/echoed config. Skill: `hw-ppa` step 4.
+- **Flat synthesis of a ≥ 0.5 M-cell design is an OOM, not a slowdown, on a 15 GB host**:
+  yosys' techmap of wide-arith cells (`$alu`/`$lcu`) during FLATTEN peaked past 15 GB and the
+  kernel killed it silently — the only symptom is a log frozen at the SAME byte count run
+  after run (deterministic input ⇒ deterministic death point; 32.67 MB twice, 32.32 MB with a
+  changed config). `SYNTH_HIERARCHY_MODE: deferred_flatten` synthesizes per-module (peak
+  3.3 GB here) and still hands the physical flow a flat netlist. Set it up front whenever the
+  step-2 fast gate reports ≳ 300 k cells. Skill: `hw-ppa` step 4.
+- (Runs 1–2 died with session restarts — the setsid-survival and log-watching lessons from
+  dv_signoff apply unchanged; no new instruction.)

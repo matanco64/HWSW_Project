@@ -1,0 +1,22 @@
+{
+    "DESIGN_NAME": "grape_pipeline",
+    "VERILOG_FILES": [
+        "dir::../rtl/fp64_pkg.sv",
+        "dir::../rtl/fp64_add.sv",
+        "dir::../rtl/fp64_mul.sv",
+        "dir::../rtl/fp64_sqrt_srt.sv",
+        "dir::../rtl/fp64_rcp_nr.sv",
+        "dir::../rtl/grape_regs.sv",
+        "dir::../rtl/grape_body_rf.sv",
+        "dir::../rtl/grape_step_fsm.sv",
+        "dir::../rtl/grape_force_pipe.sv",
+        "dir::../rtl/grape_accum.sv",
+        "dir::../rtl/grape_pipeline.sv",
+        "dir::../../common/rtl/axi_lite_if.sv"
+    ],
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 20.0,
+    "FP_CORE_UTIL": 40,
+    "PL_TARGET_DENSITY_PCT": 45,
+    "SYNTH_HIERARCHY_MODE": "deferred_flatten"
+}
