@@ -406,21 +406,24 @@
           }
         },
         "rtl": {
-          "state": "in_progress",
+          "state": "done",
           "started": "2026-09-07T22:03:04Z",
-          "finished": "",
+          "finished": "2026-09-08T06:42:12Z",
           "gate": {
             "make lint clean (verilator --lint-only -Wall)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "13 files, lint: clean",
+              "at": "2026-09-08T06:42:12Z"
             },
             "Yosys synth succeeds (synthesizable subset)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/area.txt: 151058 sky130_fd_sc_hd cells, 1634516.4 um^2, 0 errors (K5 soft ceiling 1.0mm^2 exceeded — flagged for PPA per PRD)",
+              "at": "2026-09-08T06:42:12Z"
             },
             "agent code review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_rtl.md: 3 passes, 19 must-level findings all resolved (incl. fixes-of-fixes N4/N10), 0 must open; 37 unit+smoke tests green incl. full-chip smoke",
+              "at": "2026-09-08T06:42:12Z"
             }
           }
         },
@@ -561,8 +564,8 @@
           "formal": "n/a"
         },
         "ppa": {
-          "cells": 0,
-          "area_um2": 0,
+          "cells": 151058,
+          "area_um2": 1634516,
           "fmax_mhz": 0,
           "power_mw": 0
         }
@@ -846,5 +849,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-07T22:03:04Z"
+  "updated": "2026-09-08T06:42:12Z"
 }
