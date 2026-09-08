@@ -245,3 +245,20 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   dated bullets worked; the alternative (pending-register attribution) was unfixable.
 - Folding derived state into write paths (counts, invalid bins) keeps buying margin: K2 went
   from zero-margin to 1.88x, and the doorbell-time MAXLEN/Kraft checks fell out for free.
+
+## 2026-09-08 — huffman_engine/rtl
+
+- **Contract-first parallel build, second data point**: three agents (regs 13/13, aligner
+  12/12, builder+tables 5/5 — the latter two mutation-vacuity-checked) + an own-built serial
+  core integrated with ZERO interface rework, and the full-chip smoke passed on the FIRST run
+  (grape's first integration sim hung on a lane bug). The differences: binding contracts
+  written before any RTL, unit TBs before review, and a top-level smoke at the RTL stage.
+- **The review still owned the integration layer**: 3 passes, 19 must-level findings, every
+  one in hand-wired top/ctrl/lifecycle code (skid overflow accounting, pulse-vs-level
+  handshakes, cross-invocation state, drain/abort dispositions) — none in the TB'd leaves.
+  Fixes-of-fixes needed their own verification pass twice (R3's first fix un-stalled exactly
+  the wrong cycle; pass 3 found the same hole mid-run). Selector-style engines want a TB case
+  per BOUNDARY (entry, 50-boundary, exhaustion), not per feature.
+- Reviewer-driven TB additions (boundary_refill_stall) are the regression the next module
+  inherits; a reviewer that says "the unit tests can't see this" should trigger a test, not
+  just a fix.

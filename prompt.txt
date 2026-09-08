@@ -1662,3 +1662,252 @@ Still open:
 Both open items are one-sentence/one-word spec fixes, not re-architecture.</result>
 <usage><subagent_tokens>83538</subagent_tokens><tool_uses>7</tool_uses><duration_ms>229095</duration_ms></usage>
 </task-notification>"
+
+2026-09-07T22:02:58Z — Claude Code session (auto-logged)
+Prompt: "uarch done 
+/hw-flow huffman_engine"
+
+2026-09-07T22:16:52Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a72516e9465926b5a</task-id>
+<tool-use-id>toolu_0155A7fd5QiAQQuhmL9CVkJt</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a72516e9465926b5a.output</output-file>
+<status>completed</status>
+<summary>Agent "Build huff_regs + unit TB" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All done. Final report:
+
+**Deliverables** (all under `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/`):
+- `rtl/huff_regs.sv` — register decoder: ADR-0005 header (ID `HUF1`/VERSION/CTRL WP with 1-cycle BRESP-held doorbell decision/STATUS W1C/IRQ_EN 15:1/IRQ_STATUS), live counters (CYCLES/SYMBOLS/BITS/BUILD_CYCLES/OVERFETCH), pending+latched config (MODE/START_BIT/ALPHABET/N_TABLES/SYMBOL_LIMIT), DBG_SEL (live, busy-writable) + DBG_DATA read-through of `dbg_data_i`, lengths window at per-table 48-word strides (single stored copy, `wstrb != 4'hF` ignored whole) with folded `count[6][20]` + per-table invalid bins maintained by one-cycle RMW (dec 6 old fields, inc 6 new), doorbell-time ERR_PARAM/ERR_TABLE checks, builder ports `lengths_rd` ({t,sym}→5b, 1-cycle registered) and `counts_rd` ((t,l)→9b comb), registered irq. Grape structure imitated (comb next-state + simple-assignment always_ff, apply_strb, addr_mapped).
+- `rtl/huff_regs_tb_top.sv` — wiring-only wrapper: `axi_lite_if` + `huff_regs`, all core-side/builder signals as toplevel pins.
+- `tb/unit/test_regs.py` — written first (TDD; watched it fail on missing RTL), grape wr32/rd32/PulseCounter/ring_doorbell structure.
+
+**Results**: 13/13 cocotb tests PASS (verilator). `verilator --lint-only -Wall` clean on both files. Yosys parse `hierarchy -check -top huff_regs` exit 0 with **no** line matching bare `ERROR` (only expected mem→register lowering warnings). One test-side bug found by the run and fixed in the test, not the RTL (rewrite-decrement arithmetic: expected bin value was 2, not 3).
+
+**Contract ambiguities resolved (contract files untouched)**:
+1. **ERR_PARAM vs ERR_TABLE priority at doorbell** — MAS §8 says "ERR_PARAM, or ERR_TABLE": implemented as priority — bad params set ERR_PARAM only; the folded-bin check runs only when params are legal.
+2. **`err_set_i[6:0]` mapping** — contract says "one-hot per MAS bits" without an order: mapped `[0]`→STATUS bit 9 (ERR_PARAM) through `[6]`→bit 15 (ERR_UNDERRUN); ERR_BUSY (bit 8) is regs-internal only.
+3. **DBG_DATA** — its data lives in huff_tables, so huff_regs reads a live `dbg_data_i` input and exports live `dbg_table_o/dbg_kind_o/dbg_index_o` (the TB verifies read-through + field extraction).
+4. **SYMBOL_LIMIT "1..2^27"** — taken inclusive: 2^27 accepted, 0 and 2^27+1 rejected (tested).
+5. **Lengths reads while BUSY** — single stored copy per MAS amendment, so LEN reads return the stored word in both states (writes-while-BUSY are ignored, so stored == latched).
+6. **Partial-strobe lengths write** — ignored whole with OKAY and *no* sticky flag while idle; while BUSY the config-class busy check dominates → ERR_BUSY (strobe never examined).
+7. **IRQ_EN bits 3..7** — writable per "15:1 RW" but sourceless (no STATUS bits 3..7 exist); documented dead, grape-style.</result>
+<usage><subagent_tokens>161085</subagent_tokens><tool_uses>29</tool_uses><duration_ms>717269</duration_ms></usage>
+</task-notification>"
+
+2026-09-07T22:19:19Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a5cd06e58c8cd243b</task-id>
+<tool-use-id>toolu_01EU5svvt7RsTLXmEfsUQ59k</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a5cd06e58c8cd243b.output</output-file>
+<status>completed</status>
+<summary>Agent "Build huff_aligner + unit TB" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Done. Both deliverables are complete and green.
+
+**Files**
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/rtl/huff_aligner.sv` — 64b top-aligned bit buffer + 2-beat shift-through FIFO (accepted-unconsumed ≤ 128 bits by construction; `tready = enable &amp; FIFO-not-full &amp; !last_seen`), MSB-first byte-swap ingest (byte 0 bit 7 first), 20-bit peek window with 0..20-bit consume and concurrent 32b refill, START_BIT skip through the same consume datapath at 32 bits/cycle (one word/beat rate, then the sub-word remainder), TLAST/tkeep last-valid-bit tracking with zero-padded tail, sticky `underrun_o`, DEFLATE reversed-15 window in `[19:5]` with `[4:0]=0`. Style per claude-skill-verilog: `default_nettype none`, pure always_ff (reset folded into comb next-state), sized literals, no Yosys-0.68 potholes.
+- `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/tb/unit/test_aligner.py` — written first, oracle = pure-Python bit slicer over the driven beats; single falling-edge race-free loop drives AXIS + consume by hand and checks per cycle: window vs next-20 reference bits (zero-padded; DEFLATE reversed-15), 128-bit cap, occ_ok safety (never high with &lt;20 real bits pre-TLAST), `bits_consumed_o`, underrun-free operation.
+
+**Status**
+- Sim: **12/12 tests PASS** (smoke, random streams×gaps, start_bit 0/±1/word-aligned/large-8991/==stream-end, tkeep 0x1/0x3/0x7 tails, underrun past tail + START_BIT past end, DEFLATE, backpressure/cap with observed tready drop, occ_ok gating under starvation, consume_i=0 no-op).
+- Vacuity-checked: two RTL mutations (byte-swap removed; occ_ok forced 1) each made the TB fail, then reverted; final run re-verified green.
+- Lint: `verilator --lint-only -Wall` clean. Yosys 0.68 `hierarchy -check -top huff_aligner`: no ERROR lines.
+
+**Contract ambiguities resolved (noted, contracts untouched)**
+1. *Whole-word SKIP realization*: implemented as a 0..32-bit internal consume through the buffer with concurrent refill — same one-word-per-cycle rate as "discard 1 word/beat", and discarded words are "consumed" per the MAS §8 amendment, so the 128-bit cap holds uniformly; it also makes prefetch-before-start_i safe.
+2. *underrun_o polarity*: contract doesn't say pulse vs level — implemented **sticky** (cleared by `start_i`/reset), which is what ctrl's ERR latch and the TB both want.
+3. *bits_consumed_o scope*: counts decode consumes only (MAS 0x04C "bits consumed **since START_BIT**"); skip bits excluded; on an underrun consume it counts the clamped amount (stops exactly at the last valid bit, keeping F13's `next START_BIT = prev + BITS` exact).
+4. *DEFLATE reversal convention*: `window_o[5]` = next stream bit, `window_o[19]` = 15th-next (reverse of the top-aligned 15, tail zeros land at the MSB side) — oracle and RTL agree; flagged for the huff_decoder/deflate integrator.
+5. *tkeep on non-TLAST beats* is not read (MAS §2 says all-ones there); a TLAST beat with `tkeep[0]=0` contributes 0 bits but still ends the stream.
+6. *External consumes before `skip_done_o`* are ignored (decoder isn't running in PREP); consume values 21..31 are trusted-out-of-contract (treated as-is, clamped at occupancy).</result>
+<usage><subagent_tokens>131683</subagent_tokens><tool_uses>21</tool_uses><duration_ms>849197</duration_ms></usage>
+</task-notification>"
+
+2026-09-07T22:19:48Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a1fc3929515b6d560</task-id>
+<tool-use-id>toolu_01XXaLqkfWgUA3r6T6N4qiGw</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a1fc3929515b6d560.output</output-file>
+<status>completed</status>
+<summary>Agent "Build builder+tables + unit TB" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>All done — 5/5 tests pass, lint clean, Yosys parse clean.
+
+## Files (all under `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/`)
+- `rtl/huff_builder.sv` — build FSM (IDLE/PREFIX/FILL) per uArch §3.2: PREFIX recurrence `first_code[l]=(first_code[l-1]+count[l-1])&lt;&lt;1`, `limit_la[l]=(first_code[l]+count[l])&lt;&lt;(20-l)` UQ21.0, running `base[l]`; Kraft check `first_code[l]+count[l] &gt; 2^l` → `err_table_o` pulse + abort at the *first* violating l (equivalent to the oracle's total-sum test, and keeps registers untruncated). FILL uses per-length pointer pairs (`fill_ptr` = absolute symtab address `table_base+base[l]+next[l]`, `code_ptr` = running canonical code, both seeded during PREFIX) — no adders in the fill loop; EOB latch at `s==alphabet-1` (bzip2) / `s==256`, table 0 only (DEFLATE); all six latches cleared at build start via `eob_clr_o`. `build_cycles_o` = max per-table PREFIX+FILL.
+- `rtl/huff_tables.sv` — symtab 1728×10b (1W + registered 1R "C1" + DBG comb read gated to 0 during FILL), 6×20 sets of {limit_la 21b, first_code 20b, base 11b} as 120-deep memories, per-set table_base/eob as packed reset-able vectors, flat active-set view (`cur_set_i` mux) in its own comb block.
+- `rtl/huff_build_tb_top.sv` — thin wrapper: builder + tables + behavioral lengths window ({t,sym}→5b, 1-cycle registered) and count bins ({t,l}→9b comb) loaded through simple write ports; wiring only, synthesizable subset.
+- `tb/unit/test_builder.py` — written first (TDD). 5 tests: (1) real benchmark's 6 tables (147-symbol alphabet from `pyflate_ref.trace_benchmark()`) — every set's first_code/base/limit_la/table_base/symtab content/EOB vs the golden oracle, plus DBG-port spot check; (2) random Kraft-legal tables + complete-code corners (full 1..20 ladder, `[1,1]` truncation edge, uniform, incomplete); (3) over-subscription (bad table sandwiched as table 1 of 3) → err pulse, early abort, no done, busy drop, table 0 coherent, recovery build; (4) EOB lifecycle — rebuild updates latch, PREP-entry clear wipes non-rebuilt sets, uncoded EOB stays 0, DEFLATE fixed lit/dist codes: lit latches sym-256 (checked vs `Table(lit,15)`), distance set stays 0; (5) `build_cycles_o == alphabet+MAXLEN` exactly — **167** for the benchmark and **308** at ALPHABET_MAX, matching uArch §7 K2.
+
+## Status
+- `make sim`: **TESTS=5 PASS=5 FAIL=0** (Verilator, ~0.5 s). TB teeth proven by a mutation run (broken limit shift → all limit_la asserts fired), then reverted and re-verified green.
+- `make lint` (per-file `verilator --lint-only -Wall`): clean, all three files.
+- Yosys `read_verilog -sv` + hierarchy/proc on `huff_builder.sv huff_tables.sv`: bare-`ERROR` grep empty.
+
+## Ambiguities resolved (contracts/golden untouched)
+1. **`CanonicalTable` doesn't exist** — `golden/canonical_model.py` defines class `Table(lengths, maxlen)`; the TB imports `Table` and mirrors its exact first_code/base/symtab/ERR_TABLE definitions.
+2. **`table_base[t] = t*288`** fixed stride, as directed; documented in both RTL headers.
+3. **first_code 20-bit truncation**: a code complete at l&lt;20 makes model `first_code[20] = 2^20` → stored field truncates to 0; harmless (that l can never win the one-sided compare), TB masks comparisons to 20 bits (documented in the test docstring).
+4. **FILL cycle accounting**: the 1-cycle lengths read is hidden by issuing `{t, sym 0}` throughout each table's PREFIX, so per-table time is exactly MAXLEN+ALPHABET 
+... [truncated, 4407 chars total]"
+
+2026-09-08T05:49:58Z — Claude Code session (auto-logged)
+Prompt: "resume"
+
+2026-09-08T05:54:48Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6grchlak</task-id>
+<summary>Monitor event: "huffman area synth completion"</summary>
+<event>HUFF AREA FAILED:
+ERROR: Module `\axi_lite_if' referenced in module `\huffman_engine' in cell `\u_axi' is not part of the design.
+make: *** [../common/Makefile.cocotb:91: area] Error 1</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-08T05:58:07Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bo0hor94e</task-id>
+<summary>Monitor event: "huffman area synth rerun completion"</summary>
+<event>HUFF AREA DONE:
+area: 161182 sky130_fd_sc_hd cells, 1635687.503999 um^2 -&gt; synth/area.txt</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-08T05:58:07Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bo0hor94e</task-id>
+<tool-use-id>toolu_01Ny4GjgyvZD8257Z2Kh5yHf</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/bo0hor94e.output</output-file>
+<status>completed</status>
+<summary>Monitor "huffman area synth rerun completion" stream ended</summary>
+</task-notification>"
+
+2026-09-08T06:08:29Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a6bd725bcfb05754e</task-id>
+<tool-use-id>toolu_01QdCbPZ6XyEDiucqN2Vjxbo</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a6bd725bcfb05754e.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman RTL review pass 1" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. Written to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_rtl.md` (26 findings, no RTL edited).
+
+### Summary: 13 must / 10 should / 3 nit
+
+**Must list (silent corruption / hang / MAS-protocol violations, all with cycle traces in the doc):**
+
+1. **R1 — output-skid overflow**: `stall` covers C0 only; with 1 beat in the skid + 1 in C1, `issue` still fires (out_full=0), so 3 cycles of `m_sym` back-pressure push while full and overwrite slot1 — a symbol silently lost (the worst case from the brief: 2-in-skid + 1-in-C1 is reachable).
+2. **R2 — PREP hang**: `build_done` is a 1-cycle pulse ANDed with the `skip_done` level; whenever the START_BIT skip outlasts the build the pulse is missed → BUSY forever. Multi-block bzip2 hits this by block ~2 (START_BIT grows by BITS+header per F13).
+3. **R3 — selector first-pop race**: `sel_stall_o` uses registered `pending`, skid is always empty at DECODE entry → symbol 0 deterministically issues with the reset/stale `cur_set` and the 50-symbol cadence shifts by one thereafter. Smoke can't see it (&lt;50 syms, sel 0).
+4. **R4 — DRAIN never drains `s_sel`** (pops/tready are DECODE-gated) and the MAS §8 abort-during-drain rescue is unimplemented → surplus selectors hang DRAIN unrecoverably.
+5. **R5 — early DONE**: DRAIN→DONE reads stale `out_empty` and ignores `eob_sent` → DONE can be set the cycle the EOB beat is still being pushed, before TLAST handshakes.
+6. **R6 — builder unstoppable**: no stop port; PREP abort leaves it running, the next doorbell's `start_i` is ignored and the stale `build_done` can release the new invocation onto wrong tables.
+7. **R7 — aligner lifecycle**: `last_seen_q`/buffer/FIFO survive `start_i` → after any TLAST stream, `tready` never rises again (next invocation hangs) and leftover over-fetched bits contaminate the next block; over-fetched beats are never "dropped at DONE".
+8. **R8 — PREP ignores underrun**: START_BIT ≥ stream bits spins in PREP forever instead of ERR_UNDERRUN at symbol 0.
+9. **R9 — underrun beat escapes withdrawal**: the underrunning consume still issues; its beat can handshake the same cycle flush asserts → one phantom symbol reaches mtf_cam and SYMBOLS counts it.
+10. **R10 — DBG broken** (the suspicious expression confirmed): `dbg_addr` uses t·256 vs the t·288 table stride, the ternary is dead code, and `dbg_kind` is unwired — kinds 0-2 return symtab data; `read_table()` is broken (MAS 0x114/0x118 violation).
+11. **R11 — EOB/LIMIT tie**: ctrl's DRAIN transition uses raw `eob_i` while `eob_issue` is `!limit_stop`-gated → EOB decoded at issued==LIMIT completes as DONE with **no TLAST ever emitted**, instead of ERR_LIMIT.
+12. **R12 — selector state survives invocations**: prefetched skid beat + `drained` only clear on reset → cross-invocation corruption after any ERR/ABORT.
+13. **R13 — ERR_SELECTOR on exhaustion missing**: drained + needed pop = permanent stall, no sticky error (MAS §5 requires ERR_SELECTOR).
+
+**Notable shoulds**: the DEFLATE `rev_extract` double-reverse is confirmed — the top passes the RAW aligner window while the function assumes the remapped one, so extra bits are read from the wrong end, reversed (R14); DEFLATE resolve-cycle C0 events are unguarded (spurious ERR_NOCODE/phantom EOB, R15); DEFLATE SYMBOL_LIMIT counts issues not beats and can deadlock D_DWAIT (R16); DEFLATE literals emitted TYPE 0 vs ADR-0006's TYPE 1 (R17); doorbell doesn't flush the skid
+... [truncated, 4789 chars total]"
+
+2026-09-08T06:19:42Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bn76bk8cr</task-id>
+<summary>Monitor event: "huffman final area synth completion"</summary>
+<event>area: 138934 sky130_fd_sc_hd cells, 1594495.497600 um^2 -&gt; synth/area.txt</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-08T06:19:49Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bn76bk8cr</task-id>
+<tool-use-id>toolu_015UDFEs8S4QyzayCHMGNaBC</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/bn76bk8cr.output</output-file>
+<status>completed</status>
+<summary>Monitor "huffman final area synth completion" stream ended</summary>
+</task-notification>"
+
+2026-09-08T06:27:48Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a92489a2fe64df9f1</task-id>
+<tool-use-id>toolu_01SH6nUFtpS1mkK3EWp5w7Dy</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/a92489a2fe64df9f1.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman RTL review pass 2" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass-2 verification complete. Appended `## Pass 2 (2026-09-08, agent)` to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_rtl.md` (verification table for R1..R13 + fixed shoulds, new-findings table, summary). No RTL edited.
+
+**Test evidence (re-run by me):** smoke 1/1, selector 2/2, aligner 12/12, out 1/1 green on the current RTL — but only with per-unit `TOPLEVEL=` overrides; a bare `make sim MODULE=unit.test_selector` elaborates against `huffman_engine` and fails 0/N at 0 ns (recorded as nit N9).
+
+**Verdict: 5 must-level items open.**
+
+Resolved (10/13 musts, by trace): R1 (occ+c1_v bound holds inductively, eob_issue shares the stall, DEFLATE emit path bounded), R2 (done is a level, cleared at start — no doorbell race), R5, R6, R7 (no same-cycle accept race: tready needs busy, which is 0 on the doorbell cycle), R8, R9 (its own mechanism), R11 (both EOB/LIMIT ties traced correct), R12, R13. Shoulds R14/R15/R17/R18/R20 resolved.
+
+Open/new musts:
+1. **R3 NOT resolved (N4)** — the fix's `!start_i` exemption in `sel_stall_o` (huff_selector.sv:59) un-stalls exactly the DECODE entry cycle, where pending=0 and the skid is provably empty; symbol 0 still issues with the stale cur_set=0 whenever selector[0] ≠ 0. Worse, the claimed mechanism doesn't exist: `set_valid_o` is sunk into `unused_top` (huffman_engine.sv:436). The selector TB only checks sel_stall from the cycle *after* start_i, so 36/36 can't see it.
+2. **R4 partial (N3)** — drain-discard works, but the MAS §8 abort rescue is still missing: S_DRAIN with `abort_pend &amp;&amp; eob_sent` waits on `sel_drained` forever if the selector stream stalls (huff_ctrl.sv:112-118).
+3. **NEW N2** — the drain fix never examines the skid: a prefetched surplus TLAST selector resident in the skid at DRAIN entry leaves `drained`=0 with no further stream beats → DRAIN→DONE hangs until reset (huff_selector.sv:81-86).
+4. **NEW N1** — R9/R11 cross-coupling: ctrl's `eob_i` lacks `!tail_short` and the eob branch outranks underrun; an EOB matched over the zero-pad (len &gt; real tail bits) enters DRAIN with no EOB beat ever pushed → `eob_sent` never rises → permanent hang (huffman_engine.sv:131 + huff_ctrl.sv:91).
+5. **R10 partial (N5)** — t·288 addressing and the kind mux are right, but `dbg_data` is plumbed 10 bits (kind-1 first_code UQ20.0 truncated — `read_table()` still broken), and the MAS 0x118 "reads 0 for table ≥ N_TABLES / index out of range / before first build" rules are unimplemented (table 6/7 reads out of array bounds or wraps into table 1's region).
+
+Also new: N6 should (R19 OVERFETCH 8-bit underflow wrap after a PREP-underrun/abort-mid-skip), N7/N8 nits (dead `pad_zero` tautology in rev_extract; another declare-before-use). R16/R21/R22/R23 remain open as documented. Gate `hw-review findings resolved` stays open.</result>
+<usage><subagent_tokens>152839</subagent_tokens><tool_uses>27</tool_uses><duration_ms>706537</duration_ms></usage>
+</task-notification>"
+
+2026-09-08T06:33:29Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bg2k6qep1</task-id>
+<summary>Monitor event: "final huffman area completion"</summary>
+<event>area: 142665 sky130_fd_sc_hd cells, 1612133.664000 um^2 -&gt; synth/area.txt</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-08T06:33:35Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bg2k6qep1</task-id>
+<tool-use-id>toolu_012GRJHBtxWZx84cJUCXi65p</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/bg2k6qep1.output</output-file>
+<status>completed</status>
+<summary>Monitor "final huffman area completion" stream ended</summary>
+</task-notification>"
+
+2026-09-08T06:36:45Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>ab727492abea626aa</task-id>
+<tool-use-id>toolu_01GYNVFot1ozym8rWquTThWu</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/b787e4f8-b73a-4df4-81fe-bd6fc8d071f0/tasks/ab727492abea626aa.output</output-file>
+<status>completed</status>
+<summary>Agent "huffman RTL pass 3 verify" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Pass 3 appended to `/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/docs/review_rtl.md`. No RTL edited.
+
+**Verification results — all five pass-2 musts and should N6 resolved:**
+
+- **N4/R3 (selector start stall)** — resolved. Both stall terms cover the DECODE-entry cycle; the pop resolves, `started` registers one cycle later, and issue first fires the cycle after the pop with the applied set. No deadlock in any entry state (skid is provably empty at entry anyway; a full skid would pop at T0 and flow at T1).
+- **N2 (parked skid TLAST)** — resolved. The `drain_i &amp;&amp; skid_v` block consumes the parked entry; no same-cycle fight with the stream-accept discard — both drive `skid_v_n` to 0 and `drained_n` only ever sets.
+- **N3 (abort rescue)** — resolved. Arc order is rescue → pre-EOB abort → normal DONE; matches MAS §8 verbatim; `out_empty_i` cannot wedge it (eob_sent and empty register at the same edge as the TLAST handshake); normal and pre-EOB paths unbroken.
+- **N1 (EOB over zero-pad)** — resolved. `eob_i` now mirrors `eob_issue` (`!tail_short`); the same-cycle underrun composite falls through ctrl's priority chain to ERR_UNDERRUN, per MAS §8. The pass-2 minor (nocode+tail_short → ERR_NOCODE sticky) stands, minor only.
+- **N5/R10 (DBG)** — resolved. 20-bit first_code plumbed end-to-end to 0x118; `dbg_ok` masks table/index/pre-build including the pass-2 wrap and OOB cases; `built_q` lifecycle correct. Kind-0's `build_busy` arm is dead-but-harmless (unreachable while `built_q`=0).
+- **N6 (OVERFETCH)** — resolved, subtraction clamped at 0.
+
+**One new must — N10:** the R3 hole survives *mid-run*. At a 50-symbol boundary with the skid empty, `sel_stall = (pending &amp;&amp; !skid_v)` drops on the refill cycle itself, so the symbol issues with the registered **old** `cur_set` (the new set registers a cycle later), and the pop branch beats the advance branch so the run stretches to 51 issues — silent bzip2 corruption whenever the selector DMA stalls at a boundary. One-line fix: `sel_stall_o = pending || (enable_i &amp;&amp; !set_valid_o)` (self-clearing, no deadlock). Neither unit test reaches this path.
+
+**New minors:** N11 (should — kind-3 index gate `&lt;288` vs MAS "0..ALPHABET−1"; stale symtab content readable), N12 (should — `built_q` zeroes DBG for the whole build vs MAS "live (possibly partial) during a build"/amendment (3) FILL-only rule; safe direction but unimplemented liveness), N13/N14 (nits — new declare-before-use instances; stale `dbg_fc[19:10]` sink).
+
+**Tests run:** smoke 1/1 and selector 2/2 (with `TOPLEVEL=huff_selector` override) — both green.
+
+The `hw-review findings resolved` gate stays open on N10 alone; R16/R21/R22/R23 (shoulds) and the accumulated nits remain open as before.</result>
+<usage><subagent_tokens>100693</subagent_tokens><tool_uses>14</tool_uses><duration_ms>384275</duration_ms></usage>
+</task-notification>"
+
+2026-09-08T06:41:56Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b357em7xi</task-id>
+<summary>Monitor event: "gate-final huffman area completion"</summary>
+<event>area: 151058 sky130_fd_sc_hd cells, 1634516.380800 um^2 -&gt; synth/area.txt</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
