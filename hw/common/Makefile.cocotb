@@ -98,7 +98,8 @@ formal:
 	@if [ -f "$(FORMAL_SBY)" ]; then $(SBY) -f $(FORMAL_SBY); else echo "formal: skip ($(FORMAL_SBY) not present)"; fi
 
 openlane:
-	@echo "openlane: not wired yet (run hw/setup.sh --with-openlane, then hw-ppa skill)"
+	@test -f synth/config.json || { echo "openlane: no synth/config.json"; exit 1; }
+	. "$$HOME/.nix-profile/etc/profile.d/nix.sh" && openlane --run-tag signoff synth/config.json
 
 status:
 	@if [ -f "$(PROJ_ROOT)/tools/hw/render_progress.py" ]; then \
