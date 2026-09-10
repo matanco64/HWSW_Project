@@ -99,9 +99,9 @@ check_prereqs() {
     [ "$ppver" = "$EXPECT_PYPERFORMANCE" ] || \
         _warn "pyperformance $ppver, expected $EXPECT_PYPERFORMANCE."
 
-    printf 'bench=%s\npython=%s\npyperformance=%s\npyperf=%s\nstock=%s\nhost=%s\nkernel=%s\ndate=%s\n' \
+    printf 'bench=%s\npython=%s\npyperformance=%s\npyperf=%s\nstock=%s\nhost=%s\nkernel=%s\ndate=%s\ncpu=%s\n' \
         "$BENCH" "$pyver" "$ppver" "$pfver" "$BM_STOCK" "$(uname -n)" \
-        "$(uname -sr)" "$(date -uIseconds)" > "$RES/environment_$BENCH.txt"
+        "$(uname -sr)" "$(date -uIseconds)" "${CPU:-not pinned}" > "$RES/environment_$BENCH.txt"
 }
 
 require_perf() {
@@ -155,24 +155,40 @@ pinned() {                       # pinned <backend> <cmd...>
     HWSW_BACKEND="$backend" "$@"
 }
 
-assert_backend() {               # assert_backend <json> <expected>
-    python3 - "$1" "$2" <<'EOF'
+assert_backend() {               # assert_backend <json> <backend|->
+    # <backend> is what hwsw_backend and hwsw_backend_requested must both say;
+    # "-" skips that check (the stock benchmark records no backend). When the
+    # stage pinned a CPU, the recorded affinity must match it too.
+    python3 - "$1" "$2" "${CPU:-}" <<'EOF'
 import json, sys
-path, want = sys.argv[1], sys.argv[2]
+path, want, cpu = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(path) as fh:
-    meta = json.load(fh)["metadata"]
-got, asked = meta.get("hwsw_backend"), meta.get("hwsw_backend_requested")
-if got != want:
-    sys.exit("*** BACKEND MISMATCH in %s: requested %r, JSON records %r.\n"
-             "    The run measured the wrong back end; do not quote it."
-             % (path, want, got))
-if asked is not None and asked != want:
-    # The workers ran the right path but were never told to -- HWSW_BACKEND did
-    # not reach them, and the match is a coincidence of what was installed.
-    sys.exit("*** BACKEND NOT PINNED in %s: the workers recorded request %r, "
-             "not %r.\n    Selection was accidental; do not quote it."
-             % (path, asked, want))
-print("   backend metadata ok: %s = %s (requested %s)" % (path, got, asked))
+    suite = json.load(fh)
+meta = dict(suite.get("metadata", {}))
+for bench in suite.get("benchmarks", []):
+    meta.update(bench.get("metadata", {}) or {})
+problems = []
+if want != "-":
+    got, asked = meta.get("hwsw_backend"), meta.get("hwsw_backend_requested")
+    if got != want:
+        problems.append("BACKEND MISMATCH: requested %r, JSON records %r -- the "
+                        "run measured the wrong back end" % (want, got))
+    elif asked is not None and asked != want:
+        # The workers ran the right path but were never told to -- HWSW_BACKEND
+        # did not reach them, and the match is a coincidence of what was installed.
+        problems.append("BACKEND NOT PINNED: the workers recorded request %r, "
+                        "not %r -- selection was accidental" % (asked, want))
+if cpu:
+    affinity = meta.get("cpu_affinity")
+    if affinity is None:
+        print("   WARNING: %s records no cpu_affinity (requested CPU %s)" % (path, cpu))
+    elif str(affinity) != cpu:
+        problems.append("CPU AFFINITY %r, but CPU %s was requested" % (affinity, cpu))
+if problems:
+    sys.exit("*** %s:\n    %s\n    Do not quote this run." % (path, "\n    ".join(problems)))
+print("   metadata ok: %s backend=%s requested=%s cpu=%s"
+      % (path, meta.get("hwsw_backend", "-"), meta.get("hwsw_backend_requested", "-"),
+         meta.get("cpu_affinity", "-")))
 EOF
 }
 
@@ -193,8 +209,9 @@ baseline() {
     # pinning keeps one rule for every measured invocation instead of a rule
     # with exceptions to remember.
     rm -f "$RES/baseline_$BENCH.json"
-    pinned python python3 -m pyperformance run --rigorous -b "$BENCH" \
+    pinned python python3 -m pyperformance run --rigorous "${CPU_ARGS[@]}" -b "$BENCH" \
         -o "$RES/baseline_$BENCH.json"
+    assert_backend "$RES/baseline_$BENCH.json" -
     python3 -m pyperf stats "$RES/baseline_$BENCH.json" \
         | tee "$RES/baseline_${BENCH}_stats.txt"
 }
@@ -263,9 +280,15 @@ profile() {
 optimized() {
     # Our modified benchmark from benchmarks/ via custom manifest (same benchmark name).
     rm -f "$RES/optimized_$BENCH.json"
-    pinned python python3 -m pyperformance run --rigorous \
+    pinned python python3 -m pyperformance run --rigorous "${CPU_ARGS[@]}" \
         --manifest "$ROOT/benchmarks/MANIFEST" -b "$BENCH" \
         -o "$RES/optimized_$BENCH.json"
+    # A benchmark with a native tier records its backend; mdp records none.
+    if [ "$HAS_NATIVE" = 1 ]; then
+        assert_backend "$RES/optimized_$BENCH.json" python
+    else
+        assert_backend "$RES/optimized_$BENCH.json" -
+    fi
 }
 
 compare() {
@@ -319,10 +342,10 @@ EOF
     # processes that do the timing and BOTH runs silently measure whatever the
     # import found -- which is what happened the first time, and the recorded
     # hwsw_backend metadata is what caught it.
-    pinned python python3 "$BM_OPT" --rigorous --inherit-environ HWSW_BACKEND \
-        -o "$RES/fallback_$BENCH.json"
-    pinned native python3 "$BM_OPT" --rigorous --inherit-environ HWSW_BACKEND \
-        -o "$RES/native_$BENCH.json"
+    pinned python python3 "$BM_OPT" --rigorous "${CPU_ARGS[@]}" \
+        --inherit-environ HWSW_BACKEND -o "$RES/fallback_$BENCH.json"
+    pinned native python3 "$BM_OPT" --rigorous "${CPU_ARGS[@]}" \
+        --inherit-environ HWSW_BACKEND -o "$RES/native_$BENCH.json"
     # The pin is a request; the metadata is the evidence it was honoured.
     assert_backend "$RES/fallback_$BENCH.json" python
     assert_backend "$RES/native_$BENCH.json" native
@@ -353,10 +376,30 @@ run_stage() {
 
     RES="$(_resolve_res "$stage")"
     BM_STOCK="$(locate_stock)"
+
+    # Timed stages (baseline, optimized, native) run on one guest CPU through
+    # pyperf/pyperformance --affinity -- the protocol the preserved pyflate
+    # headline was measured with. The scripts used to leave this out, so the
+    # documented route and the route that produced the quoted numbers differed.
+    # HWSW_CPU=<n> picks the CPU, HWSW_CPU=none disables pinning, and the
+    # default is the lowest CPU this process may run on. Profiling is unpinned:
+    # its timings are never quoted.
+    CPU=""
+    CPU_ARGS=()
+    if [ "${HWSW_CPU:-auto}" != none ]; then
+        CPU="${HWSW_CPU:-auto}"
+        if [ "$CPU" = auto ]; then
+            CPU="$(python3 -c 'import os; print(min(os.sched_getaffinity(0)))' 2>/dev/null || true)"
+        fi
+        if [ -n "$CPU" ]; then
+            CPU_ARGS=(--affinity "$CPU")
+        fi
+    fi
     check_prereqs
     echo "== $BENCH / $stage"
     echo "   results -> $RES"
     echo "   stock   -> $BM_STOCK"
+    echo "   cpu     -> ${CPU:-not pinned}"
 
     if [ "$stage" != all ]; then
         "$stage"

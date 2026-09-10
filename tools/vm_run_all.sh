@@ -8,6 +8,9 @@
 #   ./tools/vm_run_all.sh nbody mdp    # only these
 #   FORCE=1 ./tools/vm_run_all.sh      # re-run stages already marked done
 #   HWSW_RESULTS=<dir> ./tools/vm_run_all.sh   # somewhere other than results/runs/vm
+#   STAGES="baseline optimized compare wheel native" ./tools/vm_run_all.sh
+#                                      # only these stages (timing without profiling)
+#   HWSW_CPU=<n>|none                  # CPU for timed stages (see runner_common.sh)
 #
 # One results directory for the whole run, shared by every stage of every
 # benchmark: results/runs/vm/ by default. It has to be exported, because each
@@ -101,10 +104,20 @@ for bench in "${BENCHES[@]}"; do
         log "SKIP  $bench (no script_${bench}.sh)"
         continue
     fi
-    stages=(baseline profile optimized compare)
-    # The native tier exists only where there is a crate to build.
-    [ -d "$ROOT/rust/$bench" ] && stages+=(wheel native)
+    if [ -n "${STAGES:-}" ]; then
+        read -r -a stages <<< "$STAGES"
+    else
+        stages=(baseline profile optimized compare wheel native)
+    fi
     for stage in "${stages[@]}"; do
+        # The native tier exists only where there is a crate to build.
+        case "$stage" in
+            wheel|native)
+                if [ ! -d "$ROOT/rust/$bench" ]; then
+                    log "SKIP  $bench/$stage (no rust/$bench crate)"
+                    continue
+                fi ;;
+        esac
         run_stage "$bench" "$stage"
     done
 done

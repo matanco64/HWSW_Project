@@ -375,17 +375,18 @@ machine-readable `report/fig/timing_distributions.json` and
 
 == A note on the text companions
 
-The `.txt` files beside each PDF are produced by `pdftotext -layout`, which reconstructs rows
-from glyph positions and is not reliable on wide numeric tables. Two failures were found and
-fixed: an ablation table whose narrow last cell caused every "added cost" to be printed one
-row too high, and a profile table with a spanning header row whose values were likewise
-shifted. In both the PDF was correct and only the text companion was wrong, silently.
-Typst math is a second hazard: its italic letters export as byte sequences that are not valid
-UTF-8, and a display fraction loses its denominator, so formulas are set as code instead.
+The `.txt` files beside each PDF are produced by `pdftotext`, which reconstructs rows from
+glyph positions, and the result depends on the implementation. Companions built with
+poppler's `-layout` were intact. Rebuilding with xpdf's `pdftotext` 4.00 `-layout` shifted
+values by one row in several tables -- an ablation table's costs, a headline table, two
+counter tables -- while the PDF stayed correct. The same rebuild exported Typst's italic math
+letters as bytes that are not valid UTF-8 and dropped a display fraction's denominator, so
+formulas are set as code instead.
 
-`report/check_txt_tables.py` now runs in the build. For every table row in every
-`report_*.typ` it requires the row's label and its own cell values to appear in that order,
-close together, in the exported text, and it rejects a companion that is not valid UTF-8.
+The builds now use `-table` where the installed `pdftotext` provides it (xpdf) and `-layout`
+otherwise, and `report/check_txt_tables.py` gates the result. For every table row in every
+`report_*.typ`, the label must be followed by that row's own values, in order, before the
+next row's label appears; a companion that is not valid UTF-8 is rejected.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];

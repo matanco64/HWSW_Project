@@ -1484,3 +1484,9 @@ the course material is available in @../../CourseMaterial/ I want you to take a 
 
 2026-09-10T13:37:44Z — Claude Code session (auto-logged)
 Prompt: "the ssh is on, please re-rerun and commit what you can"
+
+2026-09-10T14:24:51Z — Claude Code session (auto-logged)
+Prompt: "are there anything more do you think we can improve or left to work on (the SW side of things)"
+
+2026-09-10T14:27:48Z — Claude Code session (auto-logged)
+Prompt: "go ahead with 1-5, switch nbody headline"

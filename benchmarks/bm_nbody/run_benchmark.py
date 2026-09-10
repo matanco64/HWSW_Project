@@ -205,7 +205,7 @@ def _advance_rolled(dt, n, bodies=SYSTEM, pairs=PAIRS):
 
     Same operations in the same order as the generated code, so results stay
     bit-identical; it just pays the interpreter overhead the emitter exists to
-    remove. Only reachable above _MAX_UNROLL_PAIRS.
+    remove. Used above _MAX_UNROLL_PAIRS, and on the native path for N > 5.
     """
     for _ in range(n):
         for (((x1, y1, z1), v1, m1),
@@ -250,6 +250,13 @@ def _configure(nbodies):
     # skipping it here would make `--bodies 1000 HWSW_BACKEND=native` attempt a
     # ~20 GB compile to build a function nothing invokes.
     if nbody_rs is not None:
+        # ...but advance() must not be left describing the 5-body system. The
+        # benchmark never calls it on this path, yet it is still a public,
+        # callable function, and dev/nbody/verify.py once called it: on the
+        # course VM that integrated half of a 10-body system and read as an
+        # 18 AU divergence. The rolled loop needs no code generation, costs
+        # nothing to bind, and is bit-identical to the generated kernel.
+        advance = _advance_rolled
         return
     if len(PAIRS) > _MAX_UNROLL_PAIRS:
         advance = _advance_rolled
