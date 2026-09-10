@@ -43,7 +43,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RES="$ROOT/results"
 FG="$HOME/FlameGraph"
 PYSPY="$(command -v py-spy || echo "$HOME/.local/bin/py-spy")"
-STOCK_ROOT=/usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks
+# The stock benchmarks are found through the installed pyperformance, not a
+# hard-coded dist-packages path -- the same rule as tools/runner_common.sh.
+STOCK_ROOT="$(python3 -c 'import os, pyperformance; print(os.path.join(os.path.dirname(pyperformance.__file__), "data-files", "benchmarks"))' 2>/dev/null)"
+[ -d "$STOCK_ROOT" ] || { echo "cannot locate pyperformance's stock benchmarks for python3" >&2; exit 1; }
 mkdir -p "$RES/folded"
 
 plot() {  # $1 folded file, $2 out svg, $3 title
@@ -91,7 +94,8 @@ for bench in nbody pyflate; do
             echo "=== py-spy $bench/$tag ==="
             raw="$RES/folded/pyspy_${bench}_${tag}.folded"
             if [ ! -s "$raw" ]; then
-                sudo "$PYSPY" record -f raw -o "$raw" -- python3 "$script" $flags \
+                # Backend pinned inside sudo, which resets the environment.
+                sudo env HWSW_BACKEND=python "$PYSPY" record -f raw -o "$raw" -- python3 "$script" $flags \
                     >/dev/null 2>&1 || { echo "  py-spy failed, skipping"; continue; }
             else
                 echo "  reusing existing folded"
