@@ -589,7 +589,7 @@ be followed by that row’s own values, in order, before the next row’s label 
 valid UTF-8 is rejected.
 
                                                    7
-HWSW Final Project                                                                     Appendix: Measurement Methodology
+HWSW Final Project                                                                               Appendix: Measurement Methodology
 
 A7. VM verification of the delivered route
 
@@ -609,17 +609,17 @@ inside each new wheel (820d20ec... and be6a477a...). Every fallback and native J
 
 requested back end, the back end that ran, and that extension hash.
 
-Comparison                       Before (ms)                  After (ms)               Rerun                Earlier
+Comparison                   Before (ms)                      After (ms)                         Rerun                     Earlier
 
-Nbody stock / optimized                  229.95                      144.60            1.59×                     1.64×
+Nbody stock / optimized                  229.95                                          144.60  1.59×                     1.64×
 
-Nbody Python / native                    143.53                      9.467             15.16×                  15.00×
+Nbody Python / native                    143.53                                          9.467   15.16×                    15.00×
 
-Pyflate stock / optimized                1,128.76                    279.11            4.04×                     3.92×
+Pyflate stock / optimized                1,128.76                                        279.11  4.04×                     3.92×
 
-Pyflate Python / native                  283.02                      168.92            1.68×                     1.66×
+Pyflate Python / native                  283.02                                          168.92  1.68×                     1.66×
 
-Pyflate stock / native                   1,128.76                    168.92            6.68×                     6.51×
+Pyflate stock / native                   1,128.76                                        168.92  6.68×                     6.51×
 
 These timings were not pinned to a CPU – pinning was added to the scripts after this run – and the earlier
 
@@ -633,7 +633,7 @@ conclusion changes.
 
 Correctness on the same host. dev/nbody/rs_check.py held the exact contract against the new nbody
 
-wheel, and dev/pyflate/rs_check.py the byte-exact one against the new pyflate wheel. verify.py              --
+wheel, and dev/pyflate/rs_check.py the byte-exact one against the new pyflate wheel. verify.py                             --
 
 bodies 5,10,20 failed: with nbody_rs installed, the landed benchmark imported in native mode and left its
 
@@ -649,7 +649,7 @@ vm_rerun_20260910_3697a63/.
 
 Canonical pinned run (revision 2c8c754)
 
-The nbody headline comes from this run. report/vm_refresh.py         start uploaded a git      archive of
+The nbody headline comes from this run. report/vm_refresh.py                             start uploaded a git  archive of
 
 revision 2c8c754 to a fresh directory on the VM and launched report/vm_refresh_worker.py. The worker
 
@@ -665,36 +665,31 @@ actual back end, and the native JSONs the extension hash, which matches the whee
 
 tools/check_all.sh         --require-native then passed all six checks, none skipped.
 
-Comparison                       Before (ms)                  After (ms)     Canonical                      Earlier
+Comparison                   Before (ms)                      After (ms)                         Canonical                 Earlier
 
-Nbody stock / optimized                  231.20                      143.13            1.62×                     1.64×
+Nbody stock / optimized                  231.20                                          143.13  1.62×                     1.64×
 
-Nbody Python / native                    145.30                      9.530             15.25×                  15.00×
+Nbody Python / native                    145.30                                          9.530   15.25×                    15.00×
 
-Pyflate stock / optimized                1,123.49                    281.16            4.00×                     3.92×
+Pyflate stock / optimized                1,123.49                                        281.16  4.00×                     3.92×
 
-Pyflate Python / native                  283.88                      170.01            1.67×                     1.66×
+Pyflate Python / native                  283.88                                          170.01  1.67×                     1.66×
 
-Pyflate stock / native                   1,123.49                    170.01            6.61×                     6.51×
+Pyflate stock / native                   1,123.49                                        170.01  6.61×                     6.51×
 
 The earlier column is the headline before this run: the 30 August nbody stock/optimized pair, the 7
 
-September nbody rerun and pyflate’s vm_release_20260907/ capture. Nbody moves from 1.64× to 1.62× and
+September nbody rerun and pyflate’s vm_release_20260907/ capture. The reports now quote the canonical
 
-from 15.00× to 15.25×. The reports now quote the canonical nbody values, because these JSONs carry the
+nbody values, because these JSONs carry the back-end, request and affinity metadata the earlier nbody pair
 
-back-end, request and affinity metadata the earlier nbody pair lacks. Pyflate’s headline stays on its preserved
+lacks. Pyflate’s headline stays on its preserved pinned capture, which this run reproduces within 2% on every
 
-pinned capture, which this run reproduces within 2% on every ratio. The wheels measured here replace the
+ratio. The wheels measured here replace the committed ones under rust/<crate>/wheels/, each with a
 
-committed ones under rust/<crate>/wheels/, each with a PROVENANCE.json. Evidence: results/
+PROVENANCE.json. Evidence: results/vm_canonical_20260910_2c8c754/.
 
-vm_canonical_20260910_2c8c754/.
+References: Python profile semantics version-specific bytecode repository and raw data.
 
                                                    8
-HWSW Final   Project                                                                               Appendix: Measurement Methodology
-
-References:  Python   profile  semantics  version-specific  bytecode  repository  and  raw  data.
-
-                                                                      9
 
