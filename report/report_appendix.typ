@@ -446,8 +446,7 @@ benchmarks -- through `tools/vm_run_all.sh`, every timed run pinned to guest CPU
 stages succeeded. Every JSON holds 120 values from 40 workers and records CPU affinity 0; the
 optimized, Python and native JSONs also record the requested and actual back end, and the
 native JSONs the extension hash, which matches the wheel built in the same run.
-`tools/check_all.sh --require-native` then passed all six checks with none skipped, including
-both native contracts against those wheels.
+`tools/check_all.sh --require-native` then passed all six checks, none skipped.
 
 #result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr, 0.9fr),
   align: (left, right, right, right, right),
@@ -464,11 +463,9 @@ the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. Nbody 
 1.64× to 1.62× and from 15.00× to 15.25×. The reports now quote the canonical nbody values,
 because these JSONs carry the back-end, request and affinity metadata the earlier nbody pair
 lacks. Pyflate's headline stays on its preserved pinned capture, which this run reproduces
-within 2% on every ratio. The wheels built and measured here replace the earlier committed
-ones under `rust/<crate>/wheels/`, each with a `PROVENANCE.json` naming the revision, the
-wheel and extension hashes, and this run directory. Evidence:
-`results/vm_canonical_20260910_2c8c754/` (protocol, logs, every JSON and comparison, wheel
-provenance).
+within 2% on every ratio. The wheels measured here replace the committed ones under
+`rust/<crate>/wheels/`, each with a `PROVENANCE.json`. Evidence:
+`results/vm_canonical_20260910_2c8c754/`.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
