@@ -1,0 +1,24 @@
+
+=== N = 5 (10 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 0 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.10e-05 relative
+
+=== N = 10 (45 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 5 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=1.81e+01 (inf-rel 3.58e-01, worst-comp 1.00e+00) | energy rel=6.92e-08 | bit-identical=False
+    *** FAIL: exceeds tolerance (state 1e-11 / energy 1e-12)
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.09e-05 relative
+    *** FAIL: landed benchmark at N=10 is not bit-identical to stock (the declared contract)
+
+=== N = 20 (190 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 15 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=1.81e+01 (inf-rel 2.21e-01, worst-comp 1.32e+00) | energy rel=1.93e-08 | bit-identical=False
+    *** FAIL: exceeds tolerance (state 1e-11 / energy 1e-12)
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.07e-05 relative
+    *** FAIL: landed benchmark at N=20 is not bit-identical to stock (the declared contract)
+
+*** FAILED AT SOME N ***

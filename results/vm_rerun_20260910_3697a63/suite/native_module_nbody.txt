@@ -1,0 +1,2 @@
+module: /usr/local/lib/python3.10/dist-packages/nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so
+sha256: 820d20ec875c65215c939f2f6866397b2b8391d4f7bf9dac69e6e0d4e0f4281d
