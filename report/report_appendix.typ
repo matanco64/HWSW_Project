@@ -459,8 +459,7 @@ native JSONs the extension hash, which matches the wheel built in the same run.
 )
 
 The earlier column is the headline before this run: the 30 August nbody stock/optimized pair,
-the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. Nbody moves from
-1.64× to 1.62× and from 15.00× to 15.25×. The reports now quote the canonical nbody values,
+the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. The reports now quote the canonical nbody values,
 because these JSONs carry the back-end, request and affinity metadata the earlier nbody pair
 lacks. Pyflate's headline stays on its preserved pinned capture, which this run reproduces
 within 2% on every ratio. The wheels measured here replace the committed ones under
