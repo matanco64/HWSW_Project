@@ -14,17 +14,16 @@ to calculate ratios, rather than rounded display values.
   table.header([*Comparison*], [*Files in the results directory*]),
   [Nbody stock / Python], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json`],
   [Nbody Python / native], [`vm_canonical_20260910_2c8c754/suite/{fallback,native}_nbody.json`],
-  [Pyflate all three tiers], [`vm_release_20260907/pyflate_{stock,python,native}.json`],
+  [Pyflate all tiers], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_pyflate.json`],
 )
 
-Nbody's four configurations come from one canonical run of revision 2c8c754 through the
+Both benchmarks' configurations come from one canonical run of revision 2c8c754 through the
 documented runner scripts, every timed run pinned to guest CPU 0; each JSON records its back
 end, the request its workers saw and its CPU affinity (A7). Stock/optimized and Python/native
-remain two pairs within that run. The earlier nbody captures -- `baseline_nbody.json` and
-`optimized_nbody.json`, which lack backend metadata, and `vm_rerun_20260907/` -- are kept
-for comparison. Pyflate's three tiers were rerun sequentially on one fixed guest CPU, using
-the same release interpreter and the refactored Rust source built on that VM. These three
-files supply its updated headline results. Earlier captures remain available for comparison.
+remain separate pairs within that run, so their ratios do not multiply exactly into the
+stock/native ratio. Earlier captures are kept for comparison: nbody's `baseline_nbody.json`
+and `optimized_nbody.json`, which lack backend metadata, `vm_rerun_20260907/`, and pyflate's
+pinned three-tier `vm_release_20260907/`, whose extension and counter evidence A2 still uses.
 
 *Development evidence is labeled separately.* Pyflate's cProfile figures and the ablation's
 development column come from Windows / CPython 3.12.6; the ablation's two VM trials are
@@ -41,8 +40,8 @@ From the repository root, compare saved data without changing it:
 ```sh
 python3 -m pyperf compare_to results/vm_canonical_20260910_2c8c754/suite/baseline_nbody.json \
     results/vm_canonical_20260910_2c8c754/suite/optimized_nbody.json
-python3 -m pyperf compare_to results/vm_release_20260907/pyflate_python.json \
-    results/vm_release_20260907/pyflate_native.json
+python3 -m pyperf compare_to results/vm_canonical_20260910_2c8c754/suite/fallback_pyflate.json \
+    results/vm_canonical_20260910_2c8c754/suite/native_pyflate.json
 ```
 
 For fresh native/Python comparisons, build and install the extension first, then run both
@@ -266,8 +265,9 @@ used the previously installed extension, before the refactored source was rebuil
 )
 
 The nbody headline has since moved to the pinned canonical run in A7; this rerun remains
-a cross-check. Pyflate uses the subsequent
-three-tier experiment in `vm_release_20260907/`, which builds the current crate with
+a cross-check. Pyflate's headline was then taken from the three-tier experiment in
+`vm_release_20260907/`, and has since moved to the canonical run too; that experiment builds
+the crate with
 `cargo build --locked --release` for CPython 3.10.12. Ten Rust tests and seven blocks
 across five fixtures pass; both decode APIs, traces and exact ending offsets are checked.
 The isolated build is selected through inherited `PYTHONPATH`; installed wheels and the
@@ -284,13 +284,13 @@ result JSONs, without re-timing anything:
 ```sh
 python3 report/summarize_distribution.py \
     results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_nbody.json \
-    results/vm_release_20260907/pyflate_{stock,python,native}.json
+    results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_pyflate.json
 ```
 
-*Shape.* Every distribution except nbody's native one is right-skewed: the median sits below
-the mean and the maximum is far from both, which is the usual signature of occasional
-interference rather than a symmetric measurement error. The native run's median lies
-0.014 ms above its mean. The interquartile range is therefore the more informative spread,
+*Shape.* Every distribution except nbody's native run and pyflate's Python back end is
+right-skewed: the median sits below the mean and the maximum is far from both, which is the
+usual signature of occasional interference rather than a symmetric measurement error. In
+those two the median lies slightly above the mean, by 0.014 ms and 0.06 ms. The interquartile range is therefore the more informative spread,
 and it is between 0.4% and 2.0% of the median in every configuration.
 
 #result-table(columns: (1.5fr, auto, auto, auto, auto, auto),
@@ -300,9 +300,10 @@ and it is between 0.4% and 2.0% of the median in every configuration.
   [Nbody optimized], [142.64], [0.52], [145.95], [151.09], [143.13],
   [Nbody Python], [143.13], [2.87], [160.06], [165.08], [145.30],
   [Nbody native], [9.544], [0.076], [9.626], [9.665], [9.530],
-  [Pyflate stock], [1128.01], [12.97], [1157.10], [1173.01], [1129.89],
-  [Pyflate Python], [287.84], [3.62], [293.49], [304.39], [288.00],
-  [Pyflate native], [172.91], [2.35], [177.96], [181.16], [173.59],
+  [Pyflate stock], [1122.68], [14.67], [1142.92], [1164.32], [1123.49],
+  [Pyflate optimized], [280.43], [3.47], [287.33], [291.55], [281.16],
+  [Pyflate Python], [283.94], [3.33], [288.78], [300.03], [283.88],
+  [Pyflate native], [169.67], [2.06], [173.39], [186.74], [170.01],
 )
 
 *Grouping.* The 120 values are not 120 independent observations. They come from 40 worker
@@ -310,40 +311,39 @@ processes, three values each, and values from one worker share that process's me
 CPU placement and page-cache state. A one-way variance decomposition splits the total into a
 between-worker and a within-worker component; the between share is the intraclass correlation
 (ICC), and the variance of the mean is inflated by the design effect
-`deff = 1 + (m - 1) * ICC`, with `m = 3` values per worker. (Set as code rather than Typst
-math, for the reason given in A6.) The block below is the tool's own output, verbatim:
+`deff = 1 + (m - 1) * ICC`, with `m = 3` values per worker. The tool's own output, verbatim:
 
 ```
-clustering        SD-betw   SD-with     ICC    deff  SE naive  SE clust
-baseline_nbody      7.899     0.602   0.994    2.99    0.7171    1.2396
-optimized_nbody     1.519     0.405   0.934    2.87    0.1424    0.2411
-fallback_nbody      3.831     3.198   0.589    2.18    0.4533    0.6691
-native_nbody        0.000     0.052   0.000    1.00    0.0046    0.0046
-pyflate_stock       9.684     8.280   0.578    2.16    1.1575    1.6993
-pyflate_python      0.000     3.276   0.000    1.00    0.2936    0.2936
-pyflate_native      1.006     1.902   0.219    1.44    0.1961    0.2351
+clustering          SD-betw   SD-with     ICC    deff  SE naive  SE clust
+baseline_nbody        7.899     0.602   0.994    2.99    0.7171    1.2396
+optimized_nbody       1.519     0.405   0.934    2.87    0.1424    0.2411
+fallback_nbody        3.831     3.198   0.589    2.18    0.4533    0.6691
+native_nbody          0.000     0.052   0.000    1.00    0.0046    0.0046
+baseline_pyflate      7.670     7.930   0.483    1.97    1.0030    1.4066
+optimized_pyflate     1.574     2.619   0.265    1.53    0.2783    0.3444
+fallback_pyflate      0.000     3.368   0.000    1.00    0.3053    0.3053
+native_pyflate        1.011     2.065   0.193    1.39    0.2095    0.2468
 ```
 
 All figures in ms. `SE naive` treats the 120 values as independent; `SE clust` is the honest
 standard error. Effective sample size is 120 / deff: 40.2 and 41.8 for nbody's stock and
-optimized runs, 55.1 and 120.0 for its Python and native runs, and 55.6, 120.0 and 83.3 for
-pyflate's three tiers.
+optimized runs, 55.1 and 120.0 for its Python and native runs, and 61.0, 78.4, 120.0 and
+86.5 for pyflate's stock, optimized, Python and native runs.
 
 Nbody's stock and optimized runs are almost entirely between-worker (ICC 0.99 and 0.93): a
 worker's three values agree closely with each other and less well with another worker's, so
 the effective sample size is about 40--42 rather than 120 and the standard error of the mean
-is roughly 1.7x what independence would give. Every one of those runs was pinned to guest
-CPU 0, so CPU placement is not what separates workers; per-process state such as memory
-layout remains a candidate, but these data do not identify the cause. Nbody's native run and
-pyflate's optimized Python tier show no detectable worker effect.
+is roughly 1.7x what independence would give. All were pinned to guest CPU 0, so CPU
+placement is not what separates workers; these data do not identify what does. Nbody's native run and
+pyflate's Python back end show no detectable worker effect, and pyflate's other runs are
+milder than nbody's (ICC 0.19 to 0.48).
 
 *What this does and does not change.* Every reported speedup is one to two orders of
 magnitude larger than the corrected standard errors, so no headline conclusion moves. What
 it does change is the reading of small differences: a gap of a few tenths of a millisecond
 between two nbody configurations is not resolvable at this sample size, whatever the naive
-SD suggests. A negative between-worker variance estimate is reported as zero, which is the
-statement that no worker effect is detectable, not that the workers are provably identical.
-Three values per worker is a small basis for an ICC estimate; these figures describe these
+SD suggests. An ICC of zero means no detectable worker effect, not identical workers. Three
+values per worker is a small basis for an ICC estimate; these figures describe these
 runs and are not offered as properties of the guest.
 
 #pagebreak()
@@ -438,7 +438,7 @@ report were taken in the same session. Raw output, without profiles or perf capt
 
 == Canonical pinned run (revision 2c8c754)
 
-The nbody headline comes from this run. `report/vm_refresh.py start` uploaded a `git archive`
+Both benchmarks' headlines come from this run. `report/vm_refresh.py start` uploaded a `git archive`
 of revision 2c8c754 to a fresh directory on the VM and launched `report/vm_refresh_worker.py`.
 The worker ran pyflate's Rust tests, Python API test and dispatch check against a fresh cargo
 build, then the timed stages -- baseline, optimized, compare, wheel and native for both
@@ -459,10 +459,10 @@ native JSONs the extension hash, which matches the wheel built in the same run.
 )
 
 The earlier column is the headline before this run: the 30 August nbody stock/optimized pair,
-the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. The reports now quote the canonical nbody values,
-because these JSONs carry the back-end, request and affinity metadata the earlier nbody pair
-lacks. Pyflate's headline stays on its preserved pinned capture, which this run reproduces
-within 2% on every ratio. The wheels measured here replace the committed ones under
+the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. The reports now quote this run for both benchmarks: the nbody pair it replaces
+lacked back-end, request and affinity metadata, and moving pyflate too puts every quoted ratio
+on one revision and one route. Pyflate's earlier pinned capture agrees within 2% on every
+ratio. The wheels measured here replace the committed ones under
 `rust/<crate>/wheels/`, each with a `PROVENANCE.json`. Evidence:
 `results/vm_canonical_20260910_2c8c754/`.
 
