@@ -40,7 +40,10 @@
 #            keeps the uncut graph.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RES="$ROOT/results"
+# Default is results/ itself: regenerating the cited figures in place from the
+# captures beside them is this script's purpose. HWSW_RESULTS=<dir> points it at
+# another run's captures instead, e.g. a fresh profile stage under results/runs/.
+RES="${HWSW_RESULTS:-$ROOT/results}"
 FG="$HOME/FlameGraph"
 PYSPY="$(command -v py-spy || echo "$HOME/.local/bin/py-spy")"
 # The stock benchmarks are found through the installed pyperformance, not a
