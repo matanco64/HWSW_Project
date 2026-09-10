@@ -589,7 +589,7 @@ be followed by that row’s own values, in order, before the next row’s label 
 valid UTF-8 is rejected.
 
                                                    7
-HWSW Final Project                                                           Appendix: Measurement Methodology
+HWSW Final Project                                                                     Appendix: Measurement Methodology
 
 A7. VM verification of the delivered route
 
@@ -609,17 +609,17 @@ inside each new wheel (820d20ec... and be6a477a...). Every fallback and native J
 
 requested back end, the back end that ran, and that extension hash.
 
-Comparison                              Before (ms)           After (ms)     Rerun                          Earlier
+Comparison                       Before (ms)                  After (ms)               Rerun                Earlier
 
-Nbody stock / optimized                  229.95                      144.60  1.59×                               1.64×
+Nbody stock / optimized                  229.95                      144.60            1.59×                     1.64×
 
-Nbody Python / native                    143.53                      9.467   15.16×                            15.00×
+Nbody Python / native                    143.53                      9.467             15.16×                  15.00×
 
-Pyflate stock / optimized                1,128.76                    279.11  4.04×                               3.92×
+Pyflate stock / optimized                1,128.76                    279.11            4.04×                     3.92×
 
-Pyflate Python / native                  283.02                      168.92  1.68×                               1.66×
+Pyflate Python / native                  283.02                      168.92            1.68×                     1.66×
 
-Pyflate stock / native                   1,128.76                    168.92  6.68×                               6.51×
+Pyflate stock / native                   1,128.76                    168.92            6.68×                     6.51×
 
 These timings were not pinned to a CPU – pinning was added to the scripts after this run – and the earlier
 
@@ -649,7 +649,7 @@ vm_rerun_20260910_3697a63/.
 
 Canonical pinned run (revision 2c8c754)
 
-The nbody headline comes from this run. report/vm_refresh.py         start uploaded a git  archive of
+The nbody headline comes from this run. report/vm_refresh.py         start uploaded a git      archive of
 
 revision 2c8c754 to a fresh directory on the VM and launched report/vm_refresh_worker.py. The worker
 
@@ -663,21 +663,19 @@ workers and records CPU affinity 0; the optimized, Python and native JSONs also 
 
 actual back end, and the native JSONs the extension hash, which matches the wheel built in the same run.
 
-tools/check_all.sh         --require-native then passed all six checks with none skipped, including both
+tools/check_all.sh         --require-native then passed all six checks, none skipped.
 
-native contracts against those wheels.
+Comparison                       Before (ms)                  After (ms)     Canonical                      Earlier
 
-Comparison                              Before (ms)           After (ms)     Canonical                      Earlier
+Nbody stock / optimized                  231.20                      143.13            1.62×                     1.64×
 
-Nbody stock / optimized                  231.20                      143.13  1.62×                               1.64×
+Nbody Python / native                    145.30                      9.530             15.25×                  15.00×
 
-Nbody Python / native                    145.30                      9.530   15.25×                            15.00×
+Pyflate stock / optimized                1,123.49                    281.16            4.00×                     3.92×
 
-Pyflate stock / optimized                1,123.49                    281.16  4.00×                               3.92×
+Pyflate Python / native                  283.88                      170.01            1.67×                     1.66×
 
-Pyflate Python / native                  283.88                      170.01  1.67×                               1.66×
-
-Pyflate stock / native                   1,123.49                    170.01  6.61×                               6.51×
+Pyflate stock / native                   1,123.49                    170.01            6.61×                     6.51×
 
 The earlier column is the headline before this run: the 30 August nbody stock/optimized pair, the 7
 
@@ -687,18 +685,16 @@ from 15.00× to 15.25×. The reports now quote the canonical nbody values, becau
 
 back-end, request and affinity metadata the earlier nbody pair lacks. Pyflate’s headline stays on its preserved
 
-pinned capture, which this run reproduces within 2% on every ratio. The wheels built and measured here
+pinned capture, which this run reproduces within 2% on every ratio. The wheels measured here replace the
 
-replace the earlier committed ones under rust/<crate>/wheels/, each with a PROVENANCE.json naming the
+committed ones under rust/<crate>/wheels/, each with a PROVENANCE.json. Evidence: results/
 
-                                                     8
-HWSW Final Project                                                                       Appendix: Measurement Methodology
+vm_canonical_20260910_2c8c754/.
 
-revision, the wheel and extension hashes, and this run directory. Evidence: results/
+                                                   8
+HWSW Final   Project                                                                               Appendix: Measurement Methodology
 
-vm_canonical_20260910_2c8c754/ (protocol, logs, every JSON and comparison, wheel provenance).
+References:  Python   profile  semantics  version-specific  bytecode  repository  and  raw  data.
 
-References: Python profile semantics version-specific bytecode repository and raw data.
-
-                    9
+                                                                      9
 
