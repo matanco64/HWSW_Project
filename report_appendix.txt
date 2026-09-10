@@ -1,8 +1,8 @@
-             Appendix: Measurement Methodology
+                   Appendix: Measurement Methodology
 
                      Reproduction, evidence scope, and the limits of the measurements
 
-                            Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
+                               Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
 
 A1. Timing and provenance
 
@@ -26,21 +26,23 @@ Nbody Python / native                   vm_canonical_20260910_2c8c754/suite/{fal
 
                                         _nbody.json
 
-Pyflate all three tiers                 vm_release_20260907/pyflate_{stock,python,native}.json
+Pyflate all tiers                       vm_canonical_20260910_2c8c754/suite/
 
-Nbody’s four configurations come from one canonical run of revision 2c8c754 through the documented
+                                        {baseline,optimized,fallback,native}_pyflate.json
+
+Both benchmarks’ configurations come from one canonical run of revision 2c8c754 through the documented
 
 runner scripts, every timed run pinned to guest CPU 0; each JSON records its back end, the request its
 
-workers saw and its CPU affinity (A7). Stock/optimized and Python/native remain two pairs within that run.
+workers saw and its CPU affinity (A7). Stock/optimized and Python/native remain separate pairs within that
 
-The earlier nbody captures – baseline_nbody.json and optimized_nbody.json, which lack backend
+run, so their ratios do not multiply exactly into the stock/native ratio. Earlier captures are kept for
 
-metadata, and vm_rerun_20260907/ – are kept for comparison. Pyflate’s three tiers were rerun sequentially
+comparison: nbody’s baseline_nbody.json and optimized_nbody.json, which lack backend metadata,
 
-on one fixed guest CPU, using the same release interpreter and the refactored Rust source built on that VM.
+vm_rerun_20260907/, and pyflate’s pinned three-tier vm_release_20260907/, whose extension and counter
 
-These three files supply its updated headline results. Earlier captures remain available for comparison.
+evidence A2 still uses.
 
 Development evidence is labeled separately. Pyflate’s cProfile figures and the ablation’s development
 
@@ -60,25 +62,27 @@ Reproducing the comparisons
 
 From the repository root, compare saved data without changing it:
 
-python3  -m  pyperf      compare_to  results/vm_canonical_20260910_2c8c754/suite/
+python3  -m  pyperf      compare_to   results/vm_canonical_20260910_2c8c754/suite/
 
 baseline_nbody.json      \
 
 results/vm_canonical_20260910_2c8c754/suite/optimized_nbody.json
 
-python3  -m  pyperf      compare_to  results/vm_release_20260907/pyflate_python.json        \
+python3  -m  pyperf      compare_to   results/vm_canonical_20260910_2c8c754/suite/
 
-results/vm_release_20260907/pyflate_native.json
+fallback_pyflate.json       \
+
+results/vm_canonical_20260910_2c8c754/suite/native_pyflate.json
 
 For fresh native/Python comparisons, build and install the extension first, then run both back ends against it:
 
-./tools/build_wheel.sh      nbody    --record  /tmp/nbody-wheel.json
+./tools/build_wheel.sh         nbody  --record  /tmp/nbody-wheel.json
 
-HWSW_BACKEND=python      python3     benchmarks/bm_nbody/run_benchmark.py              \
+HWSW_BACKEND=python      python3      benchmarks/bm_nbody/run_benchmark.py                \
 
 --rigorous           --inherit-environ  HWSW_BACKEND     -o  /tmp/nbody-python.json
 
-HWSW_BACKEND=native      python3     benchmarks/bm_nbody/run_benchmark.py              \
+HWSW_BACKEND=native      python3      benchmarks/bm_nbody/run_benchmark.py                \
 
 --rigorous           --inherit-environ  HWSW_BACKEND     -o  /tmp/nbody-native.json
 
@@ -96,12 +100,12 @@ Python subsequently imported – module path, module SHA-256, wheel SHA-256, cra
 
 toolchain versions.
 
+                                                      1
+HWSW Final Project                                                                 Appendix: Measurement Methodology
+
 Use new output names for each experiment. Repeat with bm_pyflate for decompression. pyperformance
 
 run creates its own environment; direct benchmark execution avoids assuming that environment contains
-
-                                                      1
-HWSW Final Project                                                                 Appendix: Measurement Methodology
 
 the extension wheels. Native mode fails when a wheel is unavailable. The runner scripts at the repository
 
@@ -338,7 +342,7 @@ with a justified method, and sweep working-set size. The current counters are in
 SRAM-versus-DRAM accelerator comparison.
 
                                                          4
-HWSW Final Project                                                  Appendix: Measurement Methodology
+HWSW Final Project                                                                 Appendix: Measurement Methodology
 
 A4. Full profiles and release verification
 
@@ -406,20 +410,20 @@ Pyflate                                       285.64 ± 3.04 ms      171.89 ± 2
 
 The nbody headline has since moved to the pinned canonical run in A7; this rerun remains a cross-check.
 
-Pyflate uses the subsequent three-tier experiment in vm_release_20260907/, which builds the current crate
+Pyflate’s headline was then taken from the three-tier experiment in vm_release_20260907/, and has since
 
-with cargo build --locked --release for CPython 3.10.12. Ten Rust tests and seven blocks across five
+moved to the canonical run too; that experiment builds the crate with cargo build --locked --release
 
-fixtures pass; both decode APIs, traces and exact ending offsets are checked. The isolated build is selected
+for CPython 3.10.12. Ten Rust tests and seven blocks across five fixtures pass; both decode APIs, traces and
 
-through inherited PYTHONPATH; installed wheels and the existing VM checkout remain intact. report/
+exact ending offsets are checked. The isolated build is selected through inherited PYTHONPATH; installed
 
-summarize_refresh.py validates source hashes, backend metadata and sample counts. Independent captures
+wheels and the existing VM checkout remain intact. report/summarize_refresh.py validates source hashes,
 
-are retained separately.
+backend metadata and sample counts. Independent captures are retained separately.
 
                                               5
-HWSW Final Project                                                                              Appendix: Measurement Methodology
+HWSW Final Project                                                                        Appendix: Measurement Methodology
 
 A5. Timing distributions and worker clustering
 
@@ -429,37 +433,43 @@ here, and the table below says by how much. It is produced from the same result 
 
 anything:
 
-python3    report/summarize_distribution.py  \
+python3    report/summarize_distribution.py           \
 
 results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}
 
 _nbody.json         \
 
-results/vm_release_20260907/pyflate_{stock,python,native}.json
+results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}
 
-Shape. Every distribution except nbody’s native one is right-skewed: the median sits below the mean and the
+_pyflate.json
 
-maximum is far from both, which is the usual signature of occasional interference rather than a symmetric
+Shape. Every distribution except nbody’s native run and pyflate’s Python back end is right-skewed: the
 
-measurement error. The native run’s median lies 0.014 ms above its mean. The interquartile range is therefore
+median sits below the mean and the maximum is far from both, which is the usual signature of occasional
 
-the more informative spread, and it is between 0.4% and 2.0% of the median in every configuration.
+interference rather than a symmetric measurement error. In those two the median lies slightly above the
 
-Configuration                                                    Median               IQR         p95    Max      Mean
+mean, by 0.014 ms and 0.06 ms. The interquartile range is therefore the more informative spread, and it is
 
-Nbody stock                                                                  228.84       3.09  246.29   266.97   231.20
+between 0.4% and 2.0% of the median in every configuration.
 
-Nbody optimized                                                              142.64       0.52  145.95   151.09   143.13
+Configuration                                                          Median      IQR    p95      Max           Mean
 
-Nbody Python                                                                 143.13       2.87  160.06   165.08   145.30
+Nbody stock                                                                228.84  3.09   246.29   266.97        231.20
 
-Nbody native                                                                 9.544    0.076       9.626  9.665    9.530
+Nbody optimized                                                            142.64  0.52   145.95   151.09        143.13
 
-Pyflate stock                                                                1128.01  12.97     1157.10  1173.01  1129.89
+Nbody Python                                                               143.13  2.87   160.06   165.08        145.30
 
-Pyflate Python                                                               287.84       3.62  293.49   304.39   288.00
+Nbody native                                                               9.544   0.076  9.626    9.665         9.530
 
-Pyflate native                                                               172.91       2.35  177.96   181.16   173.59
+Pyflate stock                                                          1122.68     14.67  1142.92  1164.32       1123.49
+
+Pyflate optimized                                                          280.43  3.47   287.33   291.55        281.16
+
+Pyflate Python                                                             283.94  3.33   288.78   300.03        283.88
+
+Pyflate native                                                             169.67  2.06   173.39   186.74        170.01
 
 Grouping. The 120 values are not 120 independent observations. They come from 40 worker processes, three
 
@@ -469,43 +479,45 @@ cache state. A one-way variance decomposition splits the total into a between-wo
 
 component; the between share is the intraclass correlation (ICC), and the variance of the mean is inflated by
 
-the design effect deff = 1 + (m - 1) * ICC, with m = 3 values per worker. (Set as code rather than Typst
+the design effect deff = 1 + (m - 1) * ICC, with m = 3 values per worker. The tool’s own output,
 
-math, for the reason given in A6.) The block below is the tool’s own output, verbatim:
+verbatim:
 
-clustering             SD-betw  SD-with      ICC       deff  SE  naive                SE  clust
+clustering             SD-betw  SD-with                  ICC     deff  SE  naive   SE     clust
 
-baseline_nbody         7.899    0.602        0.994     2.99      0.7171                   1.2396
+baseline_nbody         7.899    0.602                 0.994      2.99      0.7171      1.2396
 
-optimized_nbody        1.519    0.405        0.934     2.87      0.1424                   0.2411
+optimized_nbody        1.519    0.405                 0.934      2.87      0.1424      0.2411
 
-fallback_nbody         3.831    3.198        0.589     2.18      0.4533                   0.6691
+fallback_nbody         3.831    3.198                 0.589      2.18      0.4533      0.6691
 
-native_nbody           0.000    0.052        0.000     1.00      0.0046                   0.0046
+native_nbody           0.000    0.052                 0.000      1.00      0.0046      0.0046
 
-pyflate_stock          9.684    8.280        0.578     2.16      1.1575                   1.6993
+baseline_pyflate       7.670    7.930                 0.483      1.97      1.0030      1.4066
 
-pyflate_python         0.000    3.276        0.000     1.00      0.2936                   0.2936
+optimized_pyflate      1.574    2.619                 0.265      1.53      0.2783      0.3444
 
-pyflate_native         1.006    1.902        0.219     1.44      0.1961                   0.2351
+fallback_pyflate       0.000    3.368                 0.000      1.00      0.3053      0.3053
+
+native_pyflate         1.011    2.065                 0.193      1.39      0.2095      0.2468
 
 All figures in ms. SE naive treats the 120 values as independent; SE clust is the honest standard error.
 
 Effective sample size is 120 / deff: 40.2 and 41.8 for nbody’s stock and optimized runs, 55.1 and 120.0 for its
 
-Python and native runs, and 55.6, 120.0 and 83.3 for pyflate’s three tiers.
+Python and native runs, and 61.0, 78.4, 120.0 and 86.5 for pyflate’s stock, optimized, Python and native runs.
 
 Nbody’s stock and optimized runs are almost entirely between-worker (ICC 0.99 and 0.93): a worker’s three
 
 values agree closely with each other and less well with another worker’s, so the effective sample size is about
 
-40–42 rather than 120 and the standard error of the mean is roughly 1.7x what independence would give.
+40–42 rather than 120 and the standard error of the mean is roughly 1.7x what independence would give. All
 
-Every one of those runs was pinned to guest CPU 0, so CPU placement is not what separates workers; per-
+were pinned to guest CPU 0, so CPU placement is not what separates workers; these data do not identify
 
-process state such as memory layout remains a candidate, but these data do not identify the cause. Nbody’s
+what does. Nbody’s native run and pyflate’s Python back end show no detectable worker effect, and pyflate’s
 
-native run and pyflate’s optimized Python tier show no detectable worker effect.
+other runs are milder than nbody’s (ICC 0.19 to 0.48).
 
 What this does and does not change. Every reported speedup is one to two orders of magnitude larger
 
@@ -513,15 +525,13 @@ than the corrected standard errors, so no headline conclusion moves. What it doe
 
 small differences: a gap of a few tenths of a millisecond between two nbody configurations is not resolvable
 
-at this sample size, whatever the naive SD suggests. A negative between-worker variance estimate is reported
+at this sample size, whatever the naive SD suggests. An ICC of zero means no detectable worker effect, not
 
-as zero, which is the statement that no worker effect is detectable, not that the workers are provably
+identical workers. Three values per worker is a small basis for an ICC estimate; these figures describe these
 
-identical. Three values per worker is a small basis for an ICC estimate; these figures describe these runs and
+runs and are not offered as properties of the guest.
 
-are not offered as properties of the guest.
-
-                                                    6
+                                                              6
 HWSW Final Project                                    Appendix: Measurement Methodology
 
 A6. Flat function tables
@@ -609,17 +619,17 @@ inside each new wheel (820d20ec... and be6a477a...). Every fallback and native J
 
 requested back end, the back end that ran, and that extension hash.
 
-Comparison                   Before (ms)                      After (ms)                         Rerun                     Earlier
+Comparison                   Before (ms)              After (ms)                                 Rerun                 Earlier
 
-Nbody stock / optimized                  229.95                                          144.60  1.59×                     1.64×
+Nbody stock / optimized                  229.95                                          144.60  1.59×                 1.64×
 
-Nbody Python / native                    143.53                                          9.467   15.16×                    15.00×
+Nbody Python / native                    143.53                                          9.467   15.16×                15.00×
 
-Pyflate stock / optimized                1,128.76                                        279.11  4.04×                     3.92×
+Pyflate stock / optimized                1,128.76                                        279.11  4.04×                 3.92×
 
-Pyflate Python / native                  283.02                                          168.92  1.68×                     1.66×
+Pyflate Python / native                  283.02                                          168.92  1.68×                 1.66×
 
-Pyflate stock / native                   1,128.76                                        168.92  6.68×                     6.51×
+Pyflate stock / native                   1,128.76                                        168.92  6.68×                 6.51×
 
 These timings were not pinned to a CPU – pinning was added to the scripts after this run – and the earlier
 
@@ -633,7 +643,7 @@ conclusion changes.
 
 Correctness on the same host. dev/nbody/rs_check.py held the exact contract against the new nbody
 
-wheel, and dev/pyflate/rs_check.py the byte-exact one against the new pyflate wheel. verify.py                             --
+wheel, and dev/pyflate/rs_check.py the byte-exact one against the new pyflate wheel. verify.py                         --
 
 bodies 5,10,20 failed: with nbody_rs installed, the landed benchmark imported in native mode and left its
 
@@ -649,7 +659,7 @@ vm_rerun_20260910_3697a63/.
 
 Canonical pinned run (revision 2c8c754)
 
-The nbody headline comes from this run. report/vm_refresh.py                             start uploaded a git  archive of
+Both benchmarks’ headlines come from this run. report/vm_refresh.py                              start uploaded a git  archive of
 
 revision 2c8c754 to a fresh directory on the VM and launched report/vm_refresh_worker.py. The worker
 
@@ -665,29 +675,29 @@ actual back end, and the native JSONs the extension hash, which matches the whee
 
 tools/check_all.sh         --require-native then passed all six checks, none skipped.
 
-Comparison                   Before (ms)                      After (ms)                         Canonical                 Earlier
+Comparison                   Before (ms)              After (ms)                                 Canonical             Earlier
 
-Nbody stock / optimized                  231.20                                          143.13  1.62×                     1.64×
+Nbody stock / optimized                  231.20                                          143.13  1.62×                 1.64×
 
-Nbody Python / native                    145.30                                          9.530   15.25×                    15.00×
+Nbody Python / native                    145.30                                          9.530   15.25×                15.00×
 
-Pyflate stock / optimized                1,123.49                                        281.16  4.00×                     3.92×
+Pyflate stock / optimized                1,123.49                                        281.16  4.00×                 3.92×
 
-Pyflate Python / native                  283.88                                          170.01  1.67×                     1.66×
+Pyflate Python / native                  283.88                                          170.01  1.67×                 1.66×
 
-Pyflate stock / native                   1,123.49                                        170.01  6.61×                     6.51×
+Pyflate stock / native                   1,123.49                                        170.01  6.61×                 6.51×
 
 The earlier column is the headline before this run: the 30 August nbody stock/optimized pair, the 7
 
-September nbody rerun and pyflate’s vm_release_20260907/ capture. The reports now quote the canonical
+September nbody rerun and pyflate’s vm_release_20260907/ capture. The reports now quote this run for
 
-nbody values, because these JSONs carry the back-end, request and affinity metadata the earlier nbody pair
+both benchmarks: the nbody pair it replaces lacked back-end, request and affinity metadata, and moving
 
-lacks. Pyflate’s headline stays on its preserved pinned capture, which this run reproduces within 2% on every
+pyflate too puts every quoted ratio on one revision and one route. Pyflate’s earlier pinned capture agrees
 
-ratio. The wheels measured here replace the committed ones under rust/<crate>/wheels/, each with a
+within 2% on every ratio. The wheels measured here replace the committed ones under rust/<crate>/
 
-PROVENANCE.json. Evidence: results/vm_canonical_20260910_2c8c754/.
+wheels/, each with a PROVENANCE.json. Evidence: results/vm_canonical_20260910_2c8c754/.
 
 References: Python profile semantics version-specific bytecode repository and raw data.
 

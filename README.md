@@ -9,19 +9,19 @@ the selection process, but it has no report and is not part of the submission.
 
 | Benchmark | What it is | Baseline | Optimized | Speedup | |
 |---|---|---|---|---|---|
-| **pyflate** | bzip2, optimized Python + Rust decoder | 1.13 s | 173.59 ms | **6.51x** | submitted |
-| pyflate (Python tier) | optimized Python decoder | 1.13 s | 288.00 ms | 3.92x | supporting comparison |
+| **pyflate** | bzip2, optimized Python + Rust decoder | 1.12 s | 170.01 ms | **6.61x** | submitted |
+| pyflate (Python tier) | optimized Python decoder | 1.12 s | 281.16 ms | 4.00x | supporting comparison |
 | **nbody**   | N-body gravity simulation | 231 ms | 143 ms | **1.62x** | submitted |
 | mdp         | exact-arithmetic Markov decision process solver | 4.98 s | 914 ms | 5.44x | candidate only |
 
-Course VM (Ubuntu 22.04, CPython 3.10.12), rigorous pyperf measurements. Pyflate's
-latest three-tier run uses the refactored Rust extension rebuilt on the VM:
-`results/vm_release_20260907/` contains all 120-value JSONs and comparisons.
-The combined Python/Rust path cuts runtime **84.6%**; Rust adds **1.66x** over
-optimized Python. The Python tier alone cuts 74.5%, and nbody's Python changes
-cut 38.1%, both exceeding the course's 7% requirement. nbody's figures come from
-the pinned canonical run in `results/vm_canonical_20260910_2c8c754/`; earlier nbody/mdp
-comparisons remain in `results/compare_<bench>.txt`.
+Course VM (Ubuntu 22.04, CPython 3.10.12), rigorous pyperf measurements, every timed
+run pinned to one guest CPU. Both benchmarks' figures come from one canonical run of
+revision 2c8c754 through the documented scripts, with the Rust extensions built from
+that revision: `results/vm_canonical_20260910_2c8c754/` holds every 120-value JSON and
+comparison. The combined Python/Rust pyflate path cuts runtime **84.9%**; Rust adds
+**1.67x** over the Python back end. The Python tier alone cuts 75.0%, and nbody's Python
+changes cut 38.1%, both exceeding the course's 7% requirement. Earlier captures,
+including pyflate's `vm_release_20260907/`, remain in `results/`.
 
 The pair was chosen on the hardware story rather than the software margin — mdp
 has the larger speedup, but pyflate and nbody map onto the three accelerator
@@ -345,9 +345,9 @@ laptop  --ssh-->  naranja14  --ssh -p 12222-->  guest VM (127.0.0.1:12222)
 Course-VM measurements, and the only numbers to quote:
 
 - `vm_canonical_20260910_2c8c754/` — the pinned canonical run of revision 2c8c754
-  through the documented scripts: source of the nbody headline and a pyflate
-  cross-check (appendix A7)
-- `vm_release_20260907/` — pyflate's headline capture
+  through the documented scripts: source of both headlines (appendix A7)
+- `vm_release_20260907/` — pyflate's earlier pinned capture; its counter data
+  (appendix A2) are still quoted
 - `baseline_<bench>.json` / `optimized_<bench>.json` — pyperf runs, plus
   `baseline_<bench>_stats.txt`
 - `compare_<bench>.txt` — the headline before/after table

@@ -27,29 +27,31 @@ L-vector. Inverse BWT and final RLE4 expansion produce the 399,360-byte output.]
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Configuration*], [*Mean ± SD*], [*vs stock*]),
-  [Stock Python], [1,129.89 ± 12.68 ms], [1.00×],
-  [Optimized Python], [288.00 ± 3.22 ms], [3.92×],
-  [*Python + Rust extension*], [*173.59 ± 2.15 ms*], [*6.51×*],
+  [Stock Python], [1,123.49 ± 10.99 ms], [1.00×],
+  [Optimized Python], [281.16 ± 3.05 ms], [4.00×],
+  [*Python + Rust extension*], [*170.01 ± 2.30 ms*], [*6.61×*],
 )
 
-*Our final software path is 6.51× faster than stock: an 84.6% runtime reduction.*
-Python improvements provide 3.92×; the Rust symbol decoder adds *1.66×* over that optimized
-baseline. Both tiers exceed the course's 7% improvement requirement and match
+*Our final software path is 6.61× faster than stock: an 84.9% runtime reduction.*
+Python improvements provide 4.00×; over the same benchmark's Python back end, the Rust symbol
+decoder adds *1.67×* (Section 4). Both tiers exceed the course's 7% improvement requirement and match
 `bz2.decompress` byte for byte, passing the unchanged MD5 check. Rust handles the blue
 stage above; block headers, inverse BWT and RLE4 remain in Python.
 
 #note[*Measurement scope.* Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12,
-pyperf 2.10.0; 120 measured values per configuration, collected sequentially on guest CPU 0.
-The current Rust source was rebuilt and checked on this VM. Source:
-`results/vm_release_20260907/pyflate_{stock,python,native}.json`.
-Development profiles and ablations are labeled separately.]
+pyperformance 1.14.0, pyperf 2.10.0; 120 measured values per configuration, every timed run
+pinned to guest CPU 0, measured from revision 2c8c754 through the documented runner scripts
+with the Rust extension built from that revision. Source:
+`results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,native}_pyflate.json`, which
+also record back end and CPU affinity (Appendix A7). Development profiles and ablations are
+labeled separately.]
 
-Medians are 1,128.01 ms, 287.84 ms and 172.91 ms, with interquartile ranges of 12.97 ms,
-3.62 ms and 2.35 ms -- about 1.1%, 1.3% and 1.4% of the median in each case. Unlike nbody,
-these three runs are not dominated by between-worker variation: the optimized Python tier
-shows no detectable worker effect at all (ICC 0.00) and the other two are moderate
-(0.58 and 0.22), so their 120 values are worth 56 to 120 independent observations rather
-than about 40. Appendix A5 gives the decomposition and the corrected standard errors.
+Medians are 1,122.68 ms, 280.43 ms and 169.67 ms, with interquartile ranges of 14.67 ms,
+3.47 ms and 2.06 ms -- about 1.3%, 1.2% and 1.2% of the median in each case. Unlike nbody,
+these runs are not dominated by between-worker variation: their ICCs are 0.48, 0.27 and 0.19,
+so their 120 values are worth about 61 to 87 independent observations rather than about 40,
+and the Python back end measured in Section 4 shows no detectable worker effect at all.
+Appendix A5 gives the decomposition and the corrected standard errors.
 #pagebreak()
 = 2. Profiling: the whole decoding pipeline
 
@@ -81,7 +83,7 @@ work and the later transformations also deserve attention.
 
 *Self* is time in the function itself; *inclusive* is time in it and everything it calls.
 Shares are of each profile's own total and are not comparable between the two columns,
-which are independently normalized -- the optimized run is 3.92× shorter in absolute time.
+which are independently normalized -- the optimized run is 4.00× shorter in absolute time.
 A dash means the function no longer exists after the rewrite: the bit reader and the symbol
 matcher were folded into `decode_huffman_block`, and `move_to_front` became an inline
 `l.append(l.pop(-r))`.
@@ -159,12 +161,14 @@ stream desynchronization.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
-  [Python backend], [288.00 ± 3.22 ms], [1.00×],
-  [Native decode backend], [173.59 ± 2.15 ms], [*1.66×*],
+  [Python backend], [283.88 ± 3.34 ms], [1.00×],
+  [Native decode backend], [170.01 ± 2.30 ms], [*1.67×*],
 )
 
-These are the same 120-value measurements summarized on page 1, covering the complete
-benchmark. The new VM build includes the submitted Rust refactor.
+The native row is the same measurement as the Python + Rust row on page 1. The Python row
+runs the same benchmark file with its Python back end directly under pyperf, not through
+pyperformance, so it differs slightly from page 1's optimized Python; both cover the complete
+benchmark.
 `HWSW_BACKEND=python|native|auto` selects the implementation; native mode requires the extension,
 while auto mode falls back. Pyperf workers need `--inherit-environ HWSW_BACKEND`.
 
@@ -256,9 +260,9 @@ platform DMA remain integration work. No measured area, clock or power benefit i
 
 = 6. Conclusion
 
-The delivered Python-plus-Rust path decompresses the input in *173.59 ms*, achieving
-*6.51× over stock* with byte-exact output. Python improvements provide 3.92× and the native
-decoder adds 1.66×, leaving BWT and RLE4 as the next software targets. The hardware proposal
+The delivered Python-plus-Rust path decompresses the input in *170.01 ms*, achieving
+*6.61× over stock* with byte-exact output. Python improvements provide 4.00× and the native
+decoder adds 1.67×, leaving BWT and RLE4 as the next software targets. The hardware proposal
 follows the same block-level interface; its integrated performance and cost remain to be
 demonstrated.
 
