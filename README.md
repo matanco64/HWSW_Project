@@ -247,7 +247,7 @@ reader would actually measure depending on which script they ran.
 - **Prerequisites are checked, not assumed.** Missing `pyperf` or `pyperformance`
   is an error; a CPython or pyperformance version other than the VM's is a
   warning saying the run is not comparable with `results/`. The versions, host
-  and stock path are written to `environment.txt` beside the results.
+  and stock path are written to `environment_<bench>.txt` beside the results.
 - **The stock benchmark is located programmatically** through the installed
   `pyperformance` package, falling back to a sibling source checkout, instead of
   a hard-coded `dist-packages` path.

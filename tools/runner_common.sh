@@ -101,7 +101,7 @@ check_prereqs() {
 
     printf 'bench=%s\npython=%s\npyperformance=%s\npyperf=%s\nstock=%s\nhost=%s\nkernel=%s\ndate=%s\n' \
         "$BENCH" "$pyver" "$ppver" "$pfver" "$BM_STOCK" "$(uname -n)" \
-        "$(uname -sr)" "$(date -uIseconds)" > "$RES/environment.txt"
+        "$(uname -sr)" "$(date -uIseconds)" > "$RES/environment_$BENCH.txt"
 }
 
 require_perf() {
