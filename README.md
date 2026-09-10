@@ -205,12 +205,14 @@ NAME=REGEX` sums a family of symbols and lists every contributor, so prose that
 adds symbols up quotes a number a reader can reconstruct.
 
 `report/check_txt_tables.py` runs at the end of both builds. The `.txt`
-companions are named deliverables produced by `pdftotext -layout`, which
-reconstructs table rows from glyph positions and gets it wrong on wide numeric
-tables — silently, with a correct PDF. It caught two such tables here, one of
-which had been printing each ablation's cost one row too high. The checker
-requires every row's label and its own values to appear together, in order, and
-rejects a companion that is not valid UTF-8.
+companions are named deliverables produced by `pdftotext`, which reconstructs
+table rows from glyph positions, and the result depends on the implementation:
+the companions built with poppler's `-layout` were intact, while a rebuild with
+xpdf's `pdftotext` 4.00 `-layout` shifted values by one row in several tables —
+silently, with a correct PDF. The builds use `-table` where the installed
+`pdftotext` has it (xpdf) and `-layout` otherwise (poppler), and the checker gates
+whichever ran: every row's label must be followed by its own values before the
+next row's label appears, and the companion must be valid UTF-8.
 
 Matched Python/native instruction, cycle, branch and generic cache counters are
 preserved in `results/vm_release_20260907/counters/`; regenerate their validated summary
@@ -221,8 +223,38 @@ from that capture are excluded and were not requested in the new one.
 output in Python, native and auto modes using an interpreter with the wheel installed.
 
 `python report/summarize_refresh.py` validates the latest timing metadata and source hashes.
-`report/vm_refresh.py` starts an isolated remote build/run and fetches the resulting evidence;
-connection details are CLI arguments, with private access instructions in `VM_GUIDE.local.md`.
+`report/vm_refresh.py start` uploads `git archive HEAD` — the committed revision,
+never uncommitted edits — to a fresh directory on the VM and launches
+`report/vm_refresh_worker.py`. The worker is not a second timing route: it runs
+the timed stages through `tools/vm_run_all.sh`, pinned to one CPU, and adds only
+what the stage scripts do not produce — pyflate's crate tests and dispatch check
+against a fresh cargo build, the built wheels with their provenance records,
+timing distributions, and `tools/check_all.sh --require-native`. `status` and
+`fetch` follow the run; connection details are CLI arguments, with private
+access instructions in `VM_GUIDE.local.md`.
+
+### Checks
+
+```bash
+./tools/check_all.sh                   # every correctness check, one exit status
+./tools/check_all.sh --require-native  # fail, rather than skip, without the wheels
+python3 -m unittest discover -s tests -v
+```
+
+`check_all.sh` runs the unit tests, both nbody contracts (`verify.py` at N = 5
+and at N = 5, 10, 20), both native contracts (`rs_check.py`) and the report
+text-export check, and names anything it skipped. `tests/test_software.py`
+turns each failure this project actually hit into a regression test: a
+tolerance-only pass accepted as exact, a missing stock reference reported as a
+pass, the oracle checking a stale kernel when `nbody_rs` is installed, metadata
+hashing maturin's `__init__.py` instead of the compiled extension, a text export
+that shifted table rows, and runner assertions for wrong, unpinned or
+mis-pinned runs.
+
+`.github/workflows/software-checks.yml` runs the same on Ubuntu 22.04 with
+CPython 3.10 after building both wheels from the checkout with
+`tools/build_wheel.sh`. It measures nothing: shared runners are not a timing
+platform.
 
 ## How to reproduce
 
@@ -256,6 +288,11 @@ reader would actually measure depending on which script they ran.
   `results/` are what the reports quote, so a rerun must never land on top of
   them. `HWSW_RESULTS=<dir>` overrides the destination; promoting a run to
   authoritative is a deliberate copy.
+- **Timed stages run on one guest CPU.** `baseline`, `optimized` and `native`
+  pass `--affinity` to pyperf/pyperformance — the protocol the preserved pyflate
+  headline was measured with, which the scripts previously omitted.
+  `HWSW_CPU=<n>` chooses the CPU, `HWSW_CPU=none` disables pinning, and every
+  JSON's recorded `cpu_affinity` is asserted along with its back end.
 - **`all` reports a missing native tier instead of swallowing it.** It used to
   end in `native || true`, which left an incomplete results directory looking
   complete. A native failure is now named on stderr, recorded in

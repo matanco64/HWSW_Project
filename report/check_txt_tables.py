@@ -1,18 +1,20 @@
 """Verify that every report table survives the PDF-to-text export intact.
 
 The `.txt` companions are named course deliverables, not a convenience, and
-they are produced by `pdftotext -layout` -- a heuristic that reconstructs rows
-from glyph positions. It is not reliable on wide numeric tables. On one build
-it paired every pyflate row with the *next* row's numbers, so the text
-deliverable stated, in a readable and entirely plausible layout, that
-`find_next_symbol` cost 23.76% when that was `decode_huffman_block`'s figure.
-Nothing in the build failed, and the PDF was correct.
+they are produced by `pdftotext` -- a heuristic that reconstructs rows from
+glyph positions, whose output depends on the implementation. Poppler's
+`-layout` kept these tables intact; a rebuild with xpdf's `pdftotext` 4.00
+`-layout` paired rows with the *previous* row's values, so the text deliverable
+stated, in a readable and entirely plausible layout, the wrong cost for every
+pyflate ablation. Nothing in the build failed, and the PDF was correct. The
+builds now prefer `-table` where it exists; this check gates whichever ran.
 
 So this checks the property that actually matters: for each data row of each
-table in each `report_*.typ`, the row's label and its cell values must appear
-in the text export in that order, close together, and before the next row's
-label. Cosmetic damage -- a wrapped column, a stray blank line -- is fine;
-re-association is not.
+table in each `report_*.typ`, the row's label must be followed by its own cell
+values, in order, *before the next label of the same table appears*. A row
+whose values wrap onto the following line is cosmetic and passes; a value that
+turns up after another row's label has been re-associated and fails. A text
+export that is not valid UTF-8 fails too (Typst math letters export that way).
 
     python3 report/check_txt_tables.py                 # all reports
     python3 report/check_txt_tables.py report_pyflate
@@ -31,89 +33,104 @@ HERE = os.path.join(ROOT, 'report')
 # cells and nested markup are skipped rather than guessed at.
 ROW = re.compile(r'^\s*\[([^\[\]]{1,60})\](?:,\s*\[([^\[\]]{0,30})\])+\s*,?\s*$')
 CELL = re.compile(r'\[([^\[\]]{0,60})\]')
+MAX_ROW_SPAN = 2000        # characters; a guard, the next label is the real cut
 
 
 def strip_markup(text):
     """Reduce a Typst cell to the characters pdftotext will emit."""
-    text = text.replace('`', '').replace('*', '').replace('_', '_')
+    text = text.replace('`', '').replace('*', '')
     text = re.sub(r'#[a-zA-Z-]+\([^)]*\)', '', text)
-    # Typst turns `--` into an en dash and `×` stays as itself.
-    text = text.replace('--', '–')
+    text = text.replace('--', '–')          # Typst renders `--` as an en dash
     return ' '.join(text.split())
 
 
-def table_rows(typ_path):
-    """Yield (label, [values]) for every checkable table row."""
+def tables(typ_path):
+    """List of tables; each is a list of (label, [values]) checkable rows."""
     with open(typ_path, encoding='utf-8') as fh:
         lines = fh.read().splitlines()
-    inside = False
+    out, current = [], None
     for line in lines:
         if '#result-table(' in line:
-            inside = True
-        if not inside:
+            current = []
+            out.append(current)
+        if current is None:
             continue
         if line.strip() == ')':
-            inside = False
+            current = None
             continue
-        if 'table.header' in line or 'table.cell' in line:
+        if 'table.header' in line or 'table.cell' in line or not ROW.match(line):
             continue
-        if not ROW.match(line):
-            continue
-        cells = [strip_markup(c) for c in CELL.findall(line)]
-        cells = [c for c in cells if c]
+        cells = [c for c in (strip_markup(c) for c in CELL.findall(line)) if c]
         if len(cells) < 2:
             continue
         label, values = cells[0], cells[1:]
         # A label that is itself a number gives no anchor to check against.
         if re.fullmatch(r'[\d.,%–-]+', label):
             continue
-        yield label, values
+        current.append((label, values))
+    return [t for t in out if t]
 
 
-def check(base, verbose=False):
-    typ_path = os.path.join(HERE, base + '.typ')
-    txt_path = os.path.join(ROOT, base + '.txt')
+def _row_intact(text, label, values, other_labels):
+    """Is some occurrence of `label` followed by its values before another label?"""
+    for match in re.finditer(re.escape(label), text):
+        start = match.end()
+        end = min(len(text), start + MAX_ROW_SPAN)
+        for other in other_labels:
+            nxt = text.find(other, start, end)
+            if nxt != -1:
+                end = nxt
+        pos, ok = start, True
+        for value in values:
+            found = text.find(value, pos, end)
+            if found == -1:
+                ok = False
+                break
+            pos = found + len(value)
+        if ok:
+            return True
+    return False
+
+
+def check_paths(base, typ_path, txt_path, verbose=False):
+    """Check one report source against its text export."""
     if not os.path.exists(txt_path):
         return ['%s.txt not found -- run report/build.sh first' % base]
-    with open(txt_path, encoding='utf-8') as fh:
-        text = fh.read()
-
     problems = []
-    checked = 0
-    for label, values in table_rows(typ_path):
-        # The label may legitimately occur several times (prose, other tables);
-        # the row is intact if *any* occurrence is followed by its values in
-        # order within a short window.
-        starts = [m.end() for m in re.finditer(re.escape(label), text)]
-        if not starts:
-            problems.append('%s: row %r does not appear in the text export'
-                            % (base, label))
-            continue
-        if any(_values_follow(text, start, values) for start in starts):
-            checked += 1
-            continue
+    raw = open(txt_path, 'rb').read()
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeDecodeError as exc:
+        text = raw.decode('utf-8', 'replace')
         problems.append(
-            '%s: row %r is not followed by its own values %s -- the text '
-            'export has re-associated the table rows' % (base, label, values))
+            '%s: text export is not valid UTF-8 at byte %d (%s). Typst math in '
+            'the source is the usual cause; set the expression as code instead.'
+            % (base, exc.start, exc.reason))
+
+    checked = 0
+    for rows in tables(typ_path):
+        labels = [label for label, _ in rows]
+        for label, values in rows:
+            if label not in text:
+                problems.append('%s: row %r does not appear in the text export'
+                                % (base, label))
+                continue
+            others = [o for o in labels if o != label and label not in o]
+            if _row_intact(text, label, values, others):
+                checked += 1
+            else:
+                problems.append(
+                    '%s: row %r is not followed by its own values %s before '
+                    'the next row -- the text export has re-associated the '
+                    'table rows' % (base, label, values))
     if verbose:
         print('%-18s %d table rows verified' % (base, checked))
     return problems
 
 
-def _values_follow(text, start, values, window=400):
-    """Do `values` appear in order, close together, after position `start`?"""
-    window_text = text[start:start + window]
-    # Stop at a blank-line run long enough to mean "a different block".
-    cut = window_text.find('\n\n\n')
-    if cut != -1:
-        window_text = window_text[:cut]
-    pos = 0
-    for value in values:
-        found = window_text.find(value, pos)
-        if found == -1:
-            return False
-        pos = found + len(value)
-    return True
+def check(base, verbose=False):
+    return check_paths(base, os.path.join(HERE, base + '.typ'),
+                       os.path.join(ROOT, base + '.txt'), verbose)
 
 
 def main(argv):
@@ -122,15 +139,15 @@ def main(argv):
         if f.startswith('report_') and f.endswith('.typ'))
     problems = []
     for base in bases:
-        problems += check(base.removesuffix('.typ'), verbose=True)
+        problems += check(base[:-4] if base.endswith('.typ') else base, verbose=True)
     for p in problems:
         print('FAIL: %s' % p, file=sys.stderr)
     if problems:
-        print('\n%d table row(s) damaged by the text export. The PDF may look '
-              'correct; the .txt deliverable is not.\nRestructure the table '
-              '(spanning header rows and very wide label columns are the '
-              'usual triggers)\nor move the data into a verbatim block, then '
-              'rebuild.' % len(problems), file=sys.stderr)
+        print('\n%d problem(s) in the text export. The PDF may look correct; the '
+              '.txt deliverable is not.\nRestructure the table (spanning header '
+              'rows and very narrow cells are the usual triggers)\nor move the '
+              'data into a verbatim block, then rebuild.' % len(problems),
+              file=sys.stderr)
         return 1
     print('all report tables survive the text export')
     return 0

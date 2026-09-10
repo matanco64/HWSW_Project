@@ -27,9 +27,17 @@ build_one() {
     local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
     "$TYPST" compile --root "$ROOT" "$src" "$ROOT/$base.pdf"
-    pdftotext -layout -enc UTF-8 "$ROOT/$base.pdf" "$ROOT/$base.txt"
+    pdftotext "$TXTMODE" -enc UTF-8 "$ROOT/$base.pdf" "$ROOT/$base.txt"
     echo "wrote $base.pdf ($(stat -c%s "$ROOT/$base.pdf") bytes)"
 }
+
+# The .txt companions depend on which pdftotext is installed. xpdf's has -table,
+# which keeps a table row's cells together where its -layout shifted values by a
+# row; poppler's has no -table, and its -layout output was intact. Whichever runs,
+# check_txt_tables.py below gates the result.
+# (`pdftotext -h` exits nonzero, which pipefail would turn into "no -table".)
+if { pdftotext -h 2>&1 || true; } | grep -q -- '-table'; then TXTMODE=-table; else TXTMODE=-layout; fi
+echo "pdftotext mode: $TXTMODE"
 
 python3 "$HERE/make_figures.py"
 python3 "$HERE/check_figures.py"
