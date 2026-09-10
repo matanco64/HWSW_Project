@@ -15,8 +15,9 @@
         "dir::../../common/rtl/axi_lite_if.sv"
     ],
     "CLOCK_PORT": "clk",
-    "CLOCK_PERIOD": 20.0,
-    "FP_CORE_UTIL": 40,
-    "PL_TARGET_DENSITY_PCT": 45,
-    "SYNTH_HIERARCHY_MODE": "deferred_flatten"
+    "CLOCK_PERIOD": 150.0,
+    "FP_CORE_UTIL": 32,
+    "PL_TARGET_DENSITY_PCT": 37,
+    "SYNTH_HIERARCHY_MODE": "deferred_flatten",
+    "GRT_ADJUSTMENT": 0.15
 }
