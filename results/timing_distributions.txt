@@ -1,28 +1,28 @@
-file                   wrk     n    median       IQR       p95       max      mean
-baseline_nbody          40   120   230.288     3.543   236.747   249.823   231.230
-optimized_nbody         40   120   140.022     0.766   147.223   164.497   141.283
-fresh2_nbody_python     40   120   140.481     2.597   150.479   166.789   142.185
-fresh2_nbody_native     40   120     9.466     0.017     9.558     9.578     9.477
-pyflate_stock           40   120  1128.010    12.972  1157.104  1173.009  1129.889
-pyflate_python          40   120   287.835     3.623   293.492   304.386   287.997
-pyflate_native          40   120   172.910     2.352   177.959   181.160   173.589
+file               wrk     n    median       IQR       p95       max      mean
+baseline_nbody      40   120   228.844     3.086   246.290   266.968   231.204
+optimized_nbody     40   120   142.643     0.522   145.953   151.091   143.126
+fallback_nbody      40   120   143.134     2.869   160.059   165.080   145.303
+native_nbody        40   120     9.544     0.076     9.626     9.665     9.530
+pyflate_stock       40   120  1128.010    12.972  1157.104  1173.009  1129.889
+pyflate_python      40   120   287.835     3.623   293.492   304.386   287.997
+pyflate_native      40   120   172.910     2.352   177.959   181.160   173.589
 
-clustering            SD-betw   SD-with     ICC    deff  SE naive  SE clust
-baseline_nbody          3.269     1.034   0.909    2.82    0.3106    0.5214
-optimized_nbody         4.253     0.688   0.975    2.95    0.3900    0.6698
-fresh2_nbody_python     3.915     2.230   0.755    2.51    0.4087    0.6475
-fresh2_nbody_native     0.018     0.024   0.364    1.73    0.0028    0.0037
-pyflate_stock           9.684     8.280   0.578    2.16    1.1575    1.6993
-pyflate_python          0.000     3.276   0.000    1.00    0.2936    0.2936
-pyflate_native          1.006     1.902   0.219    1.44    0.1961    0.2351
+clustering        SD-betw   SD-with     ICC    deff  SE naive  SE clust
+baseline_nbody      7.899     0.602   0.994    2.99    0.7171    1.2396
+optimized_nbody     1.519     0.405   0.934    2.87    0.1424    0.2411
+fallback_nbody      3.831     3.198   0.589    2.18    0.4533    0.6691
+native_nbody        0.000     0.052   0.000    1.00    0.0046    0.0046
+pyflate_stock       9.684     8.280   0.578    2.16    1.1575    1.6993
+pyflate_python      0.000     3.276   0.000    1.00    0.2936    0.2936
+pyflate_native      1.006     1.902   0.219    1.44    0.1961    0.2351
 
-baseline_nbody       results/baseline_nbody.json
-optimized_nbody      results/optimized_nbody.json
-fresh2_nbody_python  results/vm_rerun_20260907/fresh2_nbody_python.json
-fresh2_nbody_native  results/vm_rerun_20260907/fresh2_nbody_native.json
-pyflate_stock        results/vm_release_20260907/pyflate_stock.json
-pyflate_python       results/vm_release_20260907/pyflate_python.json
-pyflate_native       results/vm_release_20260907/pyflate_native.json
+baseline_nbody   ../../../../../AppData/Local/Temp/vm_canonical_fetch/suite/baseline_nbody.json
+optimized_nbody  ../../../../../AppData/Local/Temp/vm_canonical_fetch/suite/optimized_nbody.json
+fallback_nbody   ../../../../../AppData/Local/Temp/vm_canonical_fetch/suite/fallback_nbody.json
+native_nbody     ../../../../../AppData/Local/Temp/vm_canonical_fetch/suite/native_nbody.json
+pyflate_stock    results/vm_release_20260907/pyflate_stock.json
+pyflate_python   results/vm_release_20260907/pyflate_python.json
+pyflate_native   results/vm_release_20260907/pyflate_native.json
 
 All times in ms. wrk = value-bearing worker processes; n = measured values.
 SD-betw/SD-with split the total variance into a between-worker and a within-worker
