@@ -1,0 +1,43 @@
+{
+  "revision": "2c8c75413d50324d47d77325e7b087c719570edc",
+  "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+  "cpu": 0,
+  "benches": [
+    "nbody",
+    "pyflate"
+  ],
+  "source_sha256": {
+    "rust/nbody/Cargo.toml": "72aab4a0f828f0cb6ce622033b01362041de011c0d2d52be4504828661ae2014",
+    "rust/nbody/README.md": "9a159ff08518bae507080e7189d1bbebcbabf955438e74d062e87830226bd98c",
+    "rust/nbody/pyproject.toml": "61fa648f8b1f786c8f5428dcfbb0c2a55f9be5e11eab7f945863e57286325b7c",
+    "rust/nbody/src/lib.rs": "a32dafb1402a300addd4f5c673d10b71f6cfff6fb8b8a46f8b9e8c42f9bc6439",
+    "rust/pyflate/Cargo.lock": "0b29f3c5f23aacf2d3bdab63a65a033016751ab2a8e48cbe3db8b2cf16d2fad8",
+    "rust/pyflate/Cargo.toml": "f2ef920548a64fef55e53b166237507ee546118fb1e2279938758c38300489e6",
+    "rust/pyflate/README.md": "6351e54c0f5a5794db79115a78753f3638cbc24fff53e6c3dc22c5c8e306d51a",
+    "rust/pyflate/pyproject.toml": "ded6ff904a404097095943d7ff96de1d6e1dbc8d18ab91829774559fd9c54944",
+    "rust/pyflate/src/bindings.rs": "1a424256fb196af4855bec5672229aa8da2cddb742009169eb492879fb852d03",
+    "rust/pyflate/src/bit_reader.rs": "17c43831aac365134c4d91bf0c5212a189d7cd6055e3c87682d090361467b707",
+    "rust/pyflate/src/decoder.rs": "24bee403dc15b470051bebff848d21f83733bf024b15409e2a8c0cbfddc67328",
+    "rust/pyflate/src/huffman.rs": "7fec38ef15d6e9eed66158570f85dbc435e1f5840f03370d9de2e43587e16c78",
+    "rust/pyflate/src/lib.rs": "56338ba61646c47cf12e48d16dee16c0c8f3fd72e38935a47656d6252a5f5f0a",
+    "rust/pyflate/src/trace.rs": "61110cd423ed6a7906e3d6bba7cc42b6e9bf018042685132343cd24fc9a89126",
+    "rust/pyflate/tests/kernel.rs": "73ca3b6d398b18425689e6ffba6d6773bb44f94dacbcfd288b56d15e89bfd43f",
+    "rust/pyflate/tests/python_api.py": "b3db759bca241db324e5bc3a6a8886734bccd61b46a6d830ba9046ed2cc0a97c"
+  },
+  "benchmark_sha256": {
+    "nbody": "a62deea717269ee4b96e0f64f294dce59e8ef85de53e3e590948f9b7a432ab96",
+    "pyflate": "64050569b2878cb305ce0caee2a7e616868d094f6a163afb811db743c5c44425"
+  },
+  "stock_sha256": {
+    "nbody": "d1385e816d7cfea361b7915e2cf70138cd6b84f40df8bd5152638851f7bcac2b",
+    "pyflate": "ec5347c7045af86ba33e1b2c6f64bc4b506d0ade3b77391d7e41863fe25fb464"
+  },
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "protocol": "Timing through tools/vm_run_all.sh (stages: baseline optimized compare wheel native); rigorous pyperf; every timed run pinned to guest CPU 0; wheels built from this revision and installed system-wide by tools/build_wheel.sh; backend, request and CPU affinity asserted on every JSON.",
+  "cargo_extension_sha256": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607",
+  "installed_extension_sha256": {
+    "nbody": "cf9468bde67c2bc6f21f3036921dcf92fe6404edd0a859623055a05b97105c73",
+    "pyflate": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607"
+  }
+}

@@ -21,30 +21,33 @@ the ten body pairs are constructed once and reused.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Configuration*], [*Mean ± SD*], [*vs stock*]),
-  [Stock Python], [231.23 ± 3.40 ms], [1.00×],
-  [Optimized Python], [141.28 ± 4.27 ms], [*1.64×*],
+  [Stock Python], [231.20 ± 7.85 ms], [1.00×],
+  [Optimized Python], [143.13 ± 1.56 ms], [*1.62×*],
 )
 
-The optimization reduces runtime by *38.9%*, exceeding the course's 7% requirement.
+The optimization reduces runtime by *38.1%*, exceeding the course's 7% requirement.
 It specializes the interaction schedule into local-variable arithmetic while preserving
 operation order. Final state and energy compare exactly equal to stock after 20,000 steps.
 Energy is a useful physical sanity check; componentwise state comparison is the stronger
 equivalence check.
 
 #note[*Measurement scope.* Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12,
-pyperformance 1.14.0; 120 measured values per configuration. Source:
-`results/baseline_nbody.json` and `optimized_nbody.json`. SD denotes sample standard deviation,
+pyperformance 1.14.0; 120 measured values per configuration, every timed run pinned to guest
+CPU 0, measured from revision 2c8c754 through the documented runner scripts. Source:
+`results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json`, which also record the back end and CPU
+affinity (Appendix A7). SD denotes sample standard deviation,
 not a confidence interval. Profiling is separate from timing; the shared appendix records
 methods and provenance.]
 
 The distributions behind those means are right-skewed and strongly grouped by worker
-process. Medians are 230.29 ms and 140.02 ms, with interquartile ranges of 3.54 ms and
-0.77 ms, so half of all values sit in a band well under 1% wide while the maxima reach
-249.82 ms and 164.50 ms. Almost all of the variance is *between* workers rather than within
-them (ICC 0.91 and 0.98), which means the 120 values are effectively about 43 and 41
-independent observations; Appendix A5 gives the full decomposition. The 1.64× ratio is far
-larger than that uncertainty, so the conclusion is unaffected -- but the SD alone would
-overstate how much a small difference could be trusted.
+process. Medians are 228.84 ms and 142.64 ms, with interquartile ranges of 3.09 ms and
+0.52 ms, so half of all values sit in a band under 1.4% wide, while a few slow workers push
+the stock maximum to 266.97 ms and its SD to 7.85 ms. Almost all of the variance is *between*
+workers rather than within them (ICC 0.99 and 0.93) even though every run was pinned to the
+same CPU, so the 120 values are effectively about 40 and 42 independent observations;
+Appendix A5 gives the full decomposition. The 1.62× ratio is far larger than that
+uncertainty, so the conclusion is unaffected -- but the naive standard error would overstate
+how much a small difference could be trusted.
 #pagebreak()
 = 2. Profiling and optimization
 
@@ -110,12 +113,12 @@ guarantee for every floating-point build.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
-  [Python backend], [142.19 ± 4.48 ms], [1.00×],
-  [Native backend], [9.477 ± 0.030 ms], [*15.00×*],
+  [Python backend], [145.30 ± 4.97 ms], [1.00×],
+  [Native backend], [9.530 ± 0.050 ms], [*15.25×*],
 )
 
-These are the latest 120-value VM measurements, preserved as
-`vm_rerun_20260907/fresh2_nbody_{python,native}.json` under `results/`.
+Both rows come from the same pinned canonical run as the table in Section 1, preserved as
+`vm_canonical_20260910_2c8c754/suite/{fallback,native}_nbody.json` under `results/`.
 The separate kernel experiment (228.49 → 9.48 ms, 24.1×) compares native execution with
 *stock* Python. The table compares it with the already optimized Python implementation.
 Both the baseline and timing protocol must be specified when comparing these ratios.
@@ -158,7 +161,7 @@ L1 events are omitted because an earlier capture returned invalid load counts.
 #figure(image("fig/print_nbody_opt.svg", width: 100%),
   caption: [Full optimized Python-frame profile with the integration call path enlarged.
   Integration remains the hotspot. Independent normalization does not display the absolute
-  runtime reduction from 231 to 141 ms.])
+  runtime reduction from 231 to 143 ms.])
 
 At five bodies, Barnes-Hut is *3.92× slower* than direct force evaluation on the VM.
 Tree construction and traversal do not pay off for ten pairs. Development experiments also
@@ -217,8 +220,8 @@ The Rust object demonstrates this boundary; it is not a completed hardware drive
   [RTL and verification], [Synthesis and directed bring-up recorded; full coverage, sign-off and integration remain open],
 )
 
-At that design point, modeled execution is about 4.6× faster than stock Python and 2.8×
-faster than optimized Python, but *slower than the 9.48 ms native implementation*.
+At that design point, modeled execution is about 4.6× faster than stock Python and 2.9×
+faster than optimized Python, but *slower than the 9.53 ms native implementation*.
 More units, a higher achieved clock, or reduced precision require measured area/timing
 trade-offs. No measured power advantage is claimed.
 
@@ -229,7 +232,7 @@ are distinct from the software tier's observed exact equality.
 
 = 6. Conclusion
 
-Specializing a fixed schedule cuts Python runtime by 38.9% while preserving the tested state
+Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state
 and energy exactly. Native execution removes more interpreter work through the same coarse
 interface. The hardware design implements that boundary, but its benefit over native software
 depends on achieving a better latency/area point than the current model.

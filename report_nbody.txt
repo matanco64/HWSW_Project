@@ -1,8 +1,8 @@
-                              Benchmark Report: nbody
+                        Benchmark Report: nbody
 
 Five bodies, twenty thousand steps, and an interpreter between every calculation
 
-                              Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
+                        Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
 
 A probe is falling toward Neptune, and somebody has to know where it will be in six hours.
 
@@ -24,31 +24,31 @@ The stock kernel uses only the standard library, with no I/O in the timed region
 
 position/velocity/mass records (35 float values); the ten body pairs are constructed once and reused.
 
-                              Jupiter
+                        Jupiter
 
-                                                        Uranus                           10 pairs
+                                                        Uranus                     10 pairs
 
-                                                                                         × 20,000 steps
+                                                                                   × 20,000 steps
 
-                                                                                         = 200,000 force
+                                                                                   = 200,000 force
 
-                                                                                         evaluations
+                                                                                   evaluations
 
-               Sun
+                   Sun
 
                                                         Neptune
 
-                              Saturn
+                        Saturn
 
-                    Figure 1: Ten fixed pairs × 20,000 steps = 200,000 pair-force evaluations.
+                        Figure 1: Ten fixed pairs × 20,000 steps = 200,000 pair-force evaluations.
 
-Configuration                                           Mean ± SD                                          vs stock
+Configuration                                           Mean ± SD                                         vs stock
 
-Stock Python                                            231.23 ± 3.40 ms                                        1.00×
+Stock Python                                            231.20 ± 7.85 ms                                        1.00×
 
-Optimized Python                                        141.28 ± 4.27 ms                                        1.64×
+Optimized Python                                        143.13 ± 1.56 ms                                        1.62×
 
-The optimization reduces runtime by 38.9%, exceeding the course’s 7% requirement. It specializes the
+The optimization reduces runtime by 38.1%, exceeding the course’s 7% requirement. It specializes the
 
 interaction schedule into local-variable arithmetic while preserving operation order. Final state and energy
 
@@ -58,25 +58,31 @@ state comparison is the stronger equivalence check.
 
 Measurement scope. Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12, pyperformance
 
-1.14.0; 120 measured values per configuration. Source: results/baseline_nbody.json and
+1.14.0; 120 measured values per configuration, every timed run pinned to guest CPU 0, measured from
 
-optimized_nbody.json. SD denotes sample standard deviation, not a confidence interval. Profiling is
+revision 2c8c754 through the documented runner scripts. Source: results/
 
-separate from timing; the shared appendix records methods and provenance.
+vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json, which also record the
+
+back end and CPU affinity (Appendix A7). SD denotes sample standard deviation, not a confidence
+
+interval. Profiling is separate from timing; the shared appendix records methods and provenance.
 
 The distributions behind those means are right-skewed and strongly grouped by worker process. Medians are
 
-230.29 ms and 140.02 ms, with interquartile ranges of 3.54 ms and 0.77 ms, so half of all values sit in a band
+228.84 ms and 142.64 ms, with interquartile ranges of 3.09 ms and 0.52 ms, so half of all values sit in a band
 
-well under 1% wide while the maxima reach 249.82 ms and 164.50 ms. Almost all of the variance is between
+under 1.4% wide, while a few slow workers push the stock maximum to 266.97 ms and its SD to 7.85 ms.
 
-workers rather than within them (ICC 0.91 and 0.98), which means the 120 values are effectively about 43 and
+Almost all of the variance is between workers rather than within them (ICC 0.99 and 0.93) even though
 
-41 independent observations; Appendix A5 gives the full decomposition. The 1.64× ratio is far larger than
+every run was pinned to the same CPU, so the 120 values are effectively about 40 and 42 independent
 
-that uncertainty, so the conclusion is unaffected – but the SD alone would overstate how much a small
+observations; Appendix A5 gives the full decomposition. The 1.62× ratio is far larger than that uncertainty, so
 
-difference could be trusted.
+the conclusion is unaffected – but the naive standard error would overstate how much a small difference
+
+could be trusted.
 
                                                      1
 HWSW Final Project                                                                           Benchmark Report: nbody
@@ -377,7 +383,7 @@ order. A square-root/division replacement changes rounding and is not used in th
 emitter accepts a body list and pair schedule, so the same transformation extends to larger systems.
 
                                                                                                                                                                             3
-HWSW Final Project                                                                Benchmark Report: nbody
+HWSW Final Project                                                                         Benchmark Report: nbody
 
 3. Native execution: less work, not higher IPC
 
@@ -391,19 +397,19 @@ guarantee for every floating-point build.
 
 Same benchmark file                                             Mean ± SD                                  vs Python
 
-Python backend                                                  142.19 ± 4.48 ms                                1.00×
+Python backend                                                  145.30 ± 4.97 ms                                1.00×
 
-Native backend                                                  9.477 ± 0.030 ms                               15.00×
+Native backend                                                  9.530 ± 0.050 ms                               15.25×
 
-These are the latest 120-value VM measurements, preserved as vm_rerun_20260907/
+Both rows come from the same pinned canonical run as the table in Section 1, preserved as
 
-fresh2_nbody_{python,native}.json under results/. The separate kernel experiment (228.49 → 9.48 ms,
+vm_canonical_20260910_2c8c754/suite/{fallback,native}_nbody.json under results/. The separate
 
-24.1×) compares native execution with stock Python. The table compares it with the already optimized
+kernel experiment (228.49 → 9.48 ms, 24.1×) compares native execution with stock Python. The table
 
-Python implementation. Both the baseline and timing protocol must be specified when comparing these
+compares it with the already optimized Python implementation. Both the baseline and timing protocol must
 
-ratios.
+be specified when comparing these ratios.
 
 Backend selection is explicit: HWSW_BACKEND=python|native|auto. Native mode fails if the wheel is
 
@@ -494,7 +500,7 @@ _..  bench_time_func (pyperf/_runner.py:502)
 
            Figure 3: Full optimized Python-frame profile with the integration call path enlarged. Integration remains the hotspot.
 
-                                                             Independent normalization does not display the absolute runtime reduction from 231 to 141 ms.
+                                                             Independent normalization does not display the absolute runtime reduction from 231 to 143 ms.
 
 At five bodies, Barnes-Hut is 3.92× slower than direct force evaluation on the VM. Tree construction and
 
@@ -587,9 +593,9 @@ RTL and verification                Synthesis and directed bring-up recorded; fu
 
                                     integration remain open
 
-At that design point, modeled execution is about 4.6× faster than stock Python and 2.8× faster than optimized
+At that design point, modeled execution is about 4.6× faster than stock Python and 2.9× faster than optimized
 
-Python, but slower than the 9.48 ms native implementation. More units, a higher achieved clock, or
+Python, but slower than the 9.53 ms native implementation. More units, a higher achieved clock, or
 
 reduced precision require measured area/timing trade-offs. No measured power advantage is claimed.
 
@@ -603,7 +609,7 @@ exact equality.
 
 6. Conclusion
 
-Specializing a fixed schedule cuts Python runtime by 38.9% while preserving the tested state and energy
+Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state and energy
 
 exactly. Native execution removes more interpreter work through the same coarse interface. The hardware
 
