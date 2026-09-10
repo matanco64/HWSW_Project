@@ -41,18 +41,43 @@ python3 -m pyperf compare_to results/vm_release_20260907/pyflate_python.json \
     results/vm_release_20260907/pyflate_native.json
 ```
 
-For fresh native/Python comparisons, use the same interpreter with the wheels installed:
+For fresh native/Python comparisons, build and install the extension first, then run both
+back ends against it:
 ```sh
+./tools/build_wheel.sh nbody --record /tmp/nbody-wheel.json
 HWSW_BACKEND=python python3 benchmarks/bm_nbody/run_benchmark.py \
     --rigorous --inherit-environ HWSW_BACKEND -o /tmp/nbody-python.json
 HWSW_BACKEND=native python3 benchmarks/bm_nbody/run_benchmark.py \
     --rigorous --inherit-environ HWSW_BACKEND -o /tmp/nbody-native.json
 ```
 
+*Build and install must name the same file.* `maturin build --release` writes to
+`target/wheels/`, while `rust/<crate>/wheels/` holds the prebuilt wheel committed for the
+course VM; both are version `0.1.0`, so `pip install wheels/*.whl` after a fresh build
+silently installs the saved binary instead of what was just compiled, and every number
+downstream then describes the saved binary. `tools/build_wheel.sh` builds into an empty
+directory, requires exactly one wheel to appear there, installs that path, and records what
+Python subsequently imported -- module path, module SHA-256, wheel SHA-256, crate source
+hashes and toolchain versions.
+
 Use new output names for each experiment. Repeat with `bm_pyflate` for decompression.
 `pyperformance run` creates its own environment; direct benchmark execution avoids assuming
 that environment contains the extension wheels. Native mode fails when a wheel is unavailable.
-The runner scripts at the repository root provide the full stock/optimized workflow.
+The runner scripts at the repository root provide the full stock/optimized workflow; they
+write to a fresh `results/runs/<UTC stamp>_<bench>/` directory so a rerun cannot overwrite
+the preserved captures this appendix cites.
+
+*Back-end selection is enforced in three places, not requested in one.* Each
+`run_benchmark.py` appends `HWSW_BACKEND` to pyperf's inherited environment after parsing
+its arguments, so worker processes receive it even when the caller omits
+`--inherit-environ` -- which `pyperformance run` gives no way to supply. Every measured and
+profiled invocation in the runners is pinned, including `perf record`, `py-spy` and
+`perf stat` on both the stock and optimized sides. Finally the `native` stage asserts, on
+each JSON it produced, both the back end that ran (`hwsw_backend`) and the request the
+workers actually saw (`hwsw_backend_requested`), so a run whose environment never reached
+the workers fails even if the fallback happened to choose the right path. Result metadata
+also records the loaded extension's path and SHA-256, because a crate version alone does
+not distinguish two builds.
 
 == Correctness
 
@@ -61,6 +86,22 @@ Nbody comparisons check all state components and energy after the same initial c
 a tolerance pass alone does not establish equality, and numerical equality is not a general
 byte-representation test (for example, signed zeros). Pyflate checks the decoded bytes against
 `bz2.decompress`, the original MD5, the intermediate L-vector and the ending bit position.
+
+*Exact and tolerance results are separate verdicts, and the declared contract decides the
+exit status.* The two claims are different, so collapsing them would let a rounding-changing
+edit pass a checker while the reports still claimed equality.
+
+#result-table(columns: (1.3fr, 1fr, 1.6fr),
+  table.header([*Checker*], [*Contract*], [*Failure behaviour*]),
+  [`dev/nbody/verify.py` tiers], [Tolerance], [T3's sqrt variants reorder arithmetic
+    deliberately; scored against the stated thresholds.],
+  [`dev/nbody/verify.py` landed benchmark], [Exact], [Nonzero exit unless bit-identical to
+    stock; the tolerance verdict is still printed.],
+  [`dev/nbody/rs_check.py`], [Exact (default)], [Nonzero exit unless bit-identical.
+    `--tolerance` moves the gate and says so in the output.],
+  [`dev/pyflate/rs_check.py`], [Byte-exact], [Nonzero exit unless the L-vector, ending bit
+    position, output bytes and MD5 all match.],
+)
 
 #pagebreak()
 = A2. Matched Python/native CPU counters
@@ -227,6 +268,124 @@ across five fixtures pass; both decode APIs, traces and exact ending offsets are
 The isolated build is selected through inherited `PYTHONPATH`; installed wheels and the
 existing VM checkout remain intact. `report/summarize_refresh.py` validates source hashes,
 backend metadata and sample counts. Independent captures are retained separately.
+
+#pagebreak()
+= A5. Timing distributions and worker clustering
+
+`mean ± SD` describes a symmetric spread of independent observations. Neither assumption
+holds exactly here, and the table below says by how much. It is produced from the same
+result JSONs, without re-timing anything:
+
+```sh
+python3 report/summarize_distribution.py results/baseline_nbody.json \
+    results/optimized_nbody.json \
+    results/vm_rerun_20260907/fresh2_nbody_{python,native}.json \
+    results/vm_release_20260907/pyflate_{stock,python,native}.json
+```
+
+*Shape.* Every distribution is right-skewed: the median sits below the mean and the maximum
+is far from both, which is the usual signature of occasional interference rather than a
+symmetric measurement error. The interquartile range is therefore the more informative
+spread, and it is between 0.2% and 1.4% of the median in every configuration.
+
+#result-table(columns: (1.5fr, auto, auto, auto, auto, auto),
+  align: (left, right, right, right, right, right),
+  table.header([*Configuration*], [*Median*], [*IQR*], [*p95*], [*Max*], [*Mean*]),
+  [Nbody stock], [230.29], [3.54], [236.75], [249.82], [231.23],
+  [Nbody optimized], [140.02], [0.77], [147.22], [164.50], [141.28],
+  [Nbody Python (rerun)], [140.48], [2.60], [150.48], [166.79], [142.19],
+  [Nbody native], [9.466], [0.017], [9.558], [9.578], [9.477],
+  [Pyflate stock], [1128.01], [12.97], [1157.10], [1173.01], [1129.89],
+  [Pyflate Python], [287.84], [3.62], [293.49], [304.39], [288.00],
+  [Pyflate native], [172.91], [2.35], [177.96], [181.16], [173.59],
+)
+
+*Grouping.* The 120 values are not 120 independent observations. They come from 40 worker
+processes, three values each, and values from one worker share that process's memory layout,
+CPU placement and page-cache state. A one-way variance decomposition splits the total into a
+between-worker and a within-worker component; the between share is the intraclass correlation
+(ICC), and the variance of the mean is inflated by the design effect
+`deff = 1 + (m - 1) * ICC`, with `m = 3` values per worker. (Set as code rather than Typst
+math, for the reason given in A6.) The block below is the tool's own output, verbatim:
+
+```
+clustering            SD-betw   SD-with     ICC    deff  SE naive  SE clust
+baseline_nbody          3.269     1.034   0.909    2.82    0.3106    0.5214
+optimized_nbody         4.253     0.688   0.975    2.95    0.3900    0.6698
+fresh2_nbody_python     3.915     2.230   0.755    2.51    0.4087    0.6475
+fresh2_nbody_native     0.018     0.024   0.364    1.73    0.0028    0.0037
+pyflate_stock           9.684     8.280   0.578    2.16    1.1575    1.6993
+pyflate_python          0.000     3.276   0.000    1.00    0.2936    0.2936
+pyflate_native          1.006     1.902   0.219    1.44    0.1961    0.2351
+```
+
+All figures in ms. `SE naive` treats the 120 values as independent; `SE clust` is the honest
+standard error. Effective sample size is 120 / deff: 42.6 and 40.7 for nbody's stock and
+optimized runs, 47.8 and 69.5 for the nbody rerun pair, and 55.6, 120.0 and 83.3 for
+pyflate's three tiers.
+
+Nbody's two configurations are almost entirely between-worker (ICC 0.91 and 0.98): a worker's
+three values agree closely with each other and less well with another worker's, so the
+effective sample size is about 41--43 rather than 120 and the standard error of the mean is
+roughly 1.7x what independence would give. Pyflate is milder, and its optimized Python tier
+shows no detectable worker effect at all.
+
+*What this does and does not change.* Every reported speedup is one to two orders of
+magnitude larger than the corrected standard errors, so no headline conclusion moves. What
+it does change is the reading of small differences: a gap of a few tenths of a millisecond
+between two nbody configurations is not resolvable at this sample size, whatever the naive
+SD suggests. A negative between-worker variance estimate is reported as zero, which is the
+statement that no worker effect is detectable, not that the workers are provably identical.
+Three values per worker is a small basis for an ICC estimate; these figures describe these
+runs and are not offered as properties of the guest.
+
+#pagebreak()
+= A6. Flat function tables
+
+Flame graphs show where time goes but are a poor place to read a number off: every width is
+inclusive of children, one function may appear on several call paths, and print crops can
+clip labels. `report/summarize_profiles.py` produces the companion table, with both
+percentages named, from the same recorded files the figures use:
+
+```sh
+python3 report/summarize_profiles.py --top 10
+python3 report/summarize_profiles.py --only perf_report_nbody_stock.txt \
+    --group 'list access=^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)'
+```
+
+The two profile kinds are read differently because they record different things. For
+`perf report --stdio` the *Children* and *Self* columns are read directly. For a py-spy
+flame graph, inclusive time is a frame's own sample count and self time is that count minus
+the counts of the frames stacked directly on it; frames are aggregated per function and
+file, since py-spy labels each frame with whichever line was executing.
+
+Prose that adds up a family of symbols must quote a number this prints, together with the
+pattern it came from. An earlier draft of the nbody report gave 14.4% for list access; the
+recorded profile yields *11.95%* over
+`^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)`, and float object handling is the
+larger group at 16.30% over `^(float_|PyFloat_)`. The tool lists every contributing symbol
+so the sum can be checked. Summing self time across perf rows is correct even though perf
+emits some symbols twice -- an `(inlined)` entry carries inclusive time and zero self, and
+separate entries for one symbol are separate contributions; the self column over a whole
+report sums to within half a percent of 100%, which is the check.
+
+Saved outputs: `results/timing_distributions.txt`, `results/profile_functions.txt`, and the
+machine-readable `report/fig/timing_distributions.json` and
+`report/fig/profile_functions.json`.
+
+== A note on the text companions
+
+The `.txt` files beside each PDF are produced by `pdftotext -layout`, which reconstructs rows
+from glyph positions and is not reliable on wide numeric tables. Two failures were found and
+fixed: an ablation table whose narrow last cell caused every "added cost" to be printed one
+row too high, and a profile table with a spanning header row whose values were likewise
+shifted. In both the PDF was correct and only the text companion was wrong, silently.
+Typst math is a second hazard: its italic letters export as byte sequences that are not valid
+UTF-8, and a display fraction loses its denominator, so formulas are set as code instead.
+
+`report/check_txt_tables.py` now runs in the build. For every table row in every
+`report_*.typ` it requires the row's label and its own cell values to appear in that order,
+close together, in the exported text, and it rejects a companion that is not valid UTF-8.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];

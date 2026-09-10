@@ -44,6 +44,12 @@ The current Rust source was rebuilt and checked on this VM. Source:
 `results/vm_release_20260907/pyflate_{stock,python,native}.json`.
 Development profiles and ablations are labeled separately.]
 
+Medians are 1,128.01 ms, 287.84 ms and 172.91 ms, with interquartile ranges of 12.97 ms,
+3.62 ms and 2.35 ms -- about 1.1%, 1.3% and 1.4% of the median in each case. Unlike nbody,
+these three runs are not dominated by between-worker variation: the optimized Python tier
+shows no detectable worker effect at all (ICC 0.00) and the other two are moderate
+(0.58 and 0.22), so their 120 values are worth 56 to 120 independent observations rather
+than about 40. Appendix A5 gives the decomposition and the corrected standard errors.
 #pagebreak()
 = 2. Profiling: the whole decoding pipeline
 
@@ -58,10 +64,45 @@ work and the later transformations also deserve attention.
   Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
   percentages use the original whole-profile denominator; nested shares overlap.])
 
+#result-table(columns: (1.6fr, 0.8fr, 0.8fr, 0.8fr, 0.8fr),
+  align: (left, right, right, right, right),
+  table.header([*Function*], [*Stock self*], [*Stock incl.*],
+    [*Opt. self*], [*Opt. incl.*]),
+  [`decode_huffman_block`], [23.76%], [93.81%], [37.50%], [93.27%],
+  [`find_next_symbol`], [16.34%], [40.59%], [--], [--],
+  [`move_to_front`], [15.10%], [15.10%], [--], [--],
+  [`snoopbits`], [9.65%], [17.82%], [--], [--],
+  [`readbits`], [6.44%], [7.43%], [--], [--],
+  [`_mask`], [2.97%], [2.97%], [--], [--],
+  [`bwt_reverse`], [4.70%], [13.37%], [25.96%], [50.00%],
+  [`bwt_transform`], [8.66%], [8.66%], [24.04%], [24.04%],
+  [`rle4_expand`], [--], [--], [4.81%], [4.81%],
+)
+
+*Self* is time in the function itself; *inclusive* is time in it and everything it calls.
+Shares are of each profile's own total and are not comparable between the two columns,
+which are independently normalized -- the optimized run is 3.92× shorter in absolute time.
+A dash means the function no longer exists after the rewrite: the bit reader and the symbol
+matcher were folded into `decode_huffman_block`, and `move_to_front` became an inline
+`l.append(l.pop(-r))`.
+
+The table aggregates every call site of a function; the figure's highlight percentages
+describe *one* outlined frame, which is why `find_next_symbol` reads 20.54% there and 40.59%
+here. Regenerate both from the same recorded SVGs the figures use with
+`report/summarize_profiles.py`.
+
+*The table is the argument for what shipped.* In the stock profile the symbol loop and its
+bit reader account for the bulk of the work, and the inverse BWT is a distant third. After
+the rewrite the ordering inverts: `decode_huffman_block` still dominates self time, but
+what remains beside it is `bwt_reverse` and `bwt_transform` -- which is why the Rust kernel
+is drawn around the symbol decoder and why the remaining Amdahl ceiling is the BWT.
+
 A separate *Windows / CPython 3.12.6* cProfile run gives
 `find_next_symbol` 0.519 s cumulative out of 1.186 s (43.8%), including its bit-reader
 callees. `decode_huffman_block` has 0.241 s *self* time and 1.172 s *cumulative* time:
 most of its inclusive cost is in functions it calls. Source: `dev/pyflate/FINDINGS.md` §3.
+That development run and the VM profile above agree on the ordering, not on the numbers;
+different machine, different interpreter, different estimator.
 
 #figure(image("fig/huffman_tree.svg", width: 100%),
   caption: [Illustrative canonical Huffman codes. Codes of equal length are consecutive;
@@ -81,7 +122,7 @@ most of its inclusive cost is in functions it calls. Source: `dev/pyflate/FINDIN
 
 #result-table(columns: (2fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Component reverted from T3*], [*Runtime*], [*Added cost*]),
-  [None (full T3)], [175.5 ms], [—],
+  [None (full T3)], [175.5 ms], [baseline],
   [Primary Huffman lookup], [185.6 ms], [+10.1 ms],
   [Regex-assisted RLE4], [207.7 ms], [+32.3 ms],
   [Counting-sort BWT], [214.0 ms], [+38.6 ms],
@@ -150,8 +191,8 @@ are omitted because an earlier capture returned invalid load counts.
 
 == Offload limits and the next target
 
-Amdahl's law gives $S = 1 / ((1 - f) + f / s)$ for kernel speedup $s$ and offloaded fraction
-$f$ of *optimized Python* runtime. Even infinite symbol-decoder speed leaves BWT and RLE4.
+Amdahl's law gives `S = 1 / ((1 - f) + f/s)` for kernel speedup `s` and offloaded fraction
+`f` of *optimized Python* runtime. Even infinite symbol-decoder speed leaves BWT and RLE4.
 Unlike nbody's native integration loop, this offload leaves over a billion instructions
 per decode in a largely Python pipeline. The next target is the *whole inverse BWT*, including table
 construction, not just its dependent traversal. Earlier VM phase timings put them at

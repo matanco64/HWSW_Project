@@ -26,3 +26,4 @@ hw/common/synth/area.txt
 
 # local-only notes (Technion infra detail) - never commit
 *.local.md
+tmp/*

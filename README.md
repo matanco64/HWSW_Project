@@ -33,7 +33,8 @@ precedent in Intel IAA.
 ```
 report_pyflate.pdf / report_nbody.pdf   Per-benchmark reports (course deliverable, one per
                                         selected benchmark; built from report/)
-script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable)
+script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable); thin
+                                        wrappers over tools/runner_common.sh
 script_mdp.sh                           Same runner for mdp (candidate, not submitted)
 prompt.txt                              AI-tool prompt log (course deliverable)
 project_instructions.pdf / .md          Course assignment handout (+ text transcription)
@@ -56,6 +57,9 @@ results/                                Authoritative course-VM measurements (se
 results/wsl/                            SUPERSEDED WSL2 cross-check runs — never quote as a result
 tools/
   vm_launch.sh / vm_run_all.sh          Detached remote runner for the course VM
+  runner_common.sh                      The one implementation of every runner stage
+  build_wheel.sh                        Builds a crate and installs THAT wheel, recording
+                                        the imported path/hash
   log_prompt_hook.py                    Claude Code hook: auto-appends session prompts to prompt.txt
   hw/                                   Claude Code hooks + status/progress scripts for the HW flow
 hw/                                     Hardware accelerator designs (SystemVerilog) + the stage-gated
@@ -106,22 +110,59 @@ HWSW_BACKEND=python   # force the pure-Python path
 HWSW_BACKEND=native   # force native; fails loudly if the wheel is missing
 ```
 
-The back end that actually ran is written into the `hwsw_backend` field of every
-result JSON's pyperf metadata. That is not decoration — the first native run
-compared native against native, because `pyperf` re-executes its workers with a
-scrubbed environment and `HWSW_BACKEND` never reached them. Anything invoking the
-benchmark with this variable must pass `--inherit-environ HWSW_BACKEND`, as the
-`native` stage in the scripts does.
+The back end that actually ran is written into every result JSON's pyperf
+metadata, along with the request that produced it and the binary that served it:
+
+| metadata field | what it records |
+|---|---|
+| `hwsw_backend` | `python` or `native` — what the workers actually ran |
+| `hwsw_backend_requested` | the `HWSW_BACKEND` value the workers *saw* |
+| `hwsw_native_module` / `hwsw_native_sha256` | the loaded extension path and hash |
+
+That is not decoration — the first native run compared native against native,
+because `pyperf` re-executes its workers with a scrubbed environment and
+`HWSW_BACKEND` never reached them. Two things now prevent a repeat:
+
+- **The benchmark propagates its own configuration.** Each `run_benchmark.py`
+  appends `HWSW_BACKEND` to pyperf's `inherit_environ` after parsing its
+  arguments, so workers receive it whether or not the caller passed
+  `--inherit-environ HWSW_BACKEND`. That flag is now belt-and-braces; it is also
+  the only option for `pyperformance run`, which offers no way to forward it.
+- **The scripts check the result rather than trusting the request.** The
+  `native` stage asserts both `hwsw_backend` and `hwsw_backend_requested` on each
+  JSON it produces, so a run whose environment never reached the workers fails
+  loudly even when the fallback happened to pick the right path.
+
+Every measured *and profiled* invocation is pinned, including `perf record`,
+`py-spy` and `perf stat` on both the stock and optimized sides — an unpinned
+profile would silently sample the Rust kernel on any host with the wheel
+installed.
 
 To build and install a wheel (Linux, CPython 3.10):
 
 ```bash
-cd rust/pyflate && maturin build --release      # or rust/nbody
-sudo python3 -m pip install wheels/*.whl
+./tools/build_wheel.sh pyflate      # or nbody
 ```
 
+One command on purpose. The obvious two-line version — `maturin build --release`
+then `pip install wheels/*.whl` — installs a **different file from the one it
+just built**: maturin writes to `target/wheels/`, while `wheels/` holds the
+prebuilt wheel committed for the course VM. Both are version `0.1.0`, so pip
+reports the same thing either way, and a reader following those two lines from a
+fresh clone would compile the current source and then measure a saved binary of
+it.
+
+`tools/build_wheel.sh` builds into a fresh directory, refuses to continue unless
+exactly one wheel landed there, installs **that path**, and then prints what
+Python actually imported afterwards — the module path and its SHA-256, the
+wheel's SHA-256, the crate source hashes and the toolchain versions. Pass
+`--record <file>` to save that as JSON; `./script_<bench>.sh wheel` does, into
+the run's results directory.
+
 Prebuilt `cp310` manylinux wheels for the course VM are committed under
-`rust/<crate>/wheels/`.
+`rust/<crate>/wheels/`. They are a convenience for a host that cannot build, not
+part of the reproduction route: installing one means the measurement describes
+that committed binary rather than the source in the checkout.
 
 ### `report/`
 
@@ -145,6 +186,32 @@ The original profile SVGs and their `*_full.svg` counterparts remain in `results
 The report also distinguishes current hardware implementation status from
 unverified clock, area and performance targets.
 
+Two summaries turn recorded evidence into report tables, without re-measuring
+anything:
+
+```bash
+python report/summarize_distribution.py results/baseline_nbody.json ...   # appendix A5
+python report/summarize_profiles.py --top 10                             # appendix A6
+```
+
+`summarize_distribution.py` reports the quantiles behind each `mean ± SD`, and
+decomposes the variance into between-worker and within-worker components. The
+120 values of a rigorous run come from 40 workers, three each, so they are not
+120 independent observations; the tool prints the intraclass correlation, the
+design effect and the corrected standard error. `summarize_profiles.py` produces
+flat function tables with *self* and *inclusive* percentages named as such, from
+`perf report`'s own columns and from the py-spy flame graphs. Its `--group
+NAME=REGEX` sums a family of symbols and lists every contributor, so prose that
+adds symbols up quotes a number a reader can reconstruct.
+
+`report/check_txt_tables.py` runs at the end of both builds. The `.txt`
+companions are named deliverables produced by `pdftotext -layout`, which
+reconstructs table rows from glyph positions and gets it wrong on wide numeric
+tables — silently, with a correct PDF. It caught two such tables here, one of
+which had been printing each ablation's cost one row too high. The checker
+requires every row's label and its own values to appear together, in order, and
+rejects a companion that is not valid UTF-8.
+
 Matched Python/native instruction, cycle, branch and generic cache counters are
 preserved in `results/vm_release_20260907/counters/`; regenerate their validated summary
 with `python report/summarize_counters.py --directory results/vm_release_20260907/counters`.
@@ -163,13 +230,37 @@ Everything runs inside the course QEMU VM (Ubuntu 22.04, Python 3.10.12,
 python3-dbg, perf, pyperformance 1.14.0):
 
 ```bash
-./script_pyflate.sh all     # setup -> baseline -> profile+flamegraph -> optimized -> compare
+./script_pyflate.sh all     # setup -> baseline -> profile -> optimized -> compare -> native
 ./script_nbody.sh all
-./script_mdp.sh all
+./script_mdp.sh all         # candidate; no Rust crate, so no wheel/native stage
 ```
 
 Stages can be run individually:
-`setup | baseline | profile | optimized | compare | native`.
+`setup | baseline | profile | optimized | compare | wheel | native`.
+
+All three runners are thin wrappers over one implementation,
+`tools/runner_common.sh`. They used to be three copies of the same 130 lines and
+had drifted apart — one pinned the back end while profiling and one did not, and
+their build instructions pointed at different directories — which changed what a
+reader would actually measure depending on which script they ran.
+
+- **Prerequisites are checked, not assumed.** Missing `pyperf` or `pyperformance`
+  is an error; a CPython or pyperformance version other than the VM's is a
+  warning saying the run is not comparable with `results/`. The versions, host
+  and stock path are written to `environment.txt` beside the results.
+- **The stock benchmark is located programmatically** through the installed
+  `pyperformance` package, falling back to a sibling source checkout, instead of
+  a hard-coded `dist-packages` path.
+- **Results go to a fresh directory,** `results/runs/<UTC stamp>_<bench>/`, with
+  `results/runs/latest` pointing at the current one. The preserved captures in
+  `results/` are what the reports quote, so a rerun must never land on top of
+  them. `HWSW_RESULTS=<dir>` overrides the destination; promoting a run to
+  authoritative is a deliberate copy.
+- **`all` reports a missing native tier instead of swallowing it.** It used to
+  end in `native || true`, which left an incomplete results directory looking
+  complete. A native failure is now named on stderr, recorded in
+  `stages_incomplete.txt`, and returned as a nonzero exit status — the
+  stock/optimized comparison is still complete and still valid.
 
 - **Baseline** = stock benchmark via `pyperformance run --rigorous`.
 - **Optimized** = this repo's `benchmarks/` via `--manifest benchmarks/MANIFEST`
@@ -197,7 +288,7 @@ Stages can be run individually:
 
 The job runs under **tmux on the VM**, so a dropped SSH connection (or a closed
 laptop) does not kill a multi-hour `--rigorous` run. It is **resumable**:
-`tools/vm_run_all.sh` stamps each finished stage in `results/.stamps/` and skips
+`tools/vm_run_all.sh` stamps each finished stage in `results/runs/vm/.stamps/` and skips
 it on a re-run — unless the stage's artifact has since gone missing, in which
 case it redoes it. `FORCE=1` redoes everything.
 
@@ -227,21 +318,26 @@ as a measurement.
 
 ### Measurement notes (KVM guest quirks)
 
+These are the configurations that worked *in these runs on this guest*. They are
+observations, not established kernel or KVM behaviour; Appendix A3 states the
+same limits and is the careful version — the two are meant to agree.
+
 - `perf record` uses `-e cpu-clock`, a software timer that samples in
   proportion to elapsed CPU time — the right event for a "where does the time
-  go" flame graph. The hardware PMU is nonetheless available: `perf stat -e
-  cycles` counts correctly, and `perf record -e cycles -c 2000000` samples
-  correctly with clean symbols. What does *not* work is `perf record -e cycles
-  -F <n>`, which returns zero samples at any frequency, because perf's
-  frequency mode auto-tunes the period from counter feedback and that loop does
-  not converge on the KVM vPMU. Use a fixed period (`-c`) for hardware events.
-- `perf stat` silently returns zeros for events past the guest's **four**
-  general-purpose counters instead of multiplexing them, so request at most
-  four hardware events per pass. (This, not a missing PMU, is why `cycles` once
-  looked broken.)
-- `perf stat` silently returns **zeros past 4 events** in the guest, so counters
-  are taken in **two passes** (`cycles:u,instructions:u`, then the
-  cache/branch group) and concatenated into one `perf_stat_*` file.
+  go" flame graph. The hardware PMU is nonetheless usable here: `perf stat -e
+  cycles` counted correctly, and `perf record -e cycles -c 2000000` sampled
+  correctly with clean symbols. What did *not* work is `perf record -e cycles
+  -F <n>`, which returned zero samples at every frequency tried. The plausible
+  reading is that perf's frequency mode auto-tunes the period from counter
+  feedback and that loop does not converge on this vPMU, but that cause was not
+  established — only the working configuration was. Use a fixed period (`-c`)
+  for hardware events.
+- `perf stat` returned zeros, rather than multiplexing, for events past the
+  guest's **four** general-purpose counters, so counters are taken in **two
+  passes** (`cycles:u,instructions:u`, then the cache/branch group) and
+  concatenated into one `perf_stat_*` file. This, not a missing PMU, is why
+  `cycles` once looked broken. Check the actual counts and the enabled/running
+  time rather than assuming multiplexing happened.
 - `pyperf system tune` sets `perf_event_max_sample_rate=1`, which throttles
   `perf record` to 1 Hz; the `profile` stage restores a usable rate first.
 - Timings are always measured on release `python3`; profiles are taken with
