@@ -118,7 +118,22 @@ def _load(path, name):
     loader = importlib.machinery.SourceFileLoader(name, path)
     spec = importlib.util.spec_from_file_location(name, path, loader=loader)
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    # This oracle checks the *Python* kernel, so the landed file must import
+    # with its Python back end pinned. Under the default HWSW_BACKEND=auto, a
+    # host with nbody_rs installed selects native, and _configure(n) then
+    # skips regenerating advance() because the native path never calls it --
+    # leaving the module's advance() as the 5-body kernel. Calling that on a
+    # 10-body system integrates half the bodies. On the course VM that read as
+    # an 18 AU divergence at N=10 and N=20 while N=5 stayed bit-exact.
+    saved = os.environ.get("HWSW_BACKEND")
+    os.environ["HWSW_BACKEND"] = "python"
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        if saved is None:
+            del os.environ["HWSW_BACKEND"]
+        else:
+            os.environ["HWSW_BACKEND"] = saved
     return mod
 
 
