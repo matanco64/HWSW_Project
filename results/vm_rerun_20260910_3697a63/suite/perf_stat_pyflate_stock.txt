@@ -1,0 +1,30 @@
+...........
+pyflate: Mean +- std dev: 1.12 sec +- 0.01 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
+
+       90552645363      cycles:u                                                    
+      238800957023      instructions:u            #    2.64  insn per cycle         
+
+      38.833056848 seconds time elapsed
+
+      38.176994000 seconds user
+       0.649958000 seconds sys
+
+
+...........
+pyflate: Mean +- std dev: 1.12 sec +- 0.01 sec
+
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
+
+         213369428      cache-references                                            
+          14645371      cache-misses              #    6.864 % of all cache refs    
+       48063427898      branches                                                    
+         171593990      branch-misses             #    0.36% of all branches        
+
+      38.860954089 seconds time elapsed
+
+      38.196399000 seconds user
+       0.658372000 seconds sys
+
+

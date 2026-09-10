@@ -23,8 +23,9 @@ and `native`. Pyflate's three tiers were rerun sequentially on one fixed guest C
 the same release interpreter and the refactored Rust source built on that VM. These three
 files supply its updated headline results. Earlier captures remain available for comparison.
 
-*Development evidence is labeled separately.* Pyflate's ablation and cProfile tables come
-from Windows / CPython 3.12.6. Nbody's detailed unrolling sweep and pyflate's older 25× native
+*Development evidence is labeled separately.* Pyflate's cProfile figures and the ablation's
+development column come from Windows / CPython 3.12.6; the ablation's two VM trials are
+course-VM measurements (A7). Nbody's detailed unrolling sweep and pyflate's older 25× native
 kernel example come from WSL2 / CPython 3.10.21. Different machines, interpreters and
 estimators prevent using these absolute timings as VM results. Likewise, a paired median
 speedup need not equal the ratio of two independently reported minimum times. Bytecode counts
@@ -387,6 +388,46 @@ The builds now use `-table` where the installed `pdftotext` provides it (xpdf) a
 otherwise, and `report/check_txt_tables.py` gates the result. For every table row in every
 `report_*.typ`, the label must be followed by that row's own values, in order, before the
 next row's label appears; a companion that is not valid UTF-8 is rejected.
+
+#pagebreak()
+= A7. VM verification of the delivered route
+
+== Full route, unpinned (revision 3697a63)
+
+An isolated `git archive` copy of revision 3697a63 ran on the course VM through
+`tools/vm_run_all.sh nbody pyflate`: setup, then baseline, profile, optimized, compare, wheel
+and native for each benchmark. All 13 stages succeeded. The installed extensions (SHA-256
+`a0a259f8...` for nbody, `da10776d...` for pyflate) were copied aside first. The wheel stage
+then built both crates from the uploaded source, installed them with `sudo` rather than
+through pip's silent user-site fallback, and confirmed that the imported extension is the one
+inside each new wheel (`820d20ec...` and `be6a477a...`). Every fallback and native JSON records
+the requested back end, the back end that ran, and that extension hash.
+
+#result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr, 0.9fr),
+  align: (left, right, right, right, right),
+  table.header([*Comparison*], [*Before (ms)*], [*After (ms)*], [*Rerun*], [*Preserved*]),
+  [Nbody stock / optimized], [229.95], [144.60], [1.59×], [1.64×],
+  [Nbody Python / native], [143.53], [9.467], [15.16×], [15.00×],
+  [Pyflate stock / optimized], [1,128.76], [279.11], [4.04×], [3.92×],
+  [Pyflate Python / native], [283.02], [168.92], [1.68×], [1.66×],
+  [Pyflate stock / native], [1,128.76], [168.92], [6.68×], [6.51×],
+)
+
+These timings were not pinned to a CPU -- pinning was added to the scripts after this run --
+and the preserved column comes from earlier, separate experiments, so the table shows
+reproduction rather than a matched comparison. Both nbody ratios reproduce within 3%.
+Pyflate's optimized Python tier ran 3% faster than its preserved pinned measurement, which
+raises the pyflate ratios slightly; no conclusion changes.
+
+*Correctness on the same host.* `dev/nbody/rs_check.py` held the exact contract against the
+new nbody wheel, and `dev/pyflate/rs_check.py` the byte-exact one against the new pyflate
+wheel. `verify.py --bodies 5,10,20` failed: with `nbody_rs` installed, the landed benchmark
+imported in native mode and left its five-body `advance()` bound, and the oracle called that
+kernel on ten bodies. Revision 79a0d12 pins the Python back end while loading, and on the same
+host and wheel it is bit-exact at every N. Revision 2c8c754 also rebinds `advance()` in native
+mode, so no caller can reach the stale kernel. The two VM ablation trials in the pyflate
+report were taken in the same session. Raw output, without profiles or perf captures:
+`results/vm_rerun_20260910_3697a63/`.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];

@@ -120,18 +120,29 @@ different machine, different interpreter, different estimator.
   reverse the MTF list so updates move O(rank) entries; use regex-assisted RLE4 expansion
   to reduce Python loop iterations. The byte scan/output work is still linear overall.
 
-#result-table(columns: (2fr, 1fr, 1fr), align: (left, right, right),
-  table.header([*Component reverted from T3*], [*Runtime*], [*Added cost*]),
-  [None (full T3)], [175.5 ms], [baseline],
-  [Primary Huffman lookup], [185.6 ms], [+10.1 ms],
-  [Regex-assisted RLE4], [207.7 ms], [+32.3 ms],
-  [Counting-sort BWT], [214.0 ms], [+38.6 ms],
+#result-table(columns: (1.9fr, 1fr, 1fr, 1fr), align: (left, right, right, right),
+  table.header([*Component reverted from T3*], [*VM trial 1*], [*VM trial 2*], [*Dev, 3.12*]),
+  [None (full T3 runtime)], [271.2 ms], [273.9 ms], [175.5 ms],
+  [Regex-assisted RLE4], [+100.6 ms], [+98.7 ms], [+32.3 ms],
+  [Primary Huffman lookup], [+52.6 ms], [+49.4 ms], [+10.1 ms],
+  [Counting-sort BWT], [+20.8 ms], [+17.2 ms], [+38.6 ms],
 )
 
-*Ablation scope:* Windows / CPython 3.12.6, best of seven; `dev/pyflate/FINDINGS.md` §2b.
-These are development measurements, not VM timings. Each row reverts one component;
-the costs need not add. In this experiment, each back-end change contributes more than the
-primary Huffman table. This motivates optimizing the pipeline rather than the matcher alone.
+*Ablation scope.* Each row puts one stock component back into the optimized Python decoder
+(`dev/pyflate/ablate.py`, which drives the T3 module directly rather than the pyperf harness)
+and reports the added time, best of seven interleaved decompressions. Costs need not add.
+The two VM trials are separate runs on the course VM, release CPython 3.10.12, pinned to one
+guest CPU; the last column is the earlier development run on Windows / CPython 3.12.6
+(`dev/pyflate/FINDINGS.md` §2b).
+
+*The measured platform reverses part of the development ranking.* On the VM, regex-assisted
+RLE4 is worth about 100 ms and the primary Huffman lookup about 50 ms -- both more than
+counting-sort BWT at about 20 ms -- and the two trials agree within 4 ms on every row. The
+development run had ranked BWT first and the Huffman table last, and an earlier version of
+this report concluded from it that every back-end change outweighs the matcher table. On the
+course VM that is false: the table is the second-largest single contribution. What survives
+on both platforms is that no single change dominates, so the pipeline, not the matcher
+alone, had to be optimized. Raw output: `results/vm_rerun_20260910_3697a63/`.
 
 #figure(image("fig/print_pyflate_opt.svg", width: 100%),
   caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its

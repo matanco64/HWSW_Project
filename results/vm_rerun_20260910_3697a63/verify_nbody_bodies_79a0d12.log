@@ -1,0 +1,20 @@
+
+=== N = 5 (10 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 0 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.10e-05 relative
+
+=== N = 10 (45 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 5 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.09e-05 relative
+
+=== N = 20 (190 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 15 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.07e-05 relative
+
+BIT-EXACT AT EVERY N TESTED
