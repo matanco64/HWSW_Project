@@ -35,6 +35,8 @@ python3 "$HERE/make_figures.py"
 python3 "$HERE/check_figures.py"
 if [ $# -gt 0 ]; then
     for f in "$@"; do build_one "$f"; done
+    python3 "$HERE/check_txt_tables.py" "$@"
 else
     for f in "$HERE"/report_*.typ; do build_one "$(basename "$f")"; done
+    python3 "$HERE/check_txt_tables.py"
 fi

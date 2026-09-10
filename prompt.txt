@@ -1448,3 +1448,39 @@ Result:
  - nbody --bodies N flag (agent). Found and fixed an EXTENDED_ARG cliff at N=31.
  - Course VM, --rigorous: nbody 141ms -> 9.49ms (14.86x), pyflate 289ms -> 178ms
    (1.62x).
+
+2026-09-08 — Codex (OpenAI): report review, Rust verification and VM measurements
+-------------------------------------------------------------------------------
+Manually logged on this date from the current conversation. Selected user
+prompts appear below in conversation order, with their original wording and
+spelling preserved. Individual message timestamps are unavailable; this is
+not a complete transcript. Repeated interruption/resume messages are omitted.
+
+Prompt: "I want you to take a look at this current final project for a course I am doing, tell me what you think of the reports, I think we can improve and shorten the wordings, make it more succinct, suggest improvements, you can run the benchmarks yourself via ssh, more is in the guide at VM_GUIDE.local.md"
+
+Prompt: "the intro prose was just for a fun intro, I think it is nice, we can Improve it but I think it sets the tone for why the benchmark is usesul, other than that please fix all the other points and improve the PDF readbility"
+
+Prompt: "I think you have typst here, if not use the WSL"
+
+Prompt: "In terms of flamegraphs, I don't think the current figures are informative, is there a way to show the full flamegraph and highlight the relevant sectiosn?"
+
+Prompt: "also I do think the report should include some technical talk for example when compaing the Native to the Python We should talk about what parameters improved, IPC, Cache and so on"
+
+Prompt: "can you commit the current work?"
+
+Prompt: "I reset the limit, so you should be good continuing, also can you add the comparisons we talked about to pyflate, I also think the current Rust implemenation for pyflate is not used, can you check that? should we try to incoparate it?"
+
+Prompt: "can you launch an agent that will refactor the code and improve it, I think it is worth maybe seperating it into different Rust files at least"
+
+Prompt: "did the benchmarks run on the remote machine? we should run them and update the numbers in the report as needed"
+
+Prompt: "can you re-add to pyflate the huffman-code tree example visualization? I think it was a nice visualization"
+
+Prompt: "I have recreated the connection to the VM via VPN, continue with what is left, also I think in Pyflate submission our Result should also highlight the Rust Extension and not only the Pythonic improvements"
+
+2026-09-08T22:22:38Z — Claude Code session (auto-logged)
+Prompt: "I want you to help me improve the project presented in this folder, described in @project_instructions.pdf
+the course material is available in @../../CourseMaterial/ I want you to take a look at @tmp/pdfs\  there is feedback there, for this session focus on Software improvements and related Report improvements"
+
+2026-09-10T13:37:44Z — Claude Code session (auto-logged)
+Prompt: "the ssh is on, please re-rerun and commit what you can"

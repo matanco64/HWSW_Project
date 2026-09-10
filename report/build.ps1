@@ -13,3 +13,5 @@ foreach ($reportName in @('report_nbody', 'report_pyflate', 'report_appendix')) 
     if ($LASTEXITCODE -ne 0) { throw "Text export failed: $reportName" }
     Write-Output "Built $reportName.pdf and $reportName.txt"
 }
+python "$PSScriptRoot/check_txt_tables.py"
+if ($LASTEXITCODE -ne 0) { throw 'Text-export table checks failed' }

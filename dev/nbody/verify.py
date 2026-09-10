@@ -11,9 +11,18 @@ Reported per tier:
   energy abs/rel    divergence of report_energy()
   bit-identical     True iff every component compares == to stock
 
-Also checks the *landed* benchmark file (benchmarks/bm_nbody/run_benchmark.py)
-against the stock pyperformance file, which is the claim that actually has to
-hold for the report.
+Two different contracts are checked, and they are not interchangeable:
+
+  tiers            scored against TOL_STATE / TOL_ENERGY.  T3's sqrt variants
+                   deliberately reorder the arithmetic, so they are close but
+                   not bit-identical, and a tolerance verdict is the honest one.
+  landed benchmark scored on EXACT equality.  benchmarks/bm_nbody/run_benchmark.py
+                   keeps stock's operation order precisely so the reports can
+                   say "compares exactly equal to stock", so that is the claim
+                   the exit status defends.  Its tolerance verdict is still
+                   computed and printed, but passing it is not sufficient.
+
+A violation of either contract returns a nonzero exit status.
 
     python verify.py [--steps 20000] [--bodies 5[,10,20,...]]
 
@@ -114,13 +123,25 @@ def _load(path, name):
 
 
 def _paths():
+    """(stock, landed) benchmark sources.
+
+    The stock reference is looked for in a sibling pyperformance checkout, then
+    in the installed pyperformance package (the course VM has no checkout),
+    then in the pristine copy kept next to this file.
+    """
     here = os.path.dirname(os.path.abspath(__file__))
     repo = os.path.dirname(os.path.dirname(here))
-    stock = os.path.join(
-        os.path.dirname(repo), "pyperformance", "pyperformance", "data-files",
-        "benchmarks", "bm_nbody", "run_benchmark.py")
-    if not os.path.exists(stock):
-        stock = os.path.join(here, "stock_run_benchmark.py.bak")
+    rel = ("data-files", "benchmarks", "bm_nbody", "run_benchmark.py")
+    candidates = [os.path.join(os.path.dirname(repo), "pyperformance",
+                               "pyperformance", *rel)]
+    try:
+        import pyperformance
+        candidates.append(os.path.join(os.path.dirname(pyperformance.__file__),
+                                       *rel))
+    except ImportError:
+        pass
+    candidates.append(os.path.join(here, "stock_run_benchmark.py.bak"))
+    stock = next((c for c in candidates if os.path.exists(c)), candidates[0])
     opt = os.path.join(repo, "benchmarks", "bm_nbody", "run_benchmark.py")
     return stock, opt
 
@@ -157,8 +178,10 @@ def check_landed_n(steps, n):
     """Stock kernel vs the landed benchmark at --bodies N, bit for bit."""
     stock_path, opt_path = _paths()
     if not os.path.exists(stock_path):
-        print("  (stock source not found -- skipping)")
-        return True
+        # Not a pass: a contract that was never checked must not read as held.
+        print("  *** FAIL: stock source not found (%s) -- cannot check N=%d"
+              % (stock_path, n))
+        return False
     stock = _load(stock_path, "_nbody_stock_%d" % n)
     opt = _load(opt_path, "_nbody_opt_%d" % n)
     _scale_stock_module(stock, n)
@@ -182,33 +205,33 @@ def check_landed_n(steps, n):
     e0s, e0o = stock.report_energy(), opt.report_energy()
     stock.advance(0.01, steps)
     opt.advance(0.01, steps)
-    ok0, _ = compare("  initial energy", [e0s], e0s, [e0o], e0o)
+    ok0, ex0 = compare("  initial energy", [e0s], e0s, [e0o], e0o)
     st, se = flat(stock), stock.report_energy()
-    ok1, _ = compare("  after %d steps" % steps, st, se, flat(opt),
-                     opt.report_energy())
+    ok1, ex1 = compare("  after %d steps" % steps, st, se, flat(opt),
+                       opt.report_energy())
     finite = all(x == x and abs(x) != float("inf") for x in st)
     drift = abs(se - e0s) / abs(e0s)
     print("  physical sanity: all finite=%s | energy drift over %d steps "
           "= %.2e relative" % (finite, steps, drift))
-    return ok0 and ok1 and finite
+    # Same contract as check_landed(): the generated advance() at N is claimed
+    # bit-exact against the stock kernel at N, so exactness gates the result.
+    exact = ex0 and ex1
+    if not exact:
+        print("    *** FAIL: landed benchmark at N=%d is not bit-identical to "
+              "stock (the declared contract)" % n)
+    return ok0 and ok1 and finite and exact
 
 
 def check_landed(steps):
-    here = os.path.dirname(os.path.abspath(__file__))
-    repo = os.path.dirname(os.path.dirname(here))
-    stock_path = os.path.join(
-        os.path.dirname(repo), "pyperformance", "pyperformance", "data-files",
-        "benchmarks", "bm_nbody", "run_benchmark.py")
-    opt_path = os.path.join(repo, "benchmarks", "bm_nbody",
-                            "run_benchmark.py")
+    stock_path, opt_path = _paths()
     if not os.path.exists(stock_path):
-        # WSL working copy has no sibling pyperformance checkout; fall back to
-        # the pristine copy kept next to this file.
-        stock_path = os.path.join(here, "stock_run_benchmark.py.bak")
-    if not os.path.exists(stock_path):
-        print("\n(stock pyperformance source not found at %s -- "
-              "skipping landed-benchmark check)" % stock_path)
-        return True
+        # Not a pass. This used to print "skipping" and return True, so a host
+        # without the stock source reported the landed benchmark's exactness
+        # contract as held without ever comparing a single float.
+        print("\n*** FAIL: stock pyperformance source not found (looked for "
+              "%s) -- the landed-benchmark contract cannot be checked"
+              % stock_path)
+        return False
     print("\nLANDED BENCHMARK: %s\n           versus: %s"
           % (opt_path, stock_path))
     stock = _load(stock_path, "_nbody_stock")
@@ -230,7 +253,18 @@ def check_landed(steps):
     ok0, ex0 = compare("  initial energy", [e0s], e0s, [e0o], e0o)
     ok1, ex1 = compare("  after %d steps" % steps, flat(stock),
                        stock.report_energy(), flat(opt), opt.report_energy())
-    return ok0 and ok1
+    # The landed benchmark's declared contract is EXACT equality, not a
+    # tolerance -- the shipped kernel keeps stock's operation order precisely so
+    # that it can make that claim.  Reporting only the tolerance verdict here
+    # would let a rounding-changing edit land silently while the reports still
+    # said "compares exactly equal to stock", so exactness is what gates the
+    # exit status.  The tolerance verdict is kept as an independent check.
+    exact = ex0 and ex1
+    if not exact:
+        print("    *** FAIL: landed benchmark is not bit-identical to stock "
+              "(the declared contract); tolerance verdict was %s"
+              % ("pass" if (ok0 and ok1) else "fail"))
+    return ok0 and ok1 and exact
 
 
 def main():
@@ -268,8 +302,8 @@ def main():
         all_ok &= ok
 
     all_ok &= check_landed(a.steps)
-    print("\n%s" % ("ALL TIERS WITHIN TOLERANCE" if all_ok
-                    else "*** SOME TIERS FAILED ***"))
+    print("\n%s" % ("ALL TIERS WITHIN TOLERANCE, LANDED BENCHMARK BIT-EXACT"
+                    if all_ok else "*** CONTRACT VIOLATED ***"))
     return 0 if all_ok else 1
 
 

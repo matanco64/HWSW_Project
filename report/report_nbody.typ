@@ -37,14 +37,47 @@ pyperformance 1.14.0; 120 measured values per configuration. Source:
 not a confidence interval. Profiling is separate from timing; the shared appendix records
 methods and provenance.]
 
+The distributions behind those means are right-skewed and strongly grouped by worker
+process. Medians are 230.29 ms and 140.02 ms, with interquartile ranges of 3.54 ms and
+0.77 ms, so half of all values sit in a band well under 1% wide while the maxima reach
+249.82 ms and 164.50 ms. Almost all of the variance is *between* workers rather than within
+them (ICC 0.91 and 0.98), which means the 120 values are effectively about 43 and 41
+independent observations; Appendix A5 gives the full decomposition. The 1.64× ratio is far
+larger than that uncertainty, so the conclusion is unaffected -- but the SD alone would
+overstate how much a small difference could be trusted.
 #pagebreak()
 = 2. Profiling and optimization
 
 Python-frame sampling places almost all benchmark work in `advance()`. The C-level debug-build
-profile identifies list access, generic arithmetic dispatch and float allocation as substantial
-costs. Its list-access symbols sum to about 14.4% of sampled self time across coordinate
-indexing, loads and stores. These debug-build percentages locate costs to investigate;
-release-build timing establishes the optimization's benefit.
+profile identifies generic arithmetic dispatch, float allocation and list access as substantial
+costs. These debug-build percentages locate costs to investigate; release-build timing
+establishes the optimization's benefit.
+
+#result-table(columns: (1.9fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*Stock nbody, C-frame profile*], [*Self*], [*Inclusive*]),
+  [`_PyEval_EvalFrameDefault`], [42.94%], [99.33%],
+  [`binary_op1` (generic arithmetic dispatch)], [5.51%], [20.36%],
+  [`float_mul`], [4.23%], [4.23%],
+  [`PyFloat_FromDouble`], [4.03%], [5.84%],
+  [`float_dealloc`], [3.34%], [3.34%],
+  [`list_ass_item`], [2.72%], [2.72%],
+  [`PyNumber_AsSsize_t`], [2.29%], [4.99%],
+  [Float object handling, all symbols], [*16.30%*], [--],
+  [List access and index conversion, all symbols], [*11.95%*], [--],
+)
+
+*Self* is time in the function itself; *inclusive* is time in it and everything it calls.
+The two grouped rows sum self time over `^(float_|PyFloat_)` and over
+`^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)` respectively.
+
+The named rows are the symbols that carry the self time, which perf records under their
+`.lto_priv` names. perf also emits a companion `(inlined)` entry per symbol holding the
+inclusive share and no self time -- that is the number the figure below quotes for a
+highlighted frame, so 4.00% there and 2.72% here describe the same function under two
+different measures. Both the table and the groups are regenerated from
+`results/perf_report_nbody_stock.txt` by `report/summarize_profiles.py`, which prints every
+contributing symbol; an earlier draft quoted 14.4% for the list group, which that file does
+not support.
 
 #figure(image("fig/print_nbody_stock.svg", width: 100%),
   caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined

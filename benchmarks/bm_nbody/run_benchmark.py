@@ -14,6 +14,7 @@ Contributed by Kevin Carson.
 Modified by Tupteq, Fredrik Johansson, and Daniel Nanz.
 """
 
+import hashlib
 import os
 
 from math import cos, sin, sqrt
@@ -500,12 +501,79 @@ def add_cmdline_args(cmd, args):
     cmd.extend(("--bodies", str(args.bodies)))
 
 
+
+def _native_extension_file(module):
+    """Path of the compiled extension behind `module`, not its package stub.
+
+    maturin installs the crate as a package: `nbody_rs/__init__.py` is a
+    three-line re-export generated identically for every build, and the kernel
+    itself is the `.so` beside it. Hashing `module.__file__` would give the same
+    digest for any two builds -- exactly what the hash exists to tell apart.
+    """
+    import importlib.machinery
+    import sys
+    suffixes = tuple(importlib.machinery.EXTENSION_SUFFIXES)
+    name = module.__name__
+    sub = sys.modules.get(name + '.' + name.rpartition('.')[2])
+    for candidate in (sub, module):
+        path = getattr(candidate, '__file__', None) or ''
+        if path.endswith(suffixes):
+            return path
+    for entry in getattr(module, '__path__', None) or ():
+        for fn in sorted(os.listdir(entry)):
+            if fn.endswith(suffixes):
+                return os.path.join(entry, fn)
+    return getattr(module, '__file__', None)
+
+
+def _backend_metadata(runner, module, requested):
+    """Record which back end ran, and which binary it was.
+
+    "native" is not a sufficient description of a measurement: the crate's
+    version never changes between builds, so two result files can both say
+    native and describe different compiled kernels.  The loaded path and its
+    SHA-256 are what tie a JSON to the wheel that tools/build_wheel.sh
+    installed.
+    """
+    runner.metadata['hwsw_backend'] = 'native' if module is not None else 'python'
+    runner.metadata['hwsw_backend_requested'] = requested
+    if module is not None:
+        path = _native_extension_file(module)
+        if path:
+            runner.metadata['hwsw_native_module'] = path
+            try:
+                with open(path, 'rb') as fh:
+                    runner.metadata['hwsw_native_sha256'] =                         hashlib.sha256(fh.read()).hexdigest()
+            except OSError:                              # pragma: no cover
+                pass
+
+
+def _propagate_backend(runner):
+    """Make the requested back end reach the worker processes.
+
+    pyperf re-executes every worker with a scrubbed environment
+    (``pyperf._utils.create_environ``), so ``HWSW_BACKEND`` is dropped unless
+    the caller passed ``--inherit-environ HWSW_BACKEND``.  That was forgotten
+    once: both sides of a "Python vs native" comparison measured native, and
+    only the recorded metadata caught it.  Leaving the fix in the caller means
+    every future caller has to remember it, and ``pyperformance run`` offers no
+    way to pass the flag through to the benchmark at all -- so the benchmark
+    propagates its own configuration here, and the flag on the command line
+    becomes belt-and-braces rather than the only thing standing between a
+    reader and a wrong number.
+    """
+    args = runner.parse_args()            # idempotent; returns the cached args
+    inherit = list(getattr(args, 'inherit_environ', None) or [])
+    if 'HWSW_BACKEND' not in inherit:
+        inherit.append('HWSW_BACKEND')
+    args.inherit_environ = inherit
+    return args
+
 if __name__ == '__main__':
     runner = pyperf.Runner(add_cmdline_args=add_cmdline_args)
     runner.metadata['description'] = "n-body benchmark"
-    # so the result JSON says which back end produced it
-    runner.metadata['hwsw_backend'] = ("native" if nbody_rs is not None
-                                       else "python")
+    # so the result JSON says which back end produced it, and which binary
+    _backend_metadata(runner, nbody_rs, _BACKEND)
     runner.argparser.add_argument("--iterations",
                                   type=int, default=DEFAULT_ITERATIONS,
                                   help="Number of nbody advance() iterations "
@@ -521,7 +589,7 @@ if __name__ == '__main__':
                                        "(default: %s)"
                                        % (DEFAULT_BODIES, DEFAULT_BODIES))
 
-    args = runner.parse_args()
+    args = _propagate_backend(runner)   # parses; must follow every add_argument()
     # Outside the timed region: bench_time_func() times bench_nbody(), and the
     # source generation + compile() for the larger system happens here, once,
     # before the first loop.  It is measured separately by dev/nbody/sweep_n.py

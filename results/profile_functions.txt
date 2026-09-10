@@ -1,0 +1,94 @@
+
+nbody stock (C frames, python3-dbg)
+  source: results/perf_report_nbody_stock.txt
+  function                            self %     incl %
+  _PyEval_EvalFrameDefault            42.94%     99.33%
+  binary_op1                           5.51%     20.36%
+  float_mul.lto_priv.0                 4.23%      4.23%
+  PyFloat_FromDouble                   4.03%      5.84%
+  float_dealloc.lto_priv.0             3.34%      3.34%
+  list_ass_item.lto_priv.0             2.72%      2.72%
+  PyNumber_AsSsize_t                   2.29%      4.99%
+  _Py_CheckSlotResult                  2.09%      2.09%
+  float_sub.lto_priv.0                 2.01%      2.01%
+  float_add.lto_priv.0                 1.83%      1.83%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 11.95% of self time, from 10 symbols
+    list_ass_item.lto_priv.0           2.72%
+    PyNumber_AsSsize_t                 2.29%
+    list_ass_subscript.lto_priv.0      1.76%
+    list_item.lto_priv.0               1.51%
+    list_subscript.lto_priv.0          1.40%
+    PyLong_AsSsize_t                   1.17%
+    listiter_next.lto_priv.0           0.92%
+    list_iter.lto_priv.0               0.10%
+    listiter_dealloc.lto_priv.0        0.05%
+    list_resize                        0.03%
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 16.30% of self time, from 6 symbols
+    float_mul.lto_priv.0               4.23%
+    PyFloat_FromDouble                 4.03%
+    float_dealloc.lto_priv.0           3.34%
+    float_sub.lto_priv.0               2.01%
+    float_add.lto_priv.0               1.83%
+    float_pow.lto_priv.0               0.86%
+
+nbody optimized (Python frames, py-spy)
+  source: results/pyspy_nbody_opt_full.svg  (187 samples)
+  function                                              self %     incl %
+  advance (<nbody-advance>)                             95.72%     95.72%
+  get_data (<frozen importlib._bootstrap_external>)      0.53%      0.53%
+  _parse (sre_parse.py)                                  0.53%      0.53%
+  <lambda> (socket.py)                                   0.53%      0.53%
+  namedtuple (collections/__init__.py)                   0.53%      0.53%
+  _execute_child (subprocess.py)                         0.53%      0.53%
+  update_wrapper (functools.py)                          0.53%      0.53%
+  read_text (pathlib.py)                                 0.53%      0.53%
+  <module> (run_benchmark.py)                            0.00%     99.47%
+  create_run (pyperf/_worker.py)                         0.00%     96.26%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+pyflate stock (Python frames, py-spy)
+  source: results/pyspy_pyflate_stock_full.svg  (404 samples)
+  function                                    self %     incl %
+  decode_huffman_block (run_benchmark.py)     23.76%     93.81%
+  find_next_symbol (run_benchmark.py)         16.34%     40.59%
+  move_to_front (run_benchmark.py)            15.10%     15.10%
+  snoopbits (run_benchmark.py)                 9.65%     17.82%
+  bwt_transform (run_benchmark.py)             8.66%      8.66%
+  readbits (run_benchmark.py)                  6.44%      7.43%
+  bwt_reverse (run_benchmark.py)               4.70%     13.37%
+  _more (run_benchmark.py)                     3.47%      4.46%
+  _mask (run_benchmark.py)                     2.97%      2.97%
+  needbits (run_benchmark.py)                  1.73%      6.19%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+pyflate optimized (Python frames, py-spy)
+  source: results/pyspy_pyflate_opt_full.svg  (104 samples)
+  function                                                       self %     incl %
+  decode_huffman_block (run_benchmark.py)                        37.50%     93.27%
+  bwt_reverse (run_benchmark.py)                                 25.96%     50.00%
+  bwt_transform (run_benchmark.py)                               24.04%     24.04%
+  rle4_expand (run_benchmark.py)                                  4.81%      4.81%
+  _compile_bytecode (<frozen importlib._bootstrap_external>)      1.92%      1.92%
+  _init_module_attrs (<frozen importlib._bootstrap>)              0.96%      0.96%
+  <genexpr> (enum.py)                                             0.96%      0.96%
+  __exit__ (<frozen importlib._bootstrap>)                        0.96%      0.96%
+  compute_selectors_list (run_benchmark.py)                       0.96%      0.96%
+  _compile (sre_compile.py)                                       0.96%      0.96%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+self % = time in the function itself; incl % = time in it and everything it calls.
+Shares are of a profile's own total, so they compare call paths
+within one graph and never across two.
+
+wrote report/fig/profile_functions.json
