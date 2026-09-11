@@ -38,20 +38,14 @@ decoder adds *1.67×* (Section 4). Both tiers exceed the course's 7% improvement
 `bz2.decompress` byte for byte, passing the unchanged MD5 check. Rust handles the blue
 stage above; block headers, inverse BWT and RLE4 remain in Python.
 
-#note[*Measurement scope.* Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12,
-pyperformance 1.14.0, pyperf 2.10.0; 120 measured values per configuration, every timed run
-pinned to guest CPU 0, measured from revision 2c8c754 through the documented runner scripts
-with the Rust extension built from that revision. Source:
-`results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,native}_pyflate.json`, which
-also record back end and CPU affinity (Appendix A7). Development profiles and ablations are
-labeled separately.]
+#note[*Measurement scope.* Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12; 120
+values per configuration, pinned to guest CPU 0, from revision 2c8c754 through the documented
+scripts and its own Rust build. Source: `results/vm_canonical_20260910_2c8c754/suite/`
+(Appendix A7). Development profiles and ablations are labeled separately.]
 
-Medians are 1,122.68 ms, 280.43 ms and 169.67 ms, with interquartile ranges of 14.67 ms,
-3.47 ms and 2.06 ms -- about 1.3%, 1.2% and 1.2% of the median in each case. Unlike nbody,
-these runs are not dominated by between-worker variation: their ICCs are 0.48, 0.27 and 0.19,
-so their 120 values are worth about 61 to 87 independent observations rather than about 40,
-and the Python back end measured in Section 4 shows no detectable worker effect at all.
-Appendix A5 gives the decomposition and the corrected standard errors.
+Medians are 1,122.68, 280.43 and 169.67 ms, with interquartile ranges of 1.2-1.3% of the
+median. Worker grouping is milder than nbody's (ICC 0.48, 0.27 and 0.19), so the 120 values
+are worth about 61 to 87 independent observations; Appendix A5 gives the decomposition.
 #pagebreak()
 = 2. Profiling: the whole decoding pipeline
 
