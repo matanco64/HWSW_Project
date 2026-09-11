@@ -336,17 +336,17 @@ class ProfileTables(unittest.TestCase):
         (lists, floats) = sp.group_totals(rows, [
             ('list', r'^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)'),
             ('float', r'^(float_|PyFloat_)')])
-        self.assertAlmostEqual(lists['self_pct'], 11.95, places=2)
-        self.assertAlmostEqual(floats['self_pct'], 16.30, places=2)
+        self.assertAlmostEqual(lists['self_pct'], 11.26, places=2)
+        self.assertAlmostEqual(floats['self_pct'], 16.25, places=2)
 
     @unittest.skipUnless(os.path.exists(FLAME_PYFLATE_OPT), 'recorded profile absent')
     def test_flame_self_and_inclusive(self):
         rows, total = sp.read_flame(FLAME_PYFLATE_OPT)
         by_name = {r['name']: r for r in rows}
         bwt = by_name['bwt_reverse (run_benchmark.py)']
-        self.assertEqual(total, 104)
-        self.assertAlmostEqual(bwt['self_pct'], 25.96, places=2)
-        self.assertAlmostEqual(bwt['inclusive_pct'], 50.00, places=2)
+        self.assertEqual(total, 122)
+        self.assertAlmostEqual(bwt['self_pct'], 13.11, places=2)
+        self.assertAlmostEqual(bwt['inclusive_pct'], 38.52, places=2)
         self.assertTrue(all(r['inclusive_pct'] <= 100.0 + 1e-9 for r in rows))
         self.assertTrue(all(r['self_pct'] <= r['inclusive_pct'] + 1e-9 for r in rows))
 

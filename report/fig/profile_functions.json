@@ -2,52 +2,52 @@
   {
     "functions": [
       {
-        "inclusive_pct": 99.33,
+        "inclusive_pct": 99.31,
         "name": "_PyEval_EvalFrameDefault",
         "object": "python3.10d",
-        "self_pct": 42.94
+        "self_pct": 44.1
       },
       {
-        "inclusive_pct": 20.36,
+        "inclusive_pct": 20.07,
         "name": "binary_op1",
         "object": "python3.10d",
-        "self_pct": 5.51
+        "self_pct": 4.9
       },
       {
-        "inclusive_pct": 4.23,
-        "name": "float_mul.lto_priv.0",
-        "object": "python3.10d",
-        "self_pct": 4.23
-      },
-      {
-        "inclusive_pct": 5.84,
+        "inclusive_pct": 5.82,
         "name": "PyFloat_FromDouble",
         "object": "python3.10d",
         "self_pct": 4.03
       },
       {
-        "inclusive_pct": 3.34,
+        "inclusive_pct": 3.86,
+        "name": "float_mul.lto_priv.0",
+        "object": "python3.10d",
+        "self_pct": 3.86
+      },
+      {
+        "inclusive_pct": 3.48,
         "name": "float_dealloc.lto_priv.0",
         "object": "python3.10d",
-        "self_pct": 3.34
+        "self_pct": 3.48
       },
       {
-        "inclusive_pct": 2.72,
-        "name": "list_ass_item.lto_priv.0",
+        "inclusive_pct": 2.55,
+        "name": "list_ass_subscript.lto_priv.0",
         "object": "python3.10d",
-        "self_pct": 2.72
+        "self_pct": 2.55
       },
       {
-        "inclusive_pct": 4.99,
+        "inclusive_pct": 2.38,
+        "name": "float_add.lto_priv.0",
+        "object": "python3.10d",
+        "self_pct": 2.38
+      },
+      {
+        "inclusive_pct": 4.87,
         "name": "PyNumber_AsSsize_t",
         "object": "python3.10d",
-        "self_pct": 2.29
-      },
-      {
-        "inclusive_pct": 2.09,
-        "name": "_Py_CheckSlotResult",
-        "object": "python3.10d",
-        "self_pct": 2.09
+        "self_pct": 2.22
       },
       {
         "inclusive_pct": 2.01,
@@ -56,10 +56,10 @@
         "self_pct": 2.01
       },
       {
-        "inclusive_pct": 1.83,
-        "name": "float_add.lto_priv.0",
+        "inclusive_pct": 1.96,
+        "name": "_Py_CheckSlotResult",
         "object": "python3.10d",
-        "self_pct": 1.83
+        "self_pct": 1.96
       }
     ],
     "groups": [
@@ -67,89 +67,107 @@
         "group": "list access",
         "members": [
           {
-            "inclusive_pct": 2.72,
-            "name": "list_ass_item.lto_priv.0",
-            "object": "python3.10d",
-            "self_pct": 2.72
-          },
-          {
-            "inclusive_pct": 4.99,
-            "name": "PyNumber_AsSsize_t",
-            "object": "python3.10d",
-            "self_pct": 2.29
-          },
-          {
-            "inclusive_pct": 1.76,
+            "inclusive_pct": 2.55,
             "name": "list_ass_subscript.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 1.76
+            "self_pct": 2.55
           },
           {
-            "inclusive_pct": 1.51,
-            "name": "list_item.lto_priv.0",
+            "inclusive_pct": 4.87,
+            "name": "PyNumber_AsSsize_t",
             "object": "python3.10d",
-            "self_pct": 1.51
+            "self_pct": 2.22
           },
           {
-            "inclusive_pct": 1.4,
+            "inclusive_pct": 1.78,
+            "name": "list_ass_item.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 1.78
+          },
+          {
+            "inclusive_pct": 1.58,
             "name": "list_subscript.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 1.4
+            "self_pct": 1.58
           },
           {
-            "inclusive_pct": 1.17,
+            "inclusive_pct": 1.04,
             "name": "PyLong_AsSsize_t",
             "object": "python3.10d",
-            "self_pct": 1.17
+            "self_pct": 1.04
           },
           {
-            "inclusive_pct": 0.92,
+            "inclusive_pct": 0.94,
+            "name": "list_item.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 0.94
+          },
+          {
+            "inclusive_pct": 0.77,
             "name": "listiter_next.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 0.92
+            "self_pct": 0.77
           },
           {
-            "inclusive_pct": 0.1,
+            "inclusive_pct": 0.16,
             "name": "list_iter.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 0.1
+            "self_pct": 0.16
+          },
+          {
+            "inclusive_pct": 0.15,
+            "name": "listiter_dealloc.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 0.15
+          },
+          {
+            "inclusive_pct": 0.03,
+            "name": "list_dealloc.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 0.03
           },
           {
             "inclusive_pct": 0.05,
-            "name": "listiter_dealloc.lto_priv.0",
-            "object": "python3.10d",
-            "self_pct": 0.05
-          },
-          {
-            "inclusive_pct": 0.07,
             "name": "list_resize",
             "object": "python3.10d",
-            "self_pct": 0.03
+            "self_pct": 0.02
+          },
+          {
+            "inclusive_pct": 0.02,
+            "name": "list_sort_impl",
+            "object": "python3.10d",
+            "self_pct": 0.02
           }
         ],
         "pattern": "^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)",
-        "self_pct": 11.95
+        "self_pct": 11.26
       },
       {
         "group": "float objects",
         "members": [
           {
-            "inclusive_pct": 4.23,
-            "name": "float_mul.lto_priv.0",
-            "object": "python3.10d",
-            "self_pct": 4.23
-          },
-          {
-            "inclusive_pct": 5.84,
+            "inclusive_pct": 5.82,
             "name": "PyFloat_FromDouble",
             "object": "python3.10d",
             "self_pct": 4.03
           },
           {
-            "inclusive_pct": 3.34,
+            "inclusive_pct": 3.86,
+            "name": "float_mul.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 3.86
+          },
+          {
+            "inclusive_pct": 3.48,
             "name": "float_dealloc.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 3.34
+            "self_pct": 3.48
+          },
+          {
+            "inclusive_pct": 2.38,
+            "name": "float_add.lto_priv.0",
+            "object": "python3.10d",
+            "self_pct": 2.38
           },
           {
             "inclusive_pct": 2.01,
@@ -158,98 +176,92 @@
             "self_pct": 2.01
           },
           {
-            "inclusive_pct": 1.83,
-            "name": "float_add.lto_priv.0",
-            "object": "python3.10d",
-            "self_pct": 1.83
-          },
-          {
-            "inclusive_pct": 0.86,
+            "inclusive_pct": 0.49,
             "name": "float_pow.lto_priv.0",
             "object": "python3.10d",
-            "self_pct": 0.86
+            "self_pct": 0.49
           }
         ],
         "pattern": "^(float_|PyFloat_)",
-        "self_pct": 16.3
+        "self_pct": 16.25
       }
     ],
     "kind": "perf",
     "profile": "nbody stock (C frames, python3-dbg)",
-    "self_pct_accounted": 100.37,
+    "self_pct_accounted": 100.32000000000001,
     "source": "perf_report_nbody_stock.txt",
     "total_samples": null
   },
   {
     "functions": [
       {
-        "inclusive_pct": 95.72192513368984,
+        "inclusive_pct": 91.42857142857143,
         "name": "advance (<nbody-advance>)",
         "object": null,
-        "self_pct": 95.72192513368984,
-        "sites": 92
+        "self_pct": 91.42857142857143,
+        "sites": 95
       },
       {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "get_data (<frozen importlib._bootstrap_external>)",
+        "inclusive_pct": 0.9523809523809523,
+        "name": "__new__ (abc.py)",
         "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
+        "self_pct": 0.9523809523809523,
+        "sites": 2
       },
       {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "_parse (sre_parse.py)",
+        "inclusive_pct": 2.857142857142857,
+        "name": "_create_ (enum.py)",
         "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "<lambda> (socket.py)",
-        "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "namedtuple (collections/__init__.py)",
-        "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "_execute_child (subprocess.py)",
-        "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "update_wrapper (functools.py)",
-        "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 0.5347593582887701,
-        "name": "read_text (pathlib.py)",
-        "object": null,
-        "self_pct": 0.5347593582887701,
-        "sites": 1
-      },
-      {
-        "inclusive_pct": 99.46524064171123,
-        "name": "<module> (run_benchmark.py)",
-        "object": null,
-        "self_pct": 0.0,
+        "self_pct": 0.47619047619047616,
         "sites": 3
       },
       {
-        "inclusive_pct": 96.2566844919786,
-        "name": "create_run (pyperf/_worker.py)",
+        "inclusive_pct": 1.4285714285714286,
+        "name": "__new__ (enum.py)",
         "object": null,
-        "self_pct": 0.0,
+        "self_pct": 0.47619047619047616,
+        "sites": 3
+      },
+      {
+        "inclusive_pct": 1.4285714285714286,
+        "name": "<module> (selectors.py)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
+        "sites": 3
+      },
+      {
+        "inclusive_pct": 0.9523809523809523,
+        "name": "__setitem__ (enum.py)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
+        "sites": 2
+      },
+      {
+        "inclusive_pct": 0.47619047619047616,
+        "name": "_compile_bytecode (<frozen importlib._bootstrap_external>)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
+        "sites": 1
+      },
+      {
+        "inclusive_pct": 0.47619047619047616,
+        "name": "<setcomp> (enum.py)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
+        "sites": 1
+      },
+      {
+        "inclusive_pct": 0.47619047619047616,
+        "name": "_get_spec (<frozen importlib._bootstrap_external>)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
+        "sites": 1
+      },
+      {
+        "inclusive_pct": 0.47619047619047616,
+        "name": "<dictcomp> (enum.py)",
+        "object": null,
+        "self_pct": 0.47619047619047616,
         "sites": 1
       }
     ],
@@ -269,80 +281,80 @@
     ],
     "kind": "flame",
     "profile": "nbody optimized (Python frames, py-spy)",
-    "self_pct_accounted": 99.46524064171123,
+    "self_pct_accounted": 100.0,
     "source": "pyspy_nbody_opt_full.svg",
-    "total_samples": 187
+    "total_samples": 210
   },
   {
     "functions": [
       {
-        "inclusive_pct": 93.81188118811882,
+        "inclusive_pct": 97.31182795698925,
         "name": "decode_huffman_block (run_benchmark.py)",
         "object": null,
-        "self_pct": 23.762376237623762,
-        "sites": 17
+        "self_pct": 26.0752688172043,
+        "sites": 19
       },
       {
-        "inclusive_pct": 40.59405940594059,
-        "name": "find_next_symbol (run_benchmark.py)",
-        "object": null,
-        "self_pct": 16.336633663366335,
-        "sites": 8
-      },
-      {
-        "inclusive_pct": 15.099009900990099,
+        "inclusive_pct": 13.440860215053764,
         "name": "move_to_front (run_benchmark.py)",
         "object": null,
-        "self_pct": 15.099009900990099,
+        "self_pct": 13.440860215053764,
         "sites": 1
       },
       {
-        "inclusive_pct": 17.821782178217823,
+        "inclusive_pct": 40.86021505376344,
+        "name": "find_next_symbol (run_benchmark.py)",
+        "object": null,
+        "self_pct": 12.634408602150538,
+        "sites": 7
+      },
+      {
+        "inclusive_pct": 13.440860215053764,
+        "name": "readbits (run_benchmark.py)",
+        "object": null,
+        "self_pct": 9.946236559139784,
+        "sites": 7
+      },
+      {
+        "inclusive_pct": 16.129032258064516,
         "name": "snoopbits (run_benchmark.py)",
         "object": null,
-        "self_pct": 9.653465346534654,
+        "self_pct": 9.408602150537634,
         "sites": 3
       },
       {
-        "inclusive_pct": 8.663366336633663,
-        "name": "bwt_transform (run_benchmark.py)",
+        "inclusive_pct": 14.516129032258064,
+        "name": "bwt_reverse (run_benchmark.py)",
         "object": null,
-        "self_pct": 8.663366336633663,
+        "self_pct": 8.333333333333334,
         "sites": 5
       },
       {
-        "inclusive_pct": 7.425742574257426,
-        "name": "readbits (run_benchmark.py)",
+        "inclusive_pct": 6.182795698924731,
+        "name": "bwt_transform (run_benchmark.py)",
         "object": null,
-        "self_pct": 6.435643564356436,
-        "sites": 6
-      },
-      {
-        "inclusive_pct": 13.366336633663366,
-        "name": "bwt_reverse (run_benchmark.py)",
-        "object": null,
-        "self_pct": 4.702970297029703,
+        "self_pct": 6.182795698924731,
         "sites": 4
       },
       {
-        "inclusive_pct": 4.455445544554456,
-        "name": "_more (run_benchmark.py)",
-        "object": null,
-        "self_pct": 3.4653465346534653,
-        "sites": 4
-      },
-      {
-        "inclusive_pct": 2.9702970297029703,
+        "inclusive_pct": 5.913978494623656,
         "name": "_mask (run_benchmark.py)",
         "object": null,
-        "self_pct": 2.9702970297029703,
-        "sites": 3
+        "self_pct": 5.913978494623656,
+        "sites": 4
       },
       {
-        "inclusive_pct": 6.188118811881188,
-        "name": "needbits (run_benchmark.py)",
+        "inclusive_pct": 3.4946236559139785,
+        "name": "_more (run_benchmark.py)",
         "object": null,
-        "self_pct": 1.7326732673267327,
+        "self_pct": 2.4193548387096775,
+        "sites": 4
+      },
+      {
+        "inclusive_pct": 98.38709677419355,
+        "name": "bzip2_main (run_benchmark.py)",
+        "object": null,
+        "self_pct": 1.075268817204301,
         "sites": 2
       }
     ],
@@ -362,80 +374,80 @@
     ],
     "kind": "flame",
     "profile": "pyflate stock (Python frames, py-spy)",
-    "self_pct_accounted": 99.00990099009901,
+    "self_pct_accounted": 99.73118279569893,
     "source": "pyspy_pyflate_stock_full.svg",
-    "total_samples": 404
+    "total_samples": 372
   },
   {
     "functions": [
       {
-        "inclusive_pct": 93.26923076923077,
-        "name": "decode_huffman_block (run_benchmark.py)",
+        "inclusive_pct": 32.78688524590164,
+        "name": "_decode_symbols_python (run_benchmark.py)",
         "object": null,
-        "self_pct": 37.5,
-        "sites": 21
+        "self_pct": 32.78688524590164,
+        "sites": 17
       },
       {
-        "inclusive_pct": 50.0,
-        "name": "bwt_reverse (run_benchmark.py)",
-        "object": null,
-        "self_pct": 25.96153846153846,
-        "sites": 5
-      },
-      {
-        "inclusive_pct": 24.03846153846154,
+        "inclusive_pct": 25.40983606557377,
         "name": "bwt_transform (run_benchmark.py)",
         "object": null,
-        "self_pct": 24.03846153846154,
+        "self_pct": 25.40983606557377,
         "sites": 6
       },
       {
-        "inclusive_pct": 4.8076923076923075,
-        "name": "rle4_expand (run_benchmark.py)",
+        "inclusive_pct": 38.52459016393443,
+        "name": "bwt_reverse (run_benchmark.py)",
         "object": null,
-        "self_pct": 4.8076923076923075,
-        "sites": 1
+        "self_pct": 13.114754098360656,
+        "sites": 4
       },
       {
-        "inclusive_pct": 1.9230769230769231,
+        "inclusive_pct": 5.737704918032787,
+        "name": "rle4_expand (run_benchmark.py)",
+        "object": null,
+        "self_pct": 5.737704918032787,
+        "sites": 3
+      },
+      {
+        "inclusive_pct": 3.278688524590164,
         "name": "_compile_bytecode (<frozen importlib._bootstrap_external>)",
         "object": null,
-        "self_pct": 1.9230769230769231,
+        "self_pct": 3.278688524590164,
         "sites": 2
       },
       {
-        "inclusive_pct": 0.9615384615384616,
-        "name": "_init_module_attrs (<frozen importlib._bootstrap>)",
+        "inclusive_pct": 3.278688524590164,
+        "name": "namedtuple (collections/__init__.py)",
         "object": null,
-        "self_pct": 0.9615384615384616,
-        "sites": 1
+        "self_pct": 3.278688524590164,
+        "sites": 4
       },
       {
-        "inclusive_pct": 0.9615384615384616,
-        "name": "<genexpr> (enum.py)",
+        "inclusive_pct": 2.459016393442623,
+        "name": "readbits (run_benchmark.py)",
         "object": null,
-        "self_pct": 0.9615384615384616,
-        "sites": 1
+        "self_pct": 2.459016393442623,
+        "sites": 3
       },
       {
-        "inclusive_pct": 0.9615384615384616,
-        "name": "__exit__ (<frozen importlib._bootstrap>)",
+        "inclusive_pct": 82.78688524590164,
+        "name": "decode_huffman_block (run_benchmark.py)",
         "object": null,
-        "self_pct": 0.9615384615384616,
-        "sites": 1
+        "self_pct": 1.639344262295082,
+        "sites": 4
       },
       {
-        "inclusive_pct": 0.9615384615384616,
-        "name": "compute_selectors_list (run_benchmark.py)",
+        "inclusive_pct": 15.573770491803279,
+        "name": "_call_with_frames_removed (<frozen importlib._bootstrap>)",
         "object": null,
-        "self_pct": 0.9615384615384616,
-        "sites": 1
+        "self_pct": 1.639344262295082,
+        "sites": 31
       },
       {
-        "inclusive_pct": 0.9615384615384616,
-        "name": "_compile (sre_compile.py)",
+        "inclusive_pct": 83.60655737704919,
+        "name": "bench_pyflake (run_benchmark.py)",
         "object": null,
-        "self_pct": 0.9615384615384616,
+        "self_pct": 0.819672131147541,
         "sites": 2
       }
     ],
@@ -455,8 +467,8 @@
     ],
     "kind": "flame",
     "profile": "pyflate optimized (Python frames, py-spy)",
-    "self_pct_accounted": 100.0,
+    "self_pct_accounted": 99.18032786885246,
     "source": "pyspy_pyflate_opt_full.svg",
-    "total_samples": 104
+    "total_samples": 122
   }
 ]

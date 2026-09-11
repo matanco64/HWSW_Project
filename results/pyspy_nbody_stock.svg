@@ -431,164 +431,124 @@
 <text id="matched" x="1090.00" y="261" > </text>
 <g id="frames">
 <g >
-<title>bench_time_func (pyperf/_runner.py:502) (297 samples, 99.66%)</title><rect x="14.0" y="197" width="1176.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="16.96" y="207.5" >bench_time_func (pyperf/_runner.py:502)</text>
+<title>advance (run_benchmark.py:92) (21 samples, 6.93%)</title><rect x="796.7" y="37" width="81.7" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="799.67" y="47.5" >advance (..</text>
 </g>
 <g >
-<title>create_run (pyperf/_worker.py:300) (297 samples, 99.66%)</title><rect x="14.0" y="149" width="1176.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
-<text  x="16.96" y="159.5" >create_run (pyperf/_worker.py:300)</text>
+<title>advance (run_benchmark.py:97) (14 samples, 4.62%)</title><rect x="1135.5" y="37" width="54.5" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="1138.48" y="47.5" >advan..</text>
 </g>
 <g >
-<title>_worker (pyperf/_runner.py:437) (297 samples, 99.66%)</title><rect x="14.0" y="165" width="1176.0" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
-<text  x="16.96" y="175.5" >_worker (pyperf/_runner.py:437)</text>
+<title>&lt;module&gt; (run_benchmark.py:155) (303 samples, 100.00%)</title><rect x="10.0" y="213" width="1180.0" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="13.00" y="223.5" >&lt;module&gt; (run_benchmark.py:155)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:89) (23 samples, 7.72%)</title><rect x="564.4" y="37" width="91.0" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
-<text  x="567.36" y="47.5" >advance (r..</text>
+<title>_worker (pyperf/_runner.py:437) (303 samples, 100.00%)</title><rect x="10.0" y="165" width="1180.0" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<text  x="13.00" y="175.5" >_worker (pyperf/_runner.py:437)</text>
 </g>
 <g >
-<title>_compute_values (pyperf/_worker.py:79) (297 samples, 99.66%)</title><rect x="14.0" y="85" width="1176.0" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
-<text  x="16.96" y="95.5" >_compute_values (pyperf/_worker.py:79)</text>
+<title>advance (run_benchmark.py:88) (24 samples, 7.92%)</title><rect x="454.0" y="37" width="93.4" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="456.96" y="47.5" >advance (ru..</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:97) (18 samples, 6.04%)</title><rect x="1118.7" y="37" width="71.3" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
-<text  x="1121.72" y="47.5" >advance ..</text>
+<title>advance (run_benchmark.py:81) (7 samples, 2.31%)</title><rect x="76.2" y="37" width="27.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="79.20" y="47.5" >a..</text>
 </g>
 <g >
-<title>&lt;genexpr&gt; (importlib/metadata/__init__.py:1018) (1 samples, 0.34%)</title><rect x="10.0" y="117" width="4.0" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
-<text  x="13.00" y="127.5" ></text>
+<title>advance (run_benchmark.py:85) (53 samples, 17.49%)</title><rect x="189.1" y="37" width="206.4" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
+<text  x="192.14" y="47.5" >advance (run_benchmark.py:85)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:85) (63 samples, 21.14%)</title><rect x="200.1" y="37" width="249.4" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
-<text  x="203.07" y="47.5" >advance (run_benchmark.py:85)</text>
+<title>advance (run_benchmark.py:95) (9 samples, 2.97%)</title><rect x="1053.7" y="37" width="35.0" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="1056.70" y="47.5" >ad..</text>
 </g>
 <g >
-<title>task_func (pyperf/_runner.py:497) (297 samples, 99.66%)</title><rect x="14.0" y="69" width="1176.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="16.96" y="79.5" >task_func (pyperf/_runner.py:497)</text>
+<title>create_run (pyperf/_worker.py:300) (303 samples, 100.00%)</title><rect x="10.0" y="149" width="1180.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="13.00" y="159.5" >create_run (pyperf/_worker.py:300)</text>
 </g>
 <g >
-<title>entry_points (importlib/metadata/__init__.py:631) (1 samples, 0.34%)</title><rect x="10.0" y="101" width="4.0" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
-<text  x="13.00" y="111.5" ></text>
+<title>compute_warmups_values (pyperf/_worker.py:271) (303 samples, 100.00%)</title><rect x="10.0" y="101" width="1180.0" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="13.00" y="111.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:93) (26 samples, 8.72%)</title><rect x="900.9" y="37" width="103.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="903.94" y="47.5" >advance (run..</text>
+<title>advance (run_benchmark.py:90) (19 samples, 6.27%)</title><rect x="629.2" y="37" width="74.0" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="632.21" y="47.5" >advance ..</text>
 </g>
 <g >
-<title>&lt;genexpr&gt; (importlib/metadata/__init__.py:381) (1 samples, 0.34%)</title><rect x="10.0" y="69" width="4.0" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
-<text  x="13.00" y="79.5" ></text>
-</g>
-<g >
-<title>advance (run_benchmark.py:82) (9 samples, 3.02%)</title><rect x="97.1" y="37" width="35.7" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
-<text  x="100.11" y="47.5" >adv..</text>
-</g>
-<g >
-<title>advance (run_benchmark.py:88) (22 samples, 7.38%)</title><rect x="477.2" y="37" width="87.2" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
-<text  x="480.25" y="47.5" >advance (r..</text>
-</g>
-<g >
-<title>all (298 samples, 100%)</title><rect x="10.0" y="229" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<title>all (303 samples, 100%)</title><rect x="10.0" y="229" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
 <text  x="13.00" y="239.5" ></text>
 </g>
 <g >
-<title>advance (run_benchmark.py:84) (9 samples, 3.02%)</title><rect x="164.4" y="37" width="35.7" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="167.43" y="47.5" >adv..</text>
+<title>advance (run_benchmark.py:86) (11 samples, 3.63%)</title><rect x="395.5" y="37" width="42.9" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="398.54" y="47.5" >adva..</text>
 </g>
 <g >
-<title>compute_warmups_values (pyperf/_worker.py:271) (297 samples, 99.66%)</title><rect x="14.0" y="101" width="1176.0" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
-<text  x="16.96" y="111.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
+<title>advance (run_benchmark.py:94) (7 samples, 2.31%)</title><rect x="1026.4" y="37" width="27.3" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
+<text  x="1029.44" y="47.5" >a..</text>
 </g>
 <g >
-<title>_main (pyperf/_runner.py:463) (297 samples, 99.66%)</title><rect x="14.0" y="181" width="1176.0" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
-<text  x="16.96" y="191.5" >_main (pyperf/_runner.py:463)</text>
+<title>advance (run_benchmark.py:87) (4 samples, 1.32%)</title><rect x="438.4" y="37" width="15.6" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
+<text  x="441.38" y="47.5" ></text>
 </g>
 <g >
-<title>get_hooks (pyperf/_hooks.py:18) (1 samples, 0.34%)</title><rect x="10.0" y="165" width="4.0" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
-<text  x="13.00" y="175.5" ></text>
+<title>advance (run_benchmark.py:84) (7 samples, 2.31%)</title><rect x="161.9" y="37" width="27.2" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="164.88" y="47.5" >a..</text>
 </g>
 <g >
-<title>bench_nbody (run_benchmark.py:132) (297 samples, 99.66%)</title><rect x="14.0" y="53" width="1176.0" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
-<text  x="16.96" y="63.5" >bench_nbody (run_benchmark.py:132)</text>
+<title>compute (pyperf/_worker.py:289) (303 samples, 100.00%)</title><rect x="10.0" y="117" width="1180.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="13.00" y="127.5" >compute (pyperf/_worker.py:289)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:90) (18 samples, 6.04%)</title><rect x="655.4" y="37" width="71.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
-<text  x="658.44" y="47.5" >advance ..</text>
+<title>bench_nbody (run_benchmark.py:132) (303 samples, 100.00%)</title><rect x="10.0" y="53" width="1180.0" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="13.00" y="63.5" >bench_nbody (run_benchmark.py:132)</text>
 </g>
 <g >
-<title>&lt;module&gt; (run_benchmark.py:143) (1 samples, 0.34%)</title><rect x="10.0" y="213" width="4.0" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
-<text  x="13.00" y="223.5" ></text>
+<title>advance (run_benchmark.py:93) (38 samples, 12.54%)</title><rect x="878.4" y="37" width="148.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="881.45" y="47.5" >advance (run_bench..</text>
 </g>
 <g >
-<title>&lt;module&gt; (run_benchmark.py:155) (297 samples, 99.66%)</title><rect x="14.0" y="213" width="1176.0" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
-<text  x="16.96" y="223.5" >&lt;module&gt; (run_benchmark.py:155)</text>
+<title>advance (run_benchmark.py:96) (12 samples, 3.96%)</title><rect x="1088.7" y="37" width="46.8" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
+<text  x="1091.75" y="47.5" >adva..</text>
 </g>
 <g >
-<title>compute (pyperf/_worker.py:364) (297 samples, 99.66%)</title><rect x="14.0" y="133" width="1176.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
-<text  x="16.96" y="143.5" >compute (pyperf/_worker.py:364)</text>
+<title>compute (pyperf/_worker.py:364) (303 samples, 100.00%)</title><rect x="10.0" y="133" width="1180.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="13.00" y="143.5" >compute (pyperf/_worker.py:364)</text>
 </g>
 <g >
-<title>load (importlib/metadata/__init__.py:459) (1 samples, 0.34%)</title><rect x="10.0" y="133" width="4.0" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
-<text  x="13.00" y="143.5" ></text>
+<title>advance (run_benchmark.py:82) (7 samples, 2.31%)</title><rect x="103.5" y="37" width="27.2" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="106.47" y="47.5" >a..</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:86) (4 samples, 1.34%)</title><rect x="449.5" y="37" width="15.9" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
-<text  x="452.53" y="47.5" ></text>
+<title>_main (pyperf/_runner.py:463) (303 samples, 100.00%)</title><rect x="10.0" y="181" width="1180.0" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="13.00" y="191.5" >_main (pyperf/_runner.py:463)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:95) (12 samples, 4.03%)</title><rect x="1019.7" y="37" width="47.5" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
-<text  x="1022.73" y="47.5" >adva..</text>
+<title>advance (run_benchmark.py:89) (21 samples, 6.93%)</title><rect x="547.4" y="37" width="81.8" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="550.43" y="47.5" >advance (..</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:96) (13 samples, 4.36%)</title><rect x="1067.2" y="37" width="51.5" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
-<text  x="1070.25" y="47.5" >advan..</text>
+<title>task_func (pyperf/_runner.py:497) (303 samples, 100.00%)</title><rect x="10.0" y="69" width="1180.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="13.00" y="79.5" >task_func (pyperf/_runner.py:497)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:81) (6 samples, 2.01%)</title><rect x="73.4" y="37" width="23.7" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
-<text  x="76.36" y="47.5" >a..</text>
+<title>bench_time_func (pyperf/_runner.py:502) (303 samples, 100.00%)</title><rect x="10.0" y="197" width="1180.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="13.00" y="207.5" >bench_time_func (pyperf/_runner.py:502)</text>
 </g>
 <g >
-<title>advance (run_benchmark.py:91) (17 samples, 5.70%)</title><rect x="726.7" y="37" width="67.3" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
-<text  x="729.71" y="47.5" >advance..</text>
+<title>_compute_values (pyperf/_worker.py:79) (303 samples, 100.00%)</title><rect x="10.0" y="85" width="1180.0" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="13.00" y="95.5" >_compute_values (pyperf/_worker.py:79)</text>
 </g>
 <g >
-<title>compute (pyperf/_worker.py:289) (297 samples, 99.66%)</title><rect x="14.0" y="117" width="1176.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
-<text  x="16.96" y="127.5" >compute (pyperf/_worker.py:289)</text>
+<title>advance (run_benchmark.py:83) (8 samples, 2.64%)</title><rect x="130.7" y="37" width="31.2" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="133.73" y="47.5" >ad..</text>
 </g>
 <g >
-<title>_from_text_for (importlib/metadata/__init__.py:381) (1 samples, 0.34%)</title><rect x="10.0" y="85" width="4.0" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
-<text  x="13.00" y="95.5" ></text>
+<title>advance (run_benchmark.py:80) (17 samples, 5.61%)</title><rect x="10.0" y="37" width="66.2" height="15.0" fill="rgb(238,153,36)" rx="2" ry="2" />
+<text  x="13.00" y="47.5" >advance..</text>
 </g>
 <g >
-<title>__init__ (pyperf/_runner.py:250) (1 samples, 0.34%)</title><rect x="10.0" y="197" width="4.0" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
-<text  x="13.00" y="207.5" ></text>
-</g>
-<g >
-<title>advance (run_benchmark.py:92) (27 samples, 9.06%)</title><rect x="794.0" y="37" width="106.9" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
-<text  x="797.03" y="47.5" >advance (run_..</text>
-</g>
-<g >
-<title>advance (run_benchmark.py:80) (15 samples, 5.03%)</title><rect x="14.0" y="37" width="59.4" height="15.0" fill="rgb(238,153,36)" rx="2" ry="2" />
-<text  x="16.96" y="47.5" >advanc..</text>
-</g>
-<g >
-<title>advance (run_benchmark.py:87) (3 samples, 1.01%)</title><rect x="465.4" y="37" width="11.8" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
-<text  x="468.37" y="47.5" ></text>
-</g>
-<g >
-<title>advance (run_benchmark.py:83) (8 samples, 2.68%)</title><rect x="132.8" y="37" width="31.6" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
-<text  x="135.75" y="47.5" >ad..</text>
-</g>
-<g >
-<title>entry_points (importlib/metadata/__init__.py:1021) (1 samples, 0.34%)</title><rect x="10.0" y="149" width="4.0" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
-<text  x="13.00" y="159.5" ></text>
-</g>
-<g >
-<title>get_hook_names (pyperf/_hooks.py:27) (1 samples, 0.34%)</title><rect x="10.0" y="181" width="4.0" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
-<text  x="13.00" y="191.5" ></text>
-</g>
-<g >
-<title>advance (run_benchmark.py:94) (4 samples, 1.34%)</title><rect x="1003.9" y="37" width="15.8" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
-<text  x="1006.89" y="47.5" ></text>
+<title>advance (run_benchmark.py:91) (24 samples, 7.92%)</title><rect x="703.2" y="37" width="93.5" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="706.20" y="47.5" >advance (ru..</text>
 </g>
 </g>
 </svg>

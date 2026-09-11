@@ -346,15 +346,19 @@ SRAM-versus-DRAM accelerator comparison.
 
 A4. Full profiles and release verification
 
-The reports show full original flame graphs beside enlarged context crops. report/make_figures.py copies
+The reports show full original flame graphs beside enlarged context crops. Every cited profile was recorded
 
-every recorded frame rectangle at its original coordinates; it does not merge functions, filter startup, cap
+on 10 September through the documented profile stage from revision 08da63e, whose benchmark sources
 
-stack depth or renormalize widths. Numbered outlines mark the same frame in the overview and its detail
+are byte-identical to the timing revision 2c8c754 (profiles_20260910_08da63e/provenance.json). report/
 
-crop. Selected-frame titles, coordinates, sample weights and source filenames are recorded in report/fig/
+make_figures.py copies every recorded frame rectangle at its original coordinates; it does not merge
 
-profile_counts.json.
+functions, filter startup, cap stack depth or renormalize widths. Numbered outlines mark the same frame in
+
+the overview and its detail crop. Selected-frame titles, coordinates, sample weights and source filenames are
+
+recorded in report/fig/profile_counts.json.
 
 Stock nbody uses the C-frame debug profile to expose interpreter operations. Optimized nbody and both
 
@@ -402,11 +406,11 @@ hashes match this checkout. These pyflate measurements used the previously insta
 
 refactored source was rebuilt.
 
-Earlier VM rerun                   Python mean ± SD                 Native mean ± SD                          Ratio
+Earlier VM rerun                   Python mean ± SD                 Native mean ± SD                           Ratio
 
-Nbody                                         142.19 ± 4.48 ms      9.477 ± 0.030 ms                          15.00×
+Nbody                                         142.19 ± 4.48 ms      9.477 ± 0.030 ms                           15.00×
 
-Pyflate                                       285.64 ± 3.04 ms      171.89 ± 2.20 ms                          1.66×
+Pyflate                                       285.64 ± 3.04 ms      171.89 ± 2.20 ms                           1.66×
 
 The nbody headline has since moved to the pinned canonical run in A7; this rerun remains a cross-check.
 
@@ -560,11 +564,11 @@ aggregated per function and file, since py-spy labels each frame with whichever 
 
 Prose that adds up a family of symbols must quote a number this prints, together with the pattern it came
 
-from. An earlier draft of the nbody report gave 14.4% for list access; the recorded profile yields 11.95% over
+from. An earlier draft of the nbody report gave 14.4% for list access; the recorded profile yields 11.26% over
 
 ^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t), and float object handling is the larger
 
-group at 16.30% over ^(float_|PyFloat_). The tool lists every contributing symbol so the sum can be
+group at 16.25% over ^(float_|PyFloat_). The tool lists every contributing symbol so the sum can be
 
 checked. Summing self time across perf rows is correct even though perf emits some symbols twice – an
 

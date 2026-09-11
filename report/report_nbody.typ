@@ -58,15 +58,15 @@ establishes the optimization's benefit.
 
 #result-table(columns: (1.9fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Stock nbody, C-frame profile*], [*Self*], [*Inclusive*]),
-  [`_PyEval_EvalFrameDefault`], [42.94%], [99.33%],
-  [`binary_op1` (generic arithmetic dispatch)], [5.51%], [20.36%],
-  [`float_mul`], [4.23%], [4.23%],
-  [`PyFloat_FromDouble`], [4.03%], [5.84%],
-  [`float_dealloc`], [3.34%], [3.34%],
-  [`list_ass_item`], [2.72%], [2.72%],
-  [`PyNumber_AsSsize_t`], [2.29%], [4.99%],
-  [Float object handling, all symbols], [*16.30%*], [--],
-  [List access and index conversion, all symbols], [*11.95%*], [--],
+  [`_PyEval_EvalFrameDefault`], [44.10%], [99.31%],
+  [`binary_op1` (generic arithmetic dispatch)], [4.90%], [20.07%],
+  [`float_mul`], [3.86%], [3.86%],
+  [`PyFloat_FromDouble`], [4.03%], [5.82%],
+  [`float_dealloc`], [3.48%], [3.48%],
+  [`list_ass_item`], [1.78%], [1.78%],
+  [`PyNumber_AsSsize_t`], [2.22%], [4.87%],
+  [Float object handling, all symbols], [*16.25%*], [--],
+  [List access and index conversion, all symbols], [*11.26%*], [--],
 )
 
 *Self* is time in the function itself; *inclusive* is time in it and everything it calls.
@@ -76,11 +76,11 @@ The two grouped rows sum self time over `^(float_|PyFloat_)` and over
 The named rows are the symbols that carry the self time, which perf records under their
 `.lto_priv` names. perf also emits a companion `(inlined)` entry per symbol holding the
 inclusive share and no self time -- that is the number the figure below quotes for a
-highlighted frame, so 4.00% there and 2.72% here describe the same function under two
+highlighted frame, so 3.40% there and 1.78% here describe the same function under two
 different measures. Both the table and the groups are regenerated from
 `results/perf_report_nbody_stock.txt` by `report/summarize_profiles.py`, which prints every
-contributing symbol; an earlier draft quoted 14.4% for the list group, which that file does
-not support.
+contributing symbol; an earlier draft quoted 14.4% for the list group, which the profile it
+then cited did not support.
 
 #figure(image("fig/print_nbody_stock.svg", width: 100%),
   caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" width="1200" height="342" onload="init(evt)" viewBox="0 0 1200 342" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg version="1.1" width="1200" height="278" onload="init(evt)" viewBox="0 0 1200 278" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
 <!-- NOTES:  -->
 <defs>
@@ -422,509 +422,489 @@
 	}
 ]]>
 </script>
-<rect x="0.0" y="0" width="1200.0" height="342.0" fill="url(#background)"  />
+<rect x="0.0" y="0" width="1200.0" height="278.0" fill="url(#background)"  />
 <text id="title" x="600.00" y="24" >nbody (opt, py-spy / Python frames)</text>
-<text id="details" x="10.00" y="325" > </text>
+<text id="details" x="10.00" y="261" > </text>
 <text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
 <text id="search" x="1090.00" y="24" >Search</text>
 <text id="ignorecase" x="1174.00" y="24" >ic</text>
-<text id="matched" x="1090.00" y="325" > </text>
+<text id="matched" x="1090.00" y="261" > </text>
 <g id="frames">
 <g >
-<title>advance (&lt;nbody-advance&gt;:106) (5 samples, 2.76%)</title><rect x="55.6" y="101" width="32.6" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="58.64" y="111.5" >ad..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:114) (2 samples, 1.10%)</title><rect x="140.4" y="101" width="13.0" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
-<text  x="143.39" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:111) (2 samples, 1.10%)</title><rect x="114.3" y="101" width="13.0" height="15.0" fill="rgb(214,41,9)" rx="2" ry="2" />
-<text  x="117.31" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:87) (2 samples, 1.10%)</title><rect x="1046.6" y="101" width="13.0" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
-<text  x="1049.57" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:73) (1 samples, 0.55%)</title><rect x="942.3" y="101" width="6.5" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="945.27" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:24) (1 samples, 0.55%)</title><rect x="531.5" y="101" width="6.6" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<text  x="534.55" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:88) (1 samples, 0.55%)</title><rect x="1059.6" y="101" width="6.5" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
-<text  x="1062.61" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:109) (1 samples, 0.55%)</title><rect x="94.8" y="101" width="6.5" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
-<text  x="97.75" y="111.5" ></text>
-</g>
-<g >
-<title>entry_points (importlib/metadata/__init__.py:631) (1 samples, 0.55%)</title><rect x="10.0" y="165" width="6.5" height="15.0" fill="rgb(218,62,14)" rx="2" ry="2" />
-<text  x="13.00" y="175.5" ></text>
-</g>
-<g >
-<title>compute (pyperf/_worker.py:364) (180 samples, 99.45%)</title><rect x="16.5" y="197" width="1173.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
-<text  x="19.52" y="207.5" >compute (pyperf/_worker.py:364)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:86) (1 samples, 0.55%)</title><rect x="1040.1" y="101" width="6.5" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
-<text  x="1043.06" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:68) (1 samples, 0.55%)</title><rect x="909.7" y="101" width="6.5" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
-<text  x="912.67" y="111.5" ></text>
-</g>
-<g >
-<title>collect_python_metadata (pyperf/_collect_metadata.py:54) (1 samples, 0.55%)</title><rect x="1183.5" y="133" width="6.5" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
-<text  x="1186.48" y="143.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:100) (2 samples, 1.10%)</title><rect x="16.5" y="101" width="13.1" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
-<text  x="19.52" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:123) (1 samples, 0.55%)</title><rect x="231.7" y="101" width="6.5" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
-<text  x="234.66" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:121) (2 samples, 1.10%)</title><rect x="205.6" y="101" width="13.0" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
-<text  x="208.58" y="111.5" ></text>
-</g>
-<g >
-<title>get_hook_names (pyperf/_hooks.py:27) (1 samples, 0.55%)</title><rect x="10.0" y="245" width="6.5" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
-<text  x="13.00" y="255.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:101) (2 samples, 1.10%)</title><rect x="29.6" y="101" width="13.0" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
-<text  x="32.56" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:146) (1 samples, 0.55%)</title><rect x="407.7" y="101" width="6.5" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="410.68" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:130) (8 samples, 4.42%)</title><rect x="277.3" y="101" width="52.1" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
-<text  x="280.29" y="111.5" >advan..</text>
-</g>
-<g >
-<title>check_output (subprocess.py:421) (1 samples, 0.55%)</title><rect x="1183.5" y="85" width="6.5" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
-<text  x="1186.48" y="95.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:129) (2 samples, 1.10%)</title><rect x="264.3" y="101" width="13.0" height="15.0" fill="rgb(205,4,1)" rx="2" ry="2" />
-<text  x="267.25" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:50) (1 samples, 0.55%)</title><rect x="785.8" y="101" width="6.5" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
-<text  x="788.80" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:137) (6 samples, 3.31%)</title><rect x="329.4" y="101" width="39.2" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="332.45" y="111.5" >adv..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:153) (2 samples, 1.10%)</title><rect x="459.8" y="101" width="13.1" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
-<text  x="462.83" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:74) (2 samples, 1.10%)</title><rect x="948.8" y="101" width="13.0" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="951.78" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:82) (4 samples, 2.21%)</title><rect x="987.9" y="101" width="26.1" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="990.90" y="111.5" >a..</text>
-</g>
-<g >
-<title>compute (pyperf/_worker.py:292) (1 samples, 0.55%)</title><rect x="1183.5" y="181" width="6.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
-<text  x="1186.48" y="191.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:20) (2 samples, 1.10%)</title><rect x="492.4" y="101" width="13.1" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
-<text  x="495.43" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:63) (1 samples, 0.55%)</title><rect x="877.1" y="101" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="880.07" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:47) (1 samples, 0.55%)</title><rect x="772.8" y="101" width="6.5" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="775.76" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:128) (1 samples, 0.55%)</title><rect x="257.7" y="101" width="6.6" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="260.73" y="111.5" ></text>
-</g>
-<g >
-<title>&lt;module&gt; (run_benchmark.py:219) (1 samples, 0.55%)</title><rect x="10.0" y="277" width="6.5" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
-<text  x="13.00" y="287.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:62) (1 samples, 0.55%)</title><rect x="870.6" y="101" width="6.5" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
-<text  x="873.55" y="111.5" ></text>
-</g>
-<g >
-<title>collect_metadata (pyperf/_collect_metadata.py:419) (1 samples, 0.55%)</title><rect x="1183.5" y="149" width="6.5" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
-<text  x="1186.48" y="159.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:93) (3 samples, 1.66%)</title><rect x="1072.7" y="101" width="19.5" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
-<text  x="1075.65" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:94) (12 samples, 6.63%)</title><rect x="1092.2" y="101" width="78.2" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<text  x="1095.21" y="111.5" >advance (..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:26) (1 samples, 0.55%)</title><rect x="544.6" y="101" width="6.5" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
-<text  x="547.59" y="111.5" ></text>
-</g>
-<g >
-<title>_syscmd_file (platform.py:619) (1 samples, 0.55%)</title><rect x="1183.5" y="101" width="6.5" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
-<text  x="1186.48" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:143) (1 samples, 0.55%)</title><rect x="388.1" y="101" width="6.5" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
-<text  x="391.12" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:90) (1 samples, 0.55%)</title><rect x="1066.1" y="101" width="6.6" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="1069.13" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:31) (1 samples, 0.55%)</title><rect x="570.7" y="101" width="6.5" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
-<text  x="573.66" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:113) (1 samples, 0.55%)</title><rect x="133.9" y="101" width="6.5" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="136.87" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:139) (1 samples, 0.55%)</title><rect x="368.6" y="101" width="6.5" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
-<text  x="371.56" y="111.5" ></text>
-</g>
-<g >
-<title>_main (pyperf/_runner.py:463) (180 samples, 99.45%)</title><rect x="16.5" y="245" width="1173.5" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
-<text  x="19.52" y="255.5" >_main (pyperf/_runner.py:463)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:36) (1 samples, 0.55%)</title><rect x="655.4" y="101" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="658.41" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:150) (1 samples, 0.55%)</title><rect x="427.2" y="101" width="6.6" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
-<text  x="430.24" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:112) (1 samples, 0.55%)</title><rect x="127.3" y="101" width="6.6" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
-<text  x="130.35" y="111.5" ></text>
-</g>
-<g >
-<title>&lt;module&gt; (run_benchmark.py:231) (180 samples, 99.45%)</title><rect x="16.5" y="277" width="1173.5" height="15.0" fill="rgb(244,179,42)" rx="2" ry="2" />
-<text  x="19.52" y="287.5" >&lt;module&gt; (run_benchmark.py:231)</text>
-</g>
-<g >
-<title>bench_nbody (run_benchmark.py:208) (179 samples, 98.90%)</title><rect x="16.5" y="117" width="1167.0" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
-<text  x="19.52" y="127.5" >bench_nbody (run_benchmark.py:208)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:69) (1 samples, 0.55%)</title><rect x="916.2" y="101" width="6.5" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
-<text  x="919.19" y="111.5" ></text>
-</g>
-<g >
-<title>architecture (platform.py:670) (1 samples, 0.55%)</title><rect x="1183.5" y="117" width="6.5" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
-<text  x="1186.48" y="127.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:70) (2 samples, 1.10%)</title><rect x="922.7" y="101" width="13.0" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
-<text  x="925.71" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:84) (1 samples, 0.55%)</title><rect x="1027.0" y="101" width="6.5" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
-<text  x="1030.02" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:41) (2 samples, 1.10%)</title><rect x="694.5" y="101" width="13.1" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
-<text  x="697.53" y="111.5" ></text>
-</g>
-<g >
-<title>compute (pyperf/_worker.py:289) (179 samples, 98.90%)</title><rect x="16.5" y="181" width="1167.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
-<text  x="19.52" y="191.5" >compute (pyperf/_worker.py:289)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:145) (1 samples, 0.55%)</title><rect x="401.2" y="101" width="6.5" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
-<text  x="404.16" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:34) (10 samples, 5.52%)</title><rect x="590.2" y="101" width="65.2" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
-<text  x="593.22" y="111.5" >advance..</text>
-</g>
-<g >
-<title>compute_warmups_values (pyperf/_worker.py:271) (179 samples, 98.90%)</title><rect x="16.5" y="165" width="1167.0" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
-<text  x="19.52" y="175.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
-</g>
-<g >
-<title>_execute_child (subprocess.py:1817) (1 samples, 0.55%)</title><rect x="1183.5" y="37" width="6.5" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
-<text  x="1186.48" y="47.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:142) (1 samples, 0.55%)</title><rect x="381.6" y="101" width="6.5" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="384.60" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:18) (1 samples, 0.55%)</title><rect x="472.9" y="101" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="475.87" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:151) (2 samples, 1.10%)</title><rect x="433.8" y="101" width="13.0" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="436.76" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:83) (2 samples, 1.10%)</title><rect x="1014.0" y="101" width="13.0" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="1016.98" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:77) (1 samples, 0.55%)</title><rect x="968.3" y="101" width="6.6" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
-<text  x="971.34" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:33) (2 samples, 1.10%)</title><rect x="577.2" y="101" width="13.0" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<text  x="580.18" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:122) (2 samples, 1.10%)</title><rect x="218.6" y="101" width="13.1" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="221.62" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:147) (1 samples, 0.55%)</title><rect x="414.2" y="101" width="6.5" height="15.0" fill="rgb(205,4,1)" rx="2" ry="2" />
-<text  x="417.20" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:144) (1 samples, 0.55%)</title><rect x="394.6" y="101" width="6.6" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
-<text  x="397.64" y="111.5" ></text>
-</g>
-<g >
-<title>&lt;genexpr&gt; (importlib/metadata/__init__.py:1018) (1 samples, 0.55%)</title><rect x="10.0" y="181" width="6.5" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
-<text  x="13.00" y="191.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:141) (1 samples, 0.55%)</title><rect x="375.1" y="101" width="6.5" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
-<text  x="378.08" y="111.5" ></text>
-</g>
-<g >
-<title>load (importlib/metadata/__init__.py:459) (1 samples, 0.55%)</title><rect x="10.0" y="197" width="6.5" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
-<text  x="13.00" y="207.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:75) (1 samples, 0.55%)</title><rect x="961.8" y="101" width="6.5" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
-<text  x="964.82" y="111.5" ></text>
-</g>
-<g >
-<title>__init__ (pyperf/_runner.py:250) (1 samples, 0.55%)</title><rect x="10.0" y="261" width="6.5" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
-<text  x="13.00" y="271.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:125) (1 samples, 0.55%)</title><rect x="251.2" y="101" width="6.5" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
-<text  x="254.22" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:58) (4 samples, 2.21%)</title><rect x="818.4" y="101" width="26.1" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<text  x="821.40" y="111.5" >a..</text>
-</g>
-<g >
-<title>_compute_values (pyperf/_worker.py:79) (179 samples, 98.90%)</title><rect x="16.5" y="149" width="1167.0" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
-<text  x="19.52" y="159.5" >_compute_values (pyperf/_worker.py:79)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:60) (1 samples, 0.55%)</title><rect x="864.0" y="101" width="6.6" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<text  x="867.03" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:42) (3 samples, 1.66%)</title><rect x="707.6" y="101" width="19.5" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<text  x="710.57" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:115) (1 samples, 0.55%)</title><rect x="153.4" y="101" width="6.5" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="156.43" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:27) (1 samples, 0.55%)</title><rect x="551.1" y="101" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="554.10" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:19) (2 samples, 1.10%)</title><rect x="479.4" y="101" width="13.0" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="482.39" y="111.5" ></text>
-</g>
-<g >
-<title>read_text (importlib/metadata/__init__.py:927) (1 samples, 0.55%)</title><rect x="10.0" y="149" width="6.5" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
-<text  x="13.00" y="159.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:79) (1 samples, 0.55%)</title><rect x="974.9" y="101" width="6.5" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
-<text  x="977.86" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:65) (1 samples, 0.55%)</title><rect x="896.6" y="101" width="6.5" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="899.63" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:29) (1 samples, 0.55%)</title><rect x="557.6" y="101" width="6.5" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="560.62" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:30) (1 samples, 0.55%)</title><rect x="564.1" y="101" width="6.6" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
-<text  x="567.14" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:46) (5 samples, 2.76%)</title><rect x="740.2" y="101" width="32.6" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="743.17" y="111.5" >ad..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:64) (2 samples, 1.10%)</title><rect x="883.6" y="101" width="13.0" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="886.59" y="111.5" ></text>
-</g>
-<g >
-<title>task_func (pyperf/_runner.py:497) (179 samples, 98.90%)</title><rect x="16.5" y="133" width="1167.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="19.52" y="143.5" >task_func (pyperf/_runner.py:497)</text>
-</g>
-<g >
-<title>collect_metadata (pyperf/_worker.py:384) (1 samples, 0.55%)</title><rect x="1183.5" y="165" width="6.5" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
-<text  x="1186.48" y="175.5" ></text>
-</g>
-<g >
-<title>_worker (pyperf/_runner.py:437) (180 samples, 99.45%)</title><rect x="16.5" y="229" width="1173.5" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
-<text  x="19.52" y="239.5" >_worker (pyperf/_runner.py:437)</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:40) (4 samples, 2.21%)</title><rect x="668.5" y="101" width="26.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
-<text  x="671.45" y="111.5" >a..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:149) (1 samples, 0.55%)</title><rect x="420.7" y="101" width="6.5" height="15.0" fill="rgb(243,174,41)" rx="2" ry="2" />
-<text  x="423.72" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:72) (1 samples, 0.55%)</title><rect x="935.7" y="101" width="6.6" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="938.75" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:98) (2 samples, 1.10%)</title><rect x="1170.4" y="101" width="13.1" height="15.0" fill="rgb(233,132,31)" rx="2" ry="2" />
-<text  x="1173.44" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:105) (1 samples, 0.55%)</title><rect x="49.1" y="101" width="6.5" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
-<text  x="52.12" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:152) (2 samples, 1.10%)</title><rect x="446.8" y="101" width="13.0" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
-<text  x="449.80" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:110) (2 samples, 1.10%)</title><rect x="101.3" y="101" width="13.0" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
-<text  x="104.27" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:25) (1 samples, 0.55%)</title><rect x="538.1" y="101" width="6.5" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
-<text  x="541.07" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:49) (1 samples, 0.55%)</title><rect x="779.3" y="101" width="6.5" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<text  x="782.28" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:59) (3 samples, 1.66%)</title><rect x="844.5" y="101" width="19.5" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
-<text  x="847.48" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:21) (1 samples, 0.55%)</title><rect x="505.5" y="101" width="6.5" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
-<text  x="508.47" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:45) (2 samples, 1.10%)</title><rect x="727.1" y="101" width="13.1" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="730.13" y="111.5" ></text>
-</g>
-<g >
-<title>read_text (pathlib.py:1133) (1 samples, 0.55%)</title><rect x="10.0" y="133" width="6.5" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
-<text  x="13.00" y="143.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:55) (1 samples, 0.55%)</title><rect x="805.4" y="101" width="6.5" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
-<text  x="808.36" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:81) (1 samples, 0.55%)</title><rect x="981.4" y="101" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="984.38" y="111.5" ></text>
-</g>
-<g >
-<title>create_run (pyperf/_worker.py:300) (180 samples, 99.45%)</title><rect x="16.5" y="213" width="1173.5" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
-<text  x="19.52" y="223.5" >create_run (pyperf/_worker.py:300)</text>
-</g>
-<g >
-<title>__init__ (subprocess.py:971) (1 samples, 0.55%)</title><rect x="1183.5" y="53" width="6.5" height="15.0" fill="rgb(208,17,4)" rx="2" ry="2" />
-<text  x="1186.48" y="63.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:85) (1 samples, 0.55%)</title><rect x="1033.5" y="101" width="6.6" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<text  x="1036.54" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:22) (3 samples, 1.66%)</title><rect x="512.0" y="101" width="19.5" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
-<text  x="514.99" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:108) (1 samples, 0.55%)</title><rect x="88.2" y="101" width="6.6" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
-<text  x="91.23" y="111.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:104) (1 samples, 0.55%)</title><rect x="42.6" y="101" width="6.5" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="45.60" y="111.5" ></text>
-</g>
-<g >
-<title>all (181 samples, 100%)</title><rect x="10.0" y="293" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="13.00" y="303.5" ></text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:118) (7 samples, 3.87%)</title><rect x="159.9" y="101" width="45.7" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
-<text  x="162.94" y="111.5" >adva..</text>
-</g>
-<g >
-<title>advance (&lt;nbody-advance&gt;:51) (2 samples, 1.10%)</title><rect x="792.3" y="101" width="13.1" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<text  x="795.32" y="111.5" ></text>
-</g>
-<g >
-<title>get_hooks (pyperf/_hooks.py:18) (1 samples, 0.55%)</title><rect x="10.0" y="229" width="6.5" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<title>all (194 samples, 100%)</title><rect x="10.0" y="229" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
 <text  x="13.00" y="239.5" ></text>
 </g>
 <g >
-<title>advance (&lt;nbody-advance&gt;:124) (2 samples, 1.10%)</title><rect x="238.2" y="101" width="13.0" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="241.18" y="111.5" ></text>
+<title>advance (&lt;nbody-advance&gt;:65) (2 samples, 1.03%)</title><rect x="904.1" y="37" width="12.2" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="907.12" y="47.5" ></text>
 </g>
 <g >
-<title>advance (&lt;nbody-advance&gt;:57) (1 samples, 0.55%)</title><rect x="811.9" y="101" width="6.5" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
-<text  x="814.88" y="111.5" ></text>
+<title>advance (&lt;nbody-advance&gt;:106) (2 samples, 1.03%)</title><rect x="70.8" y="37" width="12.2" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="73.82" y="47.5" ></text>
 </g>
 <g >
-<title>run (subprocess.py:503) (1 samples, 0.55%)</title><rect x="1183.5" y="69" width="6.5" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
-<text  x="1186.48" y="79.5" ></text>
+<title>advance (&lt;nbody-advance&gt;:85) (1 samples, 0.52%)</title><rect x="1068.4" y="37" width="6.0" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="1071.35" y="47.5" ></text>
 </g>
 <g >
-<title>bench_time_func (pyperf/_runner.py:502) (180 samples, 99.45%)</title><rect x="16.5" y="261" width="1173.5" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="19.52" y="271.5" >bench_time_func (pyperf/_runner.py:502)</text>
+<title>advance (&lt;nbody-advance&gt;:118) (7 samples, 3.61%)</title><rect x="174.2" y="37" width="42.6" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="177.23" y="47.5" >adva..</text>
 </g>
 <g >
-<title>advance (&lt;nbody-advance&gt;:38) (1 samples, 0.55%)</title><rect x="661.9" y="101" width="6.6" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<text  x="664.93" y="111.5" ></text>
+<title>advance (&lt;nbody-advance&gt;:49) (1 samples, 0.52%)</title><rect x="727.7" y="37" width="6.1" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="730.73" y="47.5" ></text>
 </g>
 <g >
-<title>entry_points (importlib/metadata/__init__.py:1021) (1 samples, 0.55%)</title><rect x="10.0" y="213" width="6.5" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<title>advance (&lt;nbody-advance&gt;:100) (2 samples, 1.03%)</title><rect x="22.2" y="37" width="12.1" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
+<text  x="25.16" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:102) (1 samples, 0.52%)</title><rect x="52.6" y="37" width="6.1" height="15.0" fill="rgb(214,41,9)" rx="2" ry="2" />
+<text  x="55.58" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:88) (1 samples, 0.52%)</title><rect x="1092.7" y="37" width="6.1" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
+<text  x="1095.68" y="47.5" ></text>
+</g>
+<g >
+<title>bench_time_func (pyperf/_runner.py:502) (192 samples, 98.97%)</title><rect x="22.2" y="197" width="1167.8" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="25.16" y="207.5" >bench_time_func (pyperf/_runner.py:502)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:144) (2 samples, 1.03%)</title><rect x="405.4" y="37" width="12.1" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="408.36" y="47.5" ></text>
+</g>
+<g >
+<title>create_run (pyperf/_worker.py:300) (192 samples, 98.97%)</title><rect x="22.2" y="149" width="1167.8" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="25.16" y="159.5" >create_run (pyperf/_worker.py:300)</text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:364) (192 samples, 98.97%)</title><rect x="22.2" y="133" width="1167.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="25.16" y="143.5" >compute (pyperf/_worker.py:364)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:64) (1 samples, 0.52%)</title><rect x="898.0" y="37" width="6.1" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="901.04" y="47.5" ></text>
+</g>
+<g >
+<title>bench_nbody (run_benchmark.py:497) (192 samples, 98.97%)</title><rect x="22.2" y="53" width="1167.8" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="25.16" y="63.5" >bench_nbody (run_benchmark.py:497)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:107) (2 samples, 1.03%)</title><rect x="83.0" y="37" width="12.2" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="85.99" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:153) (1 samples, 0.52%)</title><rect x="460.1" y="37" width="6.1" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="463.10" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:99) (1 samples, 0.52%)</title><rect x="1183.9" y="37" width="6.1" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="1186.92" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:87) (2 samples, 1.03%)</title><rect x="1080.5" y="37" width="12.2" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1083.52" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:94) (6 samples, 3.09%)</title><rect x="1123.1" y="37" width="36.5" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="1126.09" y="47.5" >adv..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:129) (2 samples, 1.03%)</title><rect x="271.5" y="37" width="12.2" height="15.0" fill="rgb(205,4,1)" rx="2" ry="2" />
+<text  x="274.55" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:36) (1 samples, 0.52%)</title><rect x="612.2" y="37" width="6.0" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="615.16" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:70) (9 samples, 4.64%)</title><rect x="934.5" y="37" width="54.8" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="937.54" y="47.5" >advan..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:130) (6 samples, 3.09%)</title><rect x="283.7" y="37" width="36.5" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
+<text  x="286.71" y="47.5" >adv..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:123) (1 samples, 0.52%)</title><rect x="229.0" y="37" width="6.1" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="231.97" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:109) (2 samples, 1.03%)</title><rect x="101.2" y="37" width="12.2" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="104.24" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:93) (2 samples, 1.03%)</title><rect x="1110.9" y="37" width="12.2" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="1113.93" y="47.5" ></text>
+</g>
+<g >
+<title>_worker (pyperf/_runner.py:437) (192 samples, 98.97%)</title><rect x="22.2" y="165" width="1167.8" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<text  x="25.16" y="175.5" >_worker (pyperf/_runner.py:437)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:79) (1 samples, 0.52%)</title><rect x="1007.5" y="37" width="6.1" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
+<text  x="1010.53" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:59) (1 samples, 0.52%)</title><rect x="855.5" y="37" width="6.0" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="858.46" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:83) (1 samples, 0.52%)</title><rect x="1056.2" y="37" width="6.1" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="1059.19" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:115) (1 samples, 0.52%)</title><rect x="156.0" y="37" width="6.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="158.98" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:60) (1 samples, 0.52%)</title><rect x="861.5" y="37" width="6.1" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="864.55" y="47.5" ></text>
+</g>
+<g >
+<title>__str__ (pathlib.py:625) (1 samples, 0.52%)</title><rect x="10.0" y="69" width="6.1" height="15.0" fill="rgb(228,108,26)" rx="2" ry="2" />
+<text  x="13.00" y="79.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:46) (4 samples, 2.06%)</title><rect x="691.2" y="37" width="24.4" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="694.24" y="47.5" >a..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:41) (1 samples, 0.52%)</title><rect x="673.0" y="37" width="6.1" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="675.99" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:133) (1 samples, 0.52%)</title><rect x="326.3" y="37" width="6.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="329.29" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:110) (3 samples, 1.55%)</title><rect x="113.4" y="37" width="18.2" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="116.40" y="47.5" ></text>
+</g>
+<g >
+<title>load (importlib/metadata/__init__.py:459) (1 samples, 0.52%)</title><rect x="10.0" y="133" width="6.1" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="13.00" y="143.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:81) (1 samples, 0.52%)</title><rect x="1013.6" y="37" width="6.1" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1016.61" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:135) (3 samples, 1.55%)</title><rect x="338.5" y="37" width="18.2" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="341.45" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:58) (7 samples, 3.61%)</title><rect x="812.9" y="37" width="42.6" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="815.89" y="47.5" >adva..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:90) (1 samples, 0.52%)</title><rect x="1098.8" y="37" width="6.0" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1101.76" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:148) (3 samples, 1.55%)</title><rect x="429.7" y="37" width="18.2" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
+<text  x="432.69" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:18) (2 samples, 1.03%)</title><rect x="466.2" y="37" width="12.2" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="469.19" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:42) (1 samples, 0.52%)</title><rect x="679.1" y="37" width="6.1" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="682.07" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:139) (1 samples, 0.52%)</title><rect x="381.0" y="37" width="6.1" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
+<text  x="384.03" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:134) (1 samples, 0.52%)</title><rect x="332.4" y="37" width="6.1" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="335.37" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:28) (2 samples, 1.03%)</title><rect x="520.9" y="37" width="12.2" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="523.93" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:113) (1 samples, 0.52%)</title><rect x="131.6" y="37" width="6.1" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="134.65" y="47.5" ></text>
+</g>
+<g >
+<title>add_argument (argparse.py:1446) (1 samples, 0.52%)</title><rect x="16.1" y="181" width="6.1" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="19.08" y="191.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:22) (2 samples, 1.03%)</title><rect x="478.4" y="37" width="12.1" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="481.35" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:31) (1 samples, 0.52%)</title><rect x="539.2" y="37" width="6.1" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="542.18" y="47.5" ></text>
+</g>
+<g >
+<title>_compute_values (pyperf/_worker.py:79) (192 samples, 98.97%)</title><rect x="22.2" y="85" width="1167.8" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="25.16" y="95.5" >_compute_values (pyperf/_worker.py:79)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:38) (2 samples, 1.03%)</title><rect x="624.3" y="37" width="12.2" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="627.33" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:39) (1 samples, 0.52%)</title><rect x="636.5" y="37" width="6.1" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="639.49" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:30) (1 samples, 0.52%)</title><rect x="533.1" y="37" width="6.1" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
+<text  x="536.09" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:124) (1 samples, 0.52%)</title><rect x="235.1" y="37" width="6.0" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="238.05" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:63) (2 samples, 1.03%)</title><rect x="885.9" y="37" width="12.1" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="888.88" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:40) (5 samples, 2.58%)</title><rect x="642.6" y="37" width="30.4" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="645.58" y="47.5" >ad..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:151) (1 samples, 0.52%)</title><rect x="447.9" y="37" width="6.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="450.94" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:66) (2 samples, 1.03%)</title><rect x="916.3" y="37" width="12.2" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="919.29" y="47.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (run_benchmark.py:580) (2 samples, 1.03%)</title><rect x="10.0" y="213" width="12.2" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
 <text  x="13.00" y="223.5" ></text>
 </g>
 <g >
-<title>advance (&lt;nbody-advance&gt;:67) (1 samples, 0.55%)</title><rect x="903.1" y="101" width="6.6" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<text  x="906.15" y="111.5" ></text>
+<title>advance (&lt;nbody-advance&gt;:78) (1 samples, 0.52%)</title><rect x="1001.4" y="37" width="6.1" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1004.44" y="47.5" ></text>
+</g>
+<g >
+<title>unique_everseen (importlib/metadata/_itertools.py:16) (1 samples, 0.52%)</title><rect x="10.0" y="101" width="6.1" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="13.00" y="111.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:52) (3 samples, 1.55%)</title><rect x="764.2" y="37" width="18.3" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="767.23" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:119) (1 samples, 0.52%)</title><rect x="216.8" y="37" width="6.1" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="219.80" y="47.5" ></text>
+</g>
+<g >
+<title>__init__ (pyperf/_runner.py:250) (1 samples, 0.52%)</title><rect x="10.0" y="197" width="6.1" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
+<text  x="13.00" y="207.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:152) (1 samples, 0.52%)</title><rect x="454.0" y="37" width="6.1" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="457.02" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:62) (1 samples, 0.52%)</title><rect x="879.8" y="37" width="6.1" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="882.79" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:61) (2 samples, 1.03%)</title><rect x="867.6" y="37" width="12.2" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="870.63" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:56) (2 samples, 1.03%)</title><rect x="782.5" y="37" width="12.1" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="785.47" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:136) (2 samples, 1.03%)</title><rect x="356.7" y="37" width="12.2" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="359.70" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:142) (2 samples, 1.03%)</title><rect x="393.2" y="37" width="12.2" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="396.20" y="47.5" ></text>
+</g>
+<g >
+<title>get_hook_names (pyperf/_hooks.py:27) (1 samples, 0.52%)</title><rect x="10.0" y="181" width="6.1" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="13.00" y="191.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:82) (6 samples, 3.09%)</title><rect x="1019.7" y="37" width="36.5" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="1022.69" y="47.5" >adv..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:126) (2 samples, 1.03%)</title><rect x="253.3" y="37" width="12.2" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="256.30" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:86) (1 samples, 0.52%)</title><rect x="1074.4" y="37" width="6.1" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="1077.43" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:141) (1 samples, 0.52%)</title><rect x="387.1" y="37" width="6.1" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="390.11" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:146) (2 samples, 1.03%)</title><rect x="417.5" y="37" width="12.2" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="420.53" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:121) (1 samples, 0.52%)</title><rect x="222.9" y="37" width="6.1" height="15.0" fill="rgb(207,12,2)" rx="2" ry="2" />
+<text  x="225.89" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:57) (3 samples, 1.55%)</title><rect x="794.6" y="37" width="18.3" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="797.64" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:47) (1 samples, 0.52%)</title><rect x="715.6" y="37" width="6.0" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="718.57" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:73) (1 samples, 0.52%)</title><rect x="989.3" y="37" width="6.1" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="992.28" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:23) (2 samples, 1.03%)</title><rect x="490.5" y="37" width="12.2" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="493.52" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:128) (1 samples, 0.52%)</title><rect x="265.5" y="37" width="6.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="268.46" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:132) (1 samples, 0.52%)</title><rect x="320.2" y="37" width="6.1" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="323.21" y="47.5" ></text>
+</g>
+<g >
+<title>compute_warmups_values (pyperf/_worker.py:271) (192 samples, 98.97%)</title><rect x="22.2" y="101" width="1167.8" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="25.16" y="111.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:67) (1 samples, 0.52%)</title><rect x="928.5" y="37" width="6.0" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
+<text  x="931.45" y="47.5" ></text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:289) (192 samples, 98.97%)</title><rect x="22.2" y="117" width="1167.8" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="25.16" y="127.5" >compute (pyperf/_worker.py:289)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:108) (1 samples, 0.52%)</title><rect x="95.2" y="37" width="6.0" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="98.15" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:77) (1 samples, 0.52%)</title><rect x="995.4" y="37" width="6.0" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="998.36" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:34) (10 samples, 5.15%)</title><rect x="545.3" y="37" width="60.8" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="548.26" y="47.5" >advanc..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:101) (3 samples, 1.55%)</title><rect x="34.3" y="37" width="18.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="37.33" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:48) (1 samples, 0.52%)</title><rect x="721.6" y="37" width="6.1" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="724.65" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:116) (1 samples, 0.52%)</title><rect x="162.1" y="37" width="6.0" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="165.06" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:125) (2 samples, 1.03%)</title><rect x="241.1" y="37" width="12.2" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="244.13" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:104) (1 samples, 0.52%)</title><rect x="58.7" y="37" width="6.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="61.66" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:50) (2 samples, 1.03%)</title><rect x="733.8" y="37" width="12.2" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="736.81" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:35) (1 samples, 0.52%)</title><rect x="606.1" y="37" width="6.1" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="609.08" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:37) (1 samples, 0.52%)</title><rect x="618.2" y="37" width="6.1" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="621.25" y="47.5" ></text>
+</g>
+<g >
+<title>entry_points (importlib/metadata/__init__.py:1021) (1 samples, 0.52%)</title><rect x="10.0" y="149" width="6.1" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<text  x="13.00" y="159.5" ></text>
+</g>
+<g >
+<title>__init__ (pyperf/_runner.py:251) (1 samples, 0.52%)</title><rect x="16.1" y="197" width="6.1" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="19.08" y="207.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:114) (3 samples, 1.55%)</title><rect x="137.7" y="37" width="18.3" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="140.73" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:51) (3 samples, 1.55%)</title><rect x="746.0" y="37" width="18.2" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="748.98" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:45) (1 samples, 0.52%)</title><rect x="685.2" y="37" width="6.0" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="688.15" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:137) (2 samples, 1.03%)</title><rect x="368.9" y="37" width="12.1" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="371.87" y="47.5" ></text>
+</g>
+<g >
+<title>&lt;module&gt; (run_benchmark.py:605) (192 samples, 98.97%)</title><rect x="22.2" y="213" width="1167.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="25.16" y="223.5" >&lt;module&gt; (run_benchmark.py:605)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:98) (4 samples, 2.06%)</title><rect x="1159.6" y="37" width="24.3" height="15.0" fill="rgb(233,132,31)" rx="2" ry="2" />
+<text  x="1162.59" y="47.5" >a..</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:117) (1 samples, 0.52%)</title><rect x="168.1" y="37" width="6.1" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<text  x="171.14" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:25) (3 samples, 1.55%)</title><rect x="502.7" y="37" width="18.2" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="505.68" y="47.5" ></text>
+</g>
+<g >
+<title>_normalized_name (importlib/metadata/__init__.py:940) (1 samples, 0.52%)</title><rect x="10.0" y="85" width="6.1" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="13.00" y="95.5" ></text>
+</g>
+<g >
+<title>&lt;genexpr&gt; (importlib/metadata/__init__.py:1019) (1 samples, 0.52%)</title><rect x="10.0" y="117" width="6.1" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
+<text  x="13.00" y="127.5" ></text>
+</g>
+<g >
+<title>task_func (pyperf/_runner.py:497) (192 samples, 98.97%)</title><rect x="22.2" y="69" width="1167.8" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="25.16" y="79.5" >task_func (pyperf/_runner.py:497)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:84) (1 samples, 0.52%)</title><rect x="1062.3" y="37" width="6.1" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="1065.27" y="47.5" ></text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:91) (1 samples, 0.52%)</title><rect x="1104.8" y="37" width="6.1" height="15.0" fill="rgb(228,110,26)" rx="2" ry="2" />
+<text  x="1107.85" y="47.5" ></text>
+</g>
+<g >
+<title>get_hooks (pyperf/_hooks.py:18) (1 samples, 0.52%)</title><rect x="10.0" y="165" width="6.1" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
+<text  x="13.00" y="175.5" ></text>
+</g>
+<g >
+<title>_main (pyperf/_runner.py:463) (192 samples, 98.97%)</title><rect x="22.2" y="181" width="1167.8" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="25.16" y="191.5" >_main (pyperf/_runner.py:463)</text>
+</g>
+<g >
+<title>advance (&lt;nbody-advance&gt;:105) (1 samples, 0.52%)</title><rect x="64.7" y="37" width="6.1" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="67.74" y="47.5" ></text>
 </g>
 </g>
 </svg>
