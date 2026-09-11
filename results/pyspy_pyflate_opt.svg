@@ -431,192 +431,220 @@
 <text id="matched" x="1090.00" y="309" > </text>
 <g id="frames">
 <g >
-<title>bwt_transform (run_benchmark.py:485) (1 samples, 1.03%)</title><rect x="727.7" y="37" width="12.2" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
-<text  x="730.73" y="47.5" ></text>
+<title>_decode_symbols_python (run_benchmark.py:704) (1 samples, 0.98%)</title><rect x="114.1" y="53" width="11.6" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="117.12" y="63.5" ></text>
 </g>
 <g >
-<title>bwt_transform (run_benchmark.py:473) (1 samples, 1.03%)</title><rect x="496.6" y="37" width="12.2" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
-<text  x="499.60" y="47.5" ></text>
+<title>_decode_symbols_python (run_benchmark.py:729) (2 samples, 1.96%)</title><rect x="333.9" y="53" width="23.2" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="336.92" y="63.5" >_..</text>
 </g>
 <g >
-<title>bwt_reverse (run_benchmark.py:517) (10 samples, 10.31%)</title><rect x="995.4" y="53" width="121.6" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
-<text  x="998.36" y="63.5" >bwt_reverse (ru..</text>
+<title>decode_huffman_block (run_benchmark.py:831) (7 samples, 6.86%)</title><rect x="1097.5" y="69" width="80.9" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="1100.45" y="79.5" >decode_hu..</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:656) (1 samples, 1.03%)</title><rect x="70.8" y="69" width="12.2" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="73.82" y="79.5" ></text>
+<title>bzip2_main (run_benchmark.py:854) (101 samples, 99.02%)</title><rect x="10.0" y="85" width="1168.4" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="13.00" y="95.5" >bzip2_main (run_benchmark.py:854)</text>
 </g>
 <g >
-<title>compute (pyperf/_worker.py:289) (97 samples, 100.00%)</title><rect x="10.0" y="165" width="1180.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
-<text  x="13.00" y="175.5" >compute (pyperf/_worker.py:289)</text>
+<title>decode_huffman_block (run_benchmark.py:818) (5 samples, 4.90%)</title><rect x="10.0" y="69" width="57.8" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="13.00" y="79.5" >decode..</text>
 </g>
 <g >
-<title>_main (pyperf/_runner.py:463) (97 samples, 100.00%)</title><rect x="10.0" y="229" width="1180.0" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
-<text  x="13.00" y="239.5" >_main (pyperf/_runner.py:463)</text>
+<title>_decode_symbols_python (run_benchmark.py:715) (1 samples, 0.98%)</title><rect x="241.4" y="53" width="11.5" height="15.0" fill="rgb(242,171,40)" rx="2" ry="2" />
+<text  x="244.37" y="63.5" ></text>
 </g>
 <g >
-<title>bwt_transform (run_benchmark.py:484) (1 samples, 1.03%)</title><rect x="715.6" y="37" width="12.1" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
-<text  x="718.57" y="47.5" ></text>
+<title>bwt_reverse (run_benchmark.py:560) (7 samples, 6.86%)</title><rect x="935.5" y="53" width="81.0" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="938.49" y="63.5" >bwt_rever..</text>
 </g>
 <g >
-<title>bzip2_main (run_benchmark.py:725) (97 samples, 100.00%)</title><rect x="10.0" y="85" width="1180.0" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
-<text  x="13.00" y="95.5" >bzip2_main (run_benchmark.py:725)</text>
-</g>
-<g >
-<title>bench_pyflake (run_benchmark.py:892) (97 samples, 100.00%)</title><rect x="10.0" y="101" width="1180.0" height="15.0" fill="rgb(218,60,14)" rx="2" ry="2" />
-<text  x="13.00" y="111.5" >bench_pyflake (run_benchmark.py:892)</text>
-</g>
-<g >
-<title>bwt_transform (run_benchmark.py:483) (7 samples, 7.22%)</title><rect x="630.4" y="37" width="85.2" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
-<text  x="633.41" y="47.5" >bwt_transf..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:646) (1 samples, 1.03%)</title><rect x="22.2" y="69" width="12.1" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
-<text  x="25.16" y="79.5" ></text>
-</g>
-<g >
-<title>bwt_transform (run_benchmark.py:486) (5 samples, 5.15%)</title><rect x="739.9" y="37" width="60.8" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
-<text  x="742.90" y="47.5" >bwt_tr..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:668) (2 samples, 2.06%)</title><rect x="192.5" y="69" width="24.3" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
-<text  x="195.47" y="79.5" >d..</text>
-</g>
-<g >
-<title>bwt_reverse (run_benchmark.py:515) (4 samples, 4.12%)</title><rect x="800.7" y="53" width="48.7" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
-<text  x="803.72" y="63.5" >bwt_..</text>
-</g>
-<g >
-<title>task_func (pyperf/_runner.py:497) (97 samples, 100.00%)</title><rect x="10.0" y="117" width="1180.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
-<text  x="13.00" y="127.5" >task_func (pyperf/_runner.py:497)</text>
-</g>
-<g >
-<title>compute_selectors_list (run_benchmark.py:575) (1 samples, 1.03%)</title><rect x="10.0" y="53" width="12.2" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
-<text  x="13.00" y="63.5" ></text>
-</g>
-<g >
-<title>_compute_values (pyperf/_worker.py:79) (97 samples, 100.00%)</title><rect x="10.0" y="133" width="1180.0" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
-<text  x="13.00" y="143.5" >_compute_values (pyperf/_worker.py:79)</text>
-</g>
-<g >
-<title>bwt_transform (run_benchmark.py:474) (10 samples, 10.31%)</title><rect x="508.8" y="37" width="121.6" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
-<text  x="511.76" y="47.5" >bwt_transform (..</text>
-</g>
-<g >
-<title>compute (pyperf/_worker.py:364) (97 samples, 100.00%)</title><rect x="10.0" y="181" width="1180.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<title>compute (pyperf/_worker.py:364) (102 samples, 100.00%)</title><rect x="10.0" y="181" width="1180.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
 <text  x="13.00" y="191.5" >compute (pyperf/_worker.py:364)</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:657) (1 samples, 1.03%)</title><rect x="83.0" y="69" width="12.2" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
-<text  x="85.99" y="79.5" ></text>
+<title>readbits (run_benchmark.py:253) (1 samples, 0.98%)</title><rect x="33.1" y="37" width="11.6" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<text  x="36.14" y="47.5" ></text>
 </g>
 <g >
-<title>rle4_expand (run_benchmark.py:537) (5 samples, 5.15%)</title><rect x="1129.2" y="53" width="60.8" height="15.0" fill="rgb(226,99,23)" rx="2" ry="2" />
-<text  x="1132.18" y="63.5" >rle4_e..</text>
+<title>task_func (pyperf/_runner.py:497) (102 samples, 100.00%)</title><rect x="10.0" y="117" width="1180.0" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="13.00" y="127.5" >task_func (pyperf/_runner.py:497)</text>
 </g>
 <g >
-<title>&lt;module&gt; (run_benchmark.py:912) (97 samples, 100.00%)</title><rect x="10.0" y="261" width="1180.0" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
-<text  x="13.00" y="271.5" >&lt;module&gt; (run_benchmark.py:912)</text>
-</g>
-<g >
-<title>bwt_reverse (run_benchmark.py:516) (12 samples, 12.37%)</title><rect x="849.4" y="53" width="146.0" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
-<text  x="852.38" y="63.5" >bwt_reverse (run_b..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:674) (1 samples, 1.03%)</title><rect x="241.1" y="69" width="12.2" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="244.13" y="79.5" ></text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:695) (1 samples, 1.03%)</title><rect x="423.6" y="69" width="12.2" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
-<text  x="426.61" y="79.5" ></text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:694) (1 samples, 1.03%)</title><rect x="411.4" y="69" width="12.2" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
-<text  x="414.44" y="79.5" ></text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:693) (4 samples, 4.12%)</title><rect x="362.8" y="69" width="48.6" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
-<text  x="365.78" y="79.5" >deco..</text>
-</g>
-<g >
-<title>compute_warmups_values (pyperf/_worker.py:271) (97 samples, 100.00%)</title><rect x="10.0" y="149" width="1180.0" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
-<text  x="13.00" y="159.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:669) (2 samples, 2.06%)</title><rect x="216.8" y="69" width="24.3" height="15.0" fill="rgb(212,33,7)" rx="2" ry="2" />
-<text  x="219.80" y="79.5" >d..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:681) (2 samples, 2.06%)</title><rect x="265.5" y="69" width="24.3" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
-<text  x="268.46" y="79.5" >d..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:647) (2 samples, 2.06%)</title><rect x="34.3" y="69" width="24.4" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="37.33" y="79.5" >d..</text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:611) (1 samples, 1.03%)</title><rect x="10.0" y="69" width="12.2" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
-<text  x="13.00" y="79.5" ></text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:678) (1 samples, 1.03%)</title><rect x="253.3" y="69" width="12.2" height="15.0" fill="rgb(212,33,7)" rx="2" ry="2" />
-<text  x="256.30" y="79.5" ></text>
-</g>
-<g >
-<title>decode_huffman_block (run_benchmark.py:682) (2 samples, 2.06%)</title><rect x="289.8" y="69" width="24.3" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
-<text  x="292.79" y="79.5" >d..</text>
-</g>
-<g >
-<title>create_run (pyperf/_worker.py:300) (97 samples, 100.00%)</title><rect x="10.0" y="197" width="1180.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<title>create_run (pyperf/_worker.py:300) (102 samples, 100.00%)</title><rect x="10.0" y="197" width="1180.0" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
 <text  x="13.00" y="207.5" >create_run (pyperf/_worker.py:300)</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:665) (7 samples, 7.22%)</title><rect x="95.2" y="69" width="85.1" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
-<text  x="98.15" y="79.5" >decode_huf..</text>
+<title>_decode_symbols_python (run_benchmark.py:743) (1 samples, 0.98%)</title><rect x="519.0" y="53" width="11.6" height="15.0" fill="rgb(235,141,33)" rx="2" ry="2" />
+<text  x="522.02" y="63.5" ></text>
 </g>
 <g >
-<title>bwt_reverse (run_benchmark.py:511) (25 samples, 25.77%)</title><rect x="496.6" y="53" width="304.1" height="15.0" fill="rgb(248,200,47)" rx="2" ry="2" />
-<text  x="499.60" y="63.5" >bwt_reverse (run_benchmark.py:511)</text>
+<title>decode_huffman_block (run_benchmark.py:827) (40 samples, 39.22%)</title><rect x="67.8" y="69" width="462.8" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="70.84" y="79.5" >decode_huffman_block (run_benchmark.py:827)</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:690) (1 samples, 1.03%)</title><rect x="350.6" y="69" width="12.2" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
-<text  x="353.62" y="79.5" ></text>
+<title>&lt;module&gt; (run_benchmark.py:1112) (102 samples, 100.00%)</title><rect x="10.0" y="261" width="1180.0" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<text  x="13.00" y="271.5" >&lt;module&gt; (run_benchmark.py:1112)</text>
 </g>
 <g >
-<title>bench_time_func (pyperf/_runner.py:502) (97 samples, 100.00%)</title><rect x="10.0" y="245" width="1180.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
-<text  x="13.00" y="255.5" >bench_time_func (pyperf/_runner.py:502)</text>
+<title>rle4_expand (run_benchmark.py:587) (1 samples, 0.98%)</title><rect x="1166.9" y="53" width="11.5" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<text  x="1169.86" y="63.5" ></text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:648) (1 samples, 1.03%)</title><rect x="58.7" y="69" width="12.1" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
-<text  x="61.66" y="79.5" ></text>
+<title>bwt_transform (run_benchmark.py:527) (4 samples, 3.92%)</title><rect x="681.0" y="37" width="46.3" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<text  x="683.98" y="47.5" >bwt_..</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:703) (5 samples, 5.15%)</title><rect x="1129.2" y="69" width="60.8" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
-<text  x="1132.18" y="79.5" >decode..</text>
+<title>rle4_expand (run_benchmark.py:586) (1 samples, 0.98%)</title><rect x="1155.3" y="53" width="11.6" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="1158.29" y="63.5" ></text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:688) (3 samples, 3.09%)</title><rect x="314.1" y="69" width="36.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
-<text  x="317.12" y="79.5" >dec..</text>
+<title>bwt_reverse (run_benchmark.py:555) (31 samples, 30.39%)</title><rect x="553.7" y="53" width="358.7" height="15.0" fill="rgb(246,192,46)" rx="2" ry="2" />
+<text  x="556.73" y="63.5" >bwt_reverse (run_benchmark.py:555)</text>
 </g>
 <g >
-<title>bwt_reverse (run_benchmark.py:518) (1 samples, 1.03%)</title><rect x="1117.0" y="53" width="12.2" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
-<text  x="1120.01" y="63.5" ></text>
+<title>readbits (run_benchmark.py:251) (1 samples, 0.98%)</title><rect x="21.6" y="37" width="11.5" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="24.57" y="47.5" ></text>
 </g>
 <g >
-<title>all (97 samples, 100%)</title><rect x="10.0" y="277" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="13.00" y="287.5" ></text>
+<title>bwt_reverse (run_benchmark.py:561) (7 samples, 6.86%)</title><rect x="1016.5" y="53" width="81.0" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="1019.47" y="63.5" >bwt_rever..</text>
 </g>
 <g >
-<title>_worker (pyperf/_runner.py:437) (97 samples, 100.00%)</title><rect x="10.0" y="213" width="1180.0" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
+<title>compute_selectors_list (run_benchmark.py:619) (4 samples, 3.92%)</title><rect x="10.0" y="53" width="46.3" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="13.00" y="63.5" >comp..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:695) (3 samples, 2.94%)</title><rect x="67.8" y="53" width="34.7" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<text  x="70.84" y="63.5" >_d..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:736) (5 samples, 4.90%)</title><rect x="403.3" y="53" width="57.9" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="406.33" y="63.5" >_decod..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:741) (4 samples, 3.92%)</title><rect x="472.7" y="53" width="46.3" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="475.75" y="63.5" >_dec..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:713) (4 samples, 3.92%)</title><rect x="183.5" y="53" width="46.3" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="186.53" y="63.5" >_dec..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:732) (1 samples, 0.98%)</title><rect x="391.8" y="53" width="11.5" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="394.76" y="63.5" ></text>
+</g>
+<g >
+<title>decode_huffman_block (run_benchmark.py:829) (49 samples, 48.04%)</title><rect x="530.6" y="69" width="566.9" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
+<text  x="533.59" y="79.5" >decode_huffman_block (run_benchmark.py:829)</text>
+</g>
+<g >
+<title>readbits (run_benchmark.py:256) (1 samples, 0.98%)</title><rect x="44.7" y="37" width="11.6" height="15.0" fill="rgb(244,183,43)" rx="2" ry="2" />
+<text  x="47.71" y="47.5" ></text>
+</g>
+<g >
+<title>bwt_reverse (run_benchmark.py:559) (2 samples, 1.96%)</title><rect x="912.4" y="53" width="23.1" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="915.35" y="63.5" >b..</text>
+</g>
+<g >
+<title>bench_pyflake (run_benchmark.py:1029) (1 samples, 0.98%)</title><rect x="1178.4" y="101" width="11.6" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<text  x="1181.43" y="111.5" ></text>
+</g>
+<g >
+<title>compute_warmups_values (pyperf/_worker.py:271) (102 samples, 100.00%)</title><rect x="10.0" y="149" width="1180.0" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="13.00" y="159.5" >compute_warmups_values (pyperf/_worker.py:271)</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:716) (3 samples, 2.94%)</title><rect x="252.9" y="53" width="34.7" height="15.0" fill="rgb(235,141,33)" rx="2" ry="2" />
+<text  x="255.94" y="63.5" >_d..</text>
+</g>
+<g >
+<title>_worker (pyperf/_runner.py:437) (102 samples, 100.00%)</title><rect x="10.0" y="213" width="1180.0" height="15.0" fill="rgb(223,87,20)" rx="2" ry="2" />
 <text  x="13.00" y="223.5" >_worker (pyperf/_runner.py:437)</text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:666) (1 samples, 1.03%)</title><rect x="180.3" y="69" width="12.2" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
-<text  x="183.31" y="79.5" ></text>
+<title>_decode_symbols_python (run_benchmark.py:696) (1 samples, 0.98%)</title><rect x="102.5" y="53" width="11.6" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<text  x="105.55" y="63.5" ></text>
 </g>
 <g >
-<title>decode_huffman_block (run_benchmark.py:701) (57 samples, 58.76%)</title><rect x="435.8" y="69" width="693.4" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
-<text  x="438.77" y="79.5" >decode_huffman_block (run_benchmark.py:701)</text>
+<title>_decode_symbols_python (run_benchmark.py:727) (1 samples, 0.98%)</title><rect x="322.4" y="53" width="11.5" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="325.35" y="63.5" ></text>
+</g>
+<g >
+<title>all (102 samples, 100%)</title><rect x="10.0" y="277" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="287.5" ></text>
+</g>
+<g >
+<title>bwt_transform (run_benchmark.py:529) (4 samples, 3.92%)</title><rect x="762.0" y="37" width="46.2" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
+<text  x="764.96" y="47.5" >bwt_..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:726) (3 samples, 2.94%)</title><rect x="287.6" y="53" width="34.8" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="290.65" y="63.5" >_d..</text>
+</g>
+<g >
+<title>bwt_transform (run_benchmark.py:518) (9 samples, 8.82%)</title><rect x="576.9" y="37" width="104.1" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<text  x="579.86" y="47.5" >bwt_transfor..</text>
+</g>
+<g >
+<title>rle4_expand (run_benchmark.py:581) (5 samples, 4.90%)</title><rect x="1097.5" y="53" width="57.8" height="15.0" fill="rgb(233,129,30)" rx="2" ry="2" />
+<text  x="1100.45" y="63.5" >rle4_e..</text>
+</g>
+<g >
+<title>bench_pyflake (run_benchmark.py:1021) (101 samples, 99.02%)</title><rect x="10.0" y="101" width="1168.4" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="13.00" y="111.5" >bench_pyflake (run_benchmark.py:1021)</text>
+</g>
+<g >
+<title>_main (pyperf/_runner.py:463) (102 samples, 100.00%)</title><rect x="10.0" y="229" width="1180.0" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="13.00" y="239.5" >_main (pyperf/_runner.py:463)</text>
+</g>
+<g >
+<title>compute (pyperf/_worker.py:289) (102 samples, 100.00%)</title><rect x="10.0" y="165" width="1180.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="13.00" y="175.5" >compute (pyperf/_worker.py:289)</text>
+</g>
+<g >
+<title>bwt_transform (run_benchmark.py:528) (3 samples, 2.94%)</title><rect x="727.3" y="37" width="34.7" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<text  x="730.25" y="47.5" >bw..</text>
+</g>
+<g >
+<title>bench_time_func (pyperf/_runner.py:502) (102 samples, 100.00%)</title><rect x="10.0" y="245" width="1180.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="13.00" y="255.5" >bench_time_func (pyperf/_runner.py:502)</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:705) (5 samples, 4.90%)</title><rect x="125.7" y="53" width="57.8" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="128.69" y="63.5" >_decod..</text>
+</g>
+<g >
+<title>compute_selectors_list (run_benchmark.py:624) (1 samples, 0.98%)</title><rect x="56.3" y="53" width="11.5" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
+<text  x="59.27" y="63.5" ></text>
+</g>
+<g >
+<title>bwt_transform (run_benchmark.py:517) (2 samples, 1.96%)</title><rect x="553.7" y="37" width="23.2" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="556.73" y="47.5" >b..</text>
+</g>
+<g >
+<title>move_to_front (run_benchmark.py:504) (1 samples, 0.98%)</title><rect x="56.3" y="37" width="11.5" height="15.0" fill="rgb(233,132,31)" rx="2" ry="2" />
+<text  x="59.27" y="47.5" ></text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:730) (3 samples, 2.94%)</title><rect x="357.1" y="53" width="34.7" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="360.06" y="63.5" >_d..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:714) (1 samples, 0.98%)</title><rect x="229.8" y="53" width="11.6" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="232.80" y="63.5" ></text>
+</g>
+<g >
+<title>bwt_transform (run_benchmark.py:530) (9 samples, 8.82%)</title><rect x="808.2" y="37" width="104.2" height="15.0" fill="rgb(245,184,44)" rx="2" ry="2" />
+<text  x="811.24" y="47.5" >bwt_transfor..</text>
+</g>
+<g >
+<title>_decode_symbols_python (run_benchmark.py:738) (1 samples, 0.98%)</title><rect x="461.2" y="53" width="11.5" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="464.18" y="63.5" ></text>
+</g>
+<g >
+<title>_compute_values (pyperf/_worker.py:79) (102 samples, 100.00%)</title><rect x="10.0" y="133" width="1180.0" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="13.00" y="143.5" >_compute_values (pyperf/_worker.py:79)</text>
 </g>
 </g>
 </svg>

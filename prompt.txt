@@ -1535,3 +1535,33 @@ Prompt: "lets do the software polishes, in seperate commits"
 
 2026-09-10T23:30:20Z — Claude Code session (auto-logged)
 Prompt: "the server is running if you need it"
+
+2026-09-10T23:39:08Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b2cu8xf4x</task-id>
+<tool-use-id>toolu_019P3GQJ63yC9YoFHMmTfe9j</tool-use-id>
+<output-file>C:\Users\matan\AppData\Local\Temp\claude\C--Users-matan-OneDrive---Technion-SemesterD-HWSW-FinalProject-hwsw-project\916f3d28-2bcb-4fc2-958c-a28545564e59\tasks\b2cu8xf4x.output</output-file>
+<status>completed</status>
+<summary>Background command "Watch CI for polish A in background" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-10T23:43:11Z — Claude Code session (auto-logged)
+Prompt: "This is a Final Project in a course about HWSW co-design I want you to take a look at the Project and tell me what you think about it, and what improvement does it need, espcially at the Software parts because the hardware is still work in progress, the instructions are described here @project_instructions.pdf some of the course material can be found here @../../CourseMaterial/"
+
+2026-09-10T23:47:16Z — Claude Code session (auto-logged)
+Prompt: "how long until the profile run finishes?"
+
+2026-09-10T23:48:41Z — Claude Code session (auto-logged)
+Prompt: "I think I will go to sleep leave the computer to sleep too and check it back in the morning is it ok?"
+
+2026-09-11T08:02:34Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b930quoor</task-id>
+<tool-use-id>toolu_01Jr1Pd5fzMgN4s7CWHxeyyK</tool-use-id>
+<output-file>C:\Users\matan\AppData\Local\Temp\claude\C--Users-matan-OneDrive---Technion-SemesterD-HWSW-FinalProject-hwsw-project\916f3d28-2bcb-4fc2-958c-a28545564e59\tasks\b930quoor.output</output-file>
+<status>killed</status>
+<summary>Background command "Wait in background for the profile run" was stopped because the system is running low on memory</summary>
+</task-notification>"
+
+2026-09-11T08:07:42Z — Claude Code session (auto-logged)
+Prompt: "Maybe it finished now?"

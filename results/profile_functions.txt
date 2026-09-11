@@ -2,86 +2,88 @@
 nbody stock (C frames, python3-dbg)
   source: results/perf_report_nbody_stock.txt
   function                            self %     incl %
-  _PyEval_EvalFrameDefault            42.94%     99.33%
-  binary_op1                           5.51%     20.36%
-  float_mul.lto_priv.0                 4.23%      4.23%
-  PyFloat_FromDouble                   4.03%      5.84%
-  float_dealloc.lto_priv.0             3.34%      3.34%
-  list_ass_item.lto_priv.0             2.72%      2.72%
-  PyNumber_AsSsize_t                   2.29%      4.99%
-  _Py_CheckSlotResult                  2.09%      2.09%
+  _PyEval_EvalFrameDefault            44.10%     99.31%
+  binary_op1                           4.90%     20.07%
+  PyFloat_FromDouble                   4.03%      5.82%
+  float_mul.lto_priv.0                 3.86%      3.86%
+  float_dealloc.lto_priv.0             3.48%      3.48%
+  list_ass_subscript.lto_priv.0        2.55%      2.55%
+  float_add.lto_priv.0                 2.38%      2.38%
+  PyNumber_AsSsize_t                   2.22%      4.87%
   float_sub.lto_priv.0                 2.01%      2.01%
-  float_add.lto_priv.0                 1.83%      1.83%
+  _Py_CheckSlotResult                  1.96%      1.96%
 
-  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 11.95% of self time, from 10 symbols
-    list_ass_item.lto_priv.0           2.72%
-    PyNumber_AsSsize_t                 2.29%
-    list_ass_subscript.lto_priv.0      1.76%
-    list_item.lto_priv.0               1.51%
-    list_subscript.lto_priv.0          1.40%
-    PyLong_AsSsize_t                   1.17%
-    listiter_next.lto_priv.0           0.92%
-    list_iter.lto_priv.0               0.10%
-    listiter_dealloc.lto_priv.0        0.05%
-    list_resize                        0.03%
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 11.26% of self time, from 12 symbols
+    list_ass_subscript.lto_priv.0      2.55%
+    PyNumber_AsSsize_t                 2.22%
+    list_ass_item.lto_priv.0           1.78%
+    list_subscript.lto_priv.0          1.58%
+    PyLong_AsSsize_t                   1.04%
+    list_item.lto_priv.0               0.94%
+    listiter_next.lto_priv.0           0.77%
+    list_iter.lto_priv.0               0.16%
+    listiter_dealloc.lto_priv.0        0.15%
+    list_dealloc.lto_priv.0            0.03%
+    list_resize                        0.02%
+    list_sort_impl                     0.02%
 
-  group 'float objects' matches /^(float_|PyFloat_)/: 16.30% of self time, from 6 symbols
-    float_mul.lto_priv.0               4.23%
+  group 'float objects' matches /^(float_|PyFloat_)/: 16.25% of self time, from 6 symbols
     PyFloat_FromDouble                 4.03%
-    float_dealloc.lto_priv.0           3.34%
+    float_mul.lto_priv.0               3.86%
+    float_dealloc.lto_priv.0           3.48%
+    float_add.lto_priv.0               2.38%
     float_sub.lto_priv.0               2.01%
-    float_add.lto_priv.0               1.83%
-    float_pow.lto_priv.0               0.86%
+    float_pow.lto_priv.0               0.49%
 
 nbody optimized (Python frames, py-spy)
-  source: results/pyspy_nbody_opt_full.svg  (187 samples)
-  function                                              self %     incl %
-  advance (<nbody-advance>)                             95.72%     95.72%
-  get_data (<frozen importlib._bootstrap_external>)      0.53%      0.53%
-  _parse (sre_parse.py)                                  0.53%      0.53%
-  <lambda> (socket.py)                                   0.53%      0.53%
-  namedtuple (collections/__init__.py)                   0.53%      0.53%
-  _execute_child (subprocess.py)                         0.53%      0.53%
-  update_wrapper (functools.py)                          0.53%      0.53%
-  read_text (pathlib.py)                                 0.53%      0.53%
-  <module> (run_benchmark.py)                            0.00%     99.47%
-  create_run (pyperf/_worker.py)                         0.00%     96.26%
+  source: results/pyspy_nbody_opt_full.svg  (210 samples)
+  function                                                       self %     incl %
+  advance (<nbody-advance>)                                      91.43%     91.43%
+  __new__ (abc.py)                                                0.95%      0.95%
+  _create_ (enum.py)                                              0.48%      2.86%
+  __new__ (enum.py)                                               0.48%      1.43%
+  <module> (selectors.py)                                         0.48%      1.43%
+  __setitem__ (enum.py)                                           0.48%      0.95%
+  _compile_bytecode (<frozen importlib._bootstrap_external>)      0.48%      0.48%
+  <setcomp> (enum.py)                                             0.48%      0.48%
+  _get_spec (<frozen importlib._bootstrap_external>)              0.48%      0.48%
+  <dictcomp> (enum.py)                                            0.48%      0.48%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 
   group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
 
 pyflate stock (Python frames, py-spy)
-  source: results/pyspy_pyflate_stock_full.svg  (404 samples)
+  source: results/pyspy_pyflate_stock_full.svg  (372 samples)
   function                                    self %     incl %
-  decode_huffman_block (run_benchmark.py)     23.76%     93.81%
-  find_next_symbol (run_benchmark.py)         16.34%     40.59%
-  move_to_front (run_benchmark.py)            15.10%     15.10%
-  snoopbits (run_benchmark.py)                 9.65%     17.82%
-  bwt_transform (run_benchmark.py)             8.66%      8.66%
-  readbits (run_benchmark.py)                  6.44%      7.43%
-  bwt_reverse (run_benchmark.py)               4.70%     13.37%
-  _more (run_benchmark.py)                     3.47%      4.46%
-  _mask (run_benchmark.py)                     2.97%      2.97%
-  needbits (run_benchmark.py)                  1.73%      6.19%
+  decode_huffman_block (run_benchmark.py)     26.08%     97.31%
+  move_to_front (run_benchmark.py)            13.44%     13.44%
+  find_next_symbol (run_benchmark.py)         12.63%     40.86%
+  readbits (run_benchmark.py)                  9.95%     13.44%
+  snoopbits (run_benchmark.py)                 9.41%     16.13%
+  bwt_reverse (run_benchmark.py)               8.33%     14.52%
+  bwt_transform (run_benchmark.py)             6.18%      6.18%
+  _mask (run_benchmark.py)                     5.91%      5.91%
+  _more (run_benchmark.py)                     2.42%      3.49%
+  bzip2_main (run_benchmark.py)                1.08%     98.39%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 
   group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
 
 pyflate optimized (Python frames, py-spy)
-  source: results/pyspy_pyflate_opt_full.svg  (104 samples)
+  source: results/pyspy_pyflate_opt_full.svg  (122 samples)
   function                                                       self %     incl %
-  decode_huffman_block (run_benchmark.py)                        37.50%     93.27%
-  bwt_reverse (run_benchmark.py)                                 25.96%     50.00%
-  bwt_transform (run_benchmark.py)                               24.04%     24.04%
-  rle4_expand (run_benchmark.py)                                  4.81%      4.81%
-  _compile_bytecode (<frozen importlib._bootstrap_external>)      1.92%      1.92%
-  _init_module_attrs (<frozen importlib._bootstrap>)              0.96%      0.96%
-  <genexpr> (enum.py)                                             0.96%      0.96%
-  __exit__ (<frozen importlib._bootstrap>)                        0.96%      0.96%
-  compute_selectors_list (run_benchmark.py)                       0.96%      0.96%
-  _compile (sre_compile.py)                                       0.96%      0.96%
+  _decode_symbols_python (run_benchmark.py)                      32.79%     32.79%
+  bwt_transform (run_benchmark.py)                               25.41%     25.41%
+  bwt_reverse (run_benchmark.py)                                 13.11%     38.52%
+  rle4_expand (run_benchmark.py)                                  5.74%      5.74%
+  _compile_bytecode (<frozen importlib._bootstrap_external>)      3.28%      3.28%
+  namedtuple (collections/__init__.py)                            3.28%      3.28%
+  readbits (run_benchmark.py)                                     2.46%      2.46%
+  decode_huffman_block (run_benchmark.py)                         1.64%     82.79%
+  _call_with_frames_removed (<frozen importlib._bootstrap>)       1.64%     15.57%
+  bench_pyflake (run_benchmark.py)                                0.82%     83.61%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 

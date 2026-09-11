@@ -221,7 +221,7 @@ are insufficient for a measured SRAM-versus-DRAM accelerator comparison.
 #pagebreak()
 = A4. Full profiles and release verification
 
-The reports show full original flame graphs beside enlarged context crops.
+The reports show full original flame graphs beside enlarged context crops. Every cited profile was recorded on 10 September through the documented `profile` stage from revision 08da63e, whose benchmark sources are byte-identical to the timing revision 2c8c754 (`profiles_20260910_08da63e/provenance.json`).
 `report/make_figures.py` copies every recorded frame rectangle at its original coordinates;
 it does not merge functions, filter startup, cap stack depth or renormalize widths. Numbered
 outlines mark the same frame in the overview and its detail crop. Selected-frame titles,
@@ -368,9 +368,9 @@ file, since py-spy labels each frame with whichever line was executing.
 
 Prose that adds up a family of symbols must quote a number this prints, together with the
 pattern it came from. An earlier draft of the nbody report gave 14.4% for list access; the
-recorded profile yields *11.95%* over
+recorded profile yields *11.26%* over
 `^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)`, and float object handling is the
-larger group at 16.30% over `^(float_|PyFloat_)`. The tool lists every contributing symbol
+larger group at 16.25% over `^(float_|PyFloat_)`. The tool lists every contributing symbol
 so the sum can be checked. Summing self time across perf rows is correct even though perf
 emits some symbols twice -- an `(inlined)` entry carries inclusive time and zero self, and
 separate entries for one symbol are separate contributions; the self column over a whole

@@ -1,0 +1,9 @@
+[23:32:17] revision 08da63e37900ec45f83f14b647769ad663574a3a on ubuntu-server
+[23:32:17] START profile: env HWSW_RESULTS=/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite STAGES=profile ./tools/vm_run_all.sh nbody pyflate
+[00:30:16] END   profile rc=0 (3479s)
+[00:30:16] START remake: env HWSW_RESULTS=/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite ./tools/vm_remake_flames.sh
+[00:58:06] END   remake rc=0 (1670s)
+[00:58:06] === steps ===
+profile  0  3479s
+remake   0  1670s
+[00:58:06] === profiles complete: /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217 ===

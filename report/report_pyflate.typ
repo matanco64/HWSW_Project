@@ -70,34 +70,38 @@ work and the later transformations also deserve attention.
   align: (left, right, right, right, right),
   table.header([*Function*], [*Stock self*], [*Stock incl.*],
     [*Opt. self*], [*Opt. incl.*]),
-  [`decode_huffman_block`], [23.76%], [93.81%], [37.50%], [93.27%],
-  [`find_next_symbol`], [16.34%], [40.59%], [--], [--],
-  [`move_to_front`], [15.10%], [15.10%], [--], [--],
-  [`snoopbits`], [9.65%], [17.82%], [--], [--],
-  [`readbits`], [6.44%], [7.43%], [--], [--],
-  [`_mask`], [2.97%], [2.97%], [--], [--],
-  [`bwt_reverse`], [4.70%], [13.37%], [25.96%], [50.00%],
-  [`bwt_transform`], [8.66%], [8.66%], [24.04%], [24.04%],
-  [`rle4_expand`], [--], [--], [4.81%], [4.81%],
+  [`decode_huffman_block`], [26.08%], [97.31%], [1.64%], [82.79%],
+  [`_decode_symbols_python`], [--], [--], [32.79%], [32.79%],
+  [`find_next_symbol`], [12.63%], [40.86%], [--], [--],
+  [`move_to_front`], [13.44%], [13.44%], [0.82%], [0.82%],
+  [`snoopbits`], [9.41%], [16.13%], [--], [--],
+  [`readbits`], [9.95%], [13.44%], [2.46%], [2.46%],
+  [`_mask`], [5.91%], [5.91%], [--], [--],
+  [`bwt_reverse`], [8.33%], [14.52%], [13.11%], [38.52%],
+  [`bwt_transform`], [6.18%], [6.18%], [25.41%], [25.41%],
+  [`rle4_expand`], [--], [--], [5.74%], [5.74%],
 )
 
 *Self* is time in the function itself; *inclusive* is time in it and everything it calls.
 Shares are of each profile's own total and are not comparable between the two columns,
 which are independently normalized -- the optimized run is 4.00× shorter in absolute time.
-A dash means the function no longer exists after the rewrite: the bit reader and the symbol
-matcher were folded into `decode_huffman_block`, and `move_to_front` became an inline
-`l.append(l.pop(-r))`.
+A dash means the function does not appear in that profile. The rewrite folded the stock bit
+reader and symbol matcher into one symbol-decode loop, `_decode_symbols_python` -- the Python
+back end the Rust kernel replaces -- and inlined its move-to-front as `l.append(l.pop(-r))`.
+The few `readbits` and `move_to_front` samples left in the optimized profile come from
+block-header selector parsing in `compute_selectors_list`.
 
 The table aggregates every call site of a function; the figure's highlight percentages
-describe *one* outlined frame, which is why `find_next_symbol` reads 20.54% there and 40.59%
+describe *one* outlined frame, which is why `find_next_symbol` reads 18.82% there and 40.86%
 here. Regenerate both from the same recorded SVGs the figures use with
 `report/summarize_profiles.py`.
 
 *The table is the argument for what shipped.* In the stock profile the symbol loop and its
-bit reader account for the bulk of the work, and the inverse BWT is a distant third. After
-the rewrite the ordering inverts: `decode_huffman_block` still dominates self time, but
-what remains beside it is `bwt_reverse` and `bwt_transform` -- which is why the Rust kernel
-is drawn around the symbol decoder and why the remaining Amdahl ceiling is the BWT.
+bit reader account for the bulk of the work, and the inverse BWT (14.52% inclusive) is a minor
+share by comparison. After the rewrite, symbol decoding is still the largest single function
+(`_decode_symbols_python`, 32.79% self), but the inverse BWT now matches it: `bwt_reverse`
+holds 38.52% inclusive, most of it in `bwt_transform`. That is why the Rust kernel is drawn
+around the symbol decoder, and why the remaining Amdahl ceiling is the BWT.
 
 A separate *Windows / CPython 3.12.6* cProfile run gives
 `find_next_symbol` 0.519 s cumulative out of 1.186 s (43.8%), including its bit-reader
@@ -148,8 +152,8 @@ alone, had to be optimized. Raw output: `results/vm_rerun_20260910_3697a63/`.
 
 #figure(image("fig/print_pyflate_opt.svg", width: 100%),
   caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
-  index-table construction remain visible. Matcher work was inlined, so its old function
-  frame disappears without implying that Huffman decoding is free.])
+  index-table construction remain visible beside `_decode_symbols_python`, the single
+  symbol-decode loop that replaced the stock matcher and bit-reader frames.])
 
 #pagebreak()
 = 4. Native execution: what improves, what remains

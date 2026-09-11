@@ -1,0 +1,147 @@
+[23:32:17] === run starting on ubuntu-server, Python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0] ===
+[23:32:17] benchmarks: nbody pyflate
+[23:32:17] results:    /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite
+[23:32:17] START setup
+kernel.perf_event_paranoid = -1
+kernel.kptr_restrict = 0
+Tune the system configuration to run benchmarks
+
+System state
+============
+
+CPU: use 8 logical CPUs: 0-7
+Perf event: Maximum sample rate: 1 per second
+ASLR: Full randomization
+Linux scheduler: No CPU is isolated
+IRQ affinity: irqbalance service: inactive
+IRQ affinity: Default IRQ affinity: CPU 0-7
+IRQ affinity: IRQ affinity: IRQ 0-15=CPU 0-7
+
+Advices
+=======
+
+Linux scheduler: Use isolcpus=<cpu list> kernel parameter to isolate CPUs
+Linux scheduler: Use rcu_nocbs=<cpu list> kernel parameter (with isolcpus) to not schedule RCU on isolated CPUs
+
+Errors
+======
+
+Turbo Boost (MSR): Failed to read MSR 0x1a0 from /dev/cpu/0/msr: [Errno 2] No such file or directory: '/dev/cpu/0/msr'
+Turbo Boost (MSR): Try to load the msr kernel module: sudo modprobe msr
+[23:32:18] OK    setup
+[23:32:18] START nbody/profile
+== nbody / profile
+   results -> /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+kernel.perf_event_max_sample_rate = 100000
+kernel.perf_event_paranoid = -1
+kernel.kptr_restrict = 0
+Couldn't record kernel reference relocation symbol
+Symbol resolution may be skewed if relocation was used (e.g. kexec).
+Check /proc/kallsyms permission or run as root.
+perf_event__synthesize_bpf_events: failed to synthesize bpf images: No such file or directory
+nbody: Mean +- std dev: 485 ms +- 1 ms
+[ perf record: Woken up 386 times to write data ]
+[ perf record: Captured and wrote 96.536 MB /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/nbody_stock.perf.data (6084 samples) ]
+Warning:
+Kernel address maps (/proc/{kallsyms,modules}) were restricted.
+
+Check /proc/sys/kernel/kptr_restrict before running 'perf record'.
+
+As no suitable kallsyms nor vmlinux was found, kernel samples
+can't be resolved.
+
+Samples in kernel modules can't be resolved as well.
+
+py-spy> Sampling process 100 times a second. Press Control-C to exit.
+
+nbody: Mean +- std dev: 247 ms +- 4 ms
+
+py-spy> Stopped sampling because process exited
+py-spy> Wrote flamegraph data to '/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_stock.svg'. Samples: 322 Errors: 0
+Couldn't record kernel reference relocation symbol
+Symbol resolution may be skewed if relocation was used (e.g. kexec).
+Check /proc/kallsyms permission or run as root.
+perf_event__synthesize_bpf_events: failed to synthesize bpf images: No such file or directory
+nbody: Mean +- std dev: 279 ms +- 0 ms
+[ perf record: Woken up 230 times to write data ]
+[ perf record: Captured and wrote 57.345 MB /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/nbody_opt.perf.data (3613 samples) ]
+Warning:
+Kernel address maps (/proc/{kallsyms,modules}) were restricted.
+
+Check /proc/sys/kernel/kptr_restrict before running 'perf record'.
+
+As no suitable kallsyms nor vmlinux was found, kernel samples
+can't be resolved.
+
+Samples in kernel modules can't be resolved as well.
+
+py-spy> Sampling process 100 times a second. Press Control-C to exit.
+
+nbody: Mean +- std dev: 157 ms +- 3 ms
+
+py-spy> Stopped sampling because process exited
+py-spy> Wrote flamegraph data to '/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_opt.svg'. Samples: 216 Errors: 0
+[23:54:03] OK    nbody/profile (1305s)
+[23:54:03] START pyflate/profile
+== pyflate / profile
+   results -> /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
+kernel.perf_event_max_sample_rate = 100000
+kernel.perf_event_paranoid = -1
+kernel.kptr_restrict = 0
+Couldn't record kernel reference relocation symbol
+Symbol resolution may be skewed if relocation was used (e.g. kexec).
+Check /proc/kallsyms permission or run as root.
+perf_event__synthesize_bpf_events: failed to synthesize bpf images: No such file or directory
+pyflate: Mean +- std dev: 3.26 sec +- 0.03 sec
+[ perf record: Woken up 637 times to write data ]
+[ perf record: Captured and wrote 159.168 MB /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyflate_stock.perf.data (10031 samples) ]
+Warning:
+Kernel address maps (/proc/{kallsyms,modules}) were restricted.
+
+Check /proc/sys/kernel/kptr_restrict before running 'perf record'.
+
+As no suitable kallsyms nor vmlinux was found, kernel samples
+can't be resolved.
+
+Samples in kernel modules can't be resolved as well.
+
+py-spy> Sampling process 100 times a second. Press Control-C to exit.
+
+pyflate: Mean +- std dev: 1.26 sec +- 0.00 sec
+
+py-spy> Stopped sampling because process exited
+py-spy> Wrote flamegraph data to '/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_stock.svg'. Samples: 395 Errors: 1
+Couldn't record kernel reference relocation symbol
+Symbol resolution may be skewed if relocation was used (e.g. kexec).
+Check /proc/kallsyms permission or run as root.
+perf_event__synthesize_bpf_events: failed to synthesize bpf images: No such file or directory
+pyflate: Mean +- std dev: 853 ms +- 1 ms
+[ perf record: Woken up 180 times to write data ]
+[ perf record: Captured and wrote 44.999 MB /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyflate_opt.perf.data (2834 samples) ]
+Warning:
+Kernel address maps (/proc/{kallsyms,modules}) were restricted.
+
+Check /proc/sys/kernel/kptr_restrict before running 'perf record'.
+
+As no suitable kallsyms nor vmlinux was found, kernel samples
+can't be resolved.
+
+Samples in kernel modules can't be resolved as well.
+
+py-spy> Sampling process 100 times a second. Press Control-C to exit.
+
+pyflate: Mean +- std dev: 317 ms +- 3 ms
+
+py-spy> Stopped sampling because process exited
+py-spy> Wrote flamegraph data to '/home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_opt.svg'. Samples: 116 Errors: 0
+[00:30:16] OK    pyflate/profile (2173s)
+[00:30:16] === summary ===
+--- compare_nbody.txt: not produced ---
+--- compare_nbody_native.txt: not produced ---
+--- compare_pyflate.txt: not produced ---
+--- compare_pyflate_native.txt: not produced ---
+[00:30:16] === all done; marker written to /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/.RUN_DONE ===

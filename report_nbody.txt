@@ -85,7 +85,7 @@ the conclusion is unaffected – but the naive standard error would overstate ho
 could be trusted.
 
                                                      1
-HWSW Final Project                                                                           Benchmark Report: nbody
+HWSW Final Project                                                                Benchmark Report: nbody
 
 2. Profiling and optimization
 
@@ -95,25 +95,25 @@ identifies generic arithmetic dispatch, float allocation and list access as subs
 
 percentages locate costs to investigate; release-build timing establishes the optimization’s benefit.
 
-Stock nbody, C-frame profile                      Self                                                 Inclusive
+Stock nbody, C-frame profile                      Self                                                      Inclusive
 
-_PyEval_EvalFrameDefault                          42.94%                                                          99.33%
+_PyEval_EvalFrameDefault                          44.10%                                                          99.31%
 
-binary_op1 (generic arithmetic dispatch)          5.51%                                                           20.36%
+binary_op1 (generic arithmetic dispatch)          4.90%                                                           20.07%
 
-float_mul                                         4.23%                                                           4.23%
+float_mul                                         3.86%                                                           3.86%
 
-PyFloat_FromDouble                                4.03%                                                           5.84%
+PyFloat_FromDouble                                4.03%                                                           5.82%
 
-float_dealloc                                     3.34%                                                           3.34%
+float_dealloc                                     3.48%                                                           3.48%
 
-list_ass_item                                     2.72%                                                           2.72%
+list_ass_item                                     1.78%                                                           1.78%
 
-PyNumber_AsSsize_t                                2.29%                                                           4.99%
+PyNumber_AsSsize_t                                2.22%                                                           4.87%
 
-Float object handling, all symbols                16.30%                                                          –
+Float object handling, all symbols                16.25%                                                          –
 
-List access and index conversion, all symbols     11.95%                                                          –
+List access and index conversion, all symbols     11.26%                                                          –
 
 Self is time in the function itself; inclusive is time in it and everything it calls. The two grouped rows sum
 
@@ -125,42 +125,40 @@ The named rows are the symbols that carry the self time, which perf records unde
 
 perf also emits a companion (inlined) entry per symbol holding the inclusive share and no self time – that
 
-is the number the figure below quotes for a highlighted frame, so 4.00% there and 2.72% here describe the
+is the number the figure below quotes for a highlighted frame, so 3.40% there and 1.78% here describe the
 
 same function under two different measures. Both the table and the groups are regenerated from results/
 
 perf_report_nbody_stock.txt by report/summarize_profiles.py, which prints every contributing
 
-symbol; an earlier draft quoted 14.4% for the list group, which that file does not support.
+symbol; an earlier draft quoted 14.4% for the list group, which the profile it then cited did not support.
 
                                                2
-HWSW Final Project                                                                                                                                                                                                         Benchmark Report: nbody
+HWSW Final Project                                                                                                                                                                                            Benchmark Report: nbody
 
-Full recorded flame graph                                                                                                                             Highlighted regions - enlarged with surrounding frames
+Full recorded flame graph                                                                                                                   Highlighted regions - enlarged with surrounding frames
 
-                                                                                                                                                      1. List stores
+                                                                                                                                            1. List stores
 
-                                                                                                                                                      list_ass_item | this frame: 4.00% inclusive
+                                                                                                                                            list_ass_item | this frame: 3.40% inclusive
 
-                                                                                                                                                                      _P..
+                                                                                                                                                            _P..
 
-                                                                                                                                                      P..   list..                                           f..
+                                                                                                                                            P..    lis..                                        f..
 
-                                                                                                                                                list_ass_su..                                                _Py_..           _Py..
+                                                                                                                                            list_ass_su..                                       _Py..               _Py..
 
-                                                                                                                                PyObject_SetItem                               _Py_DECREF                            _Py_I..  _Py..
+                                                                                                                           PyObject_SetItem                          _Py_DECREF                             _Py_INC.. _Py..
 
-                                                                                                                                                      2. Index conversion
+             3                              2                                                                              1                2. Index conversion
 
-             3                                          2                                                                       1                     PyNumber_AsSsize_t | this frame: 2.63% inclusive
+                            fl..     b..                PyF..                                _P..                                           PyNumber_AsSsize_t | this frame: 2.73% inclusive
 
-                            f..      bi..               Py..   _..                             _P..
+                            bin..    bi..   float_mul          fl..  b..   Py..         P..  lis..                    f..
 
-                            bin..    bi..   float_mul          flo..   bi..  Py..         P..  list..                   f..
+                            binar..  bin..  binary_op1         te..  bi..  list_s..     list_ass_su..     _Py..               _Py..
 
-                            binar..  bin..  binary_op1         tern..  bi..  list_su..    list_ass_su..                 _Py_..           _Py..
-
-                            PyNumb..PyN..   PyNumber_Multiply  PyNu.. Py..   PyObject_..  PyObject_SetItem  _Py_DECREF          _Py_I..  _Py..
+                            PyNum..  PyN..  PyNumber_Multiply  Py..  Py..  PyObject_..  PyObject_SetItem  _Py_DECREF       _Py_INC.. _Py..
 
 _PyEval_EvalFrameDefault
 
@@ -184,7 +182,7 @@ _PyEval_Vector
 
 _PyFunction_Vectorcall
 
-PyVectorcall_Call                                                                                                                                                                                             _P..
+PyVectorcall_Call
 
 _PyObject_Call
 
@@ -194,35 +192,7 @@ do_call_core
 
 _PyEval_EvalFrameDefault
 
-_PyEval_EvalFrame
-
-_PyEval_Vector
-
-_PyFunction_Vectorcall
-
-_PyObject_VectorcallTstate
-
-PyObject_Vectorcall
-
-call_function                                                                                                                                   bi..        Py..                                        P..  list..
-
-_PyEval_EvalFrameDefault
-
-_PyEval_EvalFrame
-
-_PyEval_Vector
-
-_PyFunction_Vectorcall
-
-_PyObject_VectorcallTstate
-
-PyObject_Vectorcall
-
-call_function
-
-_PyEval_EvalFrameDefault
-
-_PyEval_EvalFrame                                                                                                                               bi..        list_su..                              list_ass_su..
+_PyEval_EvalFrame                                                                                                                                                                                     _P..
 
 _PyEval_Vector
 
@@ -242,7 +212,7 @@ _PyEval_Vector
 
 _PyFunction_Vectorcall
 
-_PyObject_VectorcallTstate                                                                                                                      Py..  PyObject_..              PyObject_SetItem                            _Py_DECREF
+_PyObject_VectorcallTstate                                                                                                                  b..    Py..                                  P..    lis..
 
 PyObject_Vectorcall
 
@@ -258,23 +228,9 @@ _PyFunction_Vectorcall
 
 _PyObject_VectorcallTstate
 
-PyObject_Vectorcall                                                                                                                                   3. Generic arithmetic dispatch
+PyObject_Vectorcall
 
-call_function
-
-_PyEval_EvalFrameDefault
-
-_PyEval_EvalFrame
-
-_PyEval_Vector
-
-_PyFunction_Vectorcall
-
-_PyObject_VectorcallTstate
-
-PyObject_Vectorcall                                                                                                                                   binary_op1 | this frame: 10.40% inclusive
-
-call_function
+call_function                                                                                                                               bi..   list_s..                              list_ass_su..
 
 _PyEval_EvalFrameDefault
 
@@ -294,9 +250,37 @@ _PyEval_EvalFrameDefault
 
 _PyEval_EvalFrame
 
+_PyEval_Vector                                                                                                                              Py..  PyObject_..        PyObject_SetItem                         _Py_DECREF
+
+_PyFunction_Vectorcall
+
+_PyObject_VectorcallTstate
+
+PyObject_Vectorcall
+
+call_function
+
+_PyEval_EvalFrameDefault
+
+_PyEval_EvalFrame
+
 _PyEval_Vector
 
-_PyFunction_Vectorcall                                                                                                                                bi..                                         Py..       _..
+_PyFunction_Vectorcall                                                                                                                      3. Generic arithmetic dispatch
+
+_PyObject_VectorcallTstate
+
+PyObject_Vectorcall
+
+call_function
+
+_PyEval_EvalFrameDefault
+
+_PyEval_EvalFrame
+
+_PyEval_Vector
+
+_PyFunction_Vectorcall                                                                                                                      binary_op1 | this frame: 10.55% inclusive
 
 _PyObject_VectorcallTstate
 
@@ -316,7 +300,21 @@ _PyObject_VectorcallTstate
 
 PyObject_Vectorcall
 
-call_function                                                                                                                                         bi..                  float_mul                        flo..   bi..     Py..
+call_function
+
+_PyEval_EvalFrameDefault
+
+_PyEval_EvalFrame                                                                                                                           b..                                          PyF..
+
+_PyEval_Vector
+
+_PyFunction_Vectorcall
+
+_PyObject_VectorcallTstate
+
+PyObject_Vectorcall
+
+call_function
 
 _PyEval_EvalFrameDefault
 
@@ -326,7 +324,7 @@ _PyEval_Vector
 
 PyEval_EvalCode
 
-run_eval_code_obj
+run_eval_code_obj                                                                                                                           bi..                  float_mul                     fl..    b..   Py..
 
 run_mod
 
@@ -336,7 +334,7 @@ _PyRun_SimpleFileObject
 
 _PyRun_AnyFileObject
 
-pymain_run_file_obj                                                                                                                             bin..       binary_op1                                       tern..  bi..  list_su..
+pymain_run_file_obj
 
 pymain_run_file
 
@@ -346,7 +344,7 @@ Py_RunMain
 
 pymain_main
 
-Py_BytesMain
+Py_BytesMain                                                                                                                                bin..  binary_op1                                   te..    bi..  list_s..
 
 main
 
@@ -354,9 +352,11 @@ __libc_start_call_main
 
 __libc_start_main_impl
 
-_start                                                                                                                                          PyN..       PyNumber_Multiply                                PyNu.. Py..   PyObject_..
+_start
 
 python3-dbg
+
+                                                                                                                                            PyN.. PyNumber_Multiply                             Py..    Py..  PyObject_..
 
         Figure 2: Full stock C-frame profile (debug CPython), with the same call paths outlined and enlarged. All original frames,
 
@@ -382,7 +382,7 @@ order. A square-root/division replacement changes rounding and is not used in th
 
 emitter accepts a body list and pair schedule, so the same transformation extends to larger systems.
 
-                                                                                                                                                                            3
+                                                                                                                                                                  3
 HWSW Final Project                                                                         Benchmark Report: nbody
 
 3. Native execution: less work, not higher IPC
@@ -460,45 +460,101 @@ not establish cache latency as the bottleneck. L1 events are omitted because an 
 invalid load counts.
 
                                            4
-HWSW Final Project                                                                                                                                                  Benchmark Report: nbody
+HWSW Final Project                                                                                                                                                           Benchmark Report: nbody
 
-4. What changes                                                                        when             N grows?
+4. What changes                                                                        when                      N grows?
 
-Full recorded flame graph                                                                               Highlighted regions - enlarged with    surrounding  frames
+Full recorded flame graph                                                                                        Highlighted regions - enlarged with    surrounding  frames
 
-                                                                                                        1. Generated integration loop
+                                                                                                                 1. Generated integration loop
 
-                                                                                                        advance | this frame: 6.42% inclusive
+__..
 
-                                                                                            1
+<m..                                                                                                             advance | this frame: 4.76% inclusive
 
-_..  ad..     adva..                          advan.. adv..  advanc..  a..  ad..  a..  a..  advance ..
+_c..
 
-e..  bench_nbody (run_benchmark.py:208)
+ex..
 
-_..  task_func (pyperf/_runner.py:497)
+_l..
 
-_..  _compute_values (pyperf/_worker.py:79)
+_f..
 
-_..  compute_warmups_values (pyperf/_worker.py:271)
+_f..
 
-<..  compute (pyperf/_worker.py:289)
+_c..
 
-_..  compute (pyperf/_worker.py:364)
+_h..
 
-e..  create_run (pyperf/_worker.py:300)
+<m..
 
-_..  _worker (pyperf/_runner.py:437)
+_c..
 
-_..  _main (pyperf/_runner.py:463)
+ex..
 
-_..  bench_time_func (pyperf/_runner.py:502)
+_l..
 
-<..  <module> (run_benchmark.py:231)
+_f..
 
-                                                                                                                              a..                                   advance ..
+_f..
 
-           Figure 3: Full optimized Python-frame profile with the integration call path enlarged. Integration remains the hotspot.
+_c..
+
+_h..
+
+<m..
+
+_call..
+
+exec_..
+
+_load..
+
+_find..
+
+_find..                                                      1
+
+<modu..
+
+_call..
+
+exec_..
+
+_load..
+
+_find..
+
+_find..
+
+<modu..
+
+_call_w..       adv..                                ad..    advan..  a..  a..  adv..  advan..  ad..  ad..  a..
+
+exec_mo..    bench_nbody (run_benchmark.py:497)
+
+_load_u..    task_func (pyperf/_runner.py:497)
+
+_find_a..    _compute_values (pyperf/_worker.py:79)
+
+_find_a..    compute_warmups_values (pyperf/_worker.py:271)
+
+<module..    compute (pyperf/_worker.py:289)
+
+_call_wit..  compute (pyperf/_worker.py:364)
+
+exec_modu..  create_run (pyperf/_worker.py:300)
+
+_load_unl..  _worker (pyperf/_runner.py:437)
+
+_find_and..  _main (pyperf/_runner.py:463)
+
+_find_and..  bench_time_func (pyperf/_runner.py:502)
+
+<module> ..  <module> (run_benchmark.py:605)
+
+                                                                                                                 advan..                                a..          a..     adv..
+
+             Figure 3: Full optimized Python-frame profile with the integration call path enlarged. Integration remains the hotspot.
 
                                                              Independent normalization does not display the absolute runtime reduction from 231 to 143 ms.
 
@@ -522,17 +578,17 @@ The VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each e
 
 seven). It evaluates an extended workload, not the required N = 5 benchmark.
 
-           N                                                                           Direct                     BH                           BH/direct            Median rel. error
+             N                                                                         Direct                              BH                                BH/direct       Median rel. error
 
-           5                                                                           0.020 ms                   0.077 ms                                  3.92×               0
+             5                                                                         0.020 ms                            0.077 ms                                  3.92×   0
 
-     100                                                                               4.746 ms                   8.410 ms                                  1.77×               1.6e-5
+100                                                                                    4.746 ms                            8.410 ms                                  1.77×   1.6e-5
 
-     300                                                                               42.977 ms                  42.489 ms                                 0.99×               3.3e-5
+300                                                                                    42.977 ms                           42.489 ms                                 0.99×   3.3e-5
 
-     800                                                                          313.489 ms                      158.846 ms                                0.51×               8.7e-5
+800                                                                             313.489 ms                                 158.846 ms                                0.51×   8.7e-5
 
-1,600                                                                       1,254.660 ms                          382.471 ms                                0.30×               1.8e-4
+1,600                                                                           1,254.660 ms                               382.471 ms                                0.30×   1.8e-4
 
 The crossover is near N = 300 for this distribution. Median relative acceleration error is not a worst-case or
 
@@ -542,7 +598,7 @@ trajectory-error bound. The separate VM native sweep gives 21–22× over rolled
 
 row. Both sweeps are in results/bigN_sweep.txt.
 
-                                                                                                                  5
+                                                                                                                           5
 HWSW Final Project                                                                                 Benchmark Report: nbody
 
 5. Hardware acceleration: current design
