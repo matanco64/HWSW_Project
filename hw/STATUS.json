@@ -247,9 +247,9 @@
           }
         },
         "ppa": {
-          "state": "in_progress",
+          "state": "done",
           "started": "2026-09-08T07:37:27Z",
-          "finished": "",
+          "finished": "2026-09-12T18:14:30Z",
           "gate": {
             "Yosys+Liberty area + cell counts": {
               "result": "pass",
@@ -257,12 +257,14 @@
               "at": "2026-09-08T07:38:49Z"
             },
             "OpenLane 2 run: Fmax, area µm², power": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "post-CTS STA Fmax 11.15 MHz (synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt WS +60.32ns @150ns; worst path u_fsm->g_add accumulate picker); area 4.075 mm² (Yosys synth/area.txt); power/GDS n/a — OpenLane GRT-0607 congestion bug x3, §7 signoff not required",
+              "at": "2026-09-12T18:13:59Z"
             },
             "trade-off table (≥2 design points)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff K1 knob",
+              "at": "2026-09-12T18:14:25Z"
             },
             "trade-off table (>= 2 design points)": {
               "result": "pass",
@@ -303,7 +305,7 @@
         "ppa": {
           "cells": 584454,
           "area_um2": 4075031,
-          "fmax_mhz": 0,
+          "fmax_mhz": 11.15,
           "power_mw": 0
         }
       }
@@ -518,8 +520,8 @@
           }
         },
         "dv_signoff": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-12T18:12:42Z",
           "finished": "",
           "gate": {
             "golden equivalence on the full benchmark input": {
@@ -883,5 +885,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T17:33:06Z"
+  "updated": "2026-09-12T18:14:30Z"
 }
