@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 18:19 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-12 18:19 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 19:42 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-12 19:42 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -48,9 +48,7 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class ppa,integration todo
-    class dv_signoff in_progress
-    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage done
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration done
 ```
 
 ### `mtf_cam`
@@ -73,7 +71,8 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
+    class uarch review
     class prd,mas done
 ```
 
@@ -84,16 +83,16 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔵 | ⬜ | ⬜ |
-| `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `mtf_cam` | ✅ | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
 ## Next up
 
 - `grape_pipeline`: all stages done
-- `huffman_engine`: **DV sign-off** — in_progress (checkpoint — needs human approval)
-- `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
+- `huffman_engine`: all stages done
+- `mtf_cam`: **uArch** — review (checkpoint — needs human approval)
 
 ## Gates
 
@@ -229,7 +228,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] all functional covergroups hit — tb/cov/func_cov.txt: 34 bins all >=1 (cg_cfg alphabet{288,147,mid,small}+n_tables{1..6}, cg_sel switches/groups, cg_bp sym/src, cg_err{param,busy,table.badlen,table.kraft,nocode,selector,limit,underrun}, cg_ctrl{done,abort}, cg_deflate.block, cg_bits start_bit)
 - [x] line/toggle >= 90 % — tb/cov/coverage.txt: line 90.4%, toggle 90.3% (control signals; wide datapath/counters/ROMs/storage waived via inline coverage_off + coverage-max-width 4, docs/coverage_waivers.md), branch 91.7%
 
-#### DV sign-off — 🔵 in_progress (started 2026-09-12T18:12:42Z)
+#### DV sign-off — ✅ done (started 2026-09-12T18:12:42Z, finished 2026-09-12T18:59:21Z)
 
 - [x] golden equivalence on the full benchmark input — test_bench_block PASS: the entire benchmark (interpreter.tar.bz2 = 1 bzip2 block, 148271 symbols, START_BIT 8844, 6 tables) trace-exact vs canonical_model (148271 beats, 0 mismatches); BITS 531571, K1=1.0068<=1.1; multi-block contract via test_multiblock
 - [x] directed + random suites pass — make sim: TESTS=17 PASS=17 FAIL=0 (smoke, backpressure, bench_block, random_cfg/busy, errors_reject/runtime, abort, reset, multiblock, sel_boundary, dbg, first_latency, deflate, deflate_all_codes, deep_tree, cover_fill)
@@ -237,6 +236,21 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] lint clean — make lint: clean (12 files)
 - [x] Icarus 4-state run X-free after reset — make sim-icarus: TESTS=17 PASS=17; AXIS/AXI monitors assert is_resolvable on every handshake+beat field after reset, none fired
 - [x] formal (sby) where listed — synth/formal.sby: ctrl_arcs (FSM arcs+termination) + skid (no loss/dup, PRD-F6) BMC+cover 4/4 PASS; aligner 128b-cap property takes testplan §6 documented fallback (aligner unit TB 13/13 + AXIS protocol agent)
+- [x] hw-review findings resolved — docs/review_signoff.md: 5 findings (S1-S5), 0 must; S2 (DEFLATE underrun beat suppression) + S3/S4 (dead code) + S5 (explicit c1 reset) fixed, S1 considered+rejected (fix broke ERR valid-beat delivery, caught by regression); re-verified 17/17 both sims + formal 4/4
+
+#### PPA — ✅ done (started 2026-09-12T19:01:55Z, finished 2026-09-12T19:41:16Z)
+
+- [x] Yosys+Liberty area + cell counts — synth/area.txt: 151,058 cells; Chip area 1,634,516 um2 (1.634 mm2); 54.44% sequential
+- [x] OpenLane 2 run: Fmax, area µm², power — OpenLane 2.3.10 one attempt: synthesis clean, reached pre-PnR STA + global placement. Fmax pre-PnR tt ~8.9 MHz (ws -91.886ns @ 20ns, synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt); crit path table-build/symtab (u_regs->u_tab). Area Yosys 1.634 mm2; power/die shot not obtained (no GDS, non-convergent placement, §7-optional, not invented). docs/ppa.md §3
+- [x] trade-off table (≥2 design points) — docs/ppa.md §2: 3 design points (flop symtab as-built 1.634 mm2 / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt (huff_tables 67% + huff_regs 28%)
+- [x] trade-off table (>= 2 design points) — docs/ppa.md 2 Trade-off: 3 design points (flop symtab as-built / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt
+- [x] OpenLane 2 run: Fmax, area um2, power — OpenLane 2.3.10 one time-boxed attempt: synthesis clean + all checkers passed (better than grape OOM); reached OpenROAD pre-PnR STA + global placement. Fmax from pre-PnR STA synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt: ws -91.886ns @ 20ns -> ~8.9 MHz tt (pre-placement, upper bound); crit path u_regs->u_tab (table-build/symtab mux, not decode cascade). Area = Yosys 1.634 mm2 (OpenLane not placed). Power/die shot not obtained (no GDS; placement non-convergent, closed per proj_instructions.md §7); power not invented. docs/ppa.md §3
+
+#### Integration — ✅ done (started 2026-09-12T19:41:55Z, finished 2026-09-12T19:42:07Z)
+
+- [x] register map ↔ driver model consistent — driver/check_regmap.py -> 0 differences (20 rows vs docs/mas.md §4, ID 0x48554631); driver/test_driver.py -> ALL 5 DRIVER TESTS PASS (regmap, ID, cycle-model==decode_model.py, decode_block golden sink, ERR_PARAM)
+- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=1.13s (baseline_pyflate_stats.txt:19), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x @50MHz (ideal 1.98x); clock-insensitive 1.89-1.97x across 5-50 MHz
+- [x] report §7 bullets mapped — docs/integration.md §4: 7 project_instructions.md §7 bullets each mapped to a path (RTL/MAS/uArch/driver/PRD+integration/block_diagram/ppa)
 
 ### `mtf_cam`
 
@@ -256,10 +270,19 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] block diagram — docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML
 - [x] hw-review resolved — docs/review_mas.md: 24 findings (2 passes), 0 must open
 
+#### uArch — 🟠 review (started 2026-09-12T19:01:12Z)
+
+- [x] pipeline/FSM diagrams — docs/uarch.md §2 dataflow flowchart + §3 invocation/expander stateDiagrams + §3.2 list-CAM datapath
+- [x] number formats fixed — docs/uarch.md §4: UQ8.0 rank/byte, UQ22.0 run sum (21b stored), UQ31.0 in-flight bytes, counters per MAS §4
+- [x] memories sized — docs/uarch.md §5: 256x8 shift-register CAM (2048 flops), item FIFO Dx30b 2W/1R, packer Wx8, no macros
+- [x] per-stage timing budget — docs/uarch.md §6: 6 rows, worst = 256:1 list read mux ~6-8ns < 20ns @ 50MHz; K4 PPA-measured
+- [x] latency/throughput derived and matches PRD KPI — docs/uarch.md §7 + docs/schedule_model.py: golden list_model.cycles reproduces K3=1.063 @ W8/D8 <=1.10, D-sweep + W-table match PRD; K1 latency <=8
+- [x] hw-review resolved — docs/review_uarch.md: 12 findings, 3 must (M1 run-adder width, M2 FIFO 2W port for K3, M3 enqueue-after-check) all fixed, 0 must open
+
 ## Metrics
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 11.15 | 0 |
-| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 0 | 0 |
+| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 8.9 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |

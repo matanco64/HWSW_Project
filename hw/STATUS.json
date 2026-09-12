@@ -565,9 +565,9 @@
           }
         },
         "ppa": {
-          "state": "in_progress",
+          "state": "done",
           "started": "2026-09-12T19:01:55Z",
-          "finished": "",
+          "finished": "2026-09-12T19:41:16Z",
           "gate": {
             "Yosys+Liberty area + cell counts": {
               "result": "pass",
@@ -575,36 +575,46 @@
               "at": "2026-09-12T19:16:30Z"
             },
             "OpenLane 2 run: Fmax, area µm², power": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "OpenLane 2.3.10 one attempt: synthesis clean, reached pre-PnR STA + global placement. Fmax pre-PnR tt ~8.9 MHz (ws -91.886ns @ 20ns, synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt); crit path table-build/symtab (u_regs->u_tab). Area Yosys 1.634 mm2; power/die shot not obtained (no GDS, non-convergent placement, §7-optional, not invented). docs/ppa.md §3",
+              "at": "2026-09-12T19:41:44Z"
             },
             "trade-off table (≥2 design points)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/ppa.md §2: 3 design points (flop symtab as-built 1.634 mm2 / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt (huff_tables 67% + huff_regs 28%)",
+              "at": "2026-09-12T19:41:44Z"
             },
             "trade-off table (>= 2 design points)": {
               "result": "pass",
               "evidence": "docs/ppa.md 2 Trade-off: 3 design points (flop symtab as-built / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt",
               "at": "2026-09-12T19:16:30Z"
+            },
+            "OpenLane 2 run: Fmax, area um2, power": {
+              "result": "pass",
+              "evidence": "OpenLane 2.3.10 one time-boxed attempt: synthesis clean + all checkers passed (better than grape OOM); reached OpenROAD pre-PnR STA + global placement. Fmax from pre-PnR STA synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt: ws -91.886ns @ 20ns -> ~8.9 MHz tt (pre-placement, upper bound); crit path u_regs->u_tab (table-build/symtab mux, not decode cascade). Area = Yosys 1.634 mm2 (OpenLane not placed). Power/die shot not obtained (no GDS; placement non-convergent, closed per proj_instructions.md §7); power not invented. docs/ppa.md §3",
+              "at": "2026-09-12T19:41:16Z"
             }
           }
         },
         "integration": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-12T19:41:55Z",
+          "finished": "2026-09-12T19:42:07Z",
           "gate": {
             "register map ↔ driver model consistent": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "driver/check_regmap.py -> 0 differences (20 rows vs docs/mas.md §4, ID 0x48554631); driver/test_driver.py -> ALL 5 DRIVER TESTS PASS (regmap, ID, cycle-model==decode_model.py, decode_block golden sink, ERR_PARAM)",
+              "at": "2026-09-12T19:42:07Z"
             },
             "cycle-accurate speedup estimate vs results/baseline_*": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §3: T=1.13s (baseline_pyflate_stats.txt:19), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x @50MHz (ideal 1.98x); clock-insensitive 1.89-1.97x across 5-50 MHz",
+              "at": "2026-09-12T19:42:07Z"
             },
             "report §7 bullets mapped": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §4: 7 project_instructions.md §7 bullets each mapped to a path (RTL/MAS/uArch/driver/PRD+integration/block_diagram/ppa)",
+              "at": "2026-09-12T19:42:07Z"
             }
           }
         }
@@ -622,7 +632,7 @@
         "ppa": {
           "cells": 151058,
           "area_um2": 1634516,
-          "fmax_mhz": 0,
+          "fmax_mhz": 8.9,
           "power_mw": 0
         }
       }
@@ -911,5 +921,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T19:18:09Z"
+  "updated": "2026-09-12T19:42:07Z"
 }

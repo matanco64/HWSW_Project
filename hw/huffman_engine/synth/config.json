@@ -1,0 +1,24 @@
+{
+    "DESIGN_NAME": "huffman_engine",
+    "VERILOG_FILES": [
+        "dir::../rtl/huff_aligner.sv",
+        "dir::../rtl/huff_builder.sv",
+        "dir::../rtl/huff_ctrl.sv",
+        "dir::../rtl/huff_decoder.sv",
+        "dir::../rtl/huff_deflate.sv",
+        "dir::../rtl/huff_out.sv",
+        "dir::../rtl/huff_regs.sv",
+        "dir::../rtl/huff_selector.sv",
+        "dir::../rtl/huff_tables.sv",
+        "dir::../rtl/huffman_engine.sv",
+        "dir::../../common/rtl/axi_lite_if.sv"
+    ],
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 20.0,
+    "RUN_LINTER": false,
+    "FP_CORE_UTIL": 35,
+    "PL_TARGET_DENSITY_PCT": 40,
+    "SYNTH_HIERARCHY_MODE": "deferred_flatten",
+    "GRT_ADJUSTMENT": 0.15,
+    "GRT_ALLOW_CONGESTION": true
+}
