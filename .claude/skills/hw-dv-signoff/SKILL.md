@@ -21,6 +21,14 @@ coverage part to `done` before starting sign-off.
 4. `make -C hw/<module> cov` (Verilator `--coverage`, line + toggle report `tb/cov/coverage.txt`).
    Loop: read the uncovered lines → add a directed or random sequence → rerun. Exclusions
    (`// verilator coverage_off`) only with a testplan-cited reason.
+   The 90 % toggle target is calibrated for datapath modules (full-range values flip most
+   bits — grape hit 96 %). A control/storage module floors far lower on raw toggle because
+   unhit bits are minority bits inside well-toggled counters/storage; prove that with a
+   stimulus push first (targeted stress moving raw toggle < 2 pts is the evidence), then
+   measure toggle over the control subset — inline `coverage_off` for the named unreachable
+   wide signals plus `COVERAGE_MAX_WIDTH` for the residual — and state in coverage_waivers.md
+   that the figure is control-subset toggle with the wide datapath waived. Never report a
+   width-capped number as full-signal toggle.
 5. Gate rows; `metric dv.line_cov / dv.toggle_cov / dv.func_cov`; `set ... done`.
 
 | Criterion | Evidence |

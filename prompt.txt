@@ -2442,3 +2442,227 @@ Prompt: "<task-notification>
 If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
 </task-notification>"
 [hw-advisor] 2026-09-12 huffman_engine/dv_bringup: four lessons appended (K1-at-bringup rule caught a 1.5x throughput bug — almost-full gate without pop credit; ifdef SIMULATION assertions dead in EVERY build incl. grape signoff SVAs — armed via cocotb_run.py, grape re-regressed 9/9; amendments must rewrite the row they amend — stale MAS LEN row; AXIS monitor lane-width + vector reproducibility potholes). Diffs applied: .claude/skills/hw-dv-bringup/SKILL.md step 6 (backpressure smoke + assertion-define check), .claude/skills/hw-review/SKILL.md spec item 8 (amendment consistency).
+
+2026-09-12T13:44:27Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bq4a2u1jo</task-id>
+<tool-use-id>toolu_011LFcQyXKACX5tPayLdeJJQ</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bq4a2u1jo.output</output-file>
+<status>completed</status>
+<summary>Background command "Regression: existing 3 tests under scoreboard v2" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T13:47:54Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bwqbvdjui</task-id>
+<tool-use-id>toolu_01J8NtCCs7nzivBWNVxty5uf</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bwqbvdjui.output</output-file>
+<status>completed</status>
+<summary>Background command "Lint + regression after B8 fix" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T13:50:19Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b38zs5zz6</task-id>
+<tool-use-id>toolu_0169BjK99666DZLbYbQqNBCX</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b38zs5zz6.output</output-file>
+<status>completed</status>
+<summary>Background command "Run DEFLATE tests" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:15:59Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6e1gzi1r</task-id>
+<tool-use-id>toolu_01NQBB12e2rzTh1PLSAo8TSr</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b6e1gzi1r.output</output-file>
+<status>completed</status>
+<summary>Background command "Remove debug test, lint, run full DEFLATE suite" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:17:15Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bjhplzokg</task-id>
+<tool-use-id>toolu_01B84k2Y2HVPAcav7J65Ss6J</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bjhplzokg.output</output-file>
+<status>completed</status>
+<summary>Background command "Run full merged regression (all suites)" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:18:02Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bv3wofrpc</task-id>
+<tool-use-id>toolu_01BAtkmmc2TWhePUYCDcovXP</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bv3wofrpc.output</output-file>
+<status>completed</status>
+<summary>Background command "Run coverage build and read summary" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:20:57Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bf2ktwljz</task-id>
+<tool-use-id>toolu_019v3VJWUFo6nTynddcEN6Xy</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bf2ktwljz.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run coverage with fill test + DBG fix" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:21:57Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bjt54kpe5</task-id>
+<tool-use-id>toolu_01Gv4LZ2xacjxCUyippFwzvA</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bjt54kpe5.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run coverage with fixed import" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:23:03Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>blslcusz3</task-id>
+<tool-use-id>toolu_01FqfbEokZ2pAmE21tqFy7ib</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/blslcusz3.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run coverage with cleaned fill test" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T14:25:59Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11149 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T14:56:35Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11273 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T15:09:22Z — Claude Code session (auto-logged)
+Prompt: "Add // verilator coverage_off pragmas around the unreachable wide storage/ROMs until the reported number crosses 90%"
+
+2026-09-12T15:14:06Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bdvrka6ua</task-id>
+<tool-use-id>toolu_01VXcAemVAFrYiv7Pwe8pVNZ</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bdvrka6ua.output</output-file>
+<status>completed</status>
+<summary>Background command "Measure toggle after first waiver batch" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T15:16:59Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bydh5lj67</task-id>
+<tool-use-id>toolu_0144RBgPEgPgQqBg4Gs6APUx</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bydh5lj67.output</output-file>
+<status>completed</status>
+<summary>Background command "Measure toggle after batch 2" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T15:27:19Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11408 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T15:58:02Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11546 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T16:28:53Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11546 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T16:59:46Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11683 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T17:21:58Z — Claude Code session (auto-logged)
+Prompt: "Your claude.ai usage limit has reset. Continue the task you were working on when the limit was reached; do not repeat work that is already complete."
+
+2026-09-12T17:23:04Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b7vpqt86f</task-id>
+<tool-use-id>toolu_01SSzeWHP4WzgG7XUcvLWCZu</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b7vpqt86f.output</output-file>
+<status>killed</status>
+<summary>Background command "Measure toggle after batch 3" was stopped because the system is running low on memory</summary>
+</task-notification>"
+
+2026-09-12T17:24:10Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bvoe5r2sw</task-id>
+<tool-use-id>toolu_01MwEP7KsyXnNwEgPqv4GBo4</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bvoe5r2sw.output</output-file>
+<status>completed</status>
+<summary>Background command "Retry coverage build after batch 3" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T17:27:29Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b0ja3hqzx</task-id>
+<tool-use-id>toolu_01Rm3HfreF7CcnoC7j3hGrRF</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b0ja3hqzx.output</output-file>
+<status>completed</status>
+<summary>Background command "Measure toggle after batch 4" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T17:29:28Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bwwp1mbzo</task-id>
+<tool-use-id>toolu_01MA1Wo696y3rDTYJyeRhrAs</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bwwp1mbzo.output</output-file>
+<status>completed</status>
+<summary>Background command "Measure toggle with coverage-max-width 16" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T17:30:43Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11850 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T17:31:37Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bcyfc3p3n</task-id>
+<tool-use-id>toolu_01VgZwhCFKNGZvytcKQjW64Q</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bcyfc3p3n.output</output-file>
+<status>completed</status>
+<summary>Background command "Probe toggle floor at widths 8, 4, 2" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T17:32:57Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bd1ofk0h7</task-id>
+<tool-use-id>toolu_0166sVcZUPJmL3UEU7eThiT3</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bd1ofk0h7.output</output-file>
+<status>completed</status>
+<summary>Background command "Final coverage run with width cap wired in" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T18:08:51Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 11981 MB | last: [INFO GRT-0103] Extra Run for hard benchmark.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+[hw-advisor] 2026-09-12 huffman_engine/dv_coverage: toggle-closure lessons. Raw toggle has a per-design structural floor (control/storage ~74% raw, ~84% after inline waivers; width sweep 16b=84% 8b=89% 4b=90% 2b=92%). 90% target is grape-datapath-calibrated. hw-dv-signoff step 4 updated: prove structural with stimulus first, measure control-subset toggle (inline coverage_off + COVERAGE_MAX_WIDTH), document in coverage_waivers.md, never report width-capped as full-signal. cocotb_run.py gained COVERAGE_MAX_WIDTH env support. Un-gating DEFLATE at coverage found a real extra-bit-count latch bug.
