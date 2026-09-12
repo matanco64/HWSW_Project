@@ -29,7 +29,11 @@ def main():
         data, start_bit, lengths, selectors, alphabet)
     assert syms[-1] == alphabet - 1, "block must end at EOB"
 
-    keep = (end_bit + 7) // 8 + 16                    # tail slack ≤ overfetch cap (4 beats)
+    # Tail after end_bit must stay under the 128-bit accepted-unconsumed cap (64b buffer +
+    # 2x32b FIFO), or the TLAST beat is never accepted and the test silently loses the
+    # TLAST-accepted regime (review B3). 10 spare bytes -> tail <= 87 bits here.
+    keep = (end_bit + 7) // 8 + 10
+    assert keep * 8 - end_bit <= 128, "tail exceeds the acceptance window"
     (HERE / "bench_stream.bin").write_bytes(data[:keep])
     (HERE / "bench_block.json").write_text(json.dumps({
         "start_bit": start_bit,

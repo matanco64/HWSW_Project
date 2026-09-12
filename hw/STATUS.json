@@ -465,21 +465,29 @@
           }
         },
         "dv_bringup": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-12T10:05:01Z",
+          "finished": "2026-09-12T12:57:48Z",
           "gate": {
             "pyuvm env instantiates": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim: HuffEnv (axi agent + 3 AXIS monitors + HuffScoreboard) builds/connects; 2 tests run under it",
+              "at": "2026-09-12T12:39:06Z"
             },
             "first directed test passes on Verilator": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "test_huffman_engine.smoke PASS + test_bench_block PASS (real block: 148271 symbols, START_BIT 8844, 6 tables; K1=1.0068 <= 1.1, model 1.0068 exact; BUILD_CYCLES=167=ALPHABET+MAXLEN, OVERFETCH=3<=4)",
+              "at": "2026-09-12T12:39:06Z"
             },
             "scoreboard compares against golden": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "scoreboard: compared 148271 items, 0 mismatches (golden=canonical_model.decode_bzip2_symbols); BITS=531571 golden-exact",
+              "at": "2026-09-12T12:39:06Z"
+            },
+            "hw-review findings resolved": {
+              "result": "pass",
+              "evidence": "docs/review_bringup.md: 13 findings (B1-B13), 2 musts fixed (dead SIMULATION ifdef armed via cocotb_run.py -DSIMULATION; smoke_backpressure covers the stall-credit corner), 0 must open; B4-B6 recorded as dv_coverage entry criteria",
+              "at": "2026-09-12T12:57:48Z"
             }
           }
         },
@@ -577,9 +585,10 @@
           "line_cov": 0,
           "toggle_cov": 0,
           "func_cov": 0,
-          "tests_run": 0,
-          "tests_pass": 0,
-          "formal": "n/a"
+          "tests_run": 3,
+          "tests_pass": 3,
+          "formal": "n/a",
+          "k1_bench": 1.0068
         },
         "ppa": {
           "cells": 151058,
@@ -867,5 +876,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-08T07:45:19Z"
+  "updated": "2026-09-12T12:57:48Z"
 }

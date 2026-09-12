@@ -74,3 +74,21 @@ class HuffBenchBlockTest(HuffBaseTest):
 @cocotb.test()
 async def bench_block(_dut):
     await uvm_root().run_test("HuffBenchBlockTest")
+
+
+class HuffSmokeBpTest(HuffBaseTest):
+    """B2: the smoke decode under a deterministic toggling m_sym sink — tready drops on
+    alternating cycles, exercising the R1 stall-credit withdrawal (out_occ reaching 2 with
+    c1_v set) that an always-ready sink never hits. The armed huff_out push-while-full
+    assertion (B1) and the trace-exact scoreboard are the checkers."""
+
+    async def main(self):
+        import itertools
+        self.env.sym_sink.set_pause_generator(itertools.cycle([True, False]))
+        await self.queue_streams(bytes([0x59, 0xC0]), bytes([0]))
+        await SmokeSeq("smoke_bp").start(self.env.agent.sequencer)
+
+
+@cocotb.test()
+async def smoke_backpressure(_dut):
+    await uvm_root().run_test("HuffSmokeBpTest")
