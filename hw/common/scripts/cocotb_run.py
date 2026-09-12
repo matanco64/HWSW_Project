@@ -30,6 +30,7 @@ def main() -> int:
     build_args = []
     if a.sim == "verilator":
         build_args += ["-Wno-fatal", "--timing", "--assert"]  # arm SVAs in regression (rcp/sqrt II guards)
+        build_args += ["-DSIMULATION"]  # compile `ifdef SIMULATION` guards (B1: they were dead in every build)
         if a.cov:
             build_args += ["--coverage"]
         # Waves: runner adds --trace (VCD -> sim_build/dump.vcd). Native --trace-fst needs liblz4-dev
@@ -37,7 +38,7 @@ def main() -> int:
         if a.waves:
             build_args += ["--trace-structs"]
     elif a.sim == "icarus":
-        build_args += ["-g2012"]
+        build_args += ["-g2012", "-DSIMULATION"]
 
     runner = get_runner(a.sim)
     runner.build(
