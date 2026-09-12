@@ -393,3 +393,25 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   range check is `< 288` not `< ALPHABET`; same-cycle selector-error withdrawal drops the
   boundary symbol's beat (legal ADR-0006 withdrawal the predictor doesn't model); cocotbext
   `clear()` doesn't flush an in-flight frame (hard_flush kills+restarts the engine).
+
+## 2026-09-12 — huffman_engine/dv_coverage (toggle closure)
+
+- **Raw toggle coverage has a per-design floor set by signal structure, not stimulus.** A
+  comparator-cascade control/storage module floored at ~74 % raw and ~84 % after inline
+  waivers on every architecturally-unreachable wide signal; a width sweep (≤16 b 84 %, ≤8 b
+  89 %, ≤4 b 90 %, ≤2 b 92 %) showed the remaining unhit bits are minority bits inside
+  otherwise-well-toggled moderate-width registers, where a declaration-level `coverage_off` is
+  net-neutral (it removes more hit points than missed). grape's FP64 datapath reached 96 %
+  naturally because full-range values flip nearly every bit. Lesson: the 90 % toggle target is
+  calibrated for datapath modules; for control/storage modules, measure toggle over the
+  control subset (`--coverage-max-width`) with the wide datapath waived, and say so — don't
+  claim a full-signal 90 %. Two mechanisms, both documented: inline regions for the *named*
+  unreachable cases (the "why"), the width cap for the moderate-width residual.
+- **Prove the gap is structural before waiving.** Two purpose-built stress tests
+  (`deflate_all_codes`, `deep_tree`) that exercised every code and the full length range moved
+  raw toggle only 1.3 points — that empirical result is what justifies the waiver, versus
+  waiving on assertion. Push stimulus first, then waive what it can't reach.
+- **dv_coverage is where gated features get un-gated, and that finds bugs.** Un-gating DEFLATE
+  (F-25) at coverage exposed a real extra-bit-count latching bug in one run; the DBG range
+  check `< 288` vs `< ALPHABET` fell out of the max-config fill test. A feature carried behind
+  a gate to signoff is an unverified feature.
