@@ -794,21 +794,24 @@
           }
         },
         "dv_bringup": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-12T21:17:23Z",
+          "finished": "2026-09-12T21:22:18Z",
           "gate": {
             "pyuvm env instantiates": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim: MtfEnv (AxiLiteAgent + s_sym source + m_l sink + 2 AXIS monitors + MtfScoreboard) build/connect complete; 6 tests run under it on Verilator + Icarus",
+              "at": "2026-09-12T21:22:06Z"
             },
             "first directed test passes on Verilator": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim TESTCASE=smoke PASS (used {65,66,67,68}, L=AAABCB); TESTS=6 PASS=6 FAIL=0 (smoke, smoke_backpressure, backpressure, multiblock, k1, full_benchmark)",
+              "at": "2026-09-12T21:22:06Z"
             },
             "scoreboard compares against golden": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "scoreboard PASS: compared 336184 items over 1 block, 0 mismatches (golden=list_model.expand, cross-checked == mtf_ref.l_vector); docs/review_bringup.md 1 finding 0 must open",
+              "at": "2026-09-12T21:22:06Z"
             }
           }
         },
@@ -906,8 +909,8 @@
           "line_cov": 0,
           "toggle_cov": 0,
           "func_cov": 0,
-          "tests_run": 0,
-          "tests_pass": 0,
+          "tests_run": 6,
+          "tests_pass": 6,
           "formal": "n/a"
         },
         "ppa": {
@@ -936,5 +939,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T20:54:17Z"
+  "updated": "2026-09-12T21:22:18Z"
 }
