@@ -1,0 +1,34 @@
+[tasks]
+ctrl_bmc   ctrl bmc
+ctrl_cover ctrl cover
+skid_bmc   skid bmc
+skid_cover skid cover
+
+[options]
+bmc:   mode bmc
+bmc:   depth 30
+cover: mode cover
+cover: depth 30
+
+[engines]
+smtbmc
+
+[script]
+ctrl_bmc:   read -formal huff_ctrl.sv
+ctrl_cover: read -formal huff_ctrl.sv
+ctrl_bmc:   read -formal ctrl_arcs.sv
+ctrl_cover: read -formal ctrl_arcs.sv
+ctrl_bmc:   prep -top ctrl_arcs
+ctrl_cover: prep -top ctrl_arcs
+skid_bmc:   read -formal huff_out.sv
+skid_cover: read -formal huff_out.sv
+skid_bmc:   read -formal skid.sv
+skid_cover: read -formal skid.sv
+skid_bmc:   prep -top skid
+skid_cover: prep -top skid
+
+[files]
+rtl/huff_ctrl.sv
+rtl/huff_out.sv
+formal/ctrl_arcs.sv
+formal/skid.sv
