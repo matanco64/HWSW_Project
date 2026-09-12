@@ -7,6 +7,7 @@ and both fill `item.resp`. The monitor samples the pins independently of the dri
 `ap_write` and `ap_read`, and asserts that DUT-driven signals are X-free after reset.
 """
 from cocotb.triggers import ReadOnly, RisingEdge, Timer
+from cocotb.utils import get_sim_time
 from pyuvm import (ConfigDB, uvm_agent, uvm_analysis_port, uvm_driver, uvm_monitor,
                    uvm_sequence_item, uvm_sequencer)
 
@@ -18,6 +19,7 @@ class AxiLiteSeqItem(uvm_sequence_item):
         self.addr = addr
         self.data = data
         self.resp = None
+        self.t = get_sim_time("ns")   # creation time; monitor items = transaction completion
 
     def __str__(self):
         return f"{self.kind} @0x{self.addr:x} data=0x{self.data:x} resp={self.resp}"

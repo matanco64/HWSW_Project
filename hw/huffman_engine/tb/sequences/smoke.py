@@ -11,12 +11,16 @@ from env import (ALPHABET, BITS, BUILD_CYCLES, CTRL, CYCLES_LO, ID_REG, LEN_BASE
 def pack_lengths(all_lengths, alphabet):
     """Pack per-table length lists into LEN window words: table t occupies the fixed
     48-word stride LEN_BASE + 48·t (MAS §4 amendment 2026-09-08); 6 x 5-bit fields per
-    word, fields beyond ALPHABET written 0."""
+    word. Every word covering the alphabet is emitted (zeros included) so a re-programmed
+    stride never inherits stale fields (review B10)."""
     words = {}
     for t, lens in enumerate(all_lengths):
+        assert len(lens) == alphabet, f"table {t}: {len(lens)} lengths != ALPHABET {alphabet}"
+        for w in range(48 * t, 48 * t + (alphabet + 5) // 6):
+            words[w] = 0
         for s, l in enumerate(lens):
             w = 48 * t + s // 6
-            words[w] = words.get(w, 0) | ((l & 0x1F) << (5 * (s % 6)))
+            words[w] |= (l & 0x1F) << (5 * (s % 6))
     return words
 
 
@@ -43,13 +47,25 @@ class HuffBaseSeq(uvm_sequence):
         for w, val in sorted(pack_lengths(lengths, alphabet).items()):
             await self.wr(LEN_BASE + 4 * w, val)
 
-    async def run_to_done(self, max_polls=2000):
+    async def run_to_done(self, max_polls=2000, outcome_mask=ST_DONE):
+        """Doorbell, then poll STATUS until !BUSY with an outcome bit set (DONE by
+        default; error tests pass their expected sticky mask). Requires BUSY observed
+        or an outcome NOT present before the doorbell — grape S1/review B6."""
+        before = await self.rd(STATUS)
         await self.wr(CTRL, 1)                       # doorbell
+        busy_seen = False
         for _ in range(max_polls):
             status = await self.rd(STATUS)
-            if (status & ST_DONE) and not (status & ST_BUSY):
+            if status & ST_BUSY:
+                busy_seen = True
+                continue
+            if busy_seen and (status & outcome_mask):
                 return status
-        raise AssertionError(f"DONE not seen within {max_polls} STATUS polls")
+            if not busy_seen and (status & outcome_mask) and not (before & outcome_mask):
+                return status                        # completed between polls
+        raise AssertionError(
+            f"outcome 0x{outcome_mask:x} not seen within {max_polls} polls "
+            f"(busy_seen={busy_seen}, last STATUS 0x{status:x})")
 
 
 class SmokeSeq(HuffBaseSeq):
