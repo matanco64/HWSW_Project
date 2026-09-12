@@ -4,7 +4,7 @@ Benchmarks with tag 'math':
 +-----------+----------------+----------------------+
 | Benchmark | baseline_nbody | optimized_nbody      |
 +===========+================+======================+
-| nbody     | 231 ms         | 141 ms: 1.64x faster |
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
 +-----------+----------------+----------------------+
 
 All benchmarks:
@@ -13,5 +13,5 @@ All benchmarks:
 +-----------+----------------+----------------------+
 | Benchmark | baseline_nbody | optimized_nbody      |
 +===========+================+======================+
-| nbody     | 231 ms         | 141 ms: 1.64x faster |
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
 +-----------+----------------+----------------------+

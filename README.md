@@ -351,6 +351,12 @@ Course-VM measurements, and the only numbers to quote:
 - `baseline_<bench>.json` / `optimized_<bench>.json` — pyperf runs, plus
   `baseline_<bench>_stats.txt`
 - `compare_<bench>.txt` — the headline before/after table
+- For nbody and pyflate these top-level timing files **are** the canonical run,
+  promoted out of `vm_canonical_20260910_2c8c754/suite/` by a deliberate copy.
+  They used to be an older capture, so the first table a reader opened
+  (1.64x nbody, 3.93x pyflate) disagreed with the reports (1.62x, 4.00x). The
+  superseded capture is in git history; `mdp` is a candidate, not a submission,
+  and keeps its own earlier numbers.
 - **before/after profiling pairs**, same flags on both sides so they are directly
   comparable: `flame_<bench>_{stock,opt}.svg`,
   `perf_report_<bench>_{stock,opt}.txt`, `perf_stat_<bench>_{stock,opt}.txt`
