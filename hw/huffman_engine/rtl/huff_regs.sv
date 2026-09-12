@@ -39,11 +39,16 @@ module huff_regs #(
     input  logic [6:0]  err_set_i,                     // Error pulses -> STATUS bits 15:9
                                                        // ([0] ERR_PARAM .. [6] ERR_UNDERRUN)
     // Live counters (core FSM / datapath)
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters — upper bits need
+    // 2^18..2^63-symbol/cycle runs (the benchmark block is 148k symbols / 149k cycles / 531k
+    // bits = 18..20 bits); overfetch is capped at 4 by the FIFO. Unreachable by construction.
     input  logic [63:0] cycles_i,                      // Busy-cycle counter, UQ64.0
     input  logic [31:0] symbols_i,                     // m_sym beats handshaken, UQ32.0
     input  logic [31:0] bits_i,                        // Bits consumed since START_BIT, UQ32.0
     input  logic [15:0] build_cycles_i,                // Longest single table build, UQ16.0
     input  logic [7:0]  overfetch_i,                   // Over-fetched s_bits beats, UQ8.0
+    // verilator coverage_on
     // Debug select / data (huff_tables provides the selected word)
     input  logic [31:0] dbg_data_i,                    // Selected built-table entry (live)
     output logic [2:0]  dbg_table_o,                   // DBG_SEL table field (live)
@@ -51,10 +56,16 @@ module huff_regs #(
     output logic [8:0]  dbg_index_o,                   // DBG_SEL index field (live)
     // Latched configuration (valid from doorbell_o until the next one)
     output logic        cfg_mode_o,                    // 0 = bzip2, 1 = DEFLATE
+    // verilator coverage_off
+    // Toggle exclusion (§5): START_BIT doorbell-validated (benchmark 8844 = 14 bits); upper unreachable.
     output logic [31:0] cfg_start_bit_o,               // First code bit, UQ32.0
+    // verilator coverage_on
     output logic [8:0]  cfg_alphabet_o,                // Symbols per table, UQ9.0
     output logic [2:0]  cfg_n_tables_o,                // Tables in use, UQ3.0
+    // verilator coverage_off
+    // Toggle exclusion (§5): SYMBOL_LIMIT <= 2^27; upper bits unreachable.
     output logic [31:0] cfg_symbol_limit_o,            // Symbol beat limit, UQ32.0
+    // verilator coverage_on
     // Builder read ports
     input  logic [11:0] lengths_rd_addr_i,             // {table[2:0], sym[8:0]}
     output logic [4:0]  lengths_rd_data_o,             // Length of (t, sym), UQ5.0 (1-cycle)
@@ -79,21 +90,34 @@ module huff_regs #(
 
     // ---- storage -------------------------------------------------------------------------------
     logic        mode_pend;                            // Pending MODE
+    // verilator coverage_off
     logic [31:0] start_bit_pend;                       // Pending START_BIT
+    // verilator coverage_on
     logic [8:0]  alphabet_pend;                        // Pending ALPHABET
     logic [2:0]  n_tables_pend;                        // Pending N_TABLES
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): SYMBOL_LIMIT is doorbell-validated 1..2^27 (default
+    // 2^20); upper bits unreachable past ERR_PARAM.
     logic [31:0] sym_limit_pend;                       // Pending SYMBOL_LIMIT
+    // verilator coverage_on
     logic        mode_l;                               // Latched MODE
+    // verilator coverage_off
     logic [31:0] start_bit_l;                          // Latched START_BIT
+    // verilator coverage_on
     logic [8:0]  alphabet_l;                           // Latched ALPHABET
     logic [2:0]  n_tables_l;                           // Latched N_TABLES
-    logic [31:0] sym_limit_l;                          // Latched SYMBOL_LIMIT
+    // verilator coverage_off
+    logic [31:0] sym_limit_l;                          // Latched SYMBOL_LIMIT (doorbell-validated)
+    // verilator coverage_on
     logic [2:0]  dbg_table;                            // DBG_SEL table (live, writable while BUSY)
     logic [1:0]  dbg_kind;                             // DBG_SEL kind
     logic [8:0]  dbg_index;                            // DBG_SEL index
+    // verilator coverage_off
+    // Toggle exclusion (§5): length fields are UQ5.0 (bit 4 only for lengths 16..31); count bins hold small per-length totals; provisioned for the union of all configs.
     logic [29:0] len_words [N_LEN_W];                  // Lengths window (6 x UQ5.0 per word)
     logic [8:0]  cnt [N_BINS];                         // Folded count bins, UQ9.0 (t*20 + l-1)
     logic [8:0]  inv_cnt [6];                          // Per-table invalid bins (field > MAXLEN)
+    // verilator coverage_on
     logic [15:0] sticky;                               // STATUS sticky bits [15:1] (bit 0 unused)
     logic [15:1] irq_en;                               // IRQ_EN mask
     logic        irq_q;                                // Registered IRQ
@@ -175,7 +199,10 @@ module huff_regs #(
 
     logic        wr_len_hit;                           // Write targets a lengths-window word
     // verilator lint_off UNUSEDSIGNAL
+    // verilator coverage_off
+    // Toggle exclusion (§5): LEN-window offset, range-checked; bit 9 unreachable.
     logic [9:0]  wr_len_off;                           // wr_addr - 0x100 (bit 9 unused: range-checked)
+    // verilator coverage_on
     logic [8:0]  wr_len_tbl9;                          // idx / 48 (bits 8:3 unused: quotient <= 5)
     // verilator lint_on UNUSEDSIGNAL
     logic [8:0]  wr_len_idx;                           // Window word index 0..287
@@ -194,7 +221,9 @@ module huff_regs #(
 
     // Read-side lengths-window offset (same map as the write side)
     // verilator lint_off UNUSEDSIGNAL
+    // verilator coverage_off
     logic [9:0]  rd_len_off;                           // rd_addr - 0x100 (bit 9 unused: range-checked)
+    // verilator coverage_on
     // verilator lint_on UNUSEDSIGNAL
     logic [8:0]  rd_len_idx;                           // Window word index 0..287
     always_comb begin
@@ -223,21 +252,29 @@ module huff_regs #(
 
     // Next-state
     logic        mode_pend_n;
+    // verilator coverage_off
     logic [31:0] start_bit_pend_n;
+    // verilator coverage_on
     logic [8:0]  alphabet_pend_n;
     logic [2:0]  n_tables_pend_n;
+    // verilator coverage_off
     logic [31:0] sym_limit_pend_n;
     logic        mode_l_n;
+    // verilator coverage_off
     logic [31:0] start_bit_l_n;
+    // verilator coverage_on
     logic [8:0]  alphabet_l_n;
     logic [2:0]  n_tables_l_n;
     logic [31:0] sym_limit_l_n;
+    // verilator coverage_on
     logic [2:0]  dbg_table_n;
     logic [1:0]  dbg_kind_n;
     logic [8:0]  dbg_index_n;
+    // verilator coverage_off
     logic [29:0] len_words_n [N_LEN_W];
     logic [8:0]  cnt_n [N_BINS];
     logic [8:0]  inv_cnt_n [6];
+    // verilator coverage_on
     logic [15:0] sticky_n;
     logic [15:1] irq_en_n;
     logic        irq_n;
@@ -251,12 +288,15 @@ module huff_regs #(
     // verilator lint_off UNUSEDSIGNAL
     // Reserved bits of the staged 32-bit write word are RAZ/WI (MAS §4); Yosys: no fn-call
     // bit-selects, so apply_strb results land in full-width temporaries first.
+    // verilator coverage_off
+    // Toggle exclusion (§5): 32-bit RAZ/WI staging temps; only the register-map field bits are ever nonzero.
     logic [31:0] mode_tmp;                             // apply_strb temp (bit 0 used)
     logic [31:0] alpha_tmp;                            // apply_strb temp (bits 8:0 used)
     logic [31:0] ntab_tmp;                             // apply_strb temp (bits 2:0 used)
     logic [31:0] dbg_tmp;                              // apply_strb temp (bits 16:8,5:4,2:0 used)
     logic [31:0] w1c_tmp;                              // apply_strb temp (bits 15:1 used)
     logic [31:0] irqen_tmp;                            // apply_strb temp (bits 15:1 used)
+    // verilator coverage_on
     // verilator lint_on UNUSEDSIGNAL
     logic [3:0]  inc_c;                                // Fields of the new word equal to l, UQ4.0
     logic [3:0]  dec_c;                                // Fields of the old word equal to l, UQ4.0

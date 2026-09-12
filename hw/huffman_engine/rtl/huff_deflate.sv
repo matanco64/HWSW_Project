@@ -36,6 +36,8 @@ module huff_deflate (
 );
 
     // RFC 1951 length codes 257..285: extra bits and base (3..258)
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): constant RFC 1951 ROM tables never toggle.
     localparam logic [29*3-1:0]  LEN_EXTRA = {3'd0, 3'd5,3'd5,3'd5,3'd5, 3'd4,3'd4,3'd4,3'd4,
                                               3'd3,3'd3,3'd3,3'd3, 3'd2,3'd2,3'd2,3'd2,
                                               3'd1,3'd1,3'd1,3'd1, 3'd0,3'd0,3'd0,3'd0,
@@ -56,6 +58,7 @@ module huff_deflate (
                                               15'd385,15'd257, 15'd193,15'd129, 15'd97,15'd65,
                                               15'd49,15'd33, 15'd25,15'd17, 15'd13,15'd9,
                                               15'd7,15'd5, 15'd4,15'd3, 15'd2,15'd1};
+    // verilator coverage_on
 
     typedef enum logic [2:0] {
         D_IDLE,                         // bzip2 / waiting for a resolve

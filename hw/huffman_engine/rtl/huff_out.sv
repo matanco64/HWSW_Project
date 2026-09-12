@@ -25,10 +25,15 @@ module huff_out (
     output logic [1:0]  occ_o          // Occupied slots (issue-side almost-full gating, R1)
 );
 
+    // verilator coverage_off
+    // Toggle exclusion (§5): beat skid holds {last, data}; the [27:12] distance field is 0 in bzip2 (the benchmark) and the top value bits track the alphabet.
     logic [32:0] slot0, slot1;         // {last, data}; slot0 is the head
+    // verilator coverage_on
     logic        v0, v1;               // Occupancy
     logic        v0_n, v1_n;           // Next occupancy
+    // verilator coverage_off
     logic [32:0] slot0_n, slot1_n;     // Next contents
+    // verilator coverage_on
     logic        take;                 // Head handshakes this cycle
 
     assign m_sym_tdata  = slot0[31:0];

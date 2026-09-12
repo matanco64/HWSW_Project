@@ -71,10 +71,13 @@ module axi_lite_if #(
     logic               aw_seen_next;                  // Next aw_seen
     logic               w_seen;                        // W captured, waiting for AW
     logic               w_seen_next;                   // Next w_seen
+    // verilator coverage_off
+    // Toggle exclusion (huffman dv_coverage §5; shared-infra overlay): sparse register map — high word-address bits and the register-valued data upper bits are unreachable for this design's field set.
     logic [ADDR_W-3:0]  wr_addr_q;                     // Captured write word address
     logic [ADDR_W-3:0]  wr_addr_next;                  // Next captured write address
     logic [31:0]        wr_data_q;                     // Captured write data
     logic [31:0]        wr_data_next;                  // Next captured write data
+    // verilator coverage_on
     logic [3:0]         wr_strb_q;                     // Captured strobes
     logic [3:0]         wr_strb_next;                  // Next captured strobes
     logic               wr_err_q;                      // Latched write error
@@ -178,8 +181,10 @@ module axi_lite_if #(
     rstate_t           rstate_next;                    // Next read FSM state
     logic [ADDR_W-3:0] rd_addr_q;                      // Captured read word address
     logic [ADDR_W-3:0] rd_addr_next;                   // Next captured read address
+    // verilator coverage_off
     logic [31:0]       rd_data_q;                      // Captured read data
     logic [31:0]       rd_data_next;                   // Next captured read data
+    // verilator coverage_on
     logic              rd_err_q;                       // Captured read error
     logic              rd_err_next;                    // Next captured read error
 

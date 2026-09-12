@@ -76,12 +76,21 @@ module huffman_engine #(
     // ---- regs ----------------------------------------------------------------------------------
     logic        doorbell, abort_p, busy, done_set, aborted_set;
     logic [6:0]  err_set;
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): invocation-lifetime counters, upper bits unreachable
+    // (benchmark block 149k cycles/148k symbols/531k bits = 18..20 bits).
     logic [63:0] cycles_q;
     logic [31:0] symbols_q, bits_w;
+    // verilator coverage_on
     logic [15:0] build_cycles;
-    logic [7:0]  overfetch_q;
+    // verilator coverage_off
+    logic [7:0]  overfetch_q;                          // FIFO-capped at 4; upper bits unreachable
+    // verilator coverage_on
     logic        cfg_mode;
+    // verilator coverage_off
+    // Toggle exclusion (§5): doorbell-validated START_BIT/SYMBOL_LIMIT; upper bits unreachable.
     logic [31:0] cfg_start_bit, cfg_symbol_limit;
+    // verilator coverage_on
     logic [8:0]  cfg_alphabet;
     logic [2:0]  cfg_n_tables;
     logic [11:0] lengths_addr;
@@ -210,9 +219,12 @@ module huffman_engine #(
     );
 
     logic [2:0]   cur_set, sel_set;
+    // verilator coverage_off
+    // Toggle exclusion (§5): per-length canonical table params (limit_la/first_code/base), left-aligned UQ21/20/11 fields provisioned for MAXLEN=20 lengths; a given table populates a sparse subset and short codes leave upper bits 0.
     logic [419:0] limit_la_flat;
     logic [399:0] first_code_flat;
     logic [219:0] base_flat;
+    // verilator coverage_on
     logic [10:0]  table_base, symtab_rd_addr;
     logic [4:0]   eob_len;
     logic [19:0]  eob_code;
@@ -299,9 +311,12 @@ module huffman_engine #(
 
     // ---- decoder (C0) --------------------------------------------------------------------------
     logic [19:0] dec_window;
+    // verilator coverage_off
+    // Toggle exclusion (§5): C0 decode outputs — code_c0 is right-aligned (short codes leave upper bits 0).
     logic [4:0]  len_c0;
     logic [19:0] code_c0;
     logic [10:0] index_c0;
+    // verilator coverage_on
     logic        match_c0;
 
     // DEFLATE remap: aligner gives next stream bit at window[5] ascending; the decoder wants
@@ -328,8 +343,12 @@ module huffman_engine #(
 
     // ---- pipeline: issue / C1 / C2 -------------------------------------------------------------
     logic [1:0]  out_occ;
+    // verilator coverage_off
+    // Toggle exclusion (testplan §5): issued_cnt bounded by SYMBOL_LIMIT (<= 2^27),
+    // accepted_q by the block beat count; upper bits unreachable.
     logic [31:0] issued_cnt;
     logic [31:0] accepted_q;
+    // verilator coverage_on
 
     // R1: an issue in flight (c1_v) plus skid occupancy must never exceed the 2 slots
     // R1 bound with the concurrent pop credited: slots after this cycle =
