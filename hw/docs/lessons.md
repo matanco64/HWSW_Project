@@ -455,3 +455,19 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   is only true if the run item is enqueued AFTER the terminating symbol passes its checks — with
   a two-sided pipeline, gate the enqueue on the check, don't rely on a downstream freeze catching
   it before the bytes handshake out.
+
+## 2026-09-13 — mtf_cam/dv_bringup
+
+- **Guard concurrent SVA on `ifdef VERILATOR`, never `ifdef SIMULATION`.** `hw/common/scripts/
+  cocotb_run.py` passes `-DSIMULATION` to BOTH Verilator and Icarus; Icarus `-g2012` cannot parse
+  `assert property`, so a `` `ifdef SIMULATION `` guard compiles fine on Verilator but breaks
+  `make sim-icarus` (the dv-bringup step-3 4-state check) with syntax errors. Verilator
+  auto-defines `VERILATOR`, so `` `ifdef VERILATOR `` keeps the SVAs armed there (via `--assert`)
+  while excluding them from Icarus and Yosys `synth` — matching the repo's existing
+  `fp64_rcp_nr`/`fp64_sqrt_srt` convention. This is the mirror of the huffman B1 lesson (there the
+  SVAs never compiled because *nothing* defined SIMULATION); the durable fix is the same
+  positive rule. Skill target: hw-rtl should state the `ifdef VERILATOR` guard convention for
+  concurrent assertions so bring-up never rediscovers it per-module.
+- No other friction: the replay-scoreboard pattern ported cleanly from huffman; R1 (MAX_RUN
+  per-invocation reset) and R2 (DUT K3=1.0686 vs model 1.063) were answered green on first
+  full-benchmark run — the two-wide item FIFO and inv_clr wiring specified in uArch/RTL held.
