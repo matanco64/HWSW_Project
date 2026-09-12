@@ -12,6 +12,7 @@ module mtf_run #(
     input  logic              clk,                   // System clock
     input  logic              rst_n,                 // Active-low synchronous reset
     input  logic              clr,                   // Reset accumulator+index (doorbell, or after a run item is produced)
+    input  logic              inv_clr,               // Per-invocation clear of MAX_RUN (doorbell only; R1)
     input  logic              acc_en,                // Accept one run symbol this cycle
     input  logic              run_bit,               // 0 = RUNA, 1 = RUNB (symbol value bit 0)
     input  logic              commit,                // A run item of the current n is enqueued (update MAX_RUN)
@@ -57,6 +58,9 @@ module mtf_run #(
         if (commit && (n_q > max_q)) begin
             max_n = n_q;
         end
+        if (inv_clr) begin                           // R1: MAX_RUN is per-invocation — the doorbell
+            max_n = {RUN_W{1'b0}};                   // clears it (doorbell in IDLE never coincides
+        end                                          // with `commit` in DECODE, so this is race-free)
         if (clr) begin                               // clr wins: a produced/discarded group resets state
             n_n = {RUN_W{1'b0}};
             k_n = 5'd0;

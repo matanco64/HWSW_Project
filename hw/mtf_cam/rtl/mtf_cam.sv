@@ -225,7 +225,7 @@ module mtf_cam #(
         .RUN_W(RUN_W)
     ) u_run (
         .clk(clk), .rst_n(rst_n),
-        .clr(run_clr), .acc_en(run_acc), .run_bit(run_bit), .commit(run_commit),
+        .clr(run_clr), .inv_clr(doorbell), .acc_en(run_acc), .run_bit(run_bit), .commit(run_commit),
         .n_o(run_n), .nonzero_o(run_nonzero), .overflow_o(run_overflow), .max_run_o(max_run)
     );
 
