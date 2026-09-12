@@ -65,11 +65,16 @@ fi
 
 echo
 echo "================ summary ================"
-for x in "${PASSED[@]}";  do echo "PASS  $x"; done
-for x in "${SKIPPED[@]}"; do echo "SKIP  $x"; done
-for x in "${FAILED[@]}";  do echo "FAIL  $x"; done
-if [ "${#FAILED[@]}" -ne 0 ]; then
-    echo "${#FAILED[@]} check(s) failed"
+# bash 3.2 treats an empty declared array as unset under `set -u`, so a run in
+# which nothing failed died here instead of printing the summary. The ${a[@]+..}
+# form expands to nothing when the array is empty and is safe on every bash.
+for x in ${PASSED[@]+"${PASSED[@]}"};  do echo "PASS  $x"; done
+for x in ${SKIPPED[@]+"${SKIPPED[@]}"}; do echo "SKIP  $x"; done
+for x in ${FAILED[@]+"${FAILED[@]}"};  do echo "FAIL  $x"; done
+nfail=0
+for x in ${FAILED[@]+"${FAILED[@]}"}; do nfail=$((nfail + 1)); done
+if [ "$nfail" -ne 0 ]; then
+    echo "$nfail check(s) failed"
     exit 1
 fi
-echo "all ${#PASSED[@]} checks passed, ${#SKIPPED[@]} skipped"
+echo "all checks passed"

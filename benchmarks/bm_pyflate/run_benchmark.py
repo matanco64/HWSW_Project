@@ -18,41 +18,25 @@ but ideally the problem would be found...
 -----------------------------------------------------------------------
 HW/SW final project -- SOFTWARE OPTIMIZATION of the bzip2 decode path.
 
-The workload is unchanged: the same 67,562-byte bzip2 stream is decoded to
-the same 399,360 bytes, and the same MD5 check guards every run.  What
-changed is *how* the decoder does its work.  The author's own docstring
-above says "there is certainly some room for improvement in the Huffman
-bit-matcher" -- that is exactly what is fixed here.
+Workload unchanged: the same 67,562-byte bzip2 stream decodes to the same
+399,360 bytes under the same MD5 check. What changed is how:
 
-  1. Bit reader (`RBitfield`).  The stock reader called `f.read(1)` once per
-     input byte and rebuilt a Python int with `_mask()` helper calls on every
-     access.  It now reads the stream once into `bytes` and keeps a bounded
-     bit window refilled 32 bits at a time; the mask is a precomputed table.
+  1. Bit reader. Read the stream once into `bytes` and keep a bounded bit
+     window refilled 32 bits at a time, instead of `f.read(1)` per byte.
+  2. Huffman decode. bzip2 codes are canonical, so per table precompute the
+     zlib/libbzip2 limit/base/perm arrays plus a flat primary lookup indexed
+     by the next PRIMARY_BITS bits. 99.6% of symbols in this stream become
+     one list index, replacing the stock 258-entry linear scan.
+  3. Move-to-front. Keep the list reversed so an update is
+     `l.append(l.pop(-r))`, a memmove of `rank` slots (mean rank 7.2).
+  4. Inverse BWT. Counting sort in O(n + 256) instead of `bytes(sorted(L))`
+     plus 256 `find()` calls; the chain walk fills a preallocated bytearray.
+  5. RLE4 expansion. A regex locates each 4-byte run at C speed instead of
+     slicing one byte at a time.
 
-  2. Huffman decode.  The stock `find_next_symbol()` walked the 258-entry
-     `HuffmanLength` list linearly, calling `snoopbits()` again at every new
-     code length.  bzip2 codes are *canonical*, so per table we precompute the
-     zlib/libbzip2 arrays (`limit`, `base`, `perm`) plus a flat primary lookup
-     table indexed by the next PRIMARY_BITS bits.  A symbol is then one list
-     index (99.6% of symbols in this stream); the rest fall back to canonical
-     bit-at-a-time extension.  Table build cost is ~0.5 ms for all six tables
-     and happens 6 times per block, versus 148,271 symbol decodes.
-
-  3. Move-to-front.  The list is kept in reverse order, so a move-to-front is
-     `l.append(l.pop(-r))`, which memmoves `rank` slots (mean rank 7.2) rather
-     than rebuilding the whole 147-entry list from three slices.
-
-  4. Inverse BWT.  `bytes(sorted(L))` + 256 `find()` calls -- an O(n log n)
-     sort used only to recover 256 bucket offsets -- is replaced by an
-     O(n + 256) counting sort, and the chain walk fills a preallocated
-     `bytearray`.
-
-  5. Final RLE4 expansion.  The per-byte loop that sliced one byte at a time
-     is replaced by a regex that locates each 4-byte run at C speed; the
-     literal stretches between runs are copied with one slice each.
-
-The DEFLATE/gzip half of the module (`Bitfield`, `HuffmanTable`,
-`gzip_main`, ...) is deliberately left untouched and still functional.
+The DEFLATE/gzip half (`Bitfield`, `HuffmanTable`, `gzip_main`, ...) is
+inherited from upstream, is not reached by this benchmark, and is left
+untouched.
 """
 
 import hashlib
@@ -64,29 +48,14 @@ import struct
 import pyperf
 
 # ---------------------------------------------------------------------------
-# NATIVE ACCELERATION (optional).
-#
-# `pyflate_rs` is our Rust/PyO3 build of the symbol-decode kernel (`rust/pyflate/`).
-# It is imported, never required.  The course's three rules for an accelerator's
-# HW/SW interface (Lecture 5, "Accelerator Design Patterns") are the reason this
-# is shaped as an import and not as a rewrite:
-#
-#   Rule 1  do not expect end users to change their code.  `run_benchmark.py`
-#           keeps the same CLI, the same pyperf harness and the same MD5 check
-#           whether or not the extension is present.
-#   Rule 2  if software must change, confine the change to a runtime/library.
-#           Every native line lives in a separate crate behind one call.
-#   Rule 3  do not break the user's code -- if the accelerator cannot handle an
-#           operation, run it on the CPU.  A missing wheel, a different CPython
-#           ABI, or a non-x86 host all land on the pure-Python path below, which
-#           is still the optimized decoder and still passes the same checks.
-#
-# The same rule is why the boundary sits where it does: the kernel covers bit
-# reader -> canonical Huffman -> MTF -> RUNA/RUNB, and hands the inverse BWT and
-# RLE4 back to Python.  That is not an arbitrary split.  It is exactly the
-# `huffman_engine` + `mtf_cam` boundary in `hw/`, so this crate doubles as the
-# golden model for the RTL, and the stages left in Python are the ones §5c of
-# the report argues hardware cannot fix cheaply either.
+# Optional native tier: pyflate_rs (rust/pyflate/) is imported, never required.
+# A missing wheel, a different CPython ABI or a non-x86 host lands on the
+# Python path below, which is still the optimized decoder and passes the same
+# checks. The kernel covers bit reader -> canonical Huffman -> MTF ->
+# RUNA/RUNB and hands the inverse BWT and RLE4 back to Python: the same
+# boundary as huffman_engine + mtf_cam in hw/, so the crate doubles as the
+# golden model for the RTL.
+# ---------------------------------------------------------------------------
 
 # Back-end selection.  "auto" (the default) prefers the native kernel and falls
 # back to Python; "python" and "native" pin it.  This exists because otherwise
@@ -406,23 +375,13 @@ class OrderedHuffmanTable(HuffmanTable):
 def build_huffman_table(lengths, primary_bits=PRIMARY_BITS):
     """Canonical Huffman decode tables for one bzip2 group.
 
-    OPTIMIZED replacement for `OrderedHuffmanTable` +
-    `populate_huffman_symbols()` + `min_max_bits()` on the bzip2 path.
-
-    bzip2 hands out codes canonically: sorted by (length, symbol), starting at
-    zero, shifted left by one at every length increment -- exactly what the
-    stock `populate_huffman_symbols()` computes.  That lets us decode with
-    arithmetic instead of a search:
-
-        limit[l] : largest assigned l-bit code
-        base[l]  : offset such that perm[code - base[l]] is the symbol
-        perm[]   : symbols in canonical order
-
-    and, on top of that, a flat table indexed by the next `primary_bits` bits
-    that answers most symbols in a single index.  Because the codes are
-    canonical and MSB-first, the slots belonging to consecutive symbols are
-    contiguous, so the table is filled with one C-level span assignment per
-    symbol rather than 2**primary_bits individual writes.
+    Replaces `OrderedHuffmanTable` + `populate_huffman_symbols()` +
+    `min_max_bits()`. bzip2 codes are canonical, so decoding is arithmetic
+    rather than a search: limit[l] is the largest assigned l-bit code, base[l]
+    an offset such that perm[code - base[l]] is the symbol. On top sits a flat
+    table indexed by the next `primary_bits` bits; canonical MSB-first codes
+    make each symbol's slots contiguous, so it is filled with one span
+    assignment per symbol rather than 2**primary_bits individual writes.
 
     Returns (pb, pmask, tbl, limit, base, perm) where
     tbl[peek(pb)] == (symbol << 5) | code_length, or 0 for "code is longer
@@ -752,32 +711,22 @@ def _decode_symbols_native(b, code_lengths, selectors_list, symbols_in_use,
                            used):
     """The same stage, executed by the Rust kernel.  Returns the same `L`.
 
-    WHY THIS STAGE.  It is 44% of stock runtime and, unlike the inverse BWT
-    that follows it, it is not a serial pointer chase -- so it is the part
-    where leaving the interpreter actually buys something.
+    This stage is 44% of stock runtime and, unlike the inverse BWT that
+    follows it, is not a serial pointer chase -- so leaving the interpreter
+    buys something. What is left in the Python loop is layout, not arithmetic:
+    `favourites` is a list of boxed ints scattered across the heap, so a
+    move-to-front of mean rank 7.2 is seven dependent dereferences into seven
+    cache lines. Rust holds the same list as a [u8; 258]: one cache line, no
+    indirection. Same algorithm and mean rank, different data layout.
 
-    WHY NATIVE CODE WINS HERE, in the terms of Lecture 4 ("it is always the
-    memory").  The Python loop above is about as tight as CPython allows, and
-    what is left is not arithmetic, it is layout.  Every symbol touches
-    `favourites`, a Python list: an array of `PyObject*` pointing at boxed ints
-    scattered across the heap, so a move-to-front of mean rank 7.2 is seven
-    dependent dereferences into seven different cache lines.  The lecture puts
-    it as "pointer-based structures are a pain for caching", and that is the
-    whole story.  The Rust side holds the same list as a `[u8; 258]`: one cache
-    line, no indirection, and the memmove is a handful of bytes.  Same
-    algorithm, same mean rank, only the data layout changed -- the lecture's
-    "merging arrays" transformation applied to a structure Python cannot
-    express.
-
-    The kernel is configured per block and inside the timed region, exactly as
-    the Python path builds its six decode tables inside the timed region, so
+    The kernel is configured per block inside the timed region, exactly as the
+    Python path builds its six decode tables inside the timed region, so
     neither back end is handed a setup freebie.
 
-    Bit-position contract: the decoder is told an absolute bit offset into the
-    stream and returns the offset one past the end-of-block symbol.  Getting
-    that back wrong would silently desynchronise the stream rather than raise,
-    so `dev/pyflate/rs_check.py` asserts the returned offset as well as the
-    bytes -- and the MD5 at the end of the benchmark is the backstop.
+    Bit-position contract: the decoder takes an absolute bit offset and returns
+    the offset one past the end-of-block symbol. Returning that wrong would
+    desynchronise the stream silently rather than raise, so
+    dev/pyflate/rs_check.py asserts the offset as well as the bytes.
     """
     dec = pyflate_rs.BlockDecoder(
         b.data,
@@ -1036,7 +985,7 @@ def bench_pyflake(loops, filename):
 def _native_extension_file(module):
     """Path of the compiled extension behind `module`, not its package stub.
 
-    maturin installs the crate as a package: `nbody_rs/__init__.py` is a
+    maturin installs the crate as a package: `pyflate_rs/__init__.py` is a
     three-line re-export generated identically for every build, and the kernel
     itself is the `.so` beside it. Hashing `module.__file__` would give the same
     digest for any two builds -- exactly what the hash exists to tell apart.
@@ -1074,7 +1023,8 @@ def _backend_metadata(runner, module, requested):
             runner.metadata['hwsw_native_module'] = path
             try:
                 with open(path, 'rb') as fh:
-                    runner.metadata['hwsw_native_sha256'] =                         hashlib.sha256(fh.read()).hexdigest()
+                    runner.metadata['hwsw_native_sha256'] = \
+                        hashlib.sha256(fh.read()).hexdigest()
             except OSError:                              # pragma: no cover
                 pass
 
