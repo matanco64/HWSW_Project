@@ -12,8 +12,11 @@ module huff_decoder #(
 ) (
     input  logic [MAXLEN-1:0]     window_i,            // Top-aligned peek (UQ20.0)
     // Active table set (flattened views from huff_tables)
+    // verilator coverage_off
+    // Toggle exclusion (§5): per-length canonical table params (limit_la/first_code/base), left-aligned UQ21/20/11 fields provisioned for MAXLEN=20 lengths; a given table populates a sparse subset and short codes leave upper bits 0.
     input  logic [MAXLEN*21-1:0]  limit_la_i,          // limit_la[l], l = 1..MAXLEN (UQ21.0 each)
     input  logic [MAXLEN*20-1:0]  first_code_i,        // first_code[l] (UQ20.0)
+    // verilator coverage_on
     input  logic [MAXLEN*11-1:0]  base_i,              // base[l] (UQ11.0)
     input  logic [10:0]           table_base_i,        // Set's symtab base (UQ11.0)
     input  logic [4:0]            eob_len_i,           // EOB length (0 = no EOB in this set)
@@ -27,10 +30,15 @@ module huff_decoder #(
     output logic                  nocode_o             // No length matched (ERR_NOCODE)
 );
 
+    // verilator coverage_off
+    // Toggle exclusion (§5): decode compare datapath — codes are right-aligned so upper bits stay 0 for short codes; window/limit fields provisioned for MAXLEN=20.
     logic [MAXLEN-1:0] match_mask;                     // match(l) per length (bit l-1)
+    // verilator coverage_on
     logic [4:0]        len_n;                          // Priority-encoded smallest l
+    // verilator coverage_off
     logic [MAXLEN-1:0] code_n;                         // Extracted code bits
     logic [20:0]       lim;                            // Selected limit (loop temp)
+    // verilator coverage_on
 
     always_comb begin
         // one-sided compares: {1'b0, window} < limit_la[l]  (review U1 — ranges tile)

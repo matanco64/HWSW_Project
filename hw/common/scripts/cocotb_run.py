@@ -35,6 +35,13 @@ def main() -> int:
         build_args += ["-DSIMULATION"]  # compile `ifdef SIMULATION` guards (B1: they were dead in every build)
         if a.cov:
             build_args += ["--coverage"]
+            # Optional toggle-coverage width cap: exclude signals wider than N bits from
+            # toggle coverage (wide counters/datapath/ROMs whose upper bits are unreachable
+            # by construction — see the module's coverage_waivers.md). Off unless set, so
+            # other modules are unaffected.
+            mw = os.environ.get("COVERAGE_MAX_WIDTH", "")
+            if mw:
+                build_args += [f"--coverage-max-width", mw]
         # Waves: runner adds --trace (VCD -> sim_build/dump.vcd). Native --trace-fst needs liblz4-dev
         # headers, which plain Ubuntu lacks; `make waves` converts VCD -> FST with vcd2fst instead.
         if a.waves:

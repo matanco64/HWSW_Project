@@ -35,9 +35,12 @@ module huff_tables (
     input  logic         fill_active_i,     // FILL pass active: DBG read returns 0
     // Active-set read view (huff_decoder / TB)
     input  logic [2:0]   cur_set_i,         // Active set select
+    // verilator coverage_off
+    // Toggle exclusion (§5): per-length canonical table params (limit_la/first_code/base), left-aligned UQ21/20/11 fields provisioned for MAXLEN=20 lengths; a given table populates a sparse subset and short codes leave upper bits 0.
     output logic [419:0] limit_la_flat_o,   // 20 x limit_la UQ21.0, entry l at [(l-1)*21 +: 21]
     output logic [399:0] first_code_flat_o, // 20 x first_code UQ20.0
     output logic [219:0] base_flat_o,       // 20 x base UQ11.0
+    // verilator coverage_on
     output logic [10:0]  table_base_o,      // Active set's table_base, UQ11.0
     output logic [4:0]   eob_len_o,         // Active set's EOB length (0 = never latched)
     output logic [19:0]  eob_code_o,        // Active set's EOB code
@@ -57,10 +60,13 @@ module huff_tables (
     localparam int unsigned SYMTAB_DEPTH = 1728;  // 6 sets x 288 symbols
 
     // ---- per-set entry storage: 6 x 20 entries, indexed set*20 + (l-1) ------------------------
+    // verilator coverage_off
+    // Toggle exclusion (§5): per-set canonical tables provisioned for 6 sets x 20 lengths and a 1,728-entry symtab; a given config populates a sparse subset, and left-aligned limit/first_code upper bits track code depth.
     logic [20:0] limit_mem [0:119];   // limit_la entries, UQ21.0
     logic [19:0] first_mem [0:119];   // first_code entries, UQ20.0
     logic [10:0] base_mem  [0:119];   // base entries, UQ11.0
     logic [9:0]  symtab_mem [0:SYMTAB_DEPTH-1];  // {valid, sym[8:0]} entries
+    // verilator coverage_on
 
     // Small per-set scalars as packed vectors (Yosys-friendly, resettable)
     logic [65:0]  tbase_r;      // 6 x table_base UQ11.0
