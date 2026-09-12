@@ -9,14 +9,14 @@ from env import (ALPHABET, BITS, BUILD_CYCLES, CTRL, CYCLES_LO, ID_REG, LEN_BASE
 
 
 def pack_lengths(all_lengths, alphabet):
-    """Pack per-table length lists into LEN window words (6 x 5-bit fields, table-major)."""
-    flat = []
-    for lens in all_lengths:
-        flat.extend(lens)
+    """Pack per-table length lists into LEN window words: table t occupies the fixed
+    48-word stride LEN_BASE + 48·t (MAS §4 amendment 2026-09-08); 6 x 5-bit fields per
+    word, fields beyond ALPHABET written 0."""
     words = {}
-    for e, l in enumerate(flat):
-        w = e // 6
-        words[w] = words.get(w, 0) | ((l & 0x1F) << (5 * (e % 6)))
+    for t, lens in enumerate(all_lengths):
+        for s, l in enumerate(lens):
+            w = 48 * t + s // 6
+            words[w] = words.get(w, 0) | ((l & 0x1F) << (5 * (s % 6)))
     return words
 
 

@@ -55,6 +55,8 @@ class AxisMonitor(uvm_monitor):
         sig = lambda n: getattr(self.dut, f"{self.prefix}_{n}", None)
         tvalid, tready, tdata = sig("tvalid"), sig("tready"), sig("tdata")
         tkeep, tlast = sig("tkeep"), sig("tlast")
+        lanes = max(1, len(tdata) // 8)          # byte lanes from the bus width
+        full_keep = (1 << lanes) - 1
         n = 0
         while True:
             await RisingEdge(self.clk)
@@ -67,7 +69,7 @@ class AxisMonitor(uvm_monitor):
                 n += 1
                 self.ap.write(AxisBeat(
                     f"{self.prefix}{n}", data=int(tdata.value),
-                    keep=int(tkeep.value) if tkeep is not None else 0xF,
+                    keep=int(tkeep.value) if tkeep is not None else full_keep,
                     last=int(tlast.value) if tlast is not None else 0))
 
 
@@ -120,14 +122,14 @@ class HuffScoreboard(uvm_scoreboard):
         return bytes(out), len(beats)
 
     def _lengths_from_mirror(self, mirror, n_tables, alphabet):
-        """Unpack the LEN window (6 x 5-bit fields per word, table-major) per MAS 0x400."""
+        """Unpack the LEN window: table t at the fixed 48-word stride (MAS §4 amendment
+        2026-09-08), 6 x 5-bit fields per word."""
         tables = []
         for t in range(n_tables):
             lens = []
             for s in range(alphabet):
-                e = t * alphabet + s
-                word = mirror.get(LEN_BASE + 4 * (e // 6), 0)
-                lens.append((word >> (5 * (e % 6))) & 0x1F)
+                word = mirror.get(LEN_BASE + 4 * (48 * t + s // 6), 0)
+                lens.append((word >> (5 * (s % 6))) & 0x1F)
             tables.append(lens)
         return tables
 

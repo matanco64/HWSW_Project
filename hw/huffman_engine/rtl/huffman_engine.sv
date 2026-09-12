@@ -332,7 +332,13 @@ module huffman_engine #(
     logic [31:0] accepted_q;
 
     // R1: an issue in flight (c1_v) plus skid occupancy must never exceed the 2 slots
-    assign stall    = ({1'b0, out_occ} + {2'd0, c1_v} >= 3'd2) || sel_stall
+    // R1 bound with the concurrent pop credited: slots after this cycle =
+    // out_occ - out_beat + c1_v; issuing while that is <= 1 keeps the 2-deep skid safe.
+    // Without the credit the loop ran at 1.5 cycles/symbol against a ready sink
+    // (K1 1.5068 vs model 1.0068, caught by test_bench_block at bring-up). out_beat
+    // reaches tvalid only through two registered stages, so no comb tvalid<-tready path.
+    assign stall    = ({1'b0, out_occ} - {2'd0, out_beat} + {2'd0, c1_v} >= 3'd2)
+                      || sel_stall
                       || (cfg_mode && dfl_busy && !dfl_dist_issue);
     assign c0_valid = occ_ok && skip_done;
     assign limit_stop = (issued_cnt >= cfg_symbol_limit);
