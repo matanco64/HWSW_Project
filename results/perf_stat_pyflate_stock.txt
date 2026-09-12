@@ -1,30 +1,30 @@
 ...........
 pyflate: Mean +- std dev: 1.12 sec +- 0.01 sec
 
- Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-       90410045118      cycles:u                                                    
-      241288064497      instructions:u            #    2.67  insn per cycle         
+       90489398077      cycles:u                                                    
+      238755320238      instructions:u            #    2.64  insn per cycle         
 
-      38.762703118 seconds time elapsed
+      38.811352705 seconds time elapsed
 
-      38.094663000 seconds user
-       0.660208000 seconds sys
+      38.108225000 seconds user
+       0.684928000 seconds sys
 
 
 ...........
-pyflate: Mean +- std dev: 1.12 sec +- 0.01 sec
+pyflate: Mean +- std dev: 1.13 sec +- 0.01 sec
 
- Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-         210811316      cache-references                                            
-          14370939      cache-misses              #    6.817 % of all cache refs    
-       47923494351      branches                                                    
-         158509507      branch-misses             #    0.33% of all branches        
+         215276077      cache-references                                            
+          15036356      cache-misses              #    6.985 % of all cache refs    
+       47956132973      branches                                                    
+         173346490      branch-misses             #    0.36% of all branches        
 
-      38.690269273 seconds time elapsed
+      38.970567805 seconds time elapsed
 
-      38.035906000 seconds user
-       0.646935000 seconds sys
+      38.325914000 seconds user
+       0.634782000 seconds sys
 
 

@@ -1,0 +1,7 @@
+python 3.10.12   interleaved best-of-7
+variant                                best(s)    median(s)  cost of putting it back
+T3 full                                0.2739     0.2756     +0.0 ms
+T3 - flat table (canonical step)       0.3233     0.3257     +49.4 ms
+T3 - counting-sort BWT (stock sort)    0.2911     0.2937     +17.2 ms
+T3 - regex RLE4 (per-byte loop)        0.3726     0.3734     +98.7 ms
+T1 (micro only)                        0.6711     0.6745     +397.2 ms

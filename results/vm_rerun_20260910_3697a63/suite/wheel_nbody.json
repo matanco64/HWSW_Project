@@ -1,0 +1,21 @@
+{
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "crate": "nbody",
+  "installed_by_this_run": true,
+  "loaded_extension": "/usr/local/lib/python3.10/dist-packages/nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so",
+  "loaded_matches_wheel": true,
+  "loaded_sha256": "820d20ec875c65215c939f2f6866397b2b8391d4f7bf9dac69e6e0d4e0f4281d",
+  "maturin": "maturin 1.14.1",
+  "module": "nbody_rs",
+  "python": "3.10.12",
+  "python_executable": "/usr/bin/python3",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "sources": {
+    "lib.rs": "a32dafb1402a300addd4f5c673d10b71f6cfff6fb8b8a46f8b9e8c42f9bc6439"
+  },
+  "wheel": "/home/ubuntu/hwsw-rerun-3697a63/rust/nbody/target/wheels/20260910_140832/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl",
+  "wheel_extensions": {
+    "nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so": "820d20ec875c65215c939f2f6866397b2b8391d4f7bf9dac69e6e0d4e0f4281d"
+  },
+  "wheel_sha256": "95f5df08ede79af59d75e7af5ea62997b780ad69eada3bbe4884d0b7c23c8de2"
+}

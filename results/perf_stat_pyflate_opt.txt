@@ -1,30 +1,30 @@
 ...........
-pyflate: Mean +- std dev: 287 ms +- 2 ms
+pyflate: Mean +- std dev: 283 ms +- 2 ms
 
- Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_pyflate/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-profiles-08da63e/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-       25503565405      cycles:u                                                    
-       69100335201      instructions:u            #    2.71  insn per cycle         
+       25146410454      cycles:u                                                    
+       68035804267      instructions:u            #    2.71  insn per cycle         
 
-      11.185354704 seconds time elapsed
+      11.039277043 seconds time elapsed
 
-      10.770855000 seconds user
-       0.401627000 seconds sys
+      10.666734000 seconds user
+       0.361119000 seconds sys
 
 
 ...........
-pyflate: Mean +- std dev: 287 ms +- 1 ms
+pyflate: Mean +- std dev: 283 ms +- 2 ms
 
- Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_pyflate/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-profiles-08da63e/benchmarks/bm_pyflate/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-         130357943      cache-references                                            
-           4086713      cache-misses              #    3.135 % of all cache refs    
-       12624300940      branches                                                    
-          55526937      branch-misses             #    0.44% of all branches        
+         130775529      cache-references                                            
+           5856268      cache-misses              #    4.478 % of all cache refs    
+       12577798085      branches                                                    
+          55522221      branch-misses             #    0.44% of all branches        
 
-      11.153203426 seconds time elapsed
+      11.101157462 seconds time elapsed
 
-      10.698595000 seconds user
-       0.439264000 seconds sys
+      10.688605000 seconds user
+       0.402523000 seconds sys
 
 

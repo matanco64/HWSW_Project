@@ -1,0 +1,580 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: huff_ctrl.sv
+Parsing formal SystemVerilog input from `huff_ctrl.sv' to AST representation.
+Storing AST representation for module `$abstract\huff_ctrl'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: ctrl_arcs.sv
+Parsing formal SystemVerilog input from `ctrl_arcs.sv' to AST representation.
+Storing AST representation for module `$abstract\ctrl_arcs'.
+Successfully finished Verilog frontend.
+
+3. Executing PREP pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.2. Executing AST frontend in derive mode using pre-parsed AST for module `\ctrl_arcs'.
+Generating RTLIL representation for module `\ctrl_arcs'.
+
+3.2.1. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+
+3.2.2. Executing AST frontend in derive mode using pre-parsed AST for module `\huff_ctrl'.
+Generating RTLIL representation for module `\huff_ctrl'.
+
+3.2.3. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+
+3.2.4. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+Removing unused module `$abstract\ctrl_arcs'.
+Removing unused module `$abstract\huff_ctrl'.
+Removed 2 unused modules.
+Module ctrl_arcs directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3.3. Executing PROC pass (convert processes to netlists).
+
+3.3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 17 switch rules as full_case in process $proc$huff_ctrl.sv:63$75 in module huff_ctrl.
+Removed a total of 0 dead cases.
+
+3.3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 17 assignments to connections.
+
+3.3.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\ctrl_arcs.$proc$ctrl_arcs.sv:51$74'.
+  Set init value: \past_valid = 1'0
+
+3.3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~21 debug messages>
+
+3.3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+Creating decoders for process `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+     1/42: $11\err_n[5:0]
+     2/42: $2\abort_pend_n[0:0]
+     3/42: $17\state_n[2:0]
+     4/42: $1\err_n[5:0] [5:4]
+     5/42: $15\state_n[2:0]
+     6/42: $14\state_n[2:0]
+     7/42: $1\err_n[5:0] [3]
+     8/42: $10\err_n[5:5]
+     9/42: $12\state_n[2:0]
+    10/42: $9\err_n[5:4] [0]
+    11/42: $11\state_n[2:0]
+    12/42: $9\err_n[5:4] [1]
+    13/42: $8\err_n[5:3] [0]
+    14/42: $10\state_n[2:0]
+    15/42: $8\err_n[5:3] [2:1]
+    16/42: $7\err_n[5:2] [0]
+    17/42: $9\state_n[2:0]
+    18/42: $7\err_n[5:2] [3:1]
+    19/42: $6\err_n[5:1] [0]
+    20/42: $8\state_n[2:0]
+    21/42: $6\err_n[5:1] [4:1]
+    22/42: $7\state_n[2:0]
+    23/42: $5\err_n[5:1]
+    24/42: $1\err_n[5:0] [2:1]
+    25/42: $6\state_n[2:0]
+    26/42: $5\state_n[2:0]
+    27/42: $4\start_pulse_n[0:0]
+    28/42: $4\err_n[3:3]
+    29/42: $4\state_n[2:0]
+    30/42: $3\start_pulse_n[0:0]
+    31/42: $2\err_n[0:0]
+    32/42: $3\state_n[2:0]
+    33/42: $2\start_pulse_n[0:0]
+    34/42: $3\err_n[3:3]
+    35/42: $1\err_n[5:0] [0]
+    36/42: $16\state_n[2:0]
+    37/42: $5\start_pulse_n[0:0]
+    38/42: $13\state_n[2:0]
+    39/42: $1\state_n[2:0]
+    40/42: $1\abort_pend_n[0:0]
+    41/42: $1\start_pulse_n[0:0]
+    42/42: $2\state_n[2:0]
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:51$74'.
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:49$71'.
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:81$63'.
+     1/5: $cover$ctrl_arcs.sv:87$68_EN
+     2/5: $cover$ctrl_arcs.sv:86$67_EN
+     3/5: $cover$ctrl_arcs.sv:85$66_EN
+     4/5: $cover$ctrl_arcs.sv:84$65_EN
+     5/5: $cover$ctrl_arcs.sv:83$64_EN
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+     1/1: $assert$ctrl_arcs.sv:75$60_EN
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:56$6'.
+     1/6: $assert$ctrl_arcs.sv:65$47_EN
+     2/6: $assert$ctrl_arcs.sv:63$30_EN
+     3/6: $assert$ctrl_arcs.sv:61$27_EN
+     4/6: $assert$ctrl_arcs.sv:60$24_EN
+     5/6: $assert$ctrl_arcs.sv:59$21_EN
+     6/6: $assert$ctrl_arcs.sv:58$7_EN
+Creating decoders for process `\ctrl_arcs.$proc$ctrl_arcs.sv:52$5'.
+
+3.3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\huff_ctrl.\state_n' from process `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+No latch inferred for signal `\huff_ctrl.\err_n' from process `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+No latch inferred for signal `\huff_ctrl.\abort_pend_n' from process `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+No latch inferred for signal `\huff_ctrl.\start_pulse_n' from process `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+
+3.3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\huff_ctrl.\start_pulse_o' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$718' with positive edge clock.
+Creating register for signal `\huff_ctrl.\done_set_o' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$719' with positive edge clock.
+Creating register for signal `\huff_ctrl.\aborted_set_o' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$720' with positive edge clock.
+Creating register for signal `\huff_ctrl.\err_set_o' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$721' with positive edge clock.
+Creating register for signal `\huff_ctrl.\state' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$722' with positive edge clock.
+Creating register for signal `\huff_ctrl.\abort_pend' using process `\huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+  created $dff cell `$procdff$723' with positive edge clock.
+Creating register for signal `\ctrl_arcs.$past$ctrl_arcs.sv:73$1$0' using process `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+  created $dff cell `$procdff$724' with positive edge clock.
+Creating register for signal `\ctrl_arcs.$past$ctrl_arcs.sv:74$2$0' using process `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+  created $dff cell `$procdff$725' with positive edge clock.
+Creating register for signal `\ctrl_arcs.$past$ctrl_arcs.sv:74$3$0' using process `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+  created $dff cell `$procdff$726' with positive edge clock.
+Creating register for signal `\ctrl_arcs.$past$ctrl_arcs.sv:74$4$0' using process `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+  created $dff cell `$procdff$727' with positive edge clock.
+Creating register for signal `\ctrl_arcs.\past_valid' using process `\ctrl_arcs.$proc$ctrl_arcs.sv:52$5'.
+  created $dff cell `$procdff$728' with positive edge clock.
+
+3.3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `huff_ctrl.$proc$huff_ctrl.sv:134$92'.
+Found and cleaned up 17 empty switches in `\huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+Removing empty process `huff_ctrl.$proc$huff_ctrl.sv:63$75'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:51$74'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:49$71'.
+Found and cleaned up 1 empty switch in `\ctrl_arcs.$proc$ctrl_arcs.sv:81$63'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:81$63'.
+Found and cleaned up 2 empty switches in `\ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:72$51'.
+Found and cleaned up 1 empty switch in `\ctrl_arcs.$proc$ctrl_arcs.sv:56$6'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:56$6'.
+Removing empty process `ctrl_arcs.$proc$ctrl_arcs.sv:52$5'.
+Cleaned up 21 empty switches.
+
+3.3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+<suppressed ~8 debug messages>
+Optimizing module ctrl_arcs.
+<suppressed ~12 debug messages>
+
+3.4. Executing FUTURE pass.
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+Optimizing module ctrl_arcs.
+
+3.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \huff_ctrl..
+Finding unused cells or wires in module \ctrl_arcs..
+Removed 4 unused cells and 207 unused wires.
+<suppressed ~7 debug messages>
+
+3.7. Executing CHECK pass (checking for obvious problems).
+Checking module huff_ctrl...
+Checking module ctrl_arcs...
+Found and reported 0 problems.
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+Optimizing module ctrl_arcs.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\huff_ctrl'.
+Computing hashes of 218 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Computing hashes of 174 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Computing hashes of 173 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+<suppressed ~135 debug messages>
+Finding identical cells in module `\ctrl_arcs'.
+Computing hashes of 64 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+Computing hashes of 62 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+<suppressed ~6 debug messages>
+Removed a total of 47 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \huff_ctrl..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $procmux$559.
+    dead port 2/2 on $mux $procmux$548.
+    dead port 2/2 on $mux $procmux$537.
+    dead port 1/2 on $mux $procmux$535.
+    dead port 2/2 on $mux $procmux$523.
+    dead port 1/2 on $mux $procmux$521.
+    dead port 2/2 on $mux $procmux$509.
+    dead port 1/2 on $mux $procmux$507.
+    dead port 2/2 on $mux $procmux$495.
+    dead port 1/2 on $mux $procmux$493.
+    dead port 1/2 on $mux $procmux$490.
+    dead port 2/2 on $mux $procmux$478.
+    dead port 1/2 on $mux $procmux$476.
+    dead port 1/2 on $mux $procmux$473.
+    dead port 2/2 on $mux $procmux$461.
+    dead port 1/2 on $mux $procmux$459.
+    dead port 1/2 on $mux $procmux$456.
+    dead port 1/2 on $mux $procmux$453.
+    dead port 2/2 on $mux $procmux$652.
+    dead port 2/2 on $mux $procmux$434.
+    dead port 2/2 on $mux $procmux$424.
+    dead port 1/2 on $mux $procmux$650.
+    dead port 2/2 on $mux $procmux$414.
+    dead port 1/2 on $mux $procmux$647.
+    dead port 1/2 on $mux $procmux$412.
+    dead port 2/2 on $mux $procmux$401.
+    dead port 1/2 on $mux $procmux$644.
+    dead port 1/2 on $mux $procmux$399.
+    dead port 2/2 on $mux $procmux$388.
+    dead port 1/2 on $mux $procmux$641.
+    dead port 1/2 on $mux $procmux$386.
+    dead port 2/2 on $mux $procmux$375.
+    dead port 1/2 on $mux $procmux$638.
+    dead port 1/2 on $mux $procmux$373.
+    dead port 1/2 on $mux $procmux$370.
+    dead port 2/2 on $mux $procmux$359.
+    dead port 1/2 on $mux $procmux$635.
+    dead port 1/2 on $mux $procmux$357.
+    dead port 1/2 on $mux $procmux$354.
+    dead port 2/2 on $mux $procmux$343.
+    dead port 1/2 on $mux $procmux$341.
+    dead port 1/2 on $mux $procmux$338.
+    dead port 2/2 on $mux $procmux$327.
+    dead port 2/2 on $mux $procmux$624.
+    dead port 1/2 on $mux $procmux$325.
+    dead port 1/2 on $mux $procmux$322.
+    dead port 1/2 on $mux $procmux$319.
+    dead port 2/2 on $mux $procmux$308.
+    dead port 1/2 on $mux $procmux$306.
+    dead port 1/2 on $mux $procmux$303.
+    dead port 1/2 on $mux $procmux$300.
+    dead port 2/2 on $mux $procmux$289.
+    dead port 1/2 on $mux $procmux$622.
+    dead port 1/2 on $mux $procmux$287.
+    dead port 1/2 on $mux $procmux$284.
+    dead port 1/2 on $mux $procmux$281.
+    dead port 2/2 on $mux $procmux$270.
+    dead port 1/2 on $mux $procmux$619.
+    dead port 1/2 on $mux $procmux$268.
+    dead port 1/2 on $mux $procmux$265.
+    dead port 1/2 on $mux $procmux$262.
+    dead port 1/2 on $mux $procmux$259.
+    dead port 2/2 on $mux $procmux$248.
+    dead port 1/2 on $mux $procmux$616.
+    dead port 1/2 on $mux $procmux$246.
+    dead port 1/2 on $mux $procmux$243.
+    dead port 1/2 on $mux $procmux$240.
+    dead port 1/2 on $mux $procmux$237.
+    dead port 2/2 on $mux $procmux$226.
+    dead port 1/2 on $mux $procmux$224.
+    dead port 1/2 on $mux $procmux$221.
+    dead port 1/2 on $mux $procmux$218.
+    dead port 1/2 on $mux $procmux$215.
+    dead port 2/2 on $mux $procmux$204.
+    dead port 2/2 on $mux $procmux$604.
+    dead port 1/2 on $mux $procmux$202.
+    dead port 1/2 on $mux $procmux$199.
+    dead port 1/2 on $mux $procmux$196.
+    dead port 1/2 on $mux $procmux$193.
+    dead port 1/2 on $mux $procmux$190.
+    dead port 2/2 on $mux $procmux$179.
+    dead port 2/2 on $mux $procmux$690.
+    dead port 1/2 on $mux $procmux$177.
+    dead port 1/2 on $mux $procmux$174.
+    dead port 1/2 on $mux $procmux$171.
+    dead port 1/2 on $mux $procmux$168.
+    dead port 1/2 on $mux $procmux$165.
+    dead port 1/2 on $mux $procmux$602.
+    dead port 1/2 on $mux $procmux$599.
+    dead port 2/2 on $mux $procmux$146.
+    dead port 2/2 on $mux $procmux$137.
+    dead port 1/2 on $mux $procmux$135.
+    dead port 2/2 on $mux $procmux$581.
+    dead port 2/2 on $mux $procmux$570.
+Running muxtree optimizer on module \ctrl_arcs..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 94 multiplexer ports.
+<suppressed ~301 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \huff_ctrl.
+  Optimizing cells in module \ctrl_arcs.
+Performed a total of 0 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\huff_ctrl'.
+Computing hashes of 79 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Computing hashes of 78 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+<suppressed ~3 debug messages>
+Finding identical cells in module `\ctrl_arcs'.
+Computing hashes of 62 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+Computing hashes of 52 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+<suppressed ~30 debug messages>
+Removed a total of 11 cells.
+
+3.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \huff_ctrl..
+Finding unused cells or wires in module \ctrl_arcs..
+Removed 0 unused cells and 151 unused wires.
+<suppressed ~2 debug messages>
+
+3.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+Optimizing module ctrl_arcs.
+
+3.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \huff_ctrl..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \ctrl_arcs..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~84 debug messages>
+
+3.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \huff_ctrl.
+  Optimizing cells in module \ctrl_arcs.
+Performed a total of 0 changes.
+
+3.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\huff_ctrl'.
+Computing hashes of 78 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Finding identical cells in module `\ctrl_arcs'.
+Computing hashes of 52 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+Removed a total of 0 cells.
+
+3.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \huff_ctrl..
+Finding unused cells or wires in module \ctrl_arcs..
+
+3.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+Optimizing module ctrl_arcs.
+
+3.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 3) from port B of cell huff_ctrl.$procmux$659_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell huff_ctrl.$procmux$660_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell huff_ctrl.$procmux$679_CMP0 ($eq).
+Removed top 31 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:58$11 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:58$11 ($add).
+Removed top 30 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:58$11 ($add).
+Removed top 30 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:58$15 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:58$15 ($add).
+Removed top 29 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:58$15 ($add).
+Removed top 29 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:58$19 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:58$19 ($add).
+Removed top 28 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:58$19 ($add).
+Removed top 28 bits (of 32) from port A of cell ctrl_arcs.$le$ctrl_arcs.sv:58$20 ($le).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$le$ctrl_arcs.sv:58$20 ($le).
+Removed top 31 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:63$35 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:63$35 ($add).
+Removed top 30 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:63$35 ($add).
+Removed top 30 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:63$40 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:63$40 ($add).
+Removed top 29 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:63$40 ($add).
+Removed top 29 bits (of 32) from port A of cell ctrl_arcs.$add$ctrl_arcs.sv:63$45 ($add).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$add$ctrl_arcs.sv:63$45 ($add).
+Removed top 28 bits (of 32) from port Y of cell ctrl_arcs.$add$ctrl_arcs.sv:63$45 ($add).
+Removed top 28 bits (of 32) from port A of cell ctrl_arcs.$le$ctrl_arcs.sv:63$46 ($le).
+Removed top 31 bits (of 32) from port B of cell ctrl_arcs.$le$ctrl_arcs.sv:63$46 ($le).
+Removed top 29 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:63$40_Y.
+Removed top 30 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:63$35_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:63$34_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:63$44_Y.
+Removed top 28 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:63$45_Y.
+Removed top 28 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:58$19_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:58$18_Y.
+Removed top 29 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:58$15_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:58$14_Y.
+Removed top 30 bits (of 32) from wire ctrl_arcs.$add$ctrl_arcs.sv:58$11_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:58$10_Y.
+Removed top 31 bits (of 32) from wire ctrl_arcs.$eqx$ctrl_arcs.sv:63$39_Y.
+
+3.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \huff_ctrl..
+Finding unused cells or wires in module \ctrl_arcs..
+Removed 0 unused cells and 12 unused wires.
+<suppressed ~1 debug messages>
+
+3.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.12. Executing OPT pass (performing simple optimizations).
+
+3.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module huff_ctrl.
+Optimizing module ctrl_arcs.
+
+3.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\huff_ctrl'.
+Computing hashes of 78 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Finding identical cells in module `\ctrl_arcs'.
+Computing hashes of 52 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+Removed a total of 0 cells.
+
+3.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \huff_ctrl..
+Finding unused cells or wires in module \ctrl_arcs..
+
+3.12.4. Finished fast OPT passes.
+
+3.13. Executing SORT pass.
+
+3.14. Printing statistics.
+
+=== ctrl_arcs ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       66 wires
+      269 wire bits
+       29 public wires
+       34 public wire bits
+       19 ports
+       19 port bits
+       51 cells
+        6   $add
+       13   $check
+        5   $dff
+        6   $eqx
+        2   $le
+        2   $logic_and
+        7   $logic_not
+        6   $logic_or
+        3   $mux
+        1   $reduce_or
+        1 submodules
+        1   huff_ctrl
+
+=== huff_ctrl ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       91 wires
+      156 wire bits
+       34 public wires
+       48 public wire bits
+       28 ports
+       33 port bits
+       78 cells
+        6   $dff
+        7   $eq
+       12   $logic_and
+        5   $logic_not
+        3   $logic_or
+       39   $mux
+        2   $ne
+        1   $or
+        2   $pmux
+        1   $reduce_bool
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      129 ctrl_arcs
+       78 huff_ctrl
+
+        +----------Count including submodules.
+        | 
+      157 wires
+      425 wire bits
+       63 public wires
+       82 public wire bits
+       47 ports
+       52 port bits
+        - memories
+        - memory bits
+        - processes
+      129 cells
+        6   $add
+       13   $check
+       11   $dff
+        7   $eq
+        6   $eqx
+        2   $le
+       14   $logic_and
+       12   $logic_not
+        9   $logic_or
+       42   $mux
+        2   $ne
+        1   $or
+        2   $pmux
+        1   $reduce_bool
+        1   $reduce_or
+        1 submodules
+        1   huff_ctrl
+
+3.15. Executing CHECK pass (checking for obvious problems).
+Checking module ctrl_arcs...
+Checking module huff_ctrl...
+Found and reported 0 problems.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `ctrl_arcs'. Setting top module to ctrl_arcs.
+
+4.1. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+
+4.2. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+Removed 0 unused modules.
+Module ctrl_arcs directly or indirectly contains formal properties -> setting "keep" attribute.
+
+5. Executing jny backend.
+
+6. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+End of script. Logfile hash: 01f1121938, time: 0.04s, user: 0.03s, system: 0.01s, MEM: 19.25 MB peak
+Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 22% 2x hierarchy (0 sec), 20% 5x opt_clean (0 sec), ...

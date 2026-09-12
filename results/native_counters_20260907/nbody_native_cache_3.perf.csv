@@ -1,0 +1,6 @@
+# started on Sun Sep  6 22:38:41 2026
+
+17872;;cache-references:u;609071790;100.00;;
+180;;cache-misses:u;609071790;100.00;1.007;of all cache refs
+0;;L1-dcache-loads;609071790;100.00;;
+106527;;L1-dcache-load-misses;609071790;100.00;0.00;of all L1-dcache accesses

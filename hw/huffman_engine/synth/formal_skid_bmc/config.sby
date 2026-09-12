@@ -1,0 +1,17 @@
+[options]
+mode bmc
+depth 30
+
+[engines]
+smtbmc
+
+[script]
+read -formal huff_out.sv
+read -formal skid.sv
+prep -top skid
+
+[files]
+rtl/huff_ctrl.sv
+rtl/huff_out.sv
+formal/ctrl_arcs.sv
+formal/skid.sv

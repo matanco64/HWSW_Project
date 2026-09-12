@@ -1,0 +1,523 @@
+[14:54:39] === run starting on ubuntu-server, Python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0] ===
+[14:54:39] benchmarks: nbody pyflate
+[14:54:39] results:    /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+[14:54:39] START setup
+kernel.perf_event_paranoid = -1
+kernel.kptr_restrict = 0
+Tune the system configuration to run benchmarks
+
+Actions
+=======
+
+Perf event: Max sample rate set to 1 per second
+
+System state
+============
+
+CPU: use 8 logical CPUs: 0-7
+Perf event: Maximum sample rate: 1 per second
+ASLR: Full randomization
+Linux scheduler: No CPU is isolated
+IRQ affinity: irqbalance service: inactive
+IRQ affinity: Default IRQ affinity: CPU 0-7
+IRQ affinity: IRQ affinity: IRQ 0-15=CPU 0-7
+
+Advices
+=======
+
+Linux scheduler: Use isolcpus=<cpu list> kernel parameter to isolate CPUs
+Linux scheduler: Use rcu_nocbs=<cpu list> kernel parameter (with isolcpus) to not schedule RCU on isolated CPUs
+
+Errors
+======
+
+Turbo Boost (MSR): Failed to read MSR 0x1a0 from /dev/cpu/0/msr: [Errno 2] No such file or directory: '/dev/cpu/0/msr'
+Turbo Boost (MSR): Try to load the msr kernel module: sudo modprobe msr
+[14:54:40] OK    setup
+[14:54:40] START nbody/baseline
+== nbody / baseline
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+Python benchmark suite 1.14.0
+
+Creating the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /usr/bin/python3 -m venv --without-pip /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m ensurepip -v -U
+Using pip 22.0.2 from /tmp/tmphlsxh61y/pip-22.0.2-py3-none-any.whl/pip (python 3.10)
+Looking in links: /tmp/tmphlsxh61y
+Processing /tmp/tmphlsxh61y/setuptools-59.6.0-py3-none-any.whl
+Processing /tmp/tmphlsxh61y/pip-22.0.2-py3-none-any.whl
+Installing collected packages: setuptools, pip
+  changing mode of /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/pip3 to 775
+  changing mode of /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/pip3.10 to 775
+  changing mode of /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/pip3.10 to 775
+Successfully installed pip-22.0.2 setuptools-59.6.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install -U 'setuptools>=18.5' wheel
+Requirement already satisfied: setuptools>=18.5 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (59.6.0)
+Collecting setuptools>=18.5
+  Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Collecting wheel
+  Using cached wheel-0.48.0-py3-none-any.whl (33 kB)
+Collecting packaging>=24.0
+  Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Installing collected packages: setuptools, packaging, wheel
+  Attempting uninstall: setuptools
+    Found existing installation: setuptools 59.6.0
+    Uninstalling setuptools-59.6.0:
+      Successfully uninstalled setuptools-59.6.0
+Successfully installed packaging-26.3 setuptools-84.0.0 wheel-0.48.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip --version
+pip 22.0.2 from /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages/pip (python 3.10)
+
+==================================================
+( 1/1) creating venv for benchmark (nbody)
+
+(trying common venv first)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install pyperf==2.10.0
+Collecting pyperf==2.10.0
+  Using cached pyperf-2.10.0-py3-none-any.whl (144 kB)
+Collecting psutil>=5.9.0
+  Using cached psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+Installing collected packages: psutil, pyperf
+Successfully installed psutil-7.2.2 pyperf-2.10.0
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (7.2.2)
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+
+[1/1] nbody...
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -u /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py --rigorous --affinity=0 --output /tmp/tmpt85t1q_c --inherit-environ PYPERFORMANCE_RUNID
+.........................................
+WARNING: the benchmark result may be unstable
+* Not enough samples to get a stable result (95% certainly of less than 1% variation)
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+
+nbody: Mean +- std dev: 231 ms +- 8 ms
+
+Performance version: 1.14.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1106-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 8
+Start date: 2026-09-10 14:54:58.692404
+End date: 2026-09-10 14:55:41.448995
+
+### nbody ###
+Mean +- std dev: 231 ms +- 8 ms
+
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/baseline_nbody.json backend=- requested=- cpu=0
+Total duration: 38.3 sec
+Start date: 2026-09-10 14:54:58
+End date: 2026-09-10 14:55:41
+Raw value minimum: 226 ms
+Raw value maximum: 267 ms
+
+Number of calibration run: 1
+Number of run with values: 40
+Total number of run: 41
+
+Number of warmup per run: 1
+Number of value per run: 3
+Loop iterations per value: 1
+Total number of values: 120
+
+Minimum:         226 ms
+Median +- MAD:   229 ms +- 1 ms
+Mean +- std dev: 231 ms +- 8 ms
+Maximum:         267 ms
+
+  0th percentile: 226 ms (-2% of the mean) -- minimum
+  5th percentile: 226 ms (-2% of the mean)
+ 25th percentile: 227 ms (-2% of the mean) -- Q1
+ 50th percentile: 229 ms (-1% of the mean) -- median
+ 75th percentile: 231 ms (-0% of the mean) -- Q3
+ 95th percentile: 246 ms (+7% of the mean)
+100th percentile: 267 ms (+15% of the mean) -- maximum
+
+Number of outlier (out of 223 ms..235 ms): 13
+
+WARNING: the benchmark result may be unstable
+* Not enough samples to get a stable result (95% certainly of less than 1% variation)
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python3 -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+[14:55:40] OK    nbody/baseline (60s)
+[14:55:40] START nbody/optimized
+== nbody / optimized
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+Python benchmark suite 1.14.0
+
+
+==================================================
+( 1/1) creating venv for benchmark (nbody)
+
+(trying common venv first)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install pyperf==2.10.0
+Requirement already satisfied: pyperf==2.10.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (2.10.0)
+Requirement already satisfied: psutil>=5.9.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (from pyperf==2.10.0) (7.2.2)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (7.2.2)
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+
+[1/1] nbody...
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -u /home/ubuntu/hwsw-release-fuoh4kq_/benchmarks/bm_nbody/run_benchmark.py --rigorous --affinity=0 --output /tmp/tmpr6e6otws --inherit-environ PYPERFORMANCE_RUNID
+.........................................
+nbody: Mean +- std dev: 143 ms +- 2 ms
+
+Performance version: 1.14.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1106-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 8
+Start date: 2026-09-10 14:55:44.950043
+End date: 2026-09-10 14:56:13.911611
+
+### nbody ###
+Mean +- std dev: 143 ms +- 2 ms
+
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/optimized_nbody.json backend=python requested=python cpu=0
+[14:56:13] OK    nbody/optimized (33s)
+[14:56:13] START nbody/compare
+== nbody / compare
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+Benchmarks with tag 'math':
+===========================
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+
+All benchmarks:
+===============
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+[14:56:13] OK    nbody/compare (0s)
+[14:56:13] START nbody/wheel
+== nbody / wheel
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+note: nbody has no Cargo.lock; building without --locked
+== building nbody for Python 3.10.12 -> /home/ubuntu/hwsw-release-fuoh4kq_/rust/nbody/target/wheels/20260910_145614
+    Updating crates.io index
+     Locking 20 packages to latest compatible versions
+      Adding pyo3 v0.22.6 (available: v0.29.2)
+🐍 Found CPython 3.10 at /usr/bin/python3
+🔗 Found pyo3 bindings
+📡 Using build options features from pyproject.toml
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling libc v0.2.189
+   Compiling autocfg v1.5.1
+   Compiling heck v0.5.0
+   Compiling unindent v0.2.4
+   Compiling cfg-if v1.0.4
+   Compiling indoc v2.0.7
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling nbody_rs v0.1.0 (/home/ubuntu/hwsw-release-fuoh4kq_/rust/nbody)
+    Finished `release` profile [optimized + debuginfo] target(s) in 20.05s
+📦 Built wheel for CPython 3.10 to /home/ubuntu/hwsw-release-fuoh4kq_/rust/nbody/target/wheels/20260910_145614/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+== built  /home/ubuntu/hwsw-release-fuoh4kq_/rust/nbody/target/wheels/20260910_145614/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+   sha256 fcc57899c4af302c91f948b3911e4558811d9c52670286cc7305f6b4dee3c802
+== installing with sudo (/usr/local/lib/python3.10/dist-packages is not writable): python3 -m pip install --force-reinstall --no-deps /home/ubuntu/hwsw-release-fuoh4kq_/rust/nbody/target/wheels/20260910_145614/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Processing ./rust/nbody/target/wheels/20260910_145614/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Installing collected packages: nbody-rs
+  Attempting uninstall: nbody-rs
+    Found existing installation: nbody-rs 0.1.0
+    Uninstalling nbody-rs-0.1.0:
+      Successfully uninstalled nbody-rs-0.1.0
+Successfully installed nbody-rs-0.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+== imported nbody_rs extension from /usr/local/lib/python3.10/dist-packages/nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so
+   sha256 cf9468bde67c2bc6f21f3036921dcf92fe6404edd0a859623055a05b97105c73 (matches the wheel just built)
+   rustc  rustc 1.98.0 (88d9e12ae 2026-08-18)
+== provenance written to /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/wheel_nbody.json
+[14:56:39] OK    nbody/wheel (26s)
+[14:56:39] START nbody/native
+== nbody / native
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody
+   cpu     -> 0
+module: /usr/local/lib/python3.10/dist-packages/nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so
+sha256: cf9468bde67c2bc6f21f3036921dcf92fe6404edd0a859623055a05b97105c73
+.........................................
+WARNING: the benchmark result may be unstable
+* Not enough samples to get a stable result (95% certainly of less than 1% variation)
+
+Try to rerun the benchmark with more runs, values and/or loops.
+Run 'python3 -m pyperf system tune' command to reduce the system jitter.
+Use pyperf stats, pyperf dump and pyperf hist to analyze results.
+Use --quiet option to hide these warnings.
+
+nbody: Mean +- std dev: 145 ms +- 5 ms
+.........................................
+nbody: Mean +- std dev: 9.53 ms +- 0.05 ms
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/fallback_nbody.json backend=python requested=python cpu=0
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/native_nbody.json backend=native requested=native cpu=0
++-----------+----------------+------------------------+
+| Benchmark | fallback_nbody | native_nbody           |
++===========+================+========================+
+| nbody     | 145 ms         | 9.53 ms: 15.25x faster |
++-----------+----------------+------------------------+
+[14:57:40] OK    nbody/native (61s)
+[14:57:40] START pyflate/baseline
+== pyflate / baseline
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
+Python benchmark suite 1.14.0
+
+
+==================================================
+( 1/1) creating venv for benchmark (pyflate)
+
+(trying common venv first)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install pyperf==2.10.0
+Requirement already satisfied: pyperf==2.10.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (2.10.0)
+Requirement already satisfied: psutil>=5.9.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (from pyperf==2.10.0) (7.2.2)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (7.2.2)
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+
+[1/1] pyflate...
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -u /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate/run_benchmark.py --rigorous --affinity=0 --output /tmp/tmp957saus8 --inherit-environ PYPERFORMANCE_RUNID
+.........................................
+pyflate: Mean +- std dev: 1.12 sec +- 0.01 sec
+
+Performance version: 1.14.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1106-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 8
+Start date: 2026-09-10 14:57:48.933960
+End date: 2026-09-10 15:00:59.621504
+
+### pyflate ###
+Mean +- std dev: 1.12 sec +- 0.01 sec
+
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/baseline_pyflate.json backend=- requested=- cpu=0
+Total duration: 3 min 5.4 sec
+Start date: 2026-09-10 14:57:48
+End date: 2026-09-10 15:00:59
+Raw value minimum: 1.10 sec
+Raw value maximum: 1.16 sec
+
+Number of calibration run: 1
+Number of run with values: 40
+Total number of run: 41
+
+Number of warmup per run: 1
+Number of value per run: 3
+Loop iterations per value: 1
+Total number of values: 120
+
+Minimum:         1.10 sec
+Median +- MAD:   1.12 sec +- 0.01 sec
+Mean +- std dev: 1.12 sec +- 0.01 sec
+Maximum:         1.16 sec
+
+  0th percentile: 1.10 sec (-2% of the mean) -- minimum
+  5th percentile: 1.11 sec (-1% of the mean)
+ 25th percentile: 1.11 sec (-1% of the mean) -- Q1
+ 50th percentile: 1.12 sec (-0% of the mean) -- median
+ 75th percentile: 1.13 sec (+1% of the mean) -- Q3
+ 95th percentile: 1.14 sec (+2% of the mean)
+100th percentile: 1.16 sec (+4% of the mean) -- maximum
+
+Number of outlier (out of 1.09 sec..1.15 sec): 1
+[15:00:54] OK    pyflate/baseline (194s)
+[15:00:54] START pyflate/optimized
+== pyflate / optimized
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
+Python benchmark suite 1.14.0
+
+
+==================================================
+( 1/1) creating venv for benchmark (pyflate)
+
+(trying common venv first)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install pyperf==2.10.0
+Requirement already satisfied: pyperf==2.10.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (2.10.0)
+Requirement already satisfied: psutil>=5.9.0 in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (from pyperf==2.10.0) (7.2.2)
+Installing requirements into the virtual environment /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/lib/python3.10/site-packages (7.2.2)
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -m pip freeze
+packaging==26.3
+psutil==7.2.2
+pyperf==2.10.0
+
+[1/1] pyflate...
+# /home/ubuntu/hwsw-release-fuoh4kq_/venv/cpython3.10-0a2f95361109-compat-31b33d68c68a/bin/python -u /home/ubuntu/hwsw-release-fuoh4kq_/benchmarks/bm_pyflate/run_benchmark.py --rigorous --affinity=0 --output /tmp/tmprqag4xy8 --inherit-environ PYPERFORMANCE_RUNID
+.........................................
+pyflate: Mean +- std dev: 281 ms +- 3 ms
+
+Performance version: 1.14.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1106-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 8
+Start date: 2026-09-10 15:00:59.725501
+End date: 2026-09-10 15:01:52.217581
+
+### pyflate ###
+Mean +- std dev: 281 ms +- 3 ms
+
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/optimized_pyflate.json backend=python requested=python cpu=0
+[15:01:50] OK    pyflate/optimized (56s)
+[15:01:50] START pyflate/compare
+== pyflate / compare
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
++-----------+------------------+----------------------+
+| Benchmark | baseline_pyflate | optimized_pyflate    |
++===========+==================+======================+
+| pyflate   | 1.12 sec         | 281 ms: 4.00x faster |
++-----------+------------------+----------------------+
+[15:01:50] OK    pyflate/compare (0s)
+[15:01:50] START pyflate/wheel
+== pyflate / wheel
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
+== building pyflate for Python 3.10.12 -> /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/wheels/20260910_150151
+🐍 Found CPython 3.10 at /usr/bin/python3
+🔗 Found pyo3 bindings
+📡 Using build options features from pyproject.toml
+   Compiling pyo3-build-config v0.22.6
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate)
+    Finished `release` profile [optimized + debuginfo] target(s) in 17.88s
+📦 Built wheel for CPython 3.10 to /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/wheels/20260910_150151/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+== built  /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/wheels/20260910_150151/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+   sha256 f58ac65f05ba90ca5a3731be8be223822e0a8485871bcfd21cb96c19609492fd
+== installing with sudo (/usr/local/lib/python3.10/dist-packages is not writable): python3 -m pip install --force-reinstall --no-deps /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/wheels/20260910_150151/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Processing ./rust/pyflate/target/wheels/20260910_150151/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Installing collected packages: pyflate-rs
+  Attempting uninstall: pyflate-rs
+    Found existing installation: pyflate-rs 0.1.0
+    Uninstalling pyflate-rs-0.1.0:
+      Successfully uninstalled pyflate-rs-0.1.0
+Successfully installed pyflate-rs-0.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+== imported pyflate_rs extension from /usr/local/lib/python3.10/dist-packages/pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so
+   sha256 b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607 (matches the wheel just built)
+   rustc  rustc 1.98.0 (88d9e12ae 2026-08-18)
+== provenance written to /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/wheel_pyflate.json
+[15:02:12] OK    pyflate/wheel (22s)
+[15:02:12] START pyflate/native
+== pyflate / native
+   results -> /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite
+   stock   -> /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+   cpu     -> 0
+module: /usr/local/lib/python3.10/dist-packages/pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so
+sha256: b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607
+.........................................
+pyflate: Mean +- std dev: 284 ms +- 3 ms
+.........................................
+pyflate: Mean +- std dev: 170 ms +- 2 ms
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/fallback_pyflate.json backend=python requested=python cpu=0
+   metadata ok: /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/native_pyflate.json backend=native requested=native cpu=0
++-----------+------------------+----------------------+
+| Benchmark | fallback_pyflate | native_pyflate       |
++===========+==================+======================+
+| pyflate   | 284 ms           | 170 ms: 1.67x faster |
++-----------+------------------+----------------------+
+[15:03:39] OK    pyflate/native (87s)
+[15:03:39] === summary ===
+--- compare_nbody.txt ---
+Benchmarks with tag 'math':
+===========================
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+
+All benchmarks:
+===============
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+--- compare_nbody_native.txt ---
++-----------+----------------+------------------------+
+| Benchmark | fallback_nbody | native_nbody           |
++===========+================+========================+
+| nbody     | 145 ms         | 9.53 ms: 15.25x faster |
++-----------+----------------+------------------------+
+--- compare_pyflate.txt ---
++-----------+------------------+----------------------+
+| Benchmark | baseline_pyflate | optimized_pyflate    |
++===========+==================+======================+
+| pyflate   | 1.12 sec         | 281 ms: 4.00x faster |
++-----------+------------------+----------------------+
+--- compare_pyflate_native.txt ---
++-----------+------------------+----------------------+
+| Benchmark | fallback_pyflate | native_pyflate       |
++===========+==================+======================+
+| pyflate   | 284 ms           | 170 ms: 1.67x faster |
++-----------+------------------+----------------------+
+[15:03:40] === all done; marker written to /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/.RUN_DONE ===

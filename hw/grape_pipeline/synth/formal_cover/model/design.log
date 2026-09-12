@@ -1,0 +1,471 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: grape_step_fsm.sv
+Parsing formal SystemVerilog input from `grape_step_fsm.sv' to AST representation.
+Storing AST representation for module `$abstract\grape_step_fsm'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: fsm_arcs.sv
+Parsing formal SystemVerilog input from `fsm_arcs.sv' to AST representation.
+Storing AST representation for module `$abstract\fsm_arcs'.
+Successfully finished Verilog frontend.
+
+3. Executing PREP pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.2. Executing AST frontend in derive mode using pre-parsed AST for module `\fsm_arcs'.
+Generating RTLIL representation for module `\fsm_arcs'.
+
+3.2.1. Analyzing design hierarchy..
+Top module:  \fsm_arcs
+
+3.2.2. Executing AST frontend in derive mode using pre-parsed AST for module `\grape_step_fsm'.
+Generating RTLIL representation for module `\grape_step_fsm'.
+
+3.2.3. Analyzing design hierarchy..
+Top module:  \fsm_arcs
+Used module:     \grape_step_fsm
+
+3.2.4. Analyzing design hierarchy..
+Top module:  \fsm_arcs
+Used module:     \grape_step_fsm
+Removing unused module `$abstract\fsm_arcs'.
+Removing unused module `$abstract\grape_step_fsm'.
+Removed 2 unused modules.
+Module fsm_arcs directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3.3. Executing PROC pass (convert processes to netlists).
+
+3.3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$grape_step_fsm.sv:51$106 in module grape_step_fsm.
+Marked 6 switch rules as full_case in process $proc$fsm_arcs.sv:43$4 in module fsm_arcs.
+Removed a total of 0 dead cases.
+
+3.3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 19 assignments to connections.
+
+3.3.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\fsm_arcs.$proc$fsm_arcs.sv:55$102'.
+  Set init value: \past_valid = 1'0
+
+3.3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~23 debug messages>
+
+3.3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+Creating decoders for process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+     1/22: $2\abort_pend_next[0:0]
+     2/22: $3\cycles_next[63:0]
+     3/22: $3\steps_next[31:0]
+     4/22: $7\state_next[2:0]
+     5/22: $6\state_next[2:0]
+     6/22: $4\step_start_o[0:0]
+     7/22: $5\state_next[2:0]
+     8/22: $3\step_start_o[0:0]
+     9/22: $4\state_next[2:0]
+    10/22: $3\state_next[2:0]
+    11/22: $2\step_start_o[0:0]
+    12/22: $2\cycles_next[63:0]
+    13/22: $2\steps_next[31:0]
+    14/22: $2\state_next[2:0]
+    15/22: $1\cycles_next[63:0]
+    16/22: $1\steps_next[31:0]
+    17/22: $1\state_next[2:0]
+    18/22: $1\abort_pend_next[0:0]
+    19/22: $1\commit_o[0:0]
+    20/22: $1\step_start_o[0:0]
+    21/22: $1\aborted_set_o[0:0]
+    22/22: $1\done_set_o[0:0]
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:61$103'.
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:55$102'.
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:83$91'.
+     1/5: $cover$fsm_arcs.sv:89$100_EN
+     2/5: $cover$fsm_arcs.sv:88$98_EN
+     3/5: $cover$fsm_arcs.sv:87$96_EN
+     4/5: $cover$fsm_arcs.sv:86$94_EN
+     5/5: $cover$fsm_arcs.sv:85$92_EN
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:63$51'.
+     1/8: $assert$fsm_arcs.sv:78$89_EN
+     2/8: $assert$fsm_arcs.sv:75$84_EN
+     3/8: $assert$fsm_arcs.sv:74$81_EN
+     4/8: $assert$fsm_arcs.sv:73$74_EN
+     5/8: $assert$fsm_arcs.sv:72$69_EN
+     6/8: $assert$fsm_arcs.sv:71$64_EN
+     7/8: $assert$fsm_arcs.sv:70$59_EN
+     8/8: $assert$fsm_arcs.sv:66$54_EN
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:56$50'.
+Creating decoders for process `\fsm_arcs.$proc$fsm_arcs.sv:43$4'.
+     1/6: $6\st[2:0]
+     2/6: $5\st[2:0]
+     3/6: $4\st[2:0]
+     4/6: $3\st[2:0]
+     5/6: $2\st[2:0]
+     6/6: $1\st[2:0]
+
+3.3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\grape_step_fsm.\done_set_o' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\aborted_set_o' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\step_start_o' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\commit_o' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\state_next' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\steps_next' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\cycles_next' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\grape_step_fsm.\abort_pend_next' from process `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+No latch inferred for signal `\fsm_arcs.\st' from process `\fsm_arcs.$proc$fsm_arcs.sv:43$4'.
+
+3.3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\grape_step_fsm.\state' using process `\grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+  created $dff cell `$procdff$385' with positive edge clock.
+Creating register for signal `\grape_step_fsm.\steps' using process `\grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+  created $dff cell `$procdff$386' with positive edge clock.
+Creating register for signal `\grape_step_fsm.\cycles' using process `\grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+  created $dff cell `$procdff$387' with positive edge clock.
+Creating register for signal `\grape_step_fsm.\abort_pend' using process `\grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+  created $dff cell `$procdff$388' with positive edge clock.
+Creating register for signal `\fsm_arcs.$past$fsm_arcs.sv:68$1$0' using process `\fsm_arcs.$proc$fsm_arcs.sv:63$51'.
+  created $dff cell `$procdff$389' with positive edge clock.
+Creating register for signal `\fsm_arcs.$past$fsm_arcs.sv:77$2$0' using process `\fsm_arcs.$proc$fsm_arcs.sv:63$51'.
+  created $dff cell `$procdff$390' with positive edge clock.
+Creating register for signal `\fsm_arcs.\past_valid' using process `\fsm_arcs.$proc$fsm_arcs.sv:56$50'.
+  created $dff cell `$procdff$391' with positive edge clock.
+Creating register for signal `\fsm_arcs.\st_q' using process `\fsm_arcs.$proc$fsm_arcs.sv:56$50'.
+  created $dff cell `$procdff$392' with positive edge clock.
+
+3.3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `grape_step_fsm.$proc$grape_step_fsm.sv:117$119'.
+Found and cleaned up 7 empty switches in `\grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+Removing empty process `grape_step_fsm.$proc$grape_step_fsm.sv:51$106'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:61$103'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:55$102'.
+Found and cleaned up 1 empty switch in `\fsm_arcs.$proc$fsm_arcs.sv:83$91'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:83$91'.
+Found and cleaned up 9 empty switches in `\fsm_arcs.$proc$fsm_arcs.sv:63$51'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:63$51'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:56$50'.
+Found and cleaned up 6 empty switches in `\fsm_arcs.$proc$fsm_arcs.sv:43$4'.
+Removing empty process `fsm_arcs.$proc$fsm_arcs.sv:43$4'.
+Cleaned up 23 empty switches.
+
+3.3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+<suppressed ~13 debug messages>
+Optimizing module fsm_arcs.
+<suppressed ~6 debug messages>
+
+3.4. Executing FUTURE pass.
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+Optimizing module fsm_arcs.
+
+3.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \grape_step_fsm..
+Finding unused cells or wires in module \fsm_arcs..
+Removed 1 unused cells and 130 unused wires.
+<suppressed ~3 debug messages>
+
+3.7. Executing CHECK pass (checking for obvious problems).
+Checking module grape_step_fsm...
+Checking module fsm_arcs...
+Found and reported 0 problems.
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+Optimizing module fsm_arcs.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\grape_step_fsm'.
+Computing hashes of 77 cells of `\grape_step_fsm'.
+Finding duplicate cells in `\grape_step_fsm'.
+Computing hashes of 52 cells of `\grape_step_fsm'.
+Finding duplicate cells in `\grape_step_fsm'.
+<suppressed ~75 debug messages>
+Finding identical cells in module `\fsm_arcs'.
+Computing hashes of 140 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Computing hashes of 112 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Computing hashes of 108 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Computing hashes of 106 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Computing hashes of 105 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+<suppressed ~105 debug messages>
+Removed a total of 60 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \grape_step_fsm..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $procmux$232.
+    dead port 2/2 on $mux $procmux$221.
+    dead port 2/2 on $mux $procmux$210.
+    dead port 2/2 on $mux $procmux$199.
+    dead port 2/2 on $mux $procmux$189.
+    dead port 2/2 on $mux $procmux$179.
+    dead port 2/2 on $mux $procmux$170.
+    dead port 2/2 on $mux $procmux$162.
+    dead port 2/2 on $mux $procmux$154.
+    dead port 1/2 on $mux $procmux$152.
+    dead port 2/2 on $mux $procmux$143.
+    dead port 1/2 on $mux $procmux$141.
+Running muxtree optimizer on module \fsm_arcs..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$380.
+    dead port 1/2 on $mux $procmux$374.
+    dead port 1/2 on $mux $procmux$371.
+    dead port 1/2 on $mux $procmux$365.
+    dead port 1/2 on $mux $procmux$362.
+    dead port 1/2 on $mux $procmux$359.
+    dead port 1/2 on $mux $procmux$353.
+    dead port 1/2 on $mux $procmux$350.
+    dead port 1/2 on $mux $procmux$347.
+    dead port 1/2 on $mux $procmux$344.
+    dead port 1/2 on $mux $procmux$338.
+    dead port 1/2 on $mux $procmux$335.
+    dead port 1/2 on $mux $procmux$332.
+    dead port 1/2 on $mux $procmux$329.
+    dead port 1/2 on $mux $procmux$326.
+Removed 27 multiplexer ports.
+<suppressed ~97 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \grape_step_fsm.
+    New ctrl vector for $pmux cell $procmux$237: { $auto$opt_reduce.cc:137:opt_pmux$394 $procmux$263_CMP }
+  Optimizing cells in module \grape_step_fsm.
+  Optimizing cells in module \fsm_arcs.
+Performed a total of 1 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\grape_step_fsm'.
+Computing hashes of 41 cells of `\grape_step_fsm'.
+Finding duplicate cells in `\grape_step_fsm'.
+Finding identical cells in module `\fsm_arcs'.
+Computing hashes of 90 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Computing hashes of 85 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+<suppressed ~15 debug messages>
+Removed a total of 5 cells.
+
+3.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \grape_step_fsm..
+Finding unused cells or wires in module \fsm_arcs..
+Removed 0 unused cells and 92 unused wires.
+<suppressed ~2 debug messages>
+
+3.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+Optimizing module fsm_arcs.
+
+3.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \grape_step_fsm..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fsm_arcs..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~60 debug messages>
+
+3.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \grape_step_fsm.
+  Optimizing cells in module \fsm_arcs.
+Performed a total of 0 changes.
+
+3.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\grape_step_fsm'.
+Computing hashes of 41 cells of `\grape_step_fsm'.
+Finding duplicate cells in `\grape_step_fsm'.
+Finding identical cells in module `\fsm_arcs'.
+Computing hashes of 85 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Removed a total of 0 cells.
+
+3.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \grape_step_fsm..
+Finding unused cells or wires in module \fsm_arcs..
+
+3.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+Optimizing module fsm_arcs.
+
+3.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 63 bits (of 64) from port B of cell grape_step_fsm.$add$grape_step_fsm.sv:85$111 ($add).
+Removed top 31 bits (of 32) from port B of cell grape_step_fsm.$add$grape_step_fsm.sv:90$116 ($add).
+Removed top 1 bits (of 3) from port B of cell grape_step_fsm.$procmux$253_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell grape_step_fsm.$procmux$273_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell grape_step_fsm.$procmux$274_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:72$68 ($eq).
+Removed top 1 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:73$73 ($eq).
+Removed top 2 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:77$86 ($eq).
+Removed top 2 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:85$93 ($eq).
+Removed top 1 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:86$95 ($eq).
+Removed top 1 bits (of 3) from port B of cell fsm_arcs.$eq$fsm_arcs.sv:87$97 ($eq).
+
+3.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \grape_step_fsm..
+Finding unused cells or wires in module \fsm_arcs..
+
+3.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.12. Executing OPT pass (performing simple optimizations).
+
+3.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module grape_step_fsm.
+Optimizing module fsm_arcs.
+
+3.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\grape_step_fsm'.
+Computing hashes of 41 cells of `\grape_step_fsm'.
+Finding duplicate cells in `\grape_step_fsm'.
+Finding identical cells in module `\fsm_arcs'.
+Computing hashes of 85 cells of `\fsm_arcs'.
+Finding duplicate cells in `\fsm_arcs'.
+Removed a total of 0 cells.
+
+3.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \grape_step_fsm..
+Finding unused cells or wires in module \fsm_arcs..
+
+3.12.4. Finished fast OPT passes.
+
+3.13. Executing SORT pass.
+
+3.14. Printing statistics.
+
+=== fsm_arcs ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       85 wires
+      255 wire bits
+       18 public wires
+      147 public wire bits
+        6 ports
+       37 port bits
+       84 cells
+       14   $check
+        4   $dff
+       10   $eq
+       21   $logic_and
+        9   $logic_not
+        4   $logic_or
+       21   $mux
+        1   $ne
+        1 submodules
+        1   grape_step_fsm
+
+=== grape_step_fsm ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       49 wires
+      660 wire bits
+       22 public wires
+      339 public wire bits
+       14 ports
+      139 port bits
+       41 cells
+        2   $add
+        4   $dff
+        6   $eq
+        1   $logic_and
+        2   $logic_not
+        1   $logic_or
+       18   $mux
+        1   $ne
+        4   $pmux
+        1   $reduce_bool
+        1   $reduce_or
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      125 fsm_arcs
+       41 grape_step_fsm
+
+        +----------Count including submodules.
+        | 
+      134 wires
+      915 wire bits
+       40 public wires
+      486 public wire bits
+       20 ports
+      176 port bits
+        - memories
+        - memory bits
+        - processes
+      125 cells
+        2   $add
+       14   $check
+        8   $dff
+       16   $eq
+       22   $logic_and
+       11   $logic_not
+        5   $logic_or
+       39   $mux
+        2   $ne
+        4   $pmux
+        1   $reduce_bool
+        1   $reduce_or
+        1 submodules
+        1   grape_step_fsm
+
+3.15. Executing CHECK pass (checking for obvious problems).
+Checking module fsm_arcs...
+Checking module grape_step_fsm...
+Found and reported 0 problems.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `fsm_arcs'. Setting top module to fsm_arcs.
+
+4.1. Analyzing design hierarchy..
+Top module:  \fsm_arcs
+Used module:     \grape_step_fsm
+
+4.2. Analyzing design hierarchy..
+Top module:  \fsm_arcs
+Used module:     \grape_step_fsm
+Removed 0 unused modules.
+Module fsm_arcs directly or indirectly contains formal properties -> setting "keep" attribute.
+
+5. Executing jny backend.
+
+6. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+End of script. Logfile hash: 98253126d7, time: 0.03s, user: 0.02s, system: 0.02s, MEM: 19.50 MB peak
+Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 21% 5x opt_clean (0 sec), 14% 2x hierarchy (0 sec), ...

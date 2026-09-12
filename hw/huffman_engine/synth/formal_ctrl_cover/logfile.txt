@@ -1,0 +1,68 @@
+SBY 21:45:57 [synth/formal_ctrl_bmc] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_bmc'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/rtl/huff_ctrl.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover/src/huff_ctrl.sv'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/rtl/huff_out.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover/src/huff_out.sv'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/formal/ctrl_arcs.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover/src/ctrl_arcs.sv'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/formal/skid.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover/src/skid.sv'.
+SBY 21:45:57 [synth/formal_ctrl_cover] engine_0: smtbmc
+SBY 21:45:57 [synth/formal_ctrl_cover] base: starting process "cd synth/formal_ctrl_cover/src; yosys -ql ../model/design.log ../model/design.ys"
+SBY 21:45:57 [synth/formal_ctrl_cover] base: finished (returncode=0)
+SBY 21:45:57 [synth/formal_ctrl_cover] prep: starting process "cd synth/formal_ctrl_cover/model; yosys -ql design_prep.log design_prep.ys"
+SBY 21:45:58 [synth/formal_ctrl_cover] prep: finished (returncode=0)
+SBY 21:45:58 [synth/formal_ctrl_cover] smt2: starting process "cd synth/formal_ctrl_cover/model; yosys -ql design_smt2.log design_smt2.ys"
+SBY 21:45:58 [synth/formal_ctrl_cover] smt2: finished (returncode=0)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: starting process "cd synth/formal_ctrl_cover; yosys-smtbmc --presat --unroll -c --noprogress -t 30  --append 0 --dump-vcd engine_0/trace%.vcd --dump-yw engine_0/trace%.yw --dump-vlogtb engine_0/trace%_tb.v --dump-smtc engine_0/trace%.smtc model/design_smt2.smt2"
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Solver: yices
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 0..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 1..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 2..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Reached cover statement in step 4 at ctrl_arcs: ctrl_arcs.sv:87.13-87.31 (_witness_.check_cover_ctrl_arcs_sv_87_68)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace0.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace0_tb.v
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace0.smtc
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace0.yw
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Reached cover statement in step 4 at ctrl_arcs: ctrl_arcs.sv:86.13-86.34 (_witness_.check_cover_ctrl_arcs_sv_86_67)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace1.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace1_tb.v
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace1.smtc
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace1.yw
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Reached cover statement in step 4 at ctrl_arcs: ctrl_arcs.sv:83.13-83.29 (_witness_.check_cover_ctrl_arcs_sv_83_64)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace2_tb.v
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace2.smtc
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace2.yw
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at ctrl_arcs: ctrl_arcs.sv:84.13-84.28 (_witness_.check_cover_ctrl_arcs_sv_84_65)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace3.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace3_tb.v
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace3.smtc
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace3.yw
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Checking cover reachability in step 6..
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Reached cover statement in step 6 at ctrl_arcs: ctrl_arcs.sv:85.13-85.31 (_witness_.check_cover_ctrl_arcs_sv_85_66)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace4.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace4_tb.v
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace4.smtc
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace4.yw
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: ##   0:00:00  Status: passed
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: finished (returncode=0)
+SBY 21:45:58 [synth/formal_ctrl_cover] engine_0: Status returned by engine: pass
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: engine_0 (smtbmc) returned pass
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: cover trace: synth/formal_ctrl_cover/engine_0/trace0.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] summary:   reached cover statement ctrl_arcs._witness_.check_cover_ctrl_arcs_sv_87_68 at ctrl_arcs.sv:87.13-87.31 step 4
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: cover trace: synth/formal_ctrl_cover/engine_0/trace1.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] summary:   reached cover statement ctrl_arcs._witness_.check_cover_ctrl_arcs_sv_86_67 at ctrl_arcs.sv:86.13-86.34 step 4
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: cover trace: synth/formal_ctrl_cover/engine_0/trace2.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] summary:   reached cover statement ctrl_arcs._witness_.check_cover_ctrl_arcs_sv_83_64 at ctrl_arcs.sv:83.13-83.29 step 4
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: cover trace: synth/formal_ctrl_cover/engine_0/trace3.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] summary:   reached cover statement ctrl_arcs._witness_.check_cover_ctrl_arcs_sv_84_65 at ctrl_arcs.sv:84.13-84.28 step 5
+SBY 21:45:58 [synth/formal_ctrl_cover] summary: cover trace: synth/formal_ctrl_cover/engine_0/trace4.vcd
+SBY 21:45:58 [synth/formal_ctrl_cover] summary:   reached cover statement ctrl_arcs._witness_.check_cover_ctrl_arcs_sv_85_66 at ctrl_arcs.sv:85.13-85.31 step 6
+SBY 21:45:58 [synth/formal_ctrl_cover] DONE (PASS, rc=0)

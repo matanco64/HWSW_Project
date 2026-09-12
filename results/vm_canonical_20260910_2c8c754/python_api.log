@@ -1,0 +1,7 @@
+PASS course input: 1 blocks, 399360 output bytes
+PASS single-symbol runs: 1 blocks, 10000 output bytes
+PASS all byte values: 1 blocks, 25600 output bytes
+PASS mixed runs: 1 blocks, 2102 output bytes
+PASS multiple blocks: 3 blocks, 220000 output bytes
+PASS Python API, kernel/end-bit parity, trace and pipeline: 7 blocks
+Tested extension: /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/release/libpyflate_rs.so

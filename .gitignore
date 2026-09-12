@@ -3,6 +3,10 @@ __pycache__/
 # perf raw data is large; committed evidence is the derived reports/SVGs/JSONs
 results/*.perf.data
 results/*.perf.data.old
+# Where the runner scripts write. A single `./script_<bench>.sh profile` leaves
+# ~165 MB here, and a grader's run should not show up as untracked changes to
+# the submission. Promoting a run to authoritative stays a deliberate copy.
+results/runs/
 # build artifacts
 rust/**/target/
 venv/
@@ -10,13 +14,7 @@ venv/
 # hardware flow: local toolchain, venv, simulation & synthesis artifacts
 hw/tools/
 hw/.venv/
-hw/**/sim_build*/
-hw/**/synth/*.log
-hw/**/synth/*.gen.ys
-hw/**/synth/*.json
-hw/**/synth/area.txt
-hw/**/coverage.dat
-hw/**/coverage_annotated/
+hw/**/sim_build/
 hw/**/results.xml
 hw/**/*.vcd
 hw/**/*.fst
@@ -29,5 +27,10 @@ hw/.advisor/
 hw/**/coverage_annotated/
 hw/**/sim_build_icarus/
 hw/common/synth/area.txt
+
+# local-only notes (Technion infra detail) - never commit
 *.local.md
-hw/**/synth/formal*/
+tmp/*
+
+# Private working notes and self-assessment, not part of the submission
+output/

@@ -1,7 +1,10 @@
-﻿"""Correctness + speed check for the Rust/PyO3 `nbody_rs` wheel.
+"""Correctness + speed check for the Rust/PyO3 `nbody_rs` wheel.
 
-Run inside WSL after `maturin build --release` and installing the wheel:
+Run after building and installing the wheel with the interpreter you are
+checking (tools/build_wheel.sh installs the file it just built, which the
+two-step maturin/pip recipe does not):
 
+    ./tools/build_wheel.sh nbody --python /root/hwsw-env/py310/bin/python
     /root/hwsw-env/py310/bin/python dev/nbody/rs_check.py
 
 The claim being tested is EQUALITY, not closeness: `src/lib.rs` is written to
@@ -9,7 +12,20 @@ perform the same IEEE-754 double operations in the same order as the Python
 loop, so the 35-float state after 20,000 steps should compare `==` to stock.
 If it does not, the divergence will be in `powf`, and the honest claim
 degrades to a stated tolerance -- which this script prints either way.
+
+Which of those two is the *contract* is a command-line choice, and the exit
+status follows it, so a downgrade from equality to closeness cannot happen
+silently between a run and what the reports say about it:
+
+    (default)     exact equality is required; nonzero exit if state or energy
+                  differs by a single bit.
+    --tolerance   closeness is required instead (the thresholds below), for a
+                  build whose `powf` is known to differ.  Exactness is still
+                  measured and printed, just not enforced.
+
+Both checks are always computed and reported; only the gate moves.
 """
+import argparse
 import gc
 import os
 import sys
@@ -24,10 +40,17 @@ import t0_stock                                            # noqa: E402
 STEPS = int(os.environ.get("NBODY_STEPS", "20000"))
 ROUNDS = int(os.environ.get("NBODY_ROUNDS", "9"))
 
+# Same thresholds as dev/nbody/verify.py, and for the same reason: the Sun sits
+# near the origin after offset_momentum(), so componentwise relative error is
+# meaningless for it.  State is scored as an infinity-norm relative error and
+# energy as an ordinary relative error.
+TOL_STATE = 1e-11
+TOL_ENERGY = 1e-12
 
-def make_rust():
+
+def make_rust(n=5):
     sysr = nbody_rs.System(
-        [(list(r), list(v), m) for (r, v, m) in common.fresh_bodies()])
+        [(list(r), list(v), m) for (r, v, m) in common.fresh_bodies(n)])
     sysr.offset_momentum(0)
     return sysr
 
@@ -42,15 +65,20 @@ def dump_rust(sysr):
     return out
 
 
-def main():
-    print("python %s | steps=%d rounds=%d" % (sys.version.split()[0], STEPS,
-                                              ROUNDS))
+def check_correctness(n, tolerance):
+    """Compare the Rust kernel with stock at `n` bodies. True if the contract holds.
 
-    # ---- correctness -----------------------------------------------------
-    py = t0_stock.make_state()
-    rs = make_rust()
+    Run at more than the stock five because that is what the native path is
+    actually used for: --bodies N and the big-N sweep in results/ both drive
+    this kernel, and pair order at N > 5 is generated code that N = 5 never
+    exercises.
+    """
+    print("\n=== N = %d (%d pairs), %d steps ==="
+          % (n, n * (n - 1) // 2, STEPS))
+    py = t0_stock.make_state(n)
+    rs = make_rust(n)
     e0_py, e0_rs = t0_stock.energy(py), rs.energy()
-    print("\ninitial energy   py %r\n                 rs %r\n   equal: %s"
+    print("initial energy   py %r\n                 rs %r\n   equal: %s"
           % (e0_py, e0_rs, e0_py == e0_rs))
 
     t0_stock.advance(py, 0.01, STEPS)
@@ -59,15 +87,57 @@ def main():
     e_py, e_rs = t0_stock.energy(py), rs.energy()
     max_abs = max(abs(x - y) for x, y in zip(a, b))
     scale = max(abs(x) for x in a)
-    print("\nafter %d steps   py %r\n                 rs %r" % (STEPS, e_py,
-                                                                e_rs))
+    print("after %d steps   py %r\n                 rs %r" % (STEPS, e_py, e_rs))
     print("   state bit-identical : %s" % (a == b,))
     print("   energy bit-identical: %s" % (e_py == e_rs,))
     print("   max |delta| state   : %.3e  (inf-rel %.3e)"
           % (max_abs, max_abs / scale if scale else 0.0))
     denom = max(abs(e_py), abs(e_rs))
-    print("   energy rel delta    : %.3e"
-          % (abs(e_py - e_rs) / denom if denom else 0.0))
+    e_rel = abs(e_py - e_rs) / denom if denom else 0.0
+    print("   energy rel delta    : %.3e" % e_rel)
+
+    # Exact and tolerance verdicts are kept separate on purpose: passing the
+    # tolerance is not evidence for the equality claim the reports make, so the
+    # two are never collapsed into one boolean.
+    exact = (a == b) and (e_py == e_rs)
+    inf_rel = max_abs / scale if scale else 0.0
+    close = inf_rel <= TOL_STATE and e_rel <= TOL_ENERGY
+    ok = close if tolerance else exact
+    if not ok:
+        if tolerance:
+            print("*** FAIL at N = %d: exceeds tolerance (state %g / energy "
+                  "%g); bit-identical=%s"
+                  % (n, TOL_STATE, TOL_ENERGY, exact))
+        else:
+            print("*** FAIL at N = %d: nbody_rs is not bit-identical to stock, "
+                  "which is the declared contract. The tolerance check %s -- "
+                  "rerun with --tolerance only after the reports have been "
+                  "changed to claim closeness rather than equality."
+                  % (n, "passes" if close else "also fails"))
+    return ok
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--tolerance", action="store_true",
+                    help="require closeness (state inf-rel <= %g, energy rel "
+                         "<= %g) instead of exact equality"
+                         % (TOL_STATE, TOL_ENERGY))
+    ap.add_argument("--bodies", default="5",
+                    help="comma-separated body counts to check (default 5); "
+                         "the speed numbers below always use the benchmark's "
+                         "own N = 5")
+    args = ap.parse_args()
+    bodies_list = [int(x) for x in args.bodies.split(",") if x.strip()]
+    contract = "tolerance" if args.tolerance else "exact equality"
+    print("python %s | steps=%d rounds=%d | contract: %s | N: %s"
+          % (sys.version.split()[0], STEPS, ROUNDS, contract,
+             ",".join(str(n) for n in bodies_list)))
+
+    # ---- correctness -----------------------------------------------------
+    ok = True
+    for n in bodies_list:
+        ok = check_correctness(n, args.tolerance) and ok
 
     # ---- speed (interleaved, min-of-rounds) ------------------------------
     tpy = trs = float("inf")
@@ -101,6 +171,10 @@ def main():
     print("   -> %.2e of one advance(0.01, %d) call"
           % (per_call / trs, STEPS))
 
+    print("\n%s" % ("CONTRACT HELD (%s)" % contract if ok
+                    else "*** CONTRACT VIOLATED (%s) ***" % contract))
+    return 0 if ok else 1
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

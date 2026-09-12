@@ -1,0 +1,25 @@
+{
+  "format": "Yosys Witness Trace",
+  "generator": "smtbmc",
+  "clocks": [
+    {"path": ["\\clk"], "edge": "posedge", "offset": 0}
+  ],
+  "signals": [
+    {"path": ["\\abort_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\all_done_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\clk"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\doorbell_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\nsteps_i"], "width": 32, "offset": 0, "init_only": false},
+    {"path": ["\\rst_n"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\dut", "\\abort_pend"], "width": 1, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\cycles"], "width": 64, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\state"], "width": 3, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\steps"], "width": 32, "offset": 0, "init_only": true}
+  ],
+  "steps": [
+    {"bits": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"bits": "1000000000000000000000000000000001000"},
+    {"bits": "1000000000000000000000000000000000000"},
+    {"bits": "0000000000000000000000000000000000000"}
+  ]
+}

@@ -1,0 +1,45 @@
+# Software correctness checks on the course VM's interpreter line (CPython 3.10,
+# Ubuntu 22.04). Builds both Rust extensions from this checkout with the same
+# script the README documents, so the native checks exercise the wheels this
+# revision produces -- not the prebuilt ones committed under rust/*/wheels/.
+#
+# Timing is deliberately absent: shared CI runners are not a measurement
+# platform. Quoted numbers come from the course VM only.
+name: software checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Python dependencies (versions used on the course VM)
+        run: python -m pip install "pyperformance==1.14.0" "pyperf==2.10.0" "maturin>=1.0,<2.0"
+
+      - name: Build and install both extensions from this checkout
+        run: |
+          ./tools/build_wheel.sh nbody   --python python --record ci-provenance/nbody_rs.json
+          ./tools/build_wheel.sh pyflate --python python --record ci-provenance/pyflate_rs.json
+
+      - name: All software checks
+        env:
+          PYTHON: python
+        run: ./tools/check_all.sh --require-native
+
+      - name: Keep the wheel provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-provenance
+          path: ci-provenance/

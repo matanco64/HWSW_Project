@@ -1,0 +1,84 @@
+SBY 21:45:57 [synth/formal_ctrl_bmc] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_bmc'.
+SBY 21:45:57 [synth/formal_ctrl_cover] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_ctrl_cover'.
+SBY 21:45:57 [synth/formal_skid_bmc] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_skid_bmc'.
+SBY 21:45:57 [synth/formal_skid_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/rtl/huff_ctrl.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_skid_bmc/src/huff_ctrl.sv'.
+SBY 21:45:57 [synth/formal_skid_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/rtl/huff_out.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_skid_bmc/src/huff_out.sv'.
+SBY 21:45:57 [synth/formal_skid_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/formal/ctrl_arcs.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_skid_bmc/src/ctrl_arcs.sv'.
+SBY 21:45:57 [synth/formal_skid_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/formal/skid.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/huffman_engine/synth/formal_skid_bmc/src/skid.sv'.
+SBY 21:45:57 [synth/formal_skid_bmc] engine_0: smtbmc
+SBY 21:45:57 [synth/formal_skid_bmc] base: starting process "cd synth/formal_skid_bmc/src; yosys -ql ../model/design.log ../model/design.ys"
+SBY 21:45:57 [synth/formal_skid_bmc] base: finished (returncode=0)
+SBY 21:45:57 [synth/formal_skid_bmc] prep: starting process "cd synth/formal_skid_bmc/model; yosys -ql design_prep.log design_prep.ys"
+SBY 21:45:58 [synth/formal_skid_bmc] prep: finished (returncode=0)
+SBY 21:45:58 [synth/formal_skid_bmc] smt2: starting process "cd synth/formal_skid_bmc/model; yosys -ql design_smt2.log design_smt2.ys"
+SBY 21:45:58 [synth/formal_skid_bmc] smt2: finished (returncode=0)
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: starting process "cd synth/formal_skid_bmc; yosys-smtbmc --presat --unroll --noprogress -t 30  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2"
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Solver: yices
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 0..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 0..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 1..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 1..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 2..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 2..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 3..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 3..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 4..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 4..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 5..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 5..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 6..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 6..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 7..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 7..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 8..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 8..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 9..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 9..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 10..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 10..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 11..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 11..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 12..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 12..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 13..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 13..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 14..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 14..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 15..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 15..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 16..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 16..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 17..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 17..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 18..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 18..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 19..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 19..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 21..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 21..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 22..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 22..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 23..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 23..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 24..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 24..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 25..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 25..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 26..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 26..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 27..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 27..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 28..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 28..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assumptions in step 29..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Checking assertions in step 29..
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: ##   0:00:00  Status: passed
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: finished (returncode=0)
+SBY 21:45:58 [synth/formal_skid_bmc] engine_0: Status returned by engine: pass
+SBY 21:45:58 [synth/formal_skid_bmc] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 21:45:58 [synth/formal_skid_bmc] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 21:45:58 [synth/formal_skid_bmc] summary: engine_0 (smtbmc) returned pass
+SBY 21:45:58 [synth/formal_skid_bmc] summary: engine_0 did not produce any traces
+SBY 21:45:58 [synth/formal_skid_bmc] DONE (PASS, rc=0)

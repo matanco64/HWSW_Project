@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/log_prompt_hook.py 2>/dev/null || true"
+            "command": "sh tools/run_py.sh tools/log_prompt_hook.py 2>/dev/null || true"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/golden_guard_hook.py"
+            "command": "sh tools/run_py.sh tools/hw/golden_guard_hook.py"
           }
         ]
       }
@@ -27,12 +27,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/lint_sv_hook.py 2>/dev/null || true",
+            "command": "sh tools/run_py.sh tools/hw/lint_sv_hook.py 2>/dev/null || true",
             "timeout": 45
           },
           {
             "type": "command",
-            "command": "python3 tools/hw/status_render_hook.py 2>/dev/null || true",
+            "command": "sh tools/run_py.sh tools/hw/status_render_hook.py 2>/dev/null || true",
             "timeout": 180
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/friction_hook.py 2>/dev/null || true"
+            "command": "sh tools/run_py.sh tools/hw/friction_hook.py 2>/dev/null || true"
           }
         ]
       }
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/friction_hook.py 2>/dev/null || true"
+            "command": "sh tools/run_py.sh tools/hw/friction_hook.py 2>/dev/null || true"
           }
         ]
       }
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/inject_progress_hook.py 2>/dev/null || true"
+            "command": "sh tools/run_py.sh tools/hw/inject_progress_hook.py 2>/dev/null || true"
           }
         ]
       }
@@ -73,7 +73,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hw/stop_hook.py 2>/dev/null || true"
+            "command": "sh tools/run_py.sh tools/hw/stop_hook.py 2>/dev/null || true"
           }
         ]
       }

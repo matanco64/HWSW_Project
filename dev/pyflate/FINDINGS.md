@@ -1,5 +1,13 @@
 # pyflate — software optimization findings
 
+> **Superseded for every quoted number.** This file is the development log: its
+> timings are Windows/CPython 3.12 development measurements, kept because the
+> reasoning and the rejected ideas are the record of how the tiers were chosen.
+> The numbers the reports quote come from the course VM, in
+> `results/vm_canonical_20260910_2c8c754/`, and the Rust crate described below
+> as unbuilt has since been built, landed and measured. Where this file and
+> `results/` disagree, `results/` is right.
+
 **Status:** measurements below are **provisional**. All timings so far were taken on
 Windows/CPython 3.12.6 on a noisy hybrid-core laptop (Intel Core Ultra 7 155H,
 6 P-cores + 8 E-cores + 2 LP-E-cores). The final rigorous A/B is to be re-run
@@ -357,10 +365,11 @@ T2 994,266 calls / 0.454 s.
 ## 4. Rust / PyO3 design for the critical path
 
 Crate: `rust/pyflate/` (`Cargo.toml`, `src/lib.rs`, `README.md`).
-It **cannot be compiled in this session** (no cargo/rustc on the Windows side,
-and installing a toolchain was out of scope), so it is written to be
-correct-by-inspection, with the expected gain argued from the measured profile
-rather than measured directly. The WSL environment note says rustc 1.98 and
+It could not be compiled when this section was written (no cargo/rustc on the
+Windows side), so the design below argues the expected gain from the measured
+profile rather than from a measurement. **It has since been built, landed and
+measured**: the crate is wired into `benchmarks/bm_pyflate/run_benchmark.py`
+behind `HWSW_BACKEND`, and the measured native tier is in the reports. The WSL environment note says rustc 1.98 and
 maturin 1.15 are available there, and that a `cp310 manylinux_2_34` wheel built
 there is directly usable on the course VM (glibc 2.35) — so the build step is a
 one-command follow-up, not a redesign.
@@ -400,7 +409,9 @@ interpreted, and the Amdahl ceiling is honest and visible.
 
 A PyO3 call costs roughly 25-60 ns plus per-argument conversion. Here there is
 **one crossing per block** (two if `bwt_inverse` is used), and the arguments are
-a zero-copy `&[u8]` borrow of the input `bytes`, six small `Vec<u8>` code-length
+the 67,562-byte input, which `Decoder` copies once into an owned `Vec<u8>` with
+its tail padding (an earlier draft of this section called it a zero-copy borrow;
+`src/decoder.rs` owns the buffer), six small `Vec<u8>` code-length
 vectors (147 bytes each), and a selector list of ~2,966 bytes. Return is a
 single `Vec<u8>` -> `PyBytes`. Marshalling is microseconds against a ~150 ms
 block. This is the pydantic-core / polars shape: hand the data over once, do all
@@ -481,7 +492,7 @@ Ranked most to least defensible.
 5. **T3 flat Huffman table.** Defensible and standard (it is what inflate does),
    and conveniently the *least* valuable change at ~5%. If challenged it can be
    dropped almost for free — a good position to be in.
-6. **Rust kernel (designed, not landed).** Gray zone by construction. Scoped as
+6. **Rust kernel (landed and measured; this entry pre-dates that).** Gray zone by construction. Scoped as
    in §4 it is the same argument CPython makes with its own C accelerators.
    Present it as an *additional* optimization stage on top of a pure-Python tier
    that already clears the bar, and clear it with staff before relying on it.

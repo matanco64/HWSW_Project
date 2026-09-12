@@ -1,0 +1,43 @@
+pyflate per-phase CPI stack - course VM, release python3, native decode backend
+n = 336,184 chase steps per iteration
+
+===== phase decode (repeat 300) =====
+phase=decode backend=native repeat=300 working set=336184 bytes
+phase wall time: 0.9913 s total, 0.0033 s per iteration
+        2601838674      cycles:u                                                    
+        3883759765      instructions:u            #    1.49  insn per cycle         
+           7590549      cache-references                                            
+             97490      cache-misses              #    1.284 % of all cache refs    
+         999705537      L1-dcache-loads                                             
+          22024380      L1-dcache-load-misses     #    2.20% of all L1-dcache accesses
+
+===== phase bwt (repeat 20) =====
+phase=bwt backend=native repeat=20 working set=336184 bytes
+phase wall time: 2.7544 s total, 0.1377 s per iteration
+        6589504955      cycles:u                                                    
+       19251168401      instructions:u            #    2.92  insn per cycle         
+          36798686      cache-references                                            
+            957209      cache-misses              #    2.601 % of all cache refs    
+        5433360733      L1-dcache-loads                                             
+          61287070      L1-dcache-load-misses     #    1.13% of all L1-dcache accesses
+
+===== phase chase (repeat 30) =====
+phase=chase backend=native repeat=30 working set=336184 bytes
+phase wall time: 1.4346 s total, 0.0478 s per iteration
+        3862610441      cycles:u                                                    
+        9303967623      instructions:u            #    2.41  insn per cycle         
+          41753521      cache-references                                            
+            764339      cache-misses              #    1.831 % of all cache refs    
+        2617562292      L1-dcache-loads                                             
+          62652303      L1-dcache-load-misses     #    2.39% of all L1-dcache accesses
+
+===== phase rle4 (repeat 100) =====
+phase=rle4 backend=native repeat=100 working set=336184 bytes
+phase wall time: 2.3836 s total, 0.0238 s per iteration
+        6240753160      cycles:u                                                    
+       18043067853      instructions:u            #    2.89  insn per cycle         
+          12143543      cache-references                                            
+            197073      cache-misses              #    1.623 % of all cache refs    
+        5159684514      L1-dcache-loads                                             
+          31091357      L1-dcache-load-misses     #    0.60% of all L1-dcache accesses
+

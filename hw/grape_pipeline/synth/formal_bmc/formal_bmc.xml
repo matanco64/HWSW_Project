@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-09-06T09:49:14" hostname="Kogan-Hard-Reset-Laptop" package="formal" id="0" name="bmc" tests="13" errors="0" failures="0" time="1" skipped="5">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="bmc" name="build execution" time="0">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:66.13-66.31" time="0" type="ASSERT" location="fsm_arcs.sv:66.13-66.31" id="_witness_.check_assert_fsm_arcs_sv_66_54">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:70.34-70.68" time="0" type="ASSERT" location="fsm_arcs.sv:70.34-70.68" id="_witness_.check_assert_fsm_arcs_sv_70_59">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:71.34-71.68" time="0" type="ASSERT" location="fsm_arcs.sv:71.34-71.68" id="_witness_.check_assert_fsm_arcs_sv_71_64">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:72.34-72.68" time="0" type="ASSERT" location="fsm_arcs.sv:72.34-72.68" id="_witness_.check_assert_fsm_arcs_sv_72_69">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:73.34-73.85" time="0" type="ASSERT" location="fsm_arcs.sv:73.34-73.85" id="_witness_.check_assert_fsm_arcs_sv_73_74">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:74.34-74.53" time="0" type="ASSERT" location="fsm_arcs.sv:74.34-74.53" id="_witness_.check_assert_fsm_arcs_sv_74_81">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:75.34-75.53" time="0" type="ASSERT" location="fsm_arcs.sv:75.34-75.53" id="_witness_.check_assert_fsm_arcs_sv_75_84">
+</testcase>
+<testcase classname="bmc" name="Property ASSERT in fsm_arcs at fsm_arcs.sv:78.17-78.38" time="0" type="ASSERT" location="fsm_arcs.sv:78.17-78.38" id="_witness_.check_assert_fsm_arcs_sv_78_89">
+</testcase>
+<testcase classname="bmc" name="Property COVER in fsm_arcs at fsm_arcs.sv:85.13-85.32" time="0" type="COVER" location="fsm_arcs.sv:85.13-85.32" id="_witness_.check_cover_fsm_arcs_sv_85_92">
+<skipped />
+</testcase>
+<testcase classname="bmc" name="Property COVER in fsm_arcs at fsm_arcs.sv:86.13-86.30" time="0" type="COVER" location="fsm_arcs.sv:86.13-86.30" id="_witness_.check_cover_fsm_arcs_sv_86_94">
+<skipped />
+</testcase>
+<testcase classname="bmc" name="Property COVER in fsm_arcs at fsm_arcs.sv:87.13-87.33" time="0" type="COVER" location="fsm_arcs.sv:87.13-87.33" id="_witness_.check_cover_fsm_arcs_sv_87_96">
+<skipped />
+</testcase>
+<testcase classname="bmc" name="Property COVER in fsm_arcs at fsm_arcs.sv:88.13-88.33" time="0" type="COVER" location="fsm_arcs.sv:88.13-88.33" id="_witness_.check_cover_fsm_arcs_sv_88_98">
+<skipped />
+</testcase>
+<testcase classname="bmc" name="Property COVER in fsm_arcs at fsm_arcs.sv:89.13-89.34" time="0" type="COVER" location="fsm_arcs.sv:89.13-89.34" id="_witness_.check_cover_fsm_arcs_sv_89_100">
+<skipped />
+</testcase>
+<system-out>SBY  9:49:14 [synth/formal_bmc] Removing directory '/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/synth/formal_bmc'.
+SBY  9:49:14 [synth/formal_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/rtl/grape_step_fsm.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/synth/formal_bmc/src/grape_step_fsm.sv'.
+SBY  9:49:14 [synth/formal_bmc] Copy '/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/formal/fsm_arcs.sv' to '/home/yuvalk/HWSW/HWSW_Proj/hw/grape_pipeline/synth/formal_bmc/src/fsm_arcs.sv'.
+SBY  9:49:14 [synth/formal_bmc] engine_0: smtbmc
+SBY  9:49:14 [synth/formal_bmc] base: starting process &quot;cd synth/formal_bmc/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY  9:49:14 [synth/formal_bmc] base: finished (returncode=0)
+SBY  9:49:14 [synth/formal_bmc] prep: starting process &quot;cd synth/formal_bmc/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY  9:49:14 [synth/formal_bmc] prep: finished (returncode=0)
+SBY  9:49:14 [synth/formal_bmc] smt2: starting process &quot;cd synth/formal_bmc/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY  9:49:14 [synth/formal_bmc] smt2: finished (returncode=0)
+SBY  9:49:14 [synth/formal_bmc] engine_0: starting process &quot;cd synth/formal_bmc; yosys-smtbmc --presat --unroll --noprogress -t 40  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2&quot;
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Solver: yices
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 0..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 0..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 1..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 1..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 2..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 2..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 3..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 3..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 4..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 4..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 5..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 5..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 6..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 6..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 7..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 7..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 8..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 8..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 9..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 9..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 10..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 10..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 11..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 11..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 12..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 12..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 13..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 13..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 14..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 14..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 15..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 15..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 16..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 16..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 17..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 17..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 18..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 18..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 19..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 19..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 21..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 21..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 22..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 22..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 23..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 23..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 24..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 24..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 25..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 25..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 26..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 26..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 27..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 27..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 28..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 28..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 29..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 29..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 30..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 30..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 31..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 31..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 32..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 32..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 33..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 33..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 34..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 34..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 35..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 35..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 36..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 36..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 37..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 37..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 38..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 38..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assumptions in step 39..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Checking assertions in step 39..
+SBY  9:49:14 [synth/formal_bmc] engine_0: ##   0:00:00  Status: passed
+SBY  9:49:14 [synth/formal_bmc] engine_0: finished (returncode=0)
+SBY  9:49:14 [synth/formal_bmc] engine_0: Status returned by engine: pass
+SBY  9:49:14 [synth/formal_bmc] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY  9:49:14 [synth/formal_bmc] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY  9:49:14 [synth/formal_bmc] summary: engine_0 (smtbmc) returned pass
+SBY  9:49:14 [synth/formal_bmc] summary: engine_0 did not produce any traces
+SBY  9:49:14 [synth/formal_bmc] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

@@ -1,0 +1,22 @@
+python 3.10.12 | steps=20000 rounds=9 | contract: exact equality
+
+initial energy   py -0.1690751638285245
+                 rs -0.1690751638285245
+   equal: True
+
+after 20000 steps   py -0.16908926275527172
+                 rs -0.16908926275527172
+   state bit-identical : True
+   energy bit-identical: True
+   max |delta| state   : 0.000e+00  (inf-rel 0.000e+00)
+   energy rel delta    : 0.000e+00
+
+advance(0.01, 20000), min of 9 interleaved rounds:
+   CPython stock :   243.846 ms
+   Rust  nbody_rs:     9.455 ms
+   kernel speedup:      25.8x
+
+FFI crossing cost (System.energy(), 20000 calls): 226 ns/call
+   -> 2.40e-05 of one advance(0.01, 20000) call
+
+CONTRACT HELD (exact equality)

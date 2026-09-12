@@ -1,0 +1,15 @@
+reference: T0 stock, 20000 steps, energy = -0.16908926275527172
+tolerance: ||delta||_inf / ||ref||_inf <= 1e-11, energy rel <= 1e-12
+
+T1  micro-opt AoS        state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T2  SoA flat lists       state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T3e unrolled bit-exact   state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+T3  unrolled sqrt        state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T3f unrolled sqrt+fold   state |d|=7.78e-12 (inf-rel 1.97e-13, worst-comp 9.50e-10) | energy rel=2.30e-14 | bit-identical=False
+
+LANDED BENCHMARK: /home/ubuntu/hwsw-rerun-3697a63/benchmarks/bm_nbody/run_benchmark.py
+           versus: /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 20000 steps      state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+
+ALL TIERS WITHIN TOLERANCE, LANDED BENCHMARK BIT-EXACT
