@@ -368,7 +368,12 @@ module mtf_cam #(
     end
 
     // ---- protocol assertions (three ports) -----------------------------------------------------
-`ifdef SIMULATION
+    // Concurrent SVA: Verilator-only (VERILATOR is auto-defined; cocotb_run arms them with
+    // --assert). Icarus (-g2012) and Yosys `synth` cannot parse `assert property`, so guarding
+    // these on SIMULATION broke `make sim-icarus` (dv-bringup step 3); the 4-state Icarus X-check
+    // relies on the pyuvm monitors' is_resolvable asserts, not these. Matches the
+    // fp64_rcp_nr/fp64_sqrt_srt `ifdef VERILATOR` convention.
+`ifdef VERILATOR
     // m_l: tvalid is registered and never withdrawn or mutated under back-pressure (PRD-F6).
     property p_ml_stable;
         @(posedge clk) disable iff (!rst_n)
