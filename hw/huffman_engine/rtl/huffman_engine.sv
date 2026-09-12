@@ -94,6 +94,24 @@ module huffman_engine #(
     logic [1:0]  dbg_kind;
     logic [8:0]  dbg_index;
 
+    // Declared before first use (Icarus elaborates instance-port expressions in order;
+    // grape lesson: declare-before-use).
+    logic build_busy;           // builder walking tables (counts read mux below)
+    logic limit_stop;           // SYMBOL_LIMIT reached (C0 event gate)
+    logic c0_ev_ok;             // C0 event qualifies (post-skid, post-limit)
+    logic tail_short;           // code would consume past the last valid bit
+    logic al_tail;              // aligner past TLAST (tail rule)
+    logic [6:0]  al_occ_real;   // real (non-padded) aligner occupancy, UQ7.0
+    logic [9:0]  dbg_sym_data;  // symtab DBG read data
+    logic [19:0] dbg_fc;        // first_code DBG read data
+    logic [10:0] dbg_base;      // base DBG read data
+    logic        sel_set_valid; // selector applied this invocation (R3)
+    logic [4:0]  c1_len;        // C1 code length (DEFLATE distance resolve)
+    logic        out_full;      // output skid full (stall source)
+    logic        out_beat;      // beat handshaken this cycle
+    logic        out_tlast_q;   // TLAST of the parked beat
+    logic        built_q;       // First build of the invocation completed (N5)
+
     huff_regs #(.VERSION(VERSION)) u_regs (
         .clk(clk), .rst_n(rst_n),
         .req_wr_i(req_wr), .wr_addr_i(wr_addr), .wr_data_i(wr_data), .wr_strb_i(wr_strb),
@@ -118,7 +136,7 @@ module huffman_engine #(
     // ---- control -------------------------------------------------------------------------------
     logic prep, decode_en, drain, start_pulse, flush, ctrl_done, ctrl_aborted;
     logic [5:0] ctrl_err;
-    logic build_done, err_table, build_busy, fill_active;
+    logic build_done, err_table, fill_active;
     logic skip_done, underrun, occ_ok;
     logic stall, c0_valid, eob_c0, nocode_c0, err_sel, err_symbol, limit_hit;
     logic out_empty, eob_sent, sel_drained;
@@ -285,7 +303,6 @@ module huffman_engine #(
     logic [19:0] code_c0;
     logic [10:0] index_c0;
     logic        match_c0;
-    logic [4:0]  c1_len;
 
     // DEFLATE remap: aligner gives next stream bit at window[5] ascending; the decoder wants
     // the code's first bit at bit 19 (agent convention note #4).
@@ -310,18 +327,9 @@ module huffman_engine #(
     );
 
     // ---- pipeline: issue / C1 / C2 -------------------------------------------------------------
-    logic out_full, out_beat, out_tlast_q;
     logic [1:0]  out_occ;
     logic [31:0] issued_cnt;
-    logic        limit_stop;
-    logic        al_tail, c0_ev_ok, tail_short;
-    logic [6:0]  al_occ_real;
-    logic        sel_set_valid;
-    logic [9:0]  dbg_sym_data;
-    logic [19:0] dbg_fc;
-    logic [10:0] dbg_base;
     logic [31:0] accepted_q;
-    logic        built_q;               // First build of the invocation completed (N5)
 
     // R1: an issue in flight (c1_v) plus skid occupancy must never exceed the 2 slots
     assign stall    = ({1'b0, out_occ} + {2'd0, c1_v} >= 3'd2) || sel_stall
