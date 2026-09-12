@@ -409,7 +409,9 @@ interpreted, and the Amdahl ceiling is honest and visible.
 
 A PyO3 call costs roughly 25-60 ns plus per-argument conversion. Here there is
 **one crossing per block** (two if `bwt_inverse` is used), and the arguments are
-a zero-copy `&[u8]` borrow of the input `bytes`, six small `Vec<u8>` code-length
+the 67,562-byte input, which `Decoder` copies once into an owned `Vec<u8>` with
+its tail padding (an earlier draft of this section called it a zero-copy borrow;
+`src/decoder.rs` owns the buffer), six small `Vec<u8>` code-length
 vectors (147 bytes each), and a selector list of ~2,966 bytes. Return is a
 single `Vec<u8>` -> `PyBytes`. Marshalling is microseconds against a ~150 ms
 block. This is the pydantic-core / polars shape: hand the data over once, do all
