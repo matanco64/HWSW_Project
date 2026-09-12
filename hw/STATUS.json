@@ -565,13 +565,14 @@
           }
         },
         "ppa": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-12T19:01:55Z",
           "finished": "",
           "gate": {
             "Yosys+Liberty area + cell counts": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/area.txt: 151,058 cells; Chip area 1,634,516 um2 (1.634 mm2); 54.44% sequential",
+              "at": "2026-09-12T19:16:30Z"
             },
             "OpenLane 2 run: Fmax, area µm², power": {
               "result": "n/a",
@@ -580,6 +581,11 @@
             "trade-off table (≥2 design points)": {
               "result": "n/a",
               "evidence": ""
+            },
+            "trade-off table (>= 2 design points)": {
+              "result": "pass",
+              "evidence": "docs/ppa.md 2 Trade-off: 3 design points (flop symtab as-built / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt",
+              "at": "2026-09-12T19:16:30Z"
             }
           }
         },
@@ -688,33 +694,39 @@
           }
         },
         "uarch": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-09-12T19:01:12Z",
           "finished": "",
           "gate": {
             "pipeline/FSM diagrams": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §2 dataflow flowchart + §3 invocation/expander stateDiagrams + §3.2 list-CAM datapath",
+              "at": "2026-09-12T19:18:09Z"
             },
             "number formats fixed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §4: UQ8.0 rank/byte, UQ22.0 run sum (21b stored), UQ31.0 in-flight bytes, counters per MAS §4",
+              "at": "2026-09-12T19:18:09Z"
             },
             "memories sized": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §5: 256x8 shift-register CAM (2048 flops), item FIFO Dx30b 2W/1R, packer Wx8, no macros",
+              "at": "2026-09-12T19:18:09Z"
             },
             "per-stage timing budget": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §6: 6 rows, worst = 256:1 list read mux ~6-8ns < 20ns @ 50MHz; K4 PPA-measured",
+              "at": "2026-09-12T19:18:09Z"
             },
             "latency/throughput derived and matches PRD KPI": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/uarch.md §7 + docs/schedule_model.py: golden list_model.cycles reproduces K3=1.063 @ W8/D8 <=1.10, D-sweep + W-table match PRD; K1 latency <=8",
+              "at": "2026-09-12T19:18:09Z"
             },
             "hw-review resolved": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/review_uarch.md: 12 findings, 3 must (M1 run-adder width, M2 FIFO 2W port for K3, M3 enqueue-after-check) all fixed, 0 must open",
+              "at": "2026-09-12T19:18:09Z"
             }
           }
         },
@@ -899,5 +911,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T18:59:21Z"
+  "updated": "2026-09-12T19:18:09Z"
 }
