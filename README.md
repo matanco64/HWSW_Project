@@ -24,10 +24,15 @@ changes cut 38.1%, both exceeding the course's 7% requirement. Earlier captures,
 including pyflate's `vm_release_20260907/`, remain in `results/`.
 
 The pair was chosen on the hardware story rather than the software margin — mdp
-has the larger speedup, but pyflate and nbody map onto the three accelerator
-modules already scoped in `hw/` (`huffman_engine` + `mtf_cam` for pyflate,
-`grape_pipeline` for nbody), and pyflate's decode engine has shipping-silicon
-precedent in Intel IAA.
+has the larger speedup, but pyflate and nbody both map onto accelerator modules
+scoped in `hw/`, and pyflate's decode engine has shipping-silicon precedent in
+Intel IAA.
+
+The course requires **one** hardware accelerator, and it is nbody's
+`grape_pipeline`: the only module taken past architecture into RTL and
+verification. `hw/huffman_engine` and `hw/mtf_cam` were scoped for pyflate
+before that was settled and stop at PRD/MAS; the pyflate report is a pure
+software study and says where the accelerator lives.
 
 ## Repository structure
 
