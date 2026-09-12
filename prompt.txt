@@ -2321,3 +2321,124 @@ Prompt: "<task-notification>
 <summary>Background command "Timed 14:45 decision check for allow-congestion switch" completed (exit code 0)</summary>
 </task-notification>"
 [hw-advisor] 2026-09-12 grape_pipeline/ppa: five lessons appended (scope check vs project_instructions.md §7 — OpenLane signoff was never required; --from mid-flow resume; measured-clock rule after GRT-0607 x3; pgrep self-match recurrence -> ps -eo comm=; WSL sleep-freeze wall-clock diagnosis). .claude/skills/hw-ppa/SKILL.md updated: requirement-source paragraph + step-4 measured-clock/resume/comm-name rules.
+
+2026-09-12T12:31:58Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bfsl51o0k</task-id>
+<tool-use-id>toolu_016hRFYtyfgLrnVRo6DXvUvd</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bfsl51o0k.output</output-file>
+<status>completed</status>
+<summary>Background command "Run smoke + bench_block on Verilator" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:32:48Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b8phf9t1u</task-id>
+<tool-use-id>toolu_016YcBViob7mxoBvzhcYRyYX</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b8phf9t1u.output</output-file>
+<status>completed</status>
+<summary>Background command "Run bench_block alone with full log" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:35:09Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>baojabgv5</task-id>
+<tool-use-id>toolu_013zZTaf6Awbv9k9nF1kospX</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/baojabgv5.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run bench_block with strided LEN packing" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:37:05Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b9nlhapsn</task-id>
+<tool-use-id>toolu_01XNwp56CoJnBi8BheSqVSQb</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b9nlhapsn.output</output-file>
+<status>completed</status>
+<summary>Background command "Lint + full sim (smoke and bench) with the stall fix" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:38:22Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>bh6awg08l</task-id>
+<tool-use-id>toolu_019cvnkwiX4hCNaGqzaxdoF8</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/bh6awg08l.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run both tests with the lane-width fix" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:40:44Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>buknwjehs</task-id>
+<tool-use-id>toolu_01BHBvFyes5HkYsj1bKk6bFV</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/buknwjehs.output</output-file>
+<status>completed</status>
+<summary>Background command "Run both tests on Icarus (4-state)" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T12:52:26Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>a3eaac84e2bf9769d</task-id>
+<tool-use-id>toolu_019zcyEKSifk1ikKBrH5Ds6G</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/a3eaac84e2bf9769d.output</output-file>
+<status>completed</status>
+<summary>Agent "Adversarial review huffman bring-up diff" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Review complete. I traced every checklist item through the actual RTL and TB sources, ran the arithmetic on the bench vector, and executed the R23 test's tkeep computation.
+
+## Findings
+
+| id | severity | location | problem | proposed fix |
+|----|----------|----------|---------|--------------|
+| B1 | must | `hw/huffman_engine/rtl/huff_out.sv:75-79` + `hw/common/scripts/cocotb_run.py:31-38` | The only runtime guard for the new R1 stall credit — the `push while full` assertion — sits inside `` `ifdef SIMULATION ``, and **no build ever defines SIMULATION** (Verilator gets `-Wno-fatal --timing --assert`, Icarus gets `-g2012`; neither adds `-DSIMULATION`). The safety net for skid overflow was compiled out of the green run and of every unit run. | Add `-DSIMULATION` (Verilator) / `-DSIMULATION` (Icarus) in cocotb_run.py build_args, or change the guard to `` `ifndef SYNTHESIS ``; better, add an SVA `out_occ - out_beat + c1_v &lt;= 2` at `huffman_engine.sv:340`. |
+| B2 | must | `hw/huffman_engine/tb/env.py:238-239`, `tb/unit/test_top_smoke.py:33` | No top-level test ever deasserts `m_axis_sym_tready`: the pyuvm `AxiStreamSink` has no pause generator and test_top_smoke hardwires tready=1. The corner the stall change *introduces* — the credit being withdrawn when tready drops exactly while c1 pushes (`out_occ=1, beat=0, c1_v=1` → occ becomes 2) — has **zero dynamic coverage** at top level, and per B1 no live assertion either. The 148,271-beat green run exercised only the always-ready side of the new expression (that's where K1 improved). | Add a random pause generator on `sym_sink` (cocotbext `set_pause_generator`) to the smoke/bench tests, or a directed top-level backpressure test, before dv_coverage. |
+| B3 | should | `tb/vectors/dump_bench.py:32` vs `bench_block.json` (`"stream_bytes": 67568`) vs `bench_stream.bin` (67562 bytes on disk) | Committed vector is **not reproducible by its committed generator**: `keep = (end_bit+7)//8 + 16` yields 67568, the bin is 67562 (an earlier `+10`), and the json metadata records 67568 — bin and json came from different runs. Worse, the `+16` comment "tail slack ≤ overfetch cap" is wrong: tail = 128 + (byte-pad) = 129 bits here &gt; the 128-bit cap (64b buffer + 2×32b FIFO), so a *regenerated* stream's TLAST beat can never be accepted — silently flipping the test into the no-TLAST regime (the committed 67562-B bin has an 81-bit tail, so TLAST *is* accepted). | Fix keep so tail &lt; 128 bits, assert `keep*8 - end_bit &lt;= 128` in dump_bench.py, regenerate json+bin in one run and recommit. |
+| B4 | should | `tb/env.py:109-122` (used at 161-165) | Invocation segmentation assumes every frame's TLAST beat is accepted. When a run ends with unaccepted beats (SYMBOL_LIMIT, error stops, or exactly the B3 regenerated vector), the accepted beats carry no TLAST: `_frame_bytes` falls through to `return bytes(out), len(beats)` — for the *last* invocation that silently works, but a *following* doorbell would swallow invocation-N leftovers plus invocation-N+1's beats up to N+1's TLAST → replay desync. Also, beats left queued in the cocotbext source are accepted by the DUT after the next doorbell (aligner clears state but happily ingests them as new-stream bytes) — real interleaving the scoreboard never models. Beats after DONE are impossible (`huff_aligner.sv:155`, tready gated by busy) — that half is clean. | Tag stream beats with an invocation id
+... [truncated, 10834 chars total]"
+
+2026-09-12T12:53:31Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 101% rss 10527 MB | last: [INFO GRT-0101] Running extra iterations to remove overflow.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T12:57:25Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b2nrcbqjl</task-id>
+<tool-use-id>toolu_01AtorXsFQyCL61US9qEMo32</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b2nrcbqjl.output</output-file>
+<status>completed</status>
+<summary>Background command "Icarus 3/3 with armed SVAs (clean build dir)" completed (exit code 0)</summary>
+</task-notification>"
+
+2026-09-12T13:36:23Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b1u622fkh</task-id>
+<summary>Monitor event: "grape full regression with armed SVAs: completion + pass/fail summary"</summary>
+<event>grape SVA-armed regression finished: exit 0
+859440.01ns INFO     cocotb.grape_pipeline.s_axi        Reset de-asserted
+859440.01ns INFO     cocotb.grape_pipeline.s_axi        Reset de-asserted
+** TESTS=9 PASS=9 FAIL=0 SKIP=0                 50475580.01         225.37     223972.33  **
+sim: 9/9 tests passed (verilator)</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+
+2026-09-12T13:36:23Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b1u622fkh</task-id>
+<tool-use-id>toolu_011sxhgkVELwNUC89nqAse37</tool-use-id>
+<output-file>/tmp/claude-1000/-home-yuvalk-HWSW-HWSW-Proj/bf50eb92-8cf0-402e-935b-f17564f25976/tasks/b1u622fkh.output</output-file>
+<status>completed</status>
+<summary>Monitor "grape full regression with armed SVAs: completion + pass/fail summary" stream ended</summary>
+</task-notification>"
+
+2026-09-12T13:36:23Z — Claude Code session (auto-logged)
+Prompt: "<task-notification>
+<task-id>b6i6xwzxa</task-id>
+<summary>Monitor event: "OpenLane run 7b (allow-congestion): heartbeat, stall alert, exit report"</summary>
+<event>run7b heartbeat: step 39-openroad-globalrouting of 78 | cpu 102% rss 10817 MB | last: [INFO GRT-0101] Running extra iterations to remove overflow.</event>
+If this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.
+</task-notification>"
+[hw-advisor] 2026-09-12 huffman_engine/dv_bringup: four lessons appended (K1-at-bringup rule caught a 1.5x throughput bug — almost-full gate without pop credit; ifdef SIMULATION assertions dead in EVERY build incl. grape signoff SVAs — armed via cocotb_run.py, grape re-regressed 9/9; amendments must rewrite the row they amend — stale MAS LEN row; AXIS monitor lane-width + vector reproducibility potholes). Diffs applied: .claude/skills/hw-dv-bringup/SKILL.md step 6 (backpressure smoke + assertion-define check), .claude/skills/hw-review/SKILL.md spec item 8 (amendment consistency).
