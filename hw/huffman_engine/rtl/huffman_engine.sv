@@ -347,9 +347,12 @@ module huffman_engine #(
     // R9: in the zero-padded tail, a decode reaching past the real bits is an underrun,
     // never an issued symbol
     assign tail_short = al_tail && ({2'd0, len_c0} > al_occ_real);
-    // one C0 issue: normal decode (or the DEFLATE distance decode requested by the engine)
+    // one C0 issue: normal decode (or the DEFLATE distance decode requested by the engine).
+    // B8: a distance issue completes a pair whose beat was already admitted at its length
+    // issue — limit_stop must not block it (blocking parked huff_deflate in D_DWAIT
+    // forever: no beat, no limit_hit, livelock until the poll timeout).
     assign issue = decode_en && !stall && c0_valid && match_c0 && !eob_c0
-                   && !limit_stop && !tail_short
+                   && (!limit_stop || (cfg_mode && dfl_dist_issue)) && !tail_short
                    && (!cfg_mode || dfl_dist_issue || (!dfl_busy && !c1_v));
     logic eob_issue;                                   // EOB consumes its bits, then DRAIN
     assign eob_issue = decode_en && !stall && c0_valid && eob_c0 && !limit_stop
@@ -377,7 +380,9 @@ module huffman_engine #(
         c1_len  <= len_c0;
         if (doorbell || !rst_n) begin
             issued_cnt <= 32'd0;
-        end else if (issue) begin
+        end else if (issue && !(cfg_mode && dfl_dist_issue)) begin
+            // B8: a DEFLATE distance decode completes the pair already counted at its
+            // length issue — counting it double-counted pairs against SYMBOL_LIMIT
             issued_cnt <= issued_cnt + 32'd1;
         end
     end
