@@ -437,3 +437,21 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   loss/dup, PRD-F6) took ~1 h to write and proved the two properties the testplan listed in
   seconds (BMC+cover). The third (aligner 128-bit cap) took the documented unit-TB fallback —
   fine, but worth attempting the sby first.
+
+## 2026-09-12 — mtf_cam/uarch
+
+- **The uArch spec review earns its keep by catching KPI-fatal structure before RTL.** The
+  headline K3 (≤1.10 cycles/symbol) rested on the golden cycle model enqueuing TWO items in one
+  cycle for a run-terminating symbol, while the draft's item FIFO declared one write port — with
+  1W, K3 lands ~1.30 and the KPI is missed. A reviewer who READ the golden model line-by-line
+  (not just the prose) found it; prose-only review would have passed it to RTL where it surfaces
+  as a throughput miss at dv_signoff. Rule: a uArch that cites a golden cycle model must have its
+  micro-arch reconciled against what that model actually does per cycle (ports, parallelism).
+- **Fixed-width accumulators need the overflow bit the error check reads.** A 21-bit run adder to
+  detect n>2^20 can't represent the k=20 addend (2^21) and wraps below the threshold — the error
+  is silently missed. The compare width must exceed the max representable-plus-one, not just the
+  max valid value. Generalizes to every "≤ LIMIT" counter with a power-of-two limit.
+- **Error-discard rules race against overlapped drain.** "A run pending at ERR_RANK is discarded"
+  is only true if the run item is enqueued AFTER the terminating symbol passes its checks — with
+  a two-sided pipeline, gate the enqueue on the check, don't rely on a downstream freeze catching
+  it before the bytes handshake out.
