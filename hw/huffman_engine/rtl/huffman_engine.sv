@@ -394,9 +394,11 @@ module huffman_engine #(
 
     always_ff @(posedge clk) begin
         c1_v    <= (issue || eob_issue) && rst_n && !flush;
-        c1_eob  <= eob_issue;
-        c1_dist <= issue && cfg_mode && dfl_dist_issue;
-        c1_len  <= len_c0;
+        // S5 (dv_signoff review): explicit reset for defense-in-depth/lint clarity — these are
+        // safe only via the c1_v qualifier downstream; make the reset state defined.
+        c1_eob  <= eob_issue && rst_n;
+        c1_dist <= issue && cfg_mode && dfl_dist_issue && rst_n;
+        c1_len  <= rst_n ? len_c0 : 5'd0;
         if (doorbell || !rst_n) begin
             issued_cnt <= 32'd0;
         end else if (issue && !(cfg_mode && dfl_dist_issue)) begin
@@ -422,7 +424,10 @@ module huffman_engine #(
                      && (!cfg_mode || (symtab_rd_data[9] && c1_sym < 9'd256))) begin
             push      = 1'b1;                         // TYPE 0 (bzip2) / TYPE 1 (DEFLATE literal)
             push_data = {20'd0, cfg_mode ? 3'd1 : 3'd0, c1_sym};
-        end else if (dfl_emit) begin
+        end else if (dfl_emit && !underrun) begin
+            // S2 (dv_signoff review): suppress the pair beat if an extra-bit consume overran
+            // the last valid bit (aligner sticky underrun is high by D_EMIT) — a beat built
+            // from zero-padded extras must never leave; ctrl routes to ERR_UNDERRUN instead.
             push      = 1'b1;                         // TYPE 2 length/distance pair
             push_data = dfl_data;
         end

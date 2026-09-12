@@ -556,6 +556,11 @@
               "result": "pass",
               "evidence": "synth/formal.sby: ctrl_arcs (FSM arcs+termination) + skid (no loss/dup, PRD-F6) BMC+cover 4/4 PASS; aligner 128b-cap property takes testplan §6 documented fallback (aligner unit TB 13/13 + AXIS protocol agent)",
               "at": "2026-09-12T18:16:49Z"
+            },
+            "hw-review findings resolved": {
+              "result": "pass",
+              "evidence": "docs/review_signoff.md: 5 findings (S1-S5), 0 must; S2 (DEFLATE underrun beat suppression) + S3/S4 (dead code) + S5 (explicit c1 reset) fixed, S1 considered+rejected (fix broke ERR valid-beat delivery, caught by regression); re-verified 17/17 both sims + formal 4/4",
+              "at": "2026-09-12T18:50:49Z"
             }
           }
         },
@@ -894,5 +899,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T18:19:22Z"
+  "updated": "2026-09-12T18:50:49Z"
 }
