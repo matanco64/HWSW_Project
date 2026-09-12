@@ -231,3 +231,15 @@ one cycle; valid-qualified datapath (grape §9 pattern).
 See `docs/review_uarch.md` — pass 1: 9 must (U1 compare direction, U2 phantom decodes,
 U3 shared counts, U4 attribution, U5 window size, U6 phantom flags, U7 missing error
 mechanisms, U8 SKIP cost, U9 overfetch) — all folded into this revision; pass 2 verifies.
+
+**Amendment 2026-09-12 (R23 resolution, dv_bringup).** The aligner's DEFLATE ingest now
+bit-reverses each byte lane at beat conversion (`conv`), so stream order in DEFLATE mode is
+RFC 1951 LSB-first-per-byte — as MAS 0x104 already promised ("bit 0 = byte 0 MSB in bzip2,
+LSB in DEFLATE"). As reviewed, the RTL kept MSB-first ingest in both modes and only re-parked
+15 aligner-order bits into the reversed window; START_BIT skipping counted the wrong bit order
+too. With ingest fixed, the window remap, the extras slice (`w[17:5]`, LSB at bit 5), the
+tail rule (last stream bit of the highest valid byte = its bit 7 in RFC order) and BITS
+counting are all RFC-correct as designed. Evidence: `tb/unit/test_aligner.py::
+test_deflate_rfc_bit_order` — oracle string asserted equal to
+`canonical_model.BitReader(msb_first=False)` bit-for-bit, then RTL windows checked against it
+on a zlib-produced fixed-Huffman fragment (golden itself validated against zlib round-trip).

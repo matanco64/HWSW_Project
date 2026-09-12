@@ -43,13 +43,18 @@ KEEP_NBITS = {0x1: 8, 0x3: 16, 0x7: 24, 0xF: 32}
 
 
 # --------------------------------------------------------------------------- oracle helpers
-def beat_ref_bits(data, keep):
-    """Reference bits contributed by one beat: lane 0..3, bit 7 first within each byte."""
+def beat_ref_bits(data, keep, deflate=False):
+    """Reference bits contributed by one beat, in stream order: lane 0..3; bit 7 first
+    within each byte (bzip2), bit 0 first in DEFLATE (RFC 1951 LSB-first — R23)."""
     n = KEEP_NBITS[keep]
-    return "".join(format((data >> (8 * lane)) & 0xFF, "08b") for lane in range(n // 8))
+    out = []
+    for lane in range(n // 8):
+        bits = format((data >> (8 * lane)) & 0xFF, "08b")
+        out.append(bits[::-1] if deflate else bits)
+    return "".join(out)
 
 
-def gen_stream(rng, n_words, last_keep=0xF):
+def gen_stream(rng, n_words, last_keep=0xF, deflate=False):
     """Random n_words-beat stream; returns (beats, ref_bits). beats = (data, keep, last)."""
     beats = []
     ref = []
@@ -58,7 +63,7 @@ def gen_stream(rng, n_words, last_keep=0xF):
         last = i == n_words - 1
         keep = last_keep if last else 0xF
         beats.append((data, keep, last))
-        ref.append(beat_ref_bits(data, keep))
+        ref.append(beat_ref_bits(data, keep, deflate))
     return beats, "".join(ref)
 
 
@@ -235,7 +240,7 @@ async def run_session(dut, rng, n_words, start_bit, **kw):
     """Reset, generate a stream, pulse start, run a full session to the stream end."""
     last_keep = kw.pop("last_keep", 0xF)
     await init_dut(dut)
-    beats, ref = gen_stream(rng, n_words, last_keep)
+    beats, ref = gen_stream(rng, n_words, last_keep, deflate=kw.get("deflate", False))
     dut.mode_deflate_i.value = 1 if kw.get("deflate", False) else 0
     await pulse_start(dut, start_bit)
     ses = Session(dut, rng, beats, ref, start_bit, **kw)
@@ -427,3 +432,41 @@ async def test_consume_zero_noop(dut):
     assert int(dut.window_o.value) == win_before, "consume_i = 0 moved the window"
     assert int(dut.bits_consumed_o.value) == 0, "consume_i = 0 counted bits"
     assert int(dut.underrun_o.value) == 0
+
+
+@cocotb.test()
+async def test_deflate_rfc_bit_order(dut):
+    """R23: DEFLATE ingest equals RFC 1951 / golden BitReader order on a real zlib fragment.
+
+    The oracle string is built LSB-first per byte and asserted equal to the golden model's
+    BitReader(msb_first=False) bit-by-bit, then the RTL windows are checked against that
+    oracle for the whole session (start_bit 3 skips the BFINAL/BTYPE header, as software
+    will program START_BIT after parsing the block header)."""
+    import os
+    import sys
+    import zlib
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "golden"))
+    import canonical_model as cm
+
+    co = zlib.compressobj(9, zlib.DEFLATED, -15)
+    raw = co.compress(b"ABCABCABCABC") + co.flush()      # 7-byte fixed-Huffman block
+    ref = "".join(format(b, "08b")[::-1] for b in raw)   # RFC stream order (LSB-first)
+    rd = cm.BitReader(raw, 0, msb_first=False)
+    for p in range(len(ref)):                            # oracle == golden, bit for bit
+        assert int(ref[p]) == rd._bit(p), f"oracle/golden disagree at bit {p}"
+
+    padded = raw + b"\x00" * ((-len(raw)) % 4)
+    beats = []
+    for i in range(0, len(padded), 4):
+        last = i + 4 >= len(padded)
+        valid = min(4, len(raw) - i)
+        keep = (1 << valid) - 1
+        beats.append((int.from_bytes(padded[i:i + 4], "little"), keep, last))
+
+    rng = random.Random(SEED + 23)
+    await init_dut(dut)
+    dut.mode_deflate_i.value = 1
+    await pulse_start(dut, 3)
+    ses = Session(dut, rng, beats, ref, 3, deflate=True, consume_hi=9)
+    await ses.run()
+    await ses.finish_checks()

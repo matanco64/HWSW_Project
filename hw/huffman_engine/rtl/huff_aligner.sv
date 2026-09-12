@@ -77,7 +77,8 @@ module huff_aligner (
   logic [31:0] bits_q;        // decode bits consumed since START_BIT, UQ32.0
 
   // ---------------- combinational declarations (declare before use) ----------------
-  logic [31:0] conv;          // beat byte-swapped to MSB-first bit order
+  logic [31:0] conv_raw;      // beat byte-swapped, byte-lane bit 7 first (bzip2 ingest form)
+  logic [31:0] conv;          // ingest bits in stream order (DEFLATE: RFC 1951 LSB-first per byte)
   logic [5:0]  beat_nbits;    // valid bits of the incoming beat, UQ6.0
   logic [31:0] beat_data;     // conv masked to the valid (top-aligned) bits
   logic        accept;        // s_axis_bits handshake this cycle
@@ -112,12 +113,23 @@ module huff_aligner (
   logic [31:0] bits_next;
 
   // ---------------- beat conversion: byte swap + tkeep mask ----------------
-  // Byte 0 bit 7 must become the top buffer bit, so the beat is byte-swapped; on a TLAST
-  // beat only the lowest contiguous tkeep run counts and the rest is zeroed (the swapped
-  // word is then top-aligned valid bits over zeros, like the buffer itself).
+  // The first stream bit of byte 0 must become the top buffer bit, so the beat is
+  // byte-swapped; in DEFLATE mode each byte lane is additionally bit-reversed because
+  // RFC 1951 packs bits LSB-first within bytes (MAS 0x104: START_BIT bit 0 = byte 0 MSB
+  // in bzip2, LSB in DEFLATE — R23 resolution). On a TLAST beat only the lowest
+  // contiguous tkeep run counts and the rest is zeroed (the swapped word is then
+  // top-aligned valid bits over zeros, like the buffer itself).
   always_comb begin
-    conv = {s_axis_bits_tdata[7:0], s_axis_bits_tdata[15:8],
-            s_axis_bits_tdata[23:16], s_axis_bits_tdata[31:24]};
+    conv_raw = {s_axis_bits_tdata[7:0], s_axis_bits_tdata[15:8],
+                s_axis_bits_tdata[23:16], s_axis_bits_tdata[31:24]};
+    conv = conv_raw;
+    if (mode_deflate_i) begin
+      for (int unsigned lane = 0; lane < 4; lane++) begin
+        for (int unsigned k = 0; k < 8; k++) begin
+          conv[8 * lane + k] = conv_raw[8 * lane + 7 - k];
+        end
+      end
+    end
     if (!s_axis_bits_tlast) begin
       beat_nbits = 6'd32;
       beat_data  = conv;
