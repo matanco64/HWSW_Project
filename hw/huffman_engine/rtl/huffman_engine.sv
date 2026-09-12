@@ -246,7 +246,7 @@ module huffman_engine #(
     logic dbg_ok;
     always_comb begin
         dbg_ok = ({29'd0, dbg_table} < {29'd0, cfg_n_tables}) && built_q
-                 && ((dbg_kind == 2'd3) ? (dbg_index < 9'd288)
+                 && ((dbg_kind == 2'd3) ? (dbg_index < cfg_alphabet)
                                         : (dbg_index >= 9'd1 && dbg_index <= 9'd20));
         dbg_data = 20'd0;
         if (dbg_ok) begin

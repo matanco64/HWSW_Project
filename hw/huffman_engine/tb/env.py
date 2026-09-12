@@ -232,6 +232,65 @@ class HuffScoreboard(uvm_scoreboard):
                 return {"beats": beats[:limit], "symbols": limit, "bits": None,
                         "sticky": ST_ELIMIT}
 
+    def _predict_deflate(self, data, start_bit, lit_lengths, dist_lengths, limit):
+        """DEFLATE half of the predictor (golden primitives, mirrors
+        decode_deflate_symbols' loop with explicit stop conditions). Beats per ADR-0006:
+        TYPE 1 literal, TYPE 2 copy (length [8:0], distance [27:12]), TYPE 3 EOB=256."""
+        cm = self.golden
+        try:
+            lit = cm.Table(lit_lengths, cm.MAXLEN_DEFLATE)
+            dist = cm.Table(dist_lengths, cm.MAXLEN_DEFLATE)
+        except ValueError:
+            return {"beats": [], "symbols": 0, "bits": None, "sticky": ST_ETABLE}
+        rd = cm.BitReader(data, start_bit, msb_first=False)
+        total_bits = len(data) * 8
+        beats = []
+
+        def stop(bit):
+            return {"beats": beats[:limit], "symbols": min(len(beats), limit),
+                    "bits": None, "sticky": bit}
+
+        while True:
+            try:
+                s, l = lit.decode(rd.peek(cm.MAXLEN_DEFLATE))
+            except ValueError:
+                return stop(ST_ENOCODE)
+            if rd.pos + l > total_bits:
+                return stop(ST_EUNDER)
+            rd.consume(l)
+            if s == 256:
+                beats.append(((3 << 9) | 256, 1))
+                if len(beats) > limit:
+                    return stop(ST_ELIMIT)
+                return {"beats": beats, "symbols": len(beats),
+                        "bits": rd.pos - start_bit, "sticky": ST_DONE}
+            if s >= 286:
+                return stop(ST_ESYM)
+            if s < 256:
+                beats.append(((1 << 9) | s, 0))
+            else:
+                i = s - 257
+                ext = cm._LEN_EXTRA[i]
+                if rd.pos + ext > total_bits:
+                    return stop(ST_EUNDER)
+                length = cm._LEN_BASE[i] + rd.raw(ext)
+                try:
+                    d, dl = dist.decode(rd.peek(cm.MAXLEN_DEFLATE))
+                except ValueError:
+                    return stop(ST_ENOCODE)
+                if rd.pos + dl > total_bits:
+                    return stop(ST_EUNDER)
+                rd.consume(dl)
+                if d >= 30:
+                    return stop(ST_ESYM)
+                dext = cm._DIST_EXTRA[d]
+                if rd.pos + dext > total_bits:
+                    return stop(ST_EUNDER)
+                distance = cm._DIST_BASE[d] + rd.raw(dext)
+                beats.append(((2 << 9) | length | (distance << 12), 0))
+            if len(beats) > limit:
+                return stop(ST_ELIMIT)
+
     # ---- the replay -----------------------------------------------------------------
     def check_phase(self):
         axi = self._drain(self.axi_fifo)
@@ -290,9 +349,18 @@ class HuffScoreboard(uvm_scoreboard):
                     sels = [b.data & 7 for b in beats_of_invocation(sel_beats, t0, t1)]
                     alphabet = mirror.get(ALPHABET, 0) & 0x1FF
                     n_tables = mirror.get(N_TABLES, 0) & 0x7
-                    lengths = self._lengths_from_mirror(mirror, n_tables, alphabet)
-                    inv = self._predict(data, mirror.get(START_BIT, 0), lengths, sels,
-                                        alphabet, mirror.get(SYMBOL_LIMIT, 0))
+                    mode = mirror.get(MODE, 0) & 1
+                    if mode:
+                        lit = self._lengths_from_mirror(mirror, 1, alphabet)[0]
+                        dist = [((mirror.get(LEN_BASE + 4 * (48 + s // 6), 0)
+                                  >> (5 * (s % 6))) & 0x1F) for s in range(30)]
+                        inv = self._predict_deflate(data, mirror.get(START_BIT, 0), lit,
+                                                    dist, mirror.get(SYMBOL_LIMIT, 0))
+                        cov("cg_deflate", "block")
+                    else:
+                        lengths = self._lengths_from_mirror(mirror, n_tables, alphabet)
+                        inv = self._predict(data, mirror.get(START_BIT, 0), lengths, sels,
+                                            alphabet, mirror.get(SYMBOL_LIMIT, 0))
                     inv["t0"] = t0
                     busy = True
                     aborted = False
