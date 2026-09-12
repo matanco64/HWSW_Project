@@ -27,3 +27,6 @@ hw/common/synth/area.txt
 # local-only notes (Technion infra detail) - never commit
 *.local.md
 tmp/*
+
+# Private working notes and self-assessment, not part of the submission
+output/
