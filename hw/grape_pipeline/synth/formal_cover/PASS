@@ -1,0 +1,18 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+engine_0 (smtbmc) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement fsm_arcs._witness_.check_cover_fsm_arcs_sv_85_92 at fsm_arcs.sv:85.13-85.32 step 3
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement fsm_arcs._witness_.check_cover_fsm_arcs_sv_86_94 at fsm_arcs.sv:86.13-86.30 step 4
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement fsm_arcs._witness_.check_cover_fsm_arcs_sv_88_98 at fsm_arcs.sv:88.13-88.33 step 4
+cover trace: engine_0/trace3.vcd
+cover trace: engine_0/trace3.yw
+  reached cover statement fsm_arcs._witness_.check_cover_fsm_arcs_sv_87_96 at fsm_arcs.sv:87.13-87.33 step 5
+cover trace: engine_0/trace4.vcd
+cover trace: engine_0/trace4.yw
+  reached cover statement fsm_arcs._witness_.check_cover_fsm_arcs_sv_89_100 at fsm_arcs.sv:89.13-89.34 step 6

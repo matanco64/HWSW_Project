@@ -1,0 +1,198 @@
+RUN rust_tests
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling autocfg v1.5.1
+   Compiling libc v0.2.189
+   Compiling heck v0.5.0
+   Compiling cfg-if v1.0.4
+   Compiling unindent v0.2.4
+   Compiling indoc v2.0.7
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.57s
+     Running tests/kernel.rs (rust/pyflate/target/debug/deps/kernel-390344fa4e1bdbf0)
+
+running 10 tests
+test bit_reader_preserves_offsets_across_refills ... ok
+test golden_trace_preserves_binary_format ... ok
+test invalid_tables_return_errors_instead_of_panicking ... ok
+test long_codes_use_canonical_fallback ... ok
+test configuration_validates_alphabet_groups_and_selectors ... ok
+test non_byte_start_and_end_offsets_are_exact ... ok
+test mtf_reorders_and_non_run_symbol_flushes_pending_run ... ok
+test primary_lookup_consumes_only_the_code_length ... ok
+test runs_flush_the_mtf_head_before_eob_and_decode_is_repeatable ... ok
+test selectors_switch_after_exactly_fifty_symbols ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+RUN rust_build
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling libc v0.2.189
+   Compiling autocfg v1.5.1
+   Compiling heck v0.5.0
+   Compiling cfg-if v1.0.4
+   Compiling indoc v2.0.7
+   Compiling unindent v0.2.4
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate)
+    Finished `release` profile [optimized + debuginfo] target(s) in 20.89s
+
+RUN python_api
+PASS course input: 1 blocks, 399360 output bytes
+PASS single-symbol runs: 1 blocks, 10000 output bytes
+PASS all byte values: 1 blocks, 25600 output bytes
+PASS mixed runs: 1 blocks, 2102 output bytes
+PASS multiple blocks: 3 blocks, 220000 output bytes
+PASS Python API, kernel/end-bit parity, trace and pipeline: 7 blocks
+Tested extension: /home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/release/libpyflate_rs.so
+
+RUN dispatch
+{"requested_backend": "python", "native_calls": 0, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "64050569b2878cb305ce0caee2a7e616868d094f6a163afb811db743c5c44425", "extension": null}
+{"requested_backend": "native", "native_calls": 1, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "64050569b2878cb305ce0caee2a7e616868d094f6a163afb811db743c5c44425", "extension": "/home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/cargo_build/pyflate_rs.so"}
+{"requested_backend": "auto", "native_calls": 1, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "64050569b2878cb305ce0caee2a7e616868d094f6a163afb811db743c5c44425", "extension": "/home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/cargo_build/pyflate_rs.so"}
+
+RUN suite
+-----+
+[15:03:39] OK    pyflate/native (87s)
+[15:03:39] === summary ===
+--- compare_nbody.txt ---
+Benchmarks with tag 'math':
+===========================
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+
+All benchmarks:
+===============
+
++-----------+----------------+----------------------+
+| Benchmark | baseline_nbody | optimized_nbody      |
++===========+================+======================+
+| nbody     | 231 ms         | 143 ms: 1.62x faster |
++-----------+----------------+----------------------+
+--- compare_nbody_native.txt ---
++-----------+----------------+------------------------+
+| Benchmark | fallback_nbody | native_nbody           |
++===========+================+========================+
+| nbody     | 145 ms         | 9.53 ms: 15.25x faster |
++-----------+----------------+------------------------+
+--- compare_pyflate.txt ---
++-----------+------------------+----------------------+
+| Benchmark | baseline_pyflate | optimized_pyflate    |
++===========+==================+======================+
+| pyflate   | 1.12 sec         | 281 ms: 4.00x faster |
++-----------+------------------+----------------------+
+--- compare_pyflate_native.txt ---
++-----------+------------------+----------------------+
+| Benchmark | fallback_pyflate | native_pyflate       |
++===========+==================+======================+
+| pyflate   | 284 ms           | 170 ms: 1.67x faster |
++-----------+------------------+----------------------+
+[15:03:40] === all done; marker written to /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/suite/.RUN_DONE ===
+
+RUN timing_distributions
+  deff  SE naive  SE clust
+baseline_nbody        7.899     0.602   0.994    2.99    0.7171    1.2396
+optimized_nbody       1.519     0.405   0.934    2.87    0.1424    0.2411
+fallback_nbody        3.831     3.198   0.589    2.18    0.4533    0.6691
+native_nbody          0.000     0.052   0.000    1.00    0.0046    0.0046
+baseline_pyflate      7.670     7.930   0.483    1.97    1.0030    1.4066
+optimized_pyflate     1.574     2.619   0.265    1.53    0.2783    0.3444
+fallback_pyflate      0.000     3.368   0.000    1.00    0.3053    0.3053
+native_pyflate        1.011     2.065   0.193    1.39    0.2095    0.2468
+
+baseline_nbody     results/runs/release_20260910_145405/suite/baseline_nbody.json
+optimized_nbody    results/runs/release_20260910_145405/suite/optimized_nbody.json
+fallback_nbody     results/runs/release_20260910_145405/suite/fallback_nbody.json
+native_nbody       results/runs/release_20260910_145405/suite/native_nbody.json
+baseline_pyflate   results/runs/release_20260910_145405/suite/baseline_pyflate.json
+optimized_pyflate  results/runs/release_20260910_145405/suite/optimized_pyflate.json
+fallback_pyflate   results/runs/release_20260910_145405/suite/fallback_pyflate.json
+native_pyflate     results/runs/release_20260910_145405/suite/native_pyflate.json
+
+All times in ms. wrk = value-bearing worker processes; n = measured values.
+SD-betw/SD-with split the total variance into a between-worker and a within-worker
+component; ICC is the between share and deff = 1 + (n/wrk - 1) * ICC is the factor by
+which clustering inflates the variance of the mean. SE clust is the honest standard
+error of the mean; SE naive is what treating the values as independent would give.
+
+wrote /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405/timing_distributions.json
+
+RUN check_all
+t=147, primary_bits=11)  L identical: True  (336184 bytes)  end bit pos: True  (540415, 531571 bits of stream)
+
+--- pipeline byte-exactness (Rust kernel + Python BWT/RLE4) ---
+  pure Python T3 == bz2.decompress : True
+  hybrid         == bz2.decompress : True
+  hybrid         == pure Python T3 : True
+  hybrid md5 afa004a630fe072901b1d9628b960974 == benchmark md5 : True
+
+  ALL CORRECTNESS CHECKS PASS: True
+
+--- symbol-decode kernel, min of 9 interleaved rounds ---
+  Python T3 symbol loop :  114.816 ms
+  Rust  pyflate_rs      :    2.956 ms
+  KERNEL SPEEDUP        :     38.8x
+
+--- stages that stay in Python ---
+  inverse BWT           :  124.383 ms
+  RLE4 expand           :   23.948 ms
+  header + table build  :    8.615 ms
+  (sum of the three)    :  156.946 ms
+
+--- end to end ---
+  pure Python T3        :  271.660 ms
+  hybrid (Rust kernel)  :  158.560 ms
+  END-TO-END SPEEDUP    :     1.71x
+  T0 stock (context)    : 1114.764 ms  -> T3 4.10x, hybrid 7.03x
+
+  Amdahl:
+    symbol loop is 42.3% of the pure-Python decode
+    Python left in the hybrid: 155.604 ms (BWT 80% + RLE4 15% + header/join)
+    CAP with an infinitely fast kernel: 1.75x
+    achieved: 1.71x  (98% of the cap)
+
+  FFI crossing cost (attribute getter, 200000 calls): 86 ns
+  -> 2.92e-05 of one decode() call
+  config build BlockDecoder(...) : 0.107 ms, i.e. 3.6% of one decode
+
+== report-text-export: python3 report/check_txt_tables.py
+report_appendix    13 table rows verified
+report_nbody       21 table rows verified
+report_pyflate     26 table rows verified
+all report tables survive the text export
+
+================ summary ================
+PASS  unit-tests
+PASS  nbody-python-exact
+PASS  nbody-python-exact-N
+PASS  nbody-native-exact
+PASS  pyflate-native-exact
+PASS  report-text-export
+all 6 checks passed, 0 skipped
+
+RELEASE_CHECK_COMPLETE /home/ubuntu/hwsw-release-fuoh4kq_/results/runs/release_20260910_145405

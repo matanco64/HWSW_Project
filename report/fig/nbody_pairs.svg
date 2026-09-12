@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 150" style="max-width:520px" role="img"
+     aria-label="Five bodies with ten pairwise interaction lines">
+  <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="2.4" orient="auto">
+      <path d="M0,0 L6,2.4 L0,4.8 z" fill="#9b1c1c"/></marker></defs>
+  <g stroke="#b9c0cb" stroke-width="1">
+    <line x1="70" y1="75" x2="200" y2="40"/><line x1="70" y1="75" x2="200" y2="112"/>
+    <line x1="70" y1="75" x2="330" y2="38"/><line x1="70" y1="75" x2="330" y2="114"/>
+    <line x1="200" y1="40" x2="200" y2="112"/><line x1="200" y1="40" x2="330" y2="38"/>
+    <line x1="200" y1="40" x2="330" y2="114"/><line x1="200" y1="112" x2="330" y2="38"/>
+    <line x1="200" y1="112" x2="330" y2="114"/><line x1="330" y1="38" x2="330" y2="114"/>
+  </g>
+  <circle cx="70" cy="75" r="17" fill="#e8a33d"/>
+  <circle cx="200" cy="40" r="9" fill="#8d6e4f"/>
+  <circle cx="200" cy="112" r="8" fill="#c2a878"/>
+  <circle cx="330" cy="38" r="7" fill="#7fa8b8"/>
+  <circle cx="330" cy="114" r="7" fill="#4a6fa5"/>
+  <g font-size="10" fill="#3d4450" font-family="sans-serif">
+    <text x="70" y="106" text-anchor="middle">Sun</text>
+    <text x="200" y="26" text-anchor="middle">Jupiter</text>
+    <text x="200" y="134" text-anchor="middle">Saturn</text>
+    <text x="348" y="41">Uranus</text><text x="348" y="117">Neptune</text>
+  </g>
+  <g font-size="10.5" font-family="sans-serif" fill="#16181d">
+    <text x="410" y="46" font-weight="600">10 pairs</text>
+    <text x="410" y="62">&#215; 20,000 steps</text>
+    <text x="410" y="78">= 200,000 force</text>
+    <text x="410" y="94">   evaluations</text>
+  </g>
+  <line x1="186" y1="52" x2="96" y2="70" stroke="#9b1c1c" stroke-width="1.6" marker-end="url(#ar)"/>
+</svg>

@@ -1,0 +1,65 @@
+=== perf nbody/stock (from 97M capture) ===
+  flame_nbody_stock.folded: 6090090084 -> 6085085079 samples, depth 173 -> 9
+    dropped 5005005 samples (0.08%) not rooted at 'python3-dbg'
+    elided 97 common leading frames: python3-dbg -> PyEval_EvalCode -> _PyEval_Vector -> _PyEval_EvalFrame -> ...
+    capped at depth 9, truncating the tips of 267267267 samples (4.39%)
+  wrote flame_nbody_stock_full.svg
+  wrote flame_nbody_stock.svg
+=== py-spy nbody/stock ===
+  pyspy_nbody_stock.folded: 310 -> 303 samples, depth 40 -> 12
+    dropped 7 startup samples (2.26%) taken during module import
+  wrote pyspy_nbody_stock_full.svg
+  wrote pyspy_nbody_stock.svg
+=== perf nbody/opt (from 58M capture) ===
+  flame_nbody_opt.folded: 3616616613 -> 3613613610 samples, depth 174 -> 125
+    dropped 3003003 samples (0.08%) not rooted at 'python3-dbg'
+    elided 7 common leading frames: python3-dbg -> PyEval_EvalCode -> _PyEval_Vector -> _PyEval_EvalFrame -> ...
+    capped at depth 125, truncating the tips of 179179179 samples (4.96%)
+  wrote flame_nbody_opt_full.svg
+  wrote flame_nbody_opt.svg
+=== py-spy nbody/opt ===
+  pyspy_nbody_opt.folded: 210 -> 194 samples, depth 45 -> 12
+    dropped 16 startup samples (7.62%) taken during module import
+  wrote pyspy_nbody_opt_full.svg
+  wrote pyspy_nbody_opt.svg
+=== perf pyflate/stock (from 160M capture) ===
+  flame_pyflate_stock.folded: 10041041031 -> 10038038028 samples, depth 174 -> 36
+    dropped 3003003 samples (0.03%) not rooted at 'python3-dbg'
+    elided 104 common leading frames: python3-dbg -> PyEval_EvalCode -> _PyEval_Vector -> _PyEval_EvalFrame -> ...
+    capped at depth 36, truncating the tips of 485485485 samples (4.84%)
+  wrote flame_pyflate_stock_full.svg
+  wrote flame_pyflate_stock.svg
+=== py-spy pyflate/stock ===
+  pyspy_pyflate_stock.folded: 371 -> 366 samples, depth 37 -> 18
+    dropped 5 startup samples (1.35%) taken during module import
+  wrote pyspy_pyflate_stock_full.svg
+  wrote pyspy_pyflate_stock.svg
+=== perf pyflate/opt (from 46M capture) ===
+  flame_pyflate_opt.folded: 2836836834 -> 2833833831 samples, depth 177 -> 154
+    dropped 3003003 samples (0.11%) not rooted at 'python3-dbg'
+    elided 1 common leading frames: python3-dbg
+    capped at depth 154, truncating the tips of 137137137 samples (4.84%)
+  wrote flame_pyflate_opt_full.svg
+  wrote flame_pyflate_opt.svg
+=== py-spy pyflate/opt ===
+  pyspy_pyflate_opt.folded: 121 -> 102 samples, depth 65 -> 15
+    dropped 19 startup samples (15.70%) taken during module import
+  wrote pyspy_pyflate_opt_full.svg
+  wrote pyspy_pyflate_opt.svg
+=== done ===
+2436729 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_nbody_opt.svg
+3337169 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_nbody_opt_full.svg
+134076 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_nbody_stock.svg
+3546628 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_nbody_stock_full.svg
+3454493 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_pyflate_opt.svg
+3639286 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_pyflate_opt_full.svg
+948006 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_pyflate_stock.svg
+3879309 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/flame_pyflate_stock_full.svg
+37851 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_opt.svg
+78583 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_opt_full.svg
+19742 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_stock.svg
+46525 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_nbody_stock_full.svg
+25121 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_opt.svg
+78974 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_opt_full.svg
+29728 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_stock.svg
+50041 /home/ubuntu/hwsw-profiles-08da63e/results/runs/profiles_20260910_233217/suite/pyspy_pyflate_stock_full.svg

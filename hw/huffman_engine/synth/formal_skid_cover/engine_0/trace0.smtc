@@ -1,0 +1,44 @@
+initial
+assume (= [$auto$async2sync.cc:107:execute$190] false)
+assume (= [$auto$async2sync.cc:116:execute$188] true)
+assume (= [$auto$async2sync.cc:116:execute$194] true)
+assume (= [dut.slot0] #b000000000000000000000000000000000)
+assume (= [dut.slot1] #b000000000000000000000000000000000)
+assume (= [dut.v0] false)
+assume (= [dut.v1] false)
+
+state 0
+assume (= [clk] false)
+assume (= [flush_i] false)
+assume (= [m_sym_tready] false)
+assume (= [push_data_i] #b00000000000000000000000000000000)
+assume (= [push_i] false)
+assume (= [push_last_i] false)
+assume (= [rst_n] false)
+
+state 1
+assume (= [clk] false)
+assume (= [flush_i] false)
+assume (= [m_sym_tready] false)
+assume (= [push_data_i] #b00000000000000000000000000000000)
+assume (= [push_i] true)
+assume (= [push_last_i] true)
+assume (= [rst_n] true)
+
+state 2
+assume (= [clk] false)
+assume (= [flush_i] false)
+assume (= [m_sym_tready] true)
+assume (= [push_data_i] #b00000000000000000000000000000000)
+assume (= [push_i] false)
+assume (= [push_last_i] false)
+assume (= [rst_n] true)
+
+state 3
+assume (= [clk] false)
+assume (= [flush_i] false)
+assume (= [m_sym_tready] false)
+assume (= [push_data_i] #b00000000000000000000000000000000)
+assume (= [push_i] false)
+assume (= [push_last_i] false)
+assume (= [rst_n] false)

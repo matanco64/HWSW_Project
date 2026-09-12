@@ -1,0 +1,2 @@
+module: /usr/local/lib/python3.10/dist-packages/pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so
+sha256: be6a477a6544c9365c45e4c6e7a7b0eec7af6c209a296e725e9ad91f2299597b

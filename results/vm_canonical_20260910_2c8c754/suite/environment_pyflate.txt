@@ -1,0 +1,9 @@
+bench=pyflate
+python=3.10.12
+pyperformance=1.14.0
+pyperf=2.10.0
+stock=/usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_pyflate
+host=ubuntu-server
+kernel=Linux 5.15.0-1106-kvm
+date=2026-09-10T15:02:12+00:00
+cpu=0

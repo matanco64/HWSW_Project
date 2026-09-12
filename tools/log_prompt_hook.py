@@ -14,7 +14,18 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LOG = ROOT / "prompt.txt"
 MAX_LEN = 4000
-SKIP_PREFIXES = ("/",)  # slash commands (/clear, /help, ...) are not prompts
+# Slash commands are not prompts, and neither is anything the harness injects
+# into the prompt stream on the user's behalf: background-task notifications,
+# system reminders and local-command transcripts are machine output, and
+# logging them buried the authors' own prompts under them (they were 71% of
+# this file before they were stripped).
+SKIP_PREFIXES = (
+    "/",
+    "<task-notification>",
+    "<system-reminder>",
+    "<local-command",
+    "<command-name>",
+)
 
 
 def main() -> None:

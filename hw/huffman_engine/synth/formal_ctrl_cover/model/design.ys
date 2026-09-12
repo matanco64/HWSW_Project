@@ -1,0 +1,9 @@
+# running in synth/formal_ctrl_cover/src/
+read -formal huff_ctrl.sv
+read -formal ctrl_arcs.sv
+prep -top ctrl_arcs
+
+hierarchy -smtcheck
+rename -witness
+write_jny -no-connections ../model/design.json
+write_rtlil ../model/design.il

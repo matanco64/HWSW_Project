@@ -1,0 +1,83 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Executing script file `design_prep.ys' --
+
+1. Executing RTLIL frontend.
+Input filename: design.il
+
+2. Executing SCC pass (detecting logic loops).
+Found 0 SCCs in module ctrl_arcs.
+Found 0 SCCs in module huff_ctrl.
+Found 0 SCCs.
+
+3. Executing SIMPLEMAP pass (map simple cells to gate primitives).
+
+4. Executing MEMORY_NORDFF pass (extracting $dff cells from memories).
+
+5. Executing ASYNC2SYNC pass.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ctrl_arcs..
+Finding unused cells or wires in module \huff_ctrl..
+Removed 27 unused cells and 27 unused wires.
+<suppressed ~28 debug messages>
+
+7. Executing FORMALFF pass.
+
+8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ctrl_arcs..
+Finding unused cells or wires in module \huff_ctrl..
+Removed 12 unused cells and 12 unused wires.
+<suppressed ~14 debug messages>
+
+9. Executing CHECK pass (checking for obvious problems).
+Checking module ctrl_arcs...
+Checking module huff_ctrl...
+Found and reported 0 problems.
+
+10. Executing SETUNDEF pass (replace undef values with defined constants).
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ctrl_arcs.
+<suppressed ~3 debug messages>
+Optimizing module huff_ctrl.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ctrl_arcs'.
+Computing hashes of 50 cells of `\ctrl_arcs'.
+Finding duplicate cells in `\ctrl_arcs'.
+Finding identical cells in module `\huff_ctrl'.
+Computing hashes of 78 cells of `\huff_ctrl'.
+Finding duplicate cells in `\huff_ctrl'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+11.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ctrl_arcs..
+Finding unused cells or wires in module \huff_ctrl..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~3 debug messages>
+
+11.5. Finished fast OPT passes.
+
+12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ctrl_arcs..
+Finding unused cells or wires in module \huff_ctrl..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~1 debug messages>
+
+13. Executing RTLIL backend.
+Output filename: ../model/design_prep.il
+
+End of script. Logfile hash: 2c2aa2fb3c, time: 0.01s, user: 0.02s, system: 0.00s, MEM: 16.81 MB peak
+Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 38% 4x opt_clean (0 sec), 12% 1x opt_dff (0 sec), ...

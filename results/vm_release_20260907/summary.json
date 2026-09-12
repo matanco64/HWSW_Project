@@ -1,0 +1,35 @@
+{
+  "pyflate_stock": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 1129.8885603066688,
+    "sd_ms": 12.679346400827177,
+    "relative_sd_pct": 1.1221767213384133,
+    "backend": "stock (no backend switch)",
+    "python": "3.10.12 (64-bit)",
+    "affinity": "0",
+    "file_sha256": "cd8288b1d7bd679d71db843224e31480541fab6e2cb778ee1255ab49068f49c7"
+  },
+  "pyflate_python": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 287.9968987350973,
+    "sd_ms": 3.2165088846307883,
+    "relative_sd_pct": 1.1168553893315942,
+    "backend": "python",
+    "python": "3.10.12 (64-bit)",
+    "affinity": "0",
+    "file_sha256": "8ed9f17deca115e983266dc400abf22028f0bf040fe7cb1bc29a25bae95e93c5"
+  },
+  "pyflate_native": {
+    "values": 120,
+    "workers": 40,
+    "mean_ms": 173.58863990133008,
+    "sd_ms": 2.147677431621066,
+    "relative_sd_pct": 1.2372223394582917,
+    "backend": "native",
+    "python": "3.10.12 (64-bit)",
+    "affinity": "0",
+    "file_sha256": "28396f619b55f74e8425ff308aea3a11afcd9c51f002a8d567a54536f232c704"
+  }
+}

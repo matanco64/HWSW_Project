@@ -86,15 +86,15 @@ start)
 status)
     guest "
 cd $VM_DIR 2>/dev/null || { echo 'repo not on VM yet'; exit 0; }
-if [ -f results/.RUN_DONE ]; then
-    echo \"RUN COMPLETE at \$(cat results/.RUN_DONE)\"
+if [ -f results/runs/vm/.RUN_DONE ]; then
+    echo \"RUN COMPLETE at \$(cat results/runs/vm/.RUN_DONE)\"
 elif tmux has-session -t $SESSION 2>/dev/null; then
     echo RUNNING
 else
     echo 'NOT RUNNING (and no completion marker - may have died)'
 fi
 echo '--- stages done ---'
-ls results/.stamps/ 2>/dev/null | tr '\n' ' '; echo
+ls results/runs/vm/.stamps/ 2>/dev/null | tr '\n' ' '; echo
 echo '--- progress ---'
 grep -E '^\[.*\] (START|OK|FAIL|SKIP)' vm_run.log 2>/dev/null | tail -12 || echo 'no log yet'
 "

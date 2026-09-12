@@ -1,0 +1,15 @@
+[options]
+mode cover
+depth 40
+
+[engines]
+smtbmc
+
+[script]
+read -formal grape_step_fsm.sv
+read -formal fsm_arcs.sv
+prep -top fsm_arcs
+
+[files]
+rtl/grape_step_fsm.sv
+formal/fsm_arcs.sv

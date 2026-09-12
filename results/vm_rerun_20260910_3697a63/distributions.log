@@ -1,0 +1,36 @@
+file                 wrk     n    median       IQR       p95       max      mean
+baseline_nbody        40   120   229.187     4.203   236.179   252.182   229.949
+optimized_nbody       40   120   142.633     2.411   154.590   167.462   144.595
+fallback_nbody        40   120   142.804     0.672   147.572   164.079   143.532
+native_nbody          40   120     9.467     0.010     9.479     9.517     9.467
+baseline_pyflate      40   120  1127.027    21.549  1152.864  1180.911  1128.759
+optimized_pyflate     40   120   279.088     2.816   283.182   291.750   279.105
+fallback_pyflate      40   120   282.378     3.756   288.195   302.249   283.021
+native_pyflate        40   120   168.328     1.859   172.589   183.750   168.919
+
+clustering          SD-betw   SD-with     ICC    deff  SE naive  SE clust
+baseline_nbody        3.955     1.028   0.937    2.87    0.3701    0.6274
+optimized_nbody       3.259     3.312   0.492    1.98    0.4224    0.5950
+fallback_nbody        1.390     2.649   0.216    1.43    0.2726    0.3262
+native_nbody          0.001     0.010   0.009    1.02    0.0009    0.0009
+baseline_pyflate     11.018     9.928   0.552    2.10    1.3476    1.9546
+optimized_pyflate     1.489     2.088   0.337    1.67    0.2335    0.3021
+fallback_pyflate      1.560     3.597   0.158    1.32    0.3574    0.4101
+native_pyflate        0.790     2.429   0.096    1.19    0.2330    0.2543
+
+baseline_nbody     results/runs/vm_rerun_20260910_134525/suite/baseline_nbody.json
+optimized_nbody    results/runs/vm_rerun_20260910_134525/suite/optimized_nbody.json
+fallback_nbody     results/runs/vm_rerun_20260910_134525/suite/fallback_nbody.json
+native_nbody       results/runs/vm_rerun_20260910_134525/suite/native_nbody.json
+baseline_pyflate   results/runs/vm_rerun_20260910_134525/suite/baseline_pyflate.json
+optimized_pyflate  results/runs/vm_rerun_20260910_134525/suite/optimized_pyflate.json
+fallback_pyflate   results/runs/vm_rerun_20260910_134525/suite/fallback_pyflate.json
+native_pyflate     results/runs/vm_rerun_20260910_134525/suite/native_pyflate.json
+
+All times in ms. wrk = value-bearing worker processes; n = measured values.
+SD-betw/SD-with split the total variance into a between-worker and a within-worker
+component; ICC is the between share and deff = 1 + (n/wrk - 1) * ICC is the factor by
+which clustering inflates the variance of the mean. SE clust is the honest standard
+error of the mean; SE naive is what treating the values as independent would give.
+
+wrote /home/ubuntu/hwsw-rerun-3697a63/results/runs/vm_rerun_20260910_134525/timing_distributions.json

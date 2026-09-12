@@ -1,0 +1,17 @@
+{
+  "wheel": "pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl",
+  "wheel_sha256": "f58ac65f05ba90ca5a3731be8be223822e0a8485871bcfd21cb96c19609492fd",
+  "extension_sha256": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607",
+  "wheel_extensions": {
+    "pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607"
+  },
+  "built_from_revision": "2c8c75413d50324d47d77325e7b087c719570edc",
+  "built_on": "course VM, Ubuntu 22.04, CPython 3.10.12",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "maturin": "maturin 1.14.1",
+  "measured_in": "results/vm_canonical_20260910_2c8c754/",
+  "replaced": [
+    "pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl"
+  ],
+  "note": "The binary the canonical run installed and measured. Installing it reproduces that binary; tools/build_wheel.sh rebuilds from source and reports whether the extension hash matches."
+}

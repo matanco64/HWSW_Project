@@ -1,0 +1,41 @@
+python 3.10.12 | rounds=9
+input 67562 bytes -> 399360 bytes, md5 afa004a630fe072901b1d9628b960974
+blocks: 1
+
+--- kernel byte-exactness (Rust vs Python T3 symbol loop) ---
+  block 0: BlockDecoder(groups=6, selectors=2966, alphabet=147, primary_bits=11)  L identical: True  (336184 bytes)  end bit pos: True  (540415, 531571 bits of stream)
+
+--- pipeline byte-exactness (Rust kernel + Python BWT/RLE4) ---
+  pure Python T3 == bz2.decompress : True
+  hybrid         == bz2.decompress : True
+  hybrid         == pure Python T3 : True
+  hybrid md5 afa004a630fe072901b1d9628b960974 == benchmark md5 : True
+
+  ALL CORRECTNESS CHECKS PASS: True
+
+--- symbol-decode kernel, min of 9 interleaved rounds ---
+  Python T3 symbol loop :  113.360 ms
+  Rust  pyflate_rs      :    2.977 ms
+  KERNEL SPEEDUP        :     38.1x
+
+--- stages that stay in Python ---
+  inverse BWT           :  123.908 ms
+  RLE4 expand           :   23.950 ms
+  header + table build  :    8.637 ms
+  (sum of the three)    :  156.494 ms
+
+--- end to end ---
+  pure Python T3        :  271.019 ms
+  hybrid (Rust kernel)  :  157.406 ms
+  END-TO-END SPEEDUP    :     1.72x
+  T0 stock (context)    : 1101.398 ms  -> T3 4.06x, hybrid 7.00x
+
+  Amdahl:
+    symbol loop is 41.8% of the pure-Python decode
+    Python left in the hybrid: 154.430 ms (BWT 80% + RLE4 16% + header/join)
+    CAP with an infinitely fast kernel: 1.75x
+    achieved: 1.72x  (98% of the cap)
+
+  FFI crossing cost (attribute getter, 200000 calls): 85 ns
+  -> 2.87e-05 of one decode() call
+  config build BlockDecoder(...) : 0.109 ms, i.e. 3.7% of one decode

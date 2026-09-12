@@ -1,0 +1,136 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Executing script file `design_smt2.ys' --
+
+1. Executing RTLIL frontend.
+Input filename: design_prep.il
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `ctrl_arcs'. Setting top module to ctrl_arcs.
+
+2.1. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+
+2.2. Analyzing design hierarchy..
+Top module:  \ctrl_arcs
+Used module:     \huff_ctrl
+Removed 0 unused modules.
+Module ctrl_arcs directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3. Executing FORMALFF pass.
+
+4. Executing DFFUNMAP pass (unmap clock enable and synchronous reset from FFs).
+
+5. Printing statistics.
+
+=== ctrl_arcs ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       68 wires
+      209 wire bits
+       33 public wires
+       38 public wire bits
+       19 ports
+       19 port bits
+       49 cells
+        4   $add
+        4   $anyinit
+        7   $assert
+        2   $assume
+        6   $eqx
+        3   $ff
+        1   $initstate
+        2   $le
+        2   $logic_and
+        7   $logic_not
+        6   $logic_or
+        3   $mux
+        1   $not
+        1   $reduce_or
+        1 submodules
+        1   huff_ctrl
+
+=== huff_ctrl ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       92 wires
+      157 wire bits
+       34 public wires
+       48 public wire bits
+       28 ports
+       33 port bits
+       80 cells
+        6   $anyinit
+        1   $assume
+        7   $eq
+       12   $logic_and
+        5   $logic_not
+        3   $logic_or
+       39   $mux
+        2   $ne
+        1   $not
+        1   $or
+        2   $pmux
+        1   $reduce_bool
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      129 ctrl_arcs
+       80 huff_ctrl
+
+        +----------Count including submodules.
+        | 
+      160 wires
+      366 wire bits
+       67 public wires
+       86 public wire bits
+       47 ports
+       52 port bits
+        - memories
+        - memory bits
+        - processes
+      129 cells
+        4   $add
+       10   $anyinit
+        7   $assert
+        3   $assume
+        7   $eq
+        6   $eqx
+        3   $ff
+        1   $initstate
+        2   $le
+       14   $logic_and
+       12   $logic_not
+        9   $logic_or
+       42   $mux
+        2   $ne
+        2   $not
+        1   $or
+        2   $pmux
+        1   $reduce_bool
+        1   $reduce_or
+        1 submodules
+        1   huff_ctrl
+
+6. Executing SMT2 backend.
+
+6.1. Executing BMUXMAP pass.
+
+6.2. Executing DEMUXMAP pass.
+Creating SMT-LIBv2 representation of module huff_ctrl.
+Creating SMT-LIBv2 representation of module ctrl_arcs.
+
+End of script. Logfile hash: 8e36f61887, time: 0.00s, user: 0.01s, system: 0.01s, MEM: 16.93 MB peak
+Yosys 0.68+130 (git sha1 dd83bbad2-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 56% 2x write_smt2 (0 sec), 23% 2x read_rtlil (0 sec), ...

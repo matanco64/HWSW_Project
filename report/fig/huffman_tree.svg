@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 180" role="img"
+     aria-label="Canonical Huffman example: a 00, b 01, c 10, d 110, e 111">
+  <g stroke="#8298a9" stroke-width="1.5" fill="none">
+    <path d="M290 20L215 64 M290 20L365 64"/>
+    <path d="M215 64L175 108 M215 64L255 108"/>
+    <path d="M365 64L325 108 M365 64L405 108"/>
+    <path d="M405 108L375 152 M405 108L435 152"/>
+  </g>
+  <g font-size="12" fill="#00779d" font-family="monospace">
+    <text x="242" y="41">0</text><text x="331" y="41">1</text>
+    <text x="185" y="85">0</text><text x="242" y="85">1</text>
+    <text x="336" y="85">0</text><text x="392" y="85">1</text>
+    <text x="381" y="129">0</text><text x="428" y="129">1</text>
+  </g>
+  <g fill="#8298a9">
+    <circle cx="290" cy="20" r="6"/><circle cx="215" cy="64" r="6"/>
+    <circle cx="365" cy="64" r="6"/><circle cx="405" cy="108" r="6"/>
+  </g>
+  <g fill="#eef3f7" stroke="#8298a9">
+    <rect x="158" y="99" width="34" height="22" rx="3"/>
+    <rect x="238" y="99" width="34" height="22" rx="3"/>
+    <rect x="308" y="99" width="34" height="22" rx="3"/>
+    <rect x="358" y="143" width="34" height="22" rx="3"/>
+    <rect x="418" y="143" width="34" height="22" rx="3"/>
+  </g>
+  <g font-family="monospace" font-size="14" fill="#18344a" text-anchor="middle">
+    <text x="175" y="115">a</text><text x="255" y="115">b</text>
+    <text x="325" y="115">c</text><text x="375" y="159">d</text>
+    <text x="435" y="159">e</text>
+  </g>
+  <g font-family="monospace" font-size="13" fill="#18344a">
+    <text x="12" y="24" font-family="sans-serif" font-weight="bold">Example codes</text>
+    <text x="12" y="48">a = 00</text><text x="12" y="68">b = 01</text>
+    <text x="12" y="88">c = 10</text><text x="12" y="108">d = 110</text>
+    <text x="12" y="128">e = 111</text>
+  </g>
+  <g font-family="sans-serif" font-size="13" fill="#18344a">
+    <text x="483" y="24" font-weight="bold">Canonical ranges</text>
+    <text x="483" y="48" font-family="monospace">len 2: 00..10</text>
+    <text x="483" y="68" font-family="monospace">len 3: 110..111</text>
+    <text x="483" y="99">Match a length range,</text>
+    <text x="483" y="118">then index the symbol.</text>
+    <text x="483" y="147" fill="#00779d">Example: 110 decodes to d.</text>
+  </g>
+</svg>

@@ -1,0 +1,135 @@
+RUN rust_tests
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling autocfg v1.5.1
+   Compiling libc v0.2.189
+   Compiling heck v0.5.0
+   Compiling cfg-if v1.0.4
+   Compiling unindent v0.2.4
+   Compiling indoc v2.0.7
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/tmp/hwsw-release-check-sfmlbvdl/rust/pyflate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.02s
+     Running tests/kernel.rs (rust/pyflate/target/debug/deps/kernel-390344fa4e1bdbf0)
+
+running 10 tests
+test bit_reader_preserves_offsets_across_refills ... ok
+test configuration_validates_alphabet_groups_and_selectors ... ok
+test golden_trace_preserves_binary_format ... ok
+test long_codes_use_canonical_fallback ... ok
+test invalid_tables_return_errors_instead_of_panicking ... ok
+test primary_lookup_consumes_only_the_code_length ... ok
+test mtf_reorders_and_non_run_symbol_flushes_pending_run ... ok
+test runs_flush_the_mtf_head_before_eob_and_decode_is_repeatable ... ok
+test non_byte_start_and_end_offsets_are_exact ... ok
+test selectors_switch_after_exactly_fifty_symbols ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+RUN rust_build
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling autocfg v1.5.1
+   Compiling libc v0.2.189
+   Compiling heck v0.5.0
+   Compiling cfg-if v1.0.4
+   Compiling indoc v2.0.7
+   Compiling unindent v0.2.4
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/tmp/hwsw-release-check-sfmlbvdl/rust/pyflate)
+    Finished `release` profile [optimized + debuginfo] target(s) in 21.15s
+
+RUN python_api
+PASS course input: 1 blocks, 399360 output bytes
+PASS single-symbol runs: 1 blocks, 10000 output bytes
+PASS all byte values: 1 blocks, 25600 output bytes
+PASS mixed runs: 1 blocks, 2102 output bytes
+PASS multiple blocks: 3 blocks, 220000 output bytes
+PASS Python API, kernel/end-bit parity, trace and pipeline: 7 blocks
+Tested extension: /tmp/hwsw-release-check-sfmlbvdl/rust/pyflate/target/release/libpyflate_rs.so
+
+RUN dispatch
+{"requested_backend": "python", "native_calls": 0, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "76c2361cda5af5ff47e34633d21e7d2db7aa4e31f4ac74b0a0b147c245e4c494", "extension": null}
+{"requested_backend": "native", "native_calls": 1, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "76c2361cda5af5ff47e34633d21e7d2db7aa4e31f4ac74b0a0b147c245e4c494", "extension": "/tmp/hwsw-release-check-sfmlbvdl/native/pyflate_rs.so"}
+{"requested_backend": "auto", "native_calls": 1, "output_md5": "afa004a630fe072901b1d9628b960974", "output_bytes": 399360, "source_sha256": "76c2361cda5af5ff47e34633d21e7d2db7aa4e31f4ac74b0a0b147c245e4c494", "extension": "/tmp/hwsw-release-check-sfmlbvdl/native/pyflate_rs.so"}
+
+RUN pyflate_stock
+.........................................
+pyflate: Mean +- std dev: 1.13 sec +- 0.01 sec
+
+RUN pyflate_python
+.........................................
+pyflate: Mean +- std dev: 288 ms +- 3 ms
+
+RUN pyflate_native
+.........................................
+pyflate: Mean +- std dev: 174 ms +- 2 ms
+
+RUN stock_vs_python
++-----------+---------------+----------------------+
+| Benchmark | pyflate_stock | pyflate_python       |
++===========+===============+======================+
+| pyflate   | 1.13 sec      | 288 ms: 3.92x faster |
++-----------+---------------+----------------------+
+
+RUN python_vs_native
++-----------+----------------+----------------------+
+| Benchmark | pyflate_python | pyflate_native       |
++===========+================+======================+
+| pyflate   | 288 ms         | 174 ms: 1.66x faster |
++-----------+----------------+----------------------+
+
+RUN stock_vs_native
++-----------+---------------+----------------------+
+| Benchmark | pyflate_stock | pyflate_native       |
++===========+===============+======================+
+| pyflate   | 1.13 sec      | 174 ms: 6.51x faster |
++-----------+---------------+----------------------+
+
+RUN counters
+nbody_python_core_1: 141.081 ms/iter
+nbody_native_core_1: 9.462 ms/iter
+nbody_python_cache_1: 140.115 ms/iter
+nbody_native_cache_1: 9.459 ms/iter
+pyflate_python_core_1: 286.538 ms/iter
+pyflate_native_core_1: 174.436 ms/iter
+pyflate_python_cache_1: 287.088 ms/iter
+pyflate_native_cache_1: 174.574 ms/iter
+nbody_native_core_2: 9.536 ms/iter
+nbody_python_core_2: 146.798 ms/iter
+nbody_native_cache_2: 9.464 ms/iter
+nbody_python_cache_2: 140.208 ms/iter
+pyflate_native_core_2: 174.800 ms/iter
+pyflate_python_core_2: 288.685 ms/iter
+pyflate_native_cache_2: 176.020 ms/iter
+pyflate_python_cache_2: 287.212 ms/iter
+nbody_python_core_3: 140.257 ms/iter
+nbody_native_core_3: 9.456 ms/iter
+nbody_python_cache_3: 141.046 ms/iter
+nbody_native_cache_3: 9.453 ms/iter
+pyflate_python_core_3: 288.938 ms/iter
+pyflate_native_core_3: 174.149 ms/iter
+pyflate_python_cache_3: 287.661 ms/iter
+pyflate_native_cache_3: 176.488 ms/iter
+COUNTER_RUN_COMPLETE
+
+RELEASE_CHECK_COMPLETE

@@ -5,17 +5,17 @@ Run 'python3 -m pyperf system tune' command to reduce the system jitter.
 Use pyperf stats, pyperf dump and pyperf hist to analyze results.
 Use --quiet option to hide these warnings.
 
-nbody: Mean +- std dev: 141 ms +- 1 ms
+nbody: Mean +- std dev: 144 ms +- 2 ms
 
- Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_nbody/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-profiles-08da63e/benchmarks/bm_nbody/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-       14066815166      cycles:u                                                    
-       40232496985      instructions:u            #    2.86  insn per cycle         
+       14434723335      cycles:u                                                    
+       39965397882      instructions:u            #    2.77  insn per cycle         
 
-       6.179454531 seconds time elapsed
+       6.347625968 seconds time elapsed
 
-       5.937824000 seconds user
-       0.213051000 seconds sys
+       6.104084000 seconds user
+       0.223543000 seconds sys
 
 
 Try to rerun the benchmark with more runs, values and/or loops.
@@ -23,18 +23,18 @@ Run 'python3 -m pyperf system tune' command to reduce the system jitter.
 Use pyperf stats, pyperf dump and pyperf hist to analyze results.
 Use --quiet option to hide these warnings.
 
-nbody: Mean +- std dev: 142 ms +- 2 ms
+nbody: Mean +- std dev: 144 ms +- 2 ms
 
- Performance counter stats for 'python3 /home/ubuntu/hwsw-project/benchmarks/bm_nbody/run_benchmark.py --fast':
+ Performance counter stats for 'python3 /home/ubuntu/hwsw-profiles-08da63e/benchmarks/bm_nbody/run_benchmark.py --fast --inherit-environ HWSW_BACKEND':
 
-          74724303      cache-references                                            
-           1926250      cache-misses              #    2.578 % of all cache refs    
-        6981020027      branches                                                    
-          53318723      branch-misses             #    0.76% of all branches        
+          76170324      cache-references                                            
+           2002377      cache-misses              #    2.629 % of all cache refs    
+        7026141455      branches                                                    
+          54754984      branch-misses             #    0.78% of all branches        
 
-       6.222845003 seconds time elapsed
+       6.334380307 seconds time elapsed
 
-       5.986480000 seconds user
-       0.217302000 seconds sys
+       6.073060000 seconds user
+       0.240377000 seconds sys
 
 

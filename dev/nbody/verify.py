@@ -11,11 +11,26 @@ Reported per tier:
   energy abs/rel    divergence of report_energy()
   bit-identical     True iff every component compares == to stock
 
-Also checks the *landed* benchmark file (benchmarks/bm_nbody/run_benchmark.py)
-against the stock pyperformance file, which is the claim that actually has to
-hold for the report.
+Two different contracts are checked, and they are not interchangeable:
 
-    python verify.py [--steps 20000]
+  tiers            scored against TOL_STATE / TOL_ENERGY.  T3's sqrt variants
+                   deliberately reorder the arithmetic, so they are close but
+                   not bit-identical, and a tolerance verdict is the honest one.
+  landed benchmark scored on EXACT equality.  benchmarks/bm_nbody/run_benchmark.py
+                   keeps stock's operation order precisely so the reports can
+                   say "compares exactly equal to stock", so that is the claim
+                   the exit status defends.  Its tolerance verdict is still
+                   computed and printed, but passing it is not sufficient.
+
+A violation of either contract returns a nonzero exit status.
+
+    python verify.py [--steps 20000] [--bodies 5[,10,20,...]]
+
+`--bodies` takes a comma-separated list of body counts.  For each N it checks
+(a) that dev/nbody/common.py's `extra_bodies()` and the landed benchmark's
+`_extra_bodies()` emit bit-identical body tables, and (b) that the landed
+benchmark's generated `advance()` is still bit-exact against the stock kernel
+at that N.  N = 5 additionally runs the full tier ladder.
 """
 import argparse
 import importlib.machinery
@@ -23,6 +38,7 @@ import importlib.util
 import os
 import sys
 
+import common
 import t0_stock
 import t1_micro
 import t2_soa
@@ -102,26 +118,135 @@ def _load(path, name):
     loader = importlib.machinery.SourceFileLoader(name, path)
     spec = importlib.util.spec_from_file_location(name, path, loader=loader)
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    # This oracle checks the *Python* kernel, so the landed file must import
+    # with its Python back end pinned. Under the default HWSW_BACKEND=auto, a
+    # host with nbody_rs installed selects native, and _configure(n) then
+    # skips regenerating advance() because the native path never calls it --
+    # leaving the module's advance() as the 5-body kernel. Calling that on a
+    # 10-body system integrates half the bodies. On the course VM that read as
+    # an 18 AU divergence at N=10 and N=20 while N=5 stayed bit-exact.
+    saved = os.environ.get("HWSW_BACKEND")
+    os.environ["HWSW_BACKEND"] = "python"
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        if saved is None:
+            del os.environ["HWSW_BACKEND"]
+        else:
+            os.environ["HWSW_BACKEND"] = saved
     return mod
 
 
-def check_landed(steps):
+def _paths():
+    """(stock, landed) benchmark sources.
+
+    The stock reference is looked for in a sibling pyperformance checkout, then
+    in the installed pyperformance package (the course VM has no checkout),
+    then in the pristine copy kept next to this file.
+    """
     here = os.path.dirname(os.path.abspath(__file__))
     repo = os.path.dirname(os.path.dirname(here))
-    stock_path = os.path.join(
-        os.path.dirname(repo), "pyperformance", "pyperformance", "data-files",
-        "benchmarks", "bm_nbody", "run_benchmark.py")
-    opt_path = os.path.join(repo, "benchmarks", "bm_nbody",
-                            "run_benchmark.py")
+    rel = ("data-files", "benchmarks", "bm_nbody", "run_benchmark.py")
+    candidates = [os.path.join(os.path.dirname(repo), "pyperformance",
+                               "pyperformance", *rel)]
+    try:
+        import pyperformance
+        candidates.append(os.path.join(os.path.dirname(pyperformance.__file__),
+                                       *rel))
+    except ImportError:
+        pass
+    candidates.append(os.path.join(here, "stock_run_benchmark.py.bak"))
+    stock = next((c for c in candidates if os.path.exists(c)), candidates[0])
+    opt = os.path.join(repo, "benchmarks", "bm_nbody", "run_benchmark.py")
+    return stock, opt
+
+
+def _scale_stock_module(mod, n):
+    """Give an *unmodified* stock run_benchmark module the N > 5 system.
+
+    Does by hand exactly what the optimized file's `_configure()` does, so the
+    stock reference at N is the stock kernel run on the identical bodies --
+    no edit to the pristine stock source required.
+    """
+    if n == common.DEFAULT_BODIES:
+        return
+    for k, (r, v, m) in enumerate(common.extra_bodies(n), 1):
+        mod.BODIES['b%03d' % k] = (r, v, m)
+    mod.SYSTEM[:] = list(mod.BODIES.values())
+    mod.PAIRS[:] = mod.combinations(mod.SYSTEM)
+
+
+def check_generators(n):
+    """common.extra_bodies(n) must equal the landed file's _extra_bodies(n)."""
+    _, opt_path = _paths()
+    opt = _load(opt_path, "_nbody_opt_gen_%d" % n)
+    mine = common.extra_bodies(n)
+    theirs = [[list(r), list(v), m]
+              for (r, v, m) in opt._extra_bodies(n).values()]
+    ok = (mine == theirs)
+    print("  body generators (common.py vs run_benchmark.py): "
+          "%d extra bodies, identical=%s" % (len(mine), ok))
+    return ok
+
+
+def check_landed_n(steps, n):
+    """Stock kernel vs the landed benchmark at --bodies N, bit for bit."""
+    stock_path, opt_path = _paths()
     if not os.path.exists(stock_path):
-        # WSL working copy has no sibling pyperformance checkout; fall back to
-        # the pristine copy kept next to this file.
-        stock_path = os.path.join(here, "stock_run_benchmark.py.bak")
+        # Not a pass: a contract that was never checked must not read as held.
+        print("  *** FAIL: stock source not found (%s) -- cannot check N=%d"
+              % (stock_path, n))
+        return False
+    stock = _load(stock_path, "_nbody_stock_%d" % n)
+    opt = _load(opt_path, "_nbody_opt_%d" % n)
+    _scale_stock_module(stock, n)
+    opt._configure(n)
+    assert len(stock.SYSTEM) == len(opt.SYSTEM) == n
+
+    def flat(m):
+        out = []
+        for (r, v, mass) in m.SYSTEM:
+            out.extend(r)
+            out.extend(v)
+            out.append(mass)
+        return out
+
+    for m in (stock, opt):
+        m.offset_momentum(m.BODIES[m.DEFAULT_REFERENCE])
+    # the initial condition itself must match or nothing below means much
+    if flat(stock) != flat(opt):
+        print("  *** FAIL: initial conditions differ at N=%d" % n)
+        return False
+    e0s, e0o = stock.report_energy(), opt.report_energy()
+    stock.advance(0.01, steps)
+    opt.advance(0.01, steps)
+    ok0, ex0 = compare("  initial energy", [e0s], e0s, [e0o], e0o)
+    st, se = flat(stock), stock.report_energy()
+    ok1, ex1 = compare("  after %d steps" % steps, st, se, flat(opt),
+                       opt.report_energy())
+    finite = all(x == x and abs(x) != float("inf") for x in st)
+    drift = abs(se - e0s) / abs(e0s)
+    print("  physical sanity: all finite=%s | energy drift over %d steps "
+          "= %.2e relative" % (finite, steps, drift))
+    # Same contract as check_landed(): the generated advance() at N is claimed
+    # bit-exact against the stock kernel at N, so exactness gates the result.
+    exact = ex0 and ex1
+    if not exact:
+        print("    *** FAIL: landed benchmark at N=%d is not bit-identical to "
+              "stock (the declared contract)" % n)
+    return ok0 and ok1 and finite and exact
+
+
+def check_landed(steps):
+    stock_path, opt_path = _paths()
     if not os.path.exists(stock_path):
-        print("\n(stock pyperformance source not found at %s -- "
-              "skipping landed-benchmark check)" % stock_path)
-        return True
+        # Not a pass. This used to print "skipping" and return True, so a host
+        # without the stock source reported the landed benchmark's exactness
+        # contract as held without ever comparing a single float.
+        print("\n*** FAIL: stock pyperformance source not found (looked for "
+              "%s) -- the landed-benchmark contract cannot be checked"
+              % stock_path)
+        return False
     print("\nLANDED BENCHMARK: %s\n           versus: %s"
           % (opt_path, stock_path))
     stock = _load(stock_path, "_nbody_stock")
@@ -143,13 +268,38 @@ def check_landed(steps):
     ok0, ex0 = compare("  initial energy", [e0s], e0s, [e0o], e0o)
     ok1, ex1 = compare("  after %d steps" % steps, flat(stock),
                        stock.report_energy(), flat(opt), opt.report_energy())
-    return ok0 and ok1
+    # The landed benchmark's declared contract is EXACT equality, not a
+    # tolerance -- the shipped kernel keeps stock's operation order precisely so
+    # that it can make that claim.  Reporting only the tolerance verdict here
+    # would let a rounding-changing edit land silently while the reports still
+    # said "compares exactly equal to stock", so exactness is what gates the
+    # exit status.  The tolerance verdict is kept as an independent check.
+    exact = ex0 and ex1
+    if not exact:
+        print("    *** FAIL: landed benchmark is not bit-identical to stock "
+              "(the declared contract); tolerance verdict was %s"
+              % ("pass" if (ok0 and ok1) else "fail"))
+    return ok0 and ok1 and exact
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=20000)
+    ap.add_argument("--bodies", type=str, default="5",
+                    help="comma-separated body counts, e.g. 5,10,20,50")
     a = ap.parse_args()
+    counts = [int(x) for x in a.bodies.split(",") if x.strip()]
+
+    if counts != [5]:
+        all_ok = True
+        for n in counts:
+            print("\n=== N = %d (%d pairs), %d steps ==="
+                  % (n, n * (n - 1) // 2, a.steps))
+            all_ok &= check_generators(n)
+            all_ok &= check_landed_n(a.steps, n)
+        print("\n%s" % ("BIT-EXACT AT EVERY N TESTED" if all_ok
+                        else "*** FAILED AT SOME N ***"))
+        return 0 if all_ok else 1
 
     ref = t0_stock.make_state()
     t0_stock.advance(ref, 0.01, a.steps)
@@ -167,8 +317,8 @@ def main():
         all_ok &= ok
 
     all_ok &= check_landed(a.steps)
-    print("\n%s" % ("ALL TIERS WITHIN TOLERANCE" if all_ok
-                    else "*** SOME TIERS FAILED ***"))
+    print("\n%s" % ("ALL TIERS WITHIN TOLERANCE, LANDED BENCHMARK BIT-EXACT"
+                    if all_ok else "*** CONTRACT VIOLATED ***"))
     return 0 if all_ok else 1
 
 

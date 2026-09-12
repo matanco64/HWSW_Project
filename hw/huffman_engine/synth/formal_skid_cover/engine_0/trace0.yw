@@ -1,0 +1,26 @@
+{
+  "format": "Yosys Witness Trace",
+  "generator": "smtbmc",
+  "clocks": [
+    {"path": ["\\clk"], "edge": "posedge", "offset": 0}
+  ],
+  "signals": [
+    {"path": ["\\clk"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\flush_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\m_sym_tready"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\push_data_i"], "width": 32, "offset": 0, "init_only": false},
+    {"path": ["\\push_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\push_last_i"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\rst_n"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\dut", "\\slot0"], "width": 33, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\slot1"], "width": 33, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\v0"], "width": 1, "offset": 0, "init_only": true},
+    {"path": ["\\dut", "\\v1"], "width": 1, "offset": 0, "init_only": true}
+  ],
+  "steps": [
+    {"bits": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"bits": "11100000000000000000000000000000000000"},
+    {"bits": "10000000000000000000000000000000000100"},
+    {"bits": "00000000000000000000000000000000000000"}
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "crate": "pyflate",
+  "installed_by_this_run": true,
+  "loaded_extension": "/usr/local/lib/python3.10/dist-packages/pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so",
+  "loaded_matches_wheel": true,
+  "loaded_sha256": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607",
+  "maturin": "maturin 1.14.1",
+  "module": "pyflate_rs",
+  "python": "3.10.12",
+  "python_executable": "/usr/bin/python3",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "sources": {
+    "bindings.rs": "1a424256fb196af4855bec5672229aa8da2cddb742009169eb492879fb852d03",
+    "bit_reader.rs": "17c43831aac365134c4d91bf0c5212a189d7cd6055e3c87682d090361467b707",
+    "decoder.rs": "24bee403dc15b470051bebff848d21f83733bf024b15409e2a8c0cbfddc67328",
+    "huffman.rs": "7fec38ef15d6e9eed66158570f85dbc435e1f5840f03370d9de2e43587e16c78",
+    "lib.rs": "56338ba61646c47cf12e48d16dee16c0c8f3fd72e38935a47656d6252a5f5f0a",
+    "trace.rs": "61110cd423ed6a7906e3d6bba7cc42b6e9bf018042685132343cd24fc9a89126"
+  },
+  "wheel": "/home/ubuntu/hwsw-release-fuoh4kq_/rust/pyflate/target/wheels/20260910_150151/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl",
+  "wheel_extensions": {
+    "pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so": "b18ee42ab206ecd25dc88fc5339cdbf27ac7adfbe1563e938d3ddadb039b8607"
+  },
+  "wheel_sha256": "f58ac65f05ba90ca5a3731be8be223822e0a8485871bcfd21cb96c19609492fd"
+}

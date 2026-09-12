@@ -1,7 +1,10 @@
 """Correctness + speed check for the Rust/PyO3 `pyflate_rs` symbol-decode kernel.
 
-Run inside WSL after `maturin build --release` and installing the wheel:
+Run after building and installing the wheel with the interpreter you are
+checking (tools/build_wheel.sh installs the file it just built, which the
+two-step maturin/pip recipe does not):
 
+    ./tools/build_wheel.sh pyflate --python /root/hwsw-env/py310/bin/python
     /root/hwsw-env/py310/bin/python dev/pyflate/rs_check.py
     /root/hwsw-env/py310/bin/python dev/pyflate/rs_check.py --trace /tmp/block0.pft
 

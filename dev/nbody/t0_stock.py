@@ -16,8 +16,11 @@ def combinations(l):
     return result
 
 
-def make_state():
-    bodies = fresh_bodies()
+def make_state(n=5):
+    # n is the body count; n = 5 is stock.  Same generator the landed
+    # benchmark's --bodies uses (common.extra_bodies), so at any N the two
+    # simulate the identical system and can be compared bit for bit.
+    bodies = fresh_bodies(n)
     offset_momentum_aos(bodies)
     return (bodies, combinations(bodies))
 
