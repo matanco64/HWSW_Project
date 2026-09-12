@@ -21,9 +21,9 @@ transform (BWT) index vectors and output buffers.
  BWT and final RLE4 expansion produce the 399,360-byte output.
 
                                                       Rust extension
-      Compressed bytes                                                                                L-vector
+     Compressed bytes                                                                                 L-vector
                                                   Bit reader + Huffman
-         67,562 B                                                                                     336,184 B
+        67,562 B                                                                                      336,184 B
                                                   MTF + RUNA/RUNB
 
 
@@ -33,8 +33,8 @@ transform (BWT) index vectors and output buffers.
                        399,360 B                                                            Python
 
 
- Figure 1: The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop. The native kernel covers
-                                  the same combined boundary proposed for hardware.
+Figure 1: The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop, which is the boundary the
+                                      Rust kernel replaces in one call per block.
  Configuration                                                               Mean ± SD                            vs stock
  Stock Python                                                       1,123.49 ± 10.99 ms                              1.00×
  Optimized Python                                                        281.16 ± 3.05 ms                            4.00×
@@ -140,11 +140,10 @@ runs on the course VM, release CPython 3.10.12, pinned to one guest CPU; the las
 development run on Windows / CPython 3.12.6 (dev/pyflate/FINDINGS.md §2b).
 The measured platform reverses part of the development ranking. On the VM, regex-assisted RLE4 is
 worth about 100 ms and the primary Huffman lookup about 50 ms – both more than counting-sort BWT at
-about 20 ms – and the two trials agree within 4 ms on every row. The development run had ranked BWT first
-and the Huffman table last, and an earlier version of this report concluded from it that every back-end change
-outweighs the matcher table. On the course VM that is false: the table is the second-largest single
-contribution. What survives on both platforms is that no single change dominates, so the pipeline, not the
-matcher alone, had to be optimized. Raw output: results/vm_rerun_20260910_3697a63/.
+about 20 ms – and the two trials agree within 4 ms on every row. The development run on 3.12 had ranked
+BWT first and the Huffman table last, so the ordering is a property of the interpreter and platform, not of the
+algorithms. What survives on both is that no single change dominates: the pipeline, not the matcher alone,
+had to be optimized. Raw output: results/vm_rerun_20260910_3697a63/.
                              (flame graph omitted from the text companion — see the PDF edition)
  Figure 4: Full optimized Python profile, before native offload. Inverse BWT and its index-table construction remain visible
  beside _decode_symbols_python, the single symbol-decode loop that replaced the stock matcher and bit-reader frames.
@@ -153,39 +152,38 @@ matcher alone, had to be optimized. Raw output: results/vm_rerun_20260910_3697a6
 
 
                                                              3
-HWSW Final Project                                                                         Benchmark Report: pyflate
+HWSW Final Project                                                                           Benchmark Report: pyflate
 
 4. Native execution: what improves, what remains
 Our Rust/PyO3 BlockDecoder handles the bit reader, Huffman decode, MTF and RUNA/RUNB expansion.
 Header parsing, inverse BWT, RLE4 and MD5 remain in Python. One block-level call returns the L-vector and
 the ending bit position; checking both catches output errors and stream desynchronization.
- Same benchmark file                                                 Mean ± SD                       vs Python
- Python backend                                                  283.88 ± 3.34 ms                           1.00×
- Native decode backend                                           170.01 ± 2.30 ms                          1.67×
+ Same benchmark file                                                       Mean ± SD                   vs Python
+ Python backend                                                        283.88 ± 3.34 ms                       1.00×
+ Native decode backend                                                 170.01 ± 2.30 ms                      1.67×
 The native row is the same measurement as the Python + Rust row on page 1. The Python row runs the same
 benchmark file with its Python back end directly under pyperf, not through pyperformance, so it differs
 slightly from page 1′s optimized Python; both cover the complete benchmark. HWSW_BACKEND=python|
 native|auto selects the implementation; native mode requires the extension, while auto mode falls back.
 The benchmark forwards the variable to pyperf’s workers itself, so a scrubbed worker environment cannot
 quietly change which back end is measured.
-The submitted Rust source was rebuilt on the VM. Ten Rust unit tests and seven blocks across five
-Python/bz2 fixtures passed, including exact ending bit positions. A dispatch check confirmed that native and
-auto load the new extension and call it once per block. The crate separates Python bindings, bit reading,
-Huffman tables, block decoding and trace serialization; the Python API is unchanged. After installing the
-current build, script_pyflate.sh native runs this tier.
+The submitted Rust source was rebuilt on the VM. Eleven crate tests and seven blocks across five
+Python/bz2 fixtures passed, including exact ending bit positions; the eleventh is a property test that decodes
+random Kraft-complete Huffman tables against an independently written canonical encoder. A dispatch
+check confirmed that native and auto load the new extension and call it once per block.
 Matched-work CPU counters
 These are medians of three warm-loop VM runs, each decoding the input 16 times, divided by
 16. Both backends produced the same output digest. They are a separate experiment from the
 rigorous timing table above, with acknowledged counter gating after setup (Appendix A2).
- Metric per complete decode                                              Python                 Hybrid native
- Elapsed time                                                           288.68 ms                      174.44 ms
- Instructions                                                          1,947.94 M                     1,171.65 M
- Cycles                                                                  675.92 M                       404.24 M
- IPC                                                                          2.88                           2.90
- Branches                                                                349.43 M                       207.30 M
- Branch misses (rate)                                             544,260 (0.156%)             301,458 (0.145%)
- Generic cache references                                                 1.749 M                        1.686 M
- Generic cache misses (rate)                                       69,322 (3.964%)               52,842 (3.133%)
+ Metric per complete decode                                                       Python          Hybrid native
+ Elapsed time                                                                    288.68 ms               174.44 ms
+ Instructions                                                                1,947.94 M                 1,171.65 M
+ Cycles                                                                          675.92 M                 404.24 M
+ IPC                                                                                  2.88                     2.90
+ Branches                                                                        349.43 M                 207.30 M
+ Branch misses (rate)                                                   544,260 (0.156%)         301,458 (0.145%)
+ Generic cache references                                                         1.749 M                  1.686 M
+ Generic cache misses (rate)                                             69,322 (3.964%)           52,842 (3.133%)
 Native decoding reduces instructions by 39.9%, cycles by 40.2% and branch misses by 44.6%, while IPC
 changes little. The approximately 1.65× speedup in this experiment comes mainly from removing interpreter
 work. Generic cache misses fall 23.8%, a smaller reduction than instructions: the remaining Python BWT/
@@ -199,66 +197,13 @@ next target is the whole inverse BWT, including table construction, not just its
 VM phase timings put them at 137.7 ms and 47.8 ms respectively (Appendix A3). A native port and working-
 set sweep would test whether memory latency then becomes limiting; the present data do not establish that.
 
-
-
-
-                                                      4
-HWSW Final Project                                                                                       Benchmark Report: pyflate
-
-5. Hardware acceleration: current proposal
-The hardware boundary comprises huffman_engine followed by mtf_cam. Together they produce the same
-L-vector as the native decoder. Software keeps block headers, inverse BWT, RLE4 and MD5. A regular
-decoder datapath and a coarse block-level submission are the main co-design opportunities.
-
-        CPU: parse block headers                                                Platform DMA
-         configure via AXI4-Lite                                 32-bit bits + 8-bit selectors in; L-vector out
-
-
-
-
-             huffman_engine                                  mtf_cam                                     Output packer
-         align / canonical decode                        rank select / shift                               64-bit data
-             selector control                          run expander + FIFO                               + byte enables
-
-
-   Figure 5: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays on chip. Platform DMA
-                                              returns the L-vector to software.
-
-Huffman engine
-A bit aligner feeds a canonical-code comparator/lookup datapath. The selector controller changes the active
-table every 50 symbols. The current interface specifies a 32-bit compressed input stream, an 8-bit selector
-stream, and 32-bit output beats containing a 9-bit bzip2 symbol plus type fields. A 32-bit AXI4-Lite window
-holds controls, START_BIT, lengths and counters. It supports up to six tables and a maximum bzip2 code
-length of 20 bits.
-The target is at most 1.10 cycles per symbol, including table construction and switches, with an unstalled
-benchmark-block model of 153,121 cycles. At the 50 MHz clock target, that model is 3.06 ms for this
-module. This is not an achieved frequency or a measured end-to-end hardware runtime.
-MTF and run expansion
-The input is a rank, so the decoder selects an indexed alphabet entry and shifts preceding entries. The
-current proposal maintains up to 256 entries and expands RUNA/RUNB groups through a buffered output
-packer. The default output width is eight bytes (64-bit data plus byte enables). It targets one MTF symbol per
-cycle for any valid rank.
-Measured mean rank 7.17 characterizes this input; the one-symbol-per-cycle requirement also covers large
-ranks. The specified area/throughput sweep varies output width W = 4, 8, 16 and FIFO depth. The default
-module model is 157,560 cycles, or 3.15 ms at 50 MHz. The two modules stream concurrently; their individual
-modeled latencies cannot simply be added or substituted for an integrated back-pressure simulation.
-
-  Implementation status. Requirements and architecture are approved for both modules.
-  Microarchitecture, RTL, verification, PPA and integration are still open in the recorded hardware status.
-  Formal MTF invariants are planned, not completed proofs. Drivers and platform DMA remain integration
-  work. No measured area, clock or power benefit is claimed.
-
-
-6. Conclusion
+5. Conclusion
 The delivered Python-plus-Rust path decompresses the input in 170.01 ms, achieving 6.61× over stock with
 byte-exact output. Python improvements provide 4.00× and the native decoder adds 1.67×, leaving BWT and
-RLE4 as the next software targets. The hardware proposal follows the same block-level interface; its
-integrated performance and cost remain to be demonstrated.
-Evidence: hw/huffman_engine/docs/{prd,mas}.md, hw/mtf_cam/docs/{prd,mas}.md, and hw/PROGRESS.md
-(2026-09-05). Methods and supporting profiles: report_appendix.pdf. Repository: HWSW_Project.
+RLE4 as the next software targets.
+The course requires one hardware accelerator, and it is proposed for nbody; report_nbody.pdf §5 carries its
+block diagram, interface and trade-offs.
+Evidence: methods and profiles: report_appendix.pdf. Repository: HWSW_Project.
 
-
-
-
-                                                            5
+                                                            4
 
