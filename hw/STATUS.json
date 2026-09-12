@@ -763,21 +763,33 @@
           }
         },
         "dv_testplan": {
-          "state": "in_progress",
+          "state": "done",
           "started": "2026-09-12T20:48:21Z",
-          "finished": "",
+          "finished": "2026-09-12T20:54:17Z",
           "gate": {
             "features ↔ tests ↔ covergroups ↔ checkers matrix": {
               "result": "n/a",
               "evidence": ""
             },
             "golden-model interface defined": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/testplan.md §2: mtf_ref golden (==libbzip2) + list_model.expand predictor + list_model.cycles K3 model; DUT-vs-predictor per beat, predictor-vs-golden per block; numbers reproduced (145/147, 148271 syms, 336184 B, 42023 beats, K3 1.063)",
+              "at": "2026-09-12T20:54:16Z"
             },
             "formal properties listed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/testplan.md §3: 3 mtf_list invariants (permutation/lookup/shift) N_LIST=16 induction + 256 bounded, + handshake props (formal/*.sby)",
+              "at": "2026-09-12T20:54:16Z"
+            },
+            "features <-> tests <-> covergroups <-> checkers matrix": {
+              "result": "pass",
+              "evidence": "docs/testplan.md §1: 29 rows (F1-F16 + K1-K8 + F-20..24), no empty cell",
+              "at": "2026-09-12T20:54:16Z"
+            },
+            "hw-review resolved": {
+              "result": "pass",
+              "evidence": "spot-review: matrix complete/no empty cells, golden reproduced-by-execution, R2 (K3 model-vs-DUT) -> F-21 bring-up task, R1 MAX_RUN -> F-22 multiblock, W=4 K3>1.10 correctly PPA-only per F8",
+              "at": "2026-09-12T20:54:17Z"
             }
           }
         },
@@ -924,5 +936,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T20:48:21Z"
+  "updated": "2026-09-12T20:54:17Z"
 }
