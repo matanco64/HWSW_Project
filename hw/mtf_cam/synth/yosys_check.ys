@@ -1,0 +1,16 @@
+# Yosys synthesizability check for mtf_cam (hw-rtl stage gate).
+# Run from hw/mtf_cam:  yosys -q synth/yosys_check.ys
+read_verilog -sv ../common/rtl/axi_lite_if.sv \
+    rtl/item_fifo.sv \
+    rtl/mtf_run.sv \
+    rtl/mtf_list.sv \
+    rtl/mtf_expand.sv \
+    rtl/mtf_pack.sv \
+    rtl/mtf_regs.sv \
+    rtl/mtf_ctrl.sv \
+    rtl/mtf_cam.sv
+hierarchy -top mtf_cam
+proc
+opt
+synth -top mtf_cam
+stat
