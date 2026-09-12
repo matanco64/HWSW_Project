@@ -457,3 +457,42 @@ Prompt: "I think I will go to sleep leave the computer to sleep too and check it
 
 2026-09-11T08:07:42Z — Claude Code session (auto-logged)
 Prompt: "Maybe it finished now?"
+
+2026-09-10T23:46:36Z — Claude Code session (auto-logged)
+Prompt: "There was a disconnection"
+
+2026-09-10T23:47:50Z — Claude Code session (auto-logged)
+Prompt: "There was a disconnection"
+
+2026-09-12T10:43:02Z — Claude Code session (auto-logged)
+Prompt: "Lets start with the must fix section, also there is no need for pyflate HW, the Instructor demanded only 1 HW and we are going to do the nbody one"
+
+2026-09-12T12:15:13Z — Claude Code session (auto-logged)
+Prompt: "you can try now maybe it will work"
+
+2026-09-12T12:15:49Z — Claude Code session (auto-logged)
+Prompt: "I also don't like large comment sections, remove them as you wish from the code, also let's continue with the code improvements after the push"
+
+2026-09-12T12:33:03Z — Claude Code session (auto-logged)
+Prompt: "I also don't like large comment sections, remove them as you wish from the code, also let's continue with the code improvements after the push"
+
+2026-09-12T16:20:16Z — Claude Code session (auto-logged)
+Prompt: "Yo can continue there was a sleep accidentaly"
+
+2026-09-12T16:38:30Z — Claude Code session (auto-logged)
+Prompt: "Yo can continue there was a sleep accidentaly"
+
+2026-09-12T17:07:48Z — Claude Code session (auto-logged)
+Prompt: "So do you think anything is left on the software side? what about the report, do you need to update it? can you read it visually (via extracting each page to an image)"
+
+2026-09-12T17:09:38Z — Claude Code session (auto-logged)
+Prompt: "There was IP change mid conv, retry"
+
+2026-09-12T17:10:15Z — Claude Code session (auto-logged)
+Prompt: "I turned on the VM and not on the flight if you need to re-run something, I also want you to test the scripts are still clean"
+
+2026-09-12T17:11:09Z — Claude Code session (auto-logged)
+Prompt: "also there is also need for only 1 HW proposal remove the HW proposal from the pyflate report"
+
+2026-09-12T17:15:34Z — Claude Code session (auto-logged)
+Prompt: "you can also go back to work on the main repo and not the fresh clone, there is a bit of a conflict there"
