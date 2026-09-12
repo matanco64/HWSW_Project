@@ -63,10 +63,25 @@ Register boundaries: `s_sym` beat → symbol-side state (list shift, run accumul
 item FIFO push/pop is a register boundary; `mtf_pack` → `m_l` is registered (`tvalid` never combinational
 on `tready`, PRD-F6). The **run-ordering rule** (PRD-F3, §5 of MAS) is enforced on the symbol side:
 at the first non-run symbol (an MTF value ≥ 2, or EOB), if a run is pending the RUN item carrying the
-**current** `list[0]` byte is pushed *before* the terminating symbol's own MTF lookup and MTF_BYTE
-item — the run bytes are copies of the rank-0 byte as it stood *before* the MTF symbol moves a new
-byte to the front. Item production and drain overlap; the symbol side stalls only when the FIFO is
-full (§8).
+**current** `list[0]` byte precedes the terminating symbol's own MTF_BYTE item — the run bytes are
+copies of the rank-0 byte as it stood *before* the MTF symbol moves a new byte to the front.
+
+**Atomic 2-wide enqueue (M2/M3, review pass 1).** A run-terminating MTF symbol produces **two
+items in the same cycle** — RUN(n, list[0]) then MTF_BYTE(list[r]). The item FIFO therefore has a
+**2-wide write port** (`item_fifo.sv`: two write slots per cycle, single read port; see §5), so the
+symbol side sustains 1 symbol/cycle across a run boundary. This is not optional: K3 = 1.063 (§7)
+is derived from the golden `list_model.cycles`, which enqueues both items in one cycle
+(`q.extend(items_at[i])`); a single write port would stall one cycle per run group (~34,663 groups
+→ ≈ 192 k cycles, K3 ≈ 1.30 > 1.10, KPI missed). The FIFO-full gate reserves **two** slots so this
+paired push is always lossless (PRD-F7; §8).
+
+**Enqueue-after-check (M3).** Both items are enqueued only **after** the terminating symbol passes
+every per-symbol error check (range/EOB → ERR_RANK, F10) in the same cycle it is decoded. If the
+terminating symbol is ERR_RANK, **neither** item is enqueued — the pending run is *discarded*
+(PRD-F10 / `test_corner`), and because nothing entered the FIFO, no run byte can reach `m_l`. The
+per-symbol check is thus combinational-before-enqueue, not the "≤ 4 cycles after" sticky-flag
+latency (that latency bounds only when the STATUS bit becomes visible, §8). Item production and
+drain overlap; the symbol side stalls only when the FIFO cannot accept two items (§8).
 
 ## 3. FSMs
 
@@ -119,9 +134,11 @@ starts with empty streams (MAS §5). Reset (synchronous active-low) → IDLE, ev
 
 Not a control FSM — a datapath with two operations selected by `mtf_ctrl`:
 
-- **INIT fill**: a used-map scanner walks byte values 0..255; on each present bit it writes the
-  value into `list[fill_ptr]` and increments `fill_ptr` (= running popcount). After N_USED writes
-  the list holds the ascending used bytes; `fill_ptr` = N_USED. ≤ 256 cycles (INIT_CYCLES).
+- **INIT fill**: a **priority encoder over the residual used map emits one *used* byte value per
+  cycle** (find-lowest-set, clear it), written to `list[fill_ptr]` with `fill_ptr` = running
+  popcount (S1). So the fill is **N_USED cycles**, not a linear 0..255 walk — INIT_CYCLES = N_USED
+  (145 on the benchmark), matching MAS 0x050 ("one used byte per cycle") and the §7 model. After
+  N_USED writes the list holds the ascending used bytes; `fill_ptr` = N_USED. Bound ≤ 256.
 - **Lookup + move-to-front** (one cycle, registered): for rank `r` (= symbol value − 1, 1..N_USED−1),
   `byte_out = list[r]` via the 256:1 read mux, and the next-state shift is
   `list_n[0] = byte_out; list_n[k] = list[k−1] for 1 ≤ k ≤ r; list_n[k] = list[k] for k > r`.
@@ -160,10 +177,11 @@ Pure integer/byte — **no fixed-point arithmetic** anywhere (unlike grape's FP6
 |---|---|
 | MTF rank `r` (symbol value − 1) | `UQ8.0` (0..255; used 1..N_USED−1, rank 0 never occurs — F2) |
 | list entry / byte / `byte_out` / `byte0` | `UQ8.0` |
-| run accumulator `n`, MAX_RUN | `UQ21.0` (RUN_W = 21, holds 2^20; ERR_RUN if an add exceeds) |
-| run position `k` | `UQ5.0` (0..20; the 21st add is the overflow, F3) |
+| run accumulator `n` (stored), MAX_RUN | `UQ21.0` (RUN_W = 21, holds the max valid n = 2^20) |
+| run accumulate sum/compare (M1) | `UQ22.0` — the add and the `> 2^20` test are 22-bit so the k=20 RUNB addend (2^21) and the largest reachable partial sum (20×RUNA then RUNB = 3,145,727) are representable and detected; only a validated n ≤ 2^20 is written back to the 21-bit stored field |
+| run position `k` | `UQ5.0` (0..20; the add at k=20 is the overflow candidate, F3) |
 | `m_axis_l_tdata` | `8·W` bits (W lanes of `UQ8.0`; byte 0 in `[7:0]`, lowest lane first — MAS §2) |
-| `m_axis_l_tkeep` | `W` bits (all ones except the last/flush beat, contiguous from lane 0) |
+| `m_axis_l_tkeep` | `W` bits, contiguous from lane 0. Full beats = all ones. The **last beat's TKEEP is contiguous-from-lane-0 including the all-ones exact-multiple case** (S3): when BYTES_OUT is a multiple of W (the benchmark = 42,023×8 = 336,184 B → final beat full), the last beat is TKEEP all-ones **and** TLAST=1; TLAST rides whichever beat is last, full or partial. A flush (ERR/ABORT) partial beat gets contiguous TKEEP and **no** TLAST. |
 | used map | 256 bits (8 × 32-bit words); N_USED = popcount, `UQ9.0` (1..256) |
 | CYCLES | `UQ64.0` (MAS 0x040/0x044; ≤ 2^27 + 2^30/W ≪ 2^64) |
 | SYMBOLS_IN / BYTES_OUT | `UQ32.0` (MAS 0x048 / 0x04C) |
@@ -171,17 +189,22 @@ Pure integer/byte — **no fixed-point arithmetic** anywhere (unlike grape's FP6
 | SYMBOL_LIMIT / BYTES_LIMIT | `UQ32.0` (1..2^27 / 1..2^30, MAS 0x100 / 0x104) |
 
 The run accumulate is a shift-and-add: `s ∈ {0,1}` gives `(1+s) ∈ {1,2}`, so the increment is
-`2^k` (RUNA) or `2^(k+1)` (RUNB) — a single one-hot addend into a 21-bit adder, `k` incrementing per
-run symbol. This is bit-exact to `golden/list_model.py` (`run += (1<<k)*(1+s)`).
+`2^k` (RUNA) or `2^(k+1)` (RUNB) — a single one-hot addend, `k` incrementing per run symbol. **The
+sum and the `> 2^20` compare are 22-bit (M1)**: at k=20 a RUNB addend is `2^21`, and a 21-bit adder
+would wrap the partial sum below `2^20` and silently miss ERR_RUN; the 22-bit width (bit 21 = the
+overflow/carry region) makes the compare exact. ERR_RUN fires when the 22-bit sum exceeds `2^20`;
+otherwise the low 21 bits are the stored `n`. Bit-exact to `golden/list_model.py`
+(`run += (1<<k)*(1+s)`, unbounded-width Python — the 22-bit HW reproduces it up to the F3 limit).
 
 ## 5. Memories
 
 | Memory | Size | Ports | Implementation |
 |---|---|---|---|
 | MTF list (shift-register CAM) | 256 × 8 b = **2,048 flops** | 256:1 rank read mux + 1 DBG read; parallel registered shift-write of all 256 entries | **flops** (no RAM — needs the parallel shift, §3.2) |
-| item FIFO | D × 30 b (kind 1 + byte 8 + n 21); D = 8 → 240 b | 1W (symbol side) / 1R (drain side) | flops |
+| item FIFO | D × 30 b (kind 1 + byte 8 + n 21); D = 8 → 240 b | **2W (symbol side, M2 — a run-terminating symbol pushes RUN+MTF_BYTE in one cycle)** / 1R (drain side) | flops |
 | packer beat register | W × 8 b (W = 16 → 128 b max) | byte-lane fill / beat read | flops |
-| run accumulator + k + rank-0 latch | 21 + 5 + 8 b | 1RW | flops |
+| run accumulator (22-bit sum, 21-bit stored) + k + rank-0 latch | 22 + 5 + 8 b | 1RW | flops |
+| in-flight byte counter (S2, ERR_LIMIT) | `UQ31.0` (BYTES_OUT ≤ 2^30) | +item-bytes at enqueue, −TKEEP-popcount at each `m_l` handshake | flops |
 | register file (MAS §4) | ~ 8×32 used + limits + counters + dbg | AXI RW / datapath | flops |
 
 ≈ 2.4 kbit of flops total — the **2,048-flop list dominates** and far under the huffman/grape fabric;
@@ -199,7 +222,7 @@ little across the sweep while K3 moves 1.175 → 1.063 → 1.023 (§7). No macro
 | INIT fill: used-map bit scan → `list[fill_ptr]` write, popcount increment | 8-bit scan + write mux | ~8 gates | ~2 |
 | **list read: rank derive (r = value−1) → 256:1 read mux → `byte_out` (→ `list_n[0]`)** | 8-bit sub + 8-level 2:1 mux tree | **~18 gates** | **~6–8 (worst comb path)** |
 | list shift-select: per-entry `k ≤ r` compare (8-bit) + 3:1 mux → `list_n[k]` | 8-bit compare + mux, ×256 parallel | ~10 gates | ~3 |
-| run accumulate: one-hot `2^k`/`2^(k+1)` → 21-bit add + `> 2^20` compare | 21-bit CPA + compare | ~14 gates | ~4 |
+| run accumulate: one-hot `2^k`/`2^(k+1)` → 22-bit add + `> 2^20` compare (M1) | 22-bit CPA + compare | ~14 gates | ~4 |
 | expand/pack: `min(n_left,W)` down-count, W-lane assemble, TKEEP/TLAST | 21-bit sub + lane mux | ~12 gates | ~3–4 |
 | AXI-Lite: 12-bit address decode, register read/write mux | decode + mux | ~10 gates | ~2–3 |
 
@@ -210,7 +233,10 @@ The shift-select's `k ≤ r` is a single comparator per entry, all 256 in parall
 which is available a gate after the beat decode — it does not add to the read-mux depth. Estimated
 ~6–8 ns leaves comfortable margin under the 20 ns budget ⇒ **K4 ≥ 50 MHz met with margin**; the 100
 MHz stretch (10 ns) is plausible but read-mux-limited and is the number the PPA stage measures. Every
-other row is well under 20 ns.
+other row is well under 20 ns. **Caveat (S6): these are gate-depth estimates only** — the 256-way
+read-mux fanout and wire load across the 2,048-flop array, and the `byte_out` fanout (read-mux →
+`list_n[0]` → the FIFO item in the same cycle), are not modeled here; K4 is confirmed by the PPA
+STA, and the 100 MHz stretch is the read-mux-limited number.
 
 ## 7. Latency and throughput derivation (simulated, not stage-summed)
 
@@ -281,7 +307,7 @@ stage sets no sticky bit. `irq` is registered (1 cycle).
 | PRD-F2 (MTF semantics) | §3.2 lookup + move-to-front, bit-exact to `golden/list_model.py` |
 | PRD-F3 (run semantics, ordering) | §2 run-ordering rule, §3.1 DECODE, `mtf_run` §1, §4 shift-and-add |
 | PRD-F4 (init from used map, ≤ 256 cyc) | §3.2 INIT fill, §7 INIT = 145 cycles |
-| PRD-F5 / K8 (list invariants, formal) | §3.2 permutation/shift is the invariant proved on N_LIST = 16 (`make formal`) |
+| PRD-F5 / K8 (list invariants, formal) | §3.2 CAM. Three `sby` proof obligations (S4): (i) `list` is always a permutation of the initial N_USED bytes — no loss/dup; (ii) a lookup at rank r returns the byte at rank r *before* the shift; (iii) after the move, that byte is at rank 0, previous 0..r−1 are at 1..r, ranks > r unchanged. **Unbounded induction on an N_LIST = 16 parametrisation** (the CAM is `N_LIST`-generic; build the harness with N_LIST=16 so smtbmc closes), plus a **bounded check depth ≥ 20 on the full N_LIST = 256** (PRD-K8). |
 | PRD-F6 (byte-packed `m_l`, registered tvalid) | `mtf_pack` §1, §2 register boundary, §8 back-pressure |
 | PRD-F7 (item FIFO depth D) | §1 two-sided split, `item_fifo`, §7 D-sweep, §8 FIFO-full |
 | PRD-F8 (parameters W/N_LIST/D/RUN_W) | §4 formats, §5 sizes, §7 W-table; CAPS in `mtf_regs` |
@@ -293,11 +319,15 @@ stage sets no sticky bit. `irq` is registered (1 cycle).
 | PRD-F14 (bus agents) | three-port protocol SVAs in `mtf_cam` top §1 |
 | PRD-F15 (reference models) | §7 golden cycle model, `docs/schedule_model.py` |
 | PRD-F16 (single clock, sync reset, IRQ) | §9 |
-| K1 / K3 / K4 | §7 (1 sym/cycle, latency ≤ 8) / §7 (1.063) / §6 (read-mux budget) |
-| K5 / K6 | §7 (3.15 ms) / §5 (flop area, W sweep) |
+| K1 / K2 / K3 / K4 | §7 (1 sym/cycle, latency ≤ 8) / §3.3 expander (W bytes/cycle sustained) / §7 (1.063) / §6 (read-mux budget, PPA-measured) |
+| K5 / K6 / K7 | §7 (3.15 ms) / §5 (flop area, W sweep) / OpenLane, report-only (PPA stage) |
+| K8 (formal) | §10 PRD-F5 row: three invariants, N_LIST=16 induction + 256 bounded |
 | MAS §4 register map / §5 data path / §8 error table | §1 `mtf_regs`, §2/§3 dataflow, §3.1/§8 error+flush |
 
 ## 11. Review findings
 
-Awaiting `hw-review` (spec mode) — findings recorded in `docs/review_uarch.md`, then folded here.
-```
+`hw-review` spec mode, pass 1: 12 findings (3 must, 6 should, 3 nit) in `docs/review_uarch.md`,
+**all resolved**. M1 (22-bit run sum/compare — the 21-bit adder missed ERR_RUN at k=20), M2 (item
+FIFO 2-wide write port — a 1W port would land K3 ≈ 1.30 and bust the ≤ 1.10 KPI), and M3
+(enqueue-after-check so a run terminated by an ERR_RANK symbol is discarded before any byte
+reaches `m_l`) were the must-level fixes; the design's core decisions were unchanged. 0 must open.
