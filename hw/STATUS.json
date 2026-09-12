@@ -741,9 +741,9 @@
           }
         },
         "rtl": {
-          "state": "todo",
+          "state": "done",
           "started": "",
-          "finished": "",
+          "finished": "2026-09-12T20:47:09Z",
           "gate": {
             "make lint clean (verilator --lint-only -Wall)": {
               "result": "pass",
@@ -763,8 +763,8 @@
           }
         },
         "dv_testplan": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-12T20:48:21Z",
           "finished": "",
           "gate": {
             "features ↔ tests ↔ covergroups ↔ checkers matrix": {
@@ -924,5 +924,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T20:46:19Z"
+  "updated": "2026-09-12T20:48:21Z"
 }
