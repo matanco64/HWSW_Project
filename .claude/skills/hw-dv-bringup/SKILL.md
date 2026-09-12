@@ -42,6 +42,10 @@ tb/Makefile / pytest    # via ../common/Makefile.cocotb: SIM?=verilator
    Measure every cycle-count KPI on a full-shape configuration (maximum pairs/symbols, the
    benchmark's own topology) before leaving bring-up — a tiny smoke hides phases the KPI
    binds on (grape: NPAIRS=2 measured 126 cycles/step, the real 10-pair list 162 vs K1=128).
+   Run at least one top-level test with sink backpressure (a deterministic toggling tready):
+   almost-full/credit gating bugs are invisible to unit TBs and always-ready sinks (huffman
+   K1 1.5068→1.0068). When citing an assertion as gate evidence, confirm the define that
+   compiles it appears in the build command (`ifdef SIMULATION` was dead in every build).
 7. `hw-review` RTL mode on `tb/` + touched `rtl/`; resolve `must`. Record; set `done`.
 
 ## Gate (FLOW.md row 6)

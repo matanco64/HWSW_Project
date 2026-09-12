@@ -32,6 +32,9 @@ sentence:
    control (who starts it, who stalls it, who drains it).
 7. **Traceability** — PRD KPI ↔ MAS interface ↔ uArch timing budget ↔ testplan feature; a link
    with no counterpart is a finding.
+8. **Amendments** — a dated amendment must rewrite the sentence or table row it amends
+   (keeping the dated note as history); two disagreeing statements of one fact in the same
+   document is a finding (MAS LEN-row vs its 48-word-stride amendment cost a debug cycle).
 
 ## RTL mode (`rtl`, `dv_bringup`, `dv_coverage`, `dv_signoff`)
 
