@@ -22,13 +22,27 @@ fi
 command -v "$TYPST" >/dev/null 2>&1 || [ -x "$TYPST" ] || {
     echo "typst not found at '$TYPST' (set TYPST=...)" >&2; exit 1; }
 
+# stat(1) takes different flags on GNU and BSD userlands, and this builds on
+# both (WSL/Linux for the release build, macOS for a local check).
+_filesize() { stat -c%s "$1" 2>/dev/null || stat -f%z "$1"; }
+
 build_one() {
     local base="${1%.typ}"
     local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
     "$TYPST" compile --root "$ROOT" "$src" "$ROOT/$base.pdf"
-    pdftotext "$TXTMODE" -enc UTF-8 "$ROOT/$base.pdf" "$ROOT/$base.txt"
-    echo "wrote $base.pdf ($(stat -c%s "$ROOT/$base.pdf") bytes)"
+    # The .txt companion comes from a SECOND compilation, with txtmode set.
+    # pdftotext pulls every text label out of an embedded vector graphic, so
+    # the annotated flame graphs used to dump several hundred truncated frame
+    # names into the middle of the prose of the named .txt deliverable. In
+    # txtmode those four figures become a one-line pointer (see style.typ);
+    # prose, tables and the diagrams are identical in both compilations.
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+    "$TYPST" compile --root "$ROOT" --input txtmode=1 "$src" "$tmpdir/$base.pdf"
+    pdftotext "$TXTMODE" -enc UTF-8 "$tmpdir/$base.pdf" "$ROOT/$base.txt"
+    rm -rf "$tmpdir"
+    echo "wrote $base.pdf ($(_filesize "$ROOT/$base.pdf") bytes)"
 }
 
 # The .txt companions depend on which pdftotext is installed. xpdf's has -table,

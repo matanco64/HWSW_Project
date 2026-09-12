@@ -1,4 +1,22 @@
 // Shared print layout. Build with the repository as Typst's root.
+
+// The .txt deliverables are pdftotext exports of the compiled PDF, and
+// pdftotext extracts every text label inside an embedded vector graphic. For
+// the annotated flame graphs that is several hundred truncated frame names
+// apiece, dumped into the middle of the prose: they were 115 lines of
+// report_nbody.txt and 51 of report_pyflate.txt. Compiling with
+// `--input txtmode=1` swaps just those figures for a one-line pointer, so the
+// text companion reads as prose while the PDF keeps the vector figure.
+// Diagrams deliberately do NOT go through this: their labels are the content
+// and they export as readable text.
+#let text_edition = sys.inputs.at("txtmode", default: "0") == "1"
+#let flamefig(path, ..args) = if text_edition {
+  align(center, text(size: 9.5pt, style: "italic")[
+    (flame graph omitted from the text companion \u{2014} see the PDF edition)
+  ])
+} else {
+  image(path, ..args)
+}
 #let ink = rgb("#18344a")
 #let pale = rgb("#eef3f7")
 #let report(title, subtitle, body) = {

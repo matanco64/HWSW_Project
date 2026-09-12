@@ -55,7 +55,7 @@ about five entries visited by the symbol matcher, despite its table capacity of 
 A lookup table can remove this scan, but the measured scan is short; per-symbol interpreter
 work and the later transformations also deserve attention.
 
-#figure(image("fig/print_pyflate_stock.svg", width: 100%),
+#figure(flamefig("fig/print_pyflate_stock.svg", width: 100%),
   caption: [Full stock Python-frame flame graph, retaining startup and harness context.
   Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
   percentages use the original whole-profile denominator; nested shares overlap.])
@@ -144,7 +144,7 @@ course VM that is false: the table is the second-largest single contribution. Wh
 on both platforms is that no single change dominates, so the pipeline, not the matcher
 alone, had to be optimized. Raw output: `results/vm_rerun_20260910_3697a63/`.
 
-#figure(image("fig/print_pyflate_opt.svg", width: 100%),
+#figure(flamefig("fig/print_pyflate_opt.svg", width: 100%),
   caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
   index-table construction remain visible beside `_decode_symbols_python`, the single
   symbol-decode loop that replaced the stock matcher and bit-reader frames.])
