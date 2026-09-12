@@ -415,3 +415,25 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   (F-25) at coverage exposed a real extra-bit-count latching bug in one run; the DBG range
   check `< 288` vs `< ALPHABET` fell out of the max-config fill test. A feature carried behind
   a gate to signoff is an unverified feature.
+
+## 2026-09-12 — huffman_engine/dv_signoff
+
+- **A sign-off reviewer's "should" can be a false positive, and the test suite is the arbiter.**
+  The review flagged S1 (flush-cycle handshake "race" lets a beat transfer during withdrawal).
+  Implementing the fix (mask tvalid/take with !flush) broke errors_runtime: ERR_NOCODE expects
+  the N valid symbols before the erroring one to be delivered, and the flush-cycle transfer IS
+  that intended delivery — flush withdraws only beats not yet handshaked AFTER this cycle.
+  Reverted with an in-code rationale. Lesson: at sign-off, verify a reviewer's proposed fix
+  against the regression before trusting it; a green→red on a fix is evidence the original was
+  right. Fixing S2-S5 (real: DEFLATE underrun beat suppression, dead code, explicit reset) and
+  rejecting S1 is the correct disposition.
+- **Un-gated DEFLATE + a full-file sign-off trace is where the robustness-on-malformed-input
+  gaps live.** S2 (a TYPE-2 pair beat built from zero-padded extras could leak on truncated
+  DEFLATE) was invisible to 17 tests + coverage + formal because every DEFLATE stream fed was
+  well-formed (zlib round-trip). Gating the top's pair-push with the aligner's sticky underrun
+  closes it. Sign-off review must hand-trace the malformed-input paths that constrained-random
+  over VALID inputs never reaches.
+- Formal harnesses are cheap insurance at sign-off: ctrl_arcs (FSM termination) + skid (no
+  loss/dup, PRD-F6) took ~1 h to write and proved the two properties the testplan listed in
+  seconds (BMC+cover). The third (aligner 128-bit cap) took the documented unit-TB fallback —
+  fine, but worth attempting the sby first.
