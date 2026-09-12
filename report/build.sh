@@ -31,12 +31,9 @@ build_one() {
     local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
     "$TYPST" compile --root "$ROOT" "$src" "$ROOT/$base.pdf"
-    # The .txt companion comes from a SECOND compilation, with txtmode set.
-    # pdftotext pulls every text label out of an embedded vector graphic, so
-    # the annotated flame graphs used to dump several hundred truncated frame
-    # names into the middle of the prose of the named .txt deliverable. In
-    # txtmode those four figures become a one-line pointer (see style.typ);
-    # prose, tables and the diagrams are identical in both compilations.
+    # The .txt companion comes from a second compilation with txtmode set, in
+    # which the flame graphs become a one-line pointer (see style.typ). Prose,
+    # tables and diagrams are identical in both.
     local tmpdir
     tmpdir="$(mktemp -d)"
     "$TYPST" compile --root "$ROOT" --input txtmode=1 "$src" "$tmpdir/$base.pdf"

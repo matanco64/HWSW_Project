@@ -21,16 +21,9 @@ from math import cos, sin, sqrt
 
 import pyperf
 
-# ---------------------------------------------------------------------------
-# NATIVE ACCELERATION (optional).
-#
-# `nbody_rs` is our Rust/PyO3 build of the integrator (`rust/nbody/`).  It is
-# imported, never required, for the reasons Lecture 5 gives for an
-# accelerator's HW/SW interface: the user does not change their code (Rule 1),
-# everything native is confined to a library behind one call (Rule 2), and if
-# the extension is missing -- no wheel, different CPython ABI, non-x86 host --
-# the work runs on the CPU instead of breaking (Rule 3).  The fallback is the
-# generated straight-line Python below, which is itself the optimized version.
+# Optional native tier: nbody_rs (rust/nbody/) is imported, never required.
+# A missing wheel or wrong CPython ABI falls back to the generated Python
+# below, which is itself the optimized version. Interface rules: rust/README.md.
 
 # Back-end selection.  "auto" (the default) prefers the native kernel and falls
 # back to Python; "python" and "native" pin it.  This exists because otherwise
@@ -111,60 +104,12 @@ SYSTEM = list(BODIES.values())
 PAIRS = combinations(SYSTEM)
 
 
-# ---------------------------------------------------------------------------
-# SCALING THE WORKLOAD: --bodies N
-#
-# Stock hardcodes N = 5 (sun + 4 gas giants), i.e. 10 pairs.  `--bodies N`
-# appends N-5 further bodies so the same exact O(N^2) all-pairs algorithm can
-# be run at a larger N -- nothing about the integrator, the step count or the
-# operation order changes, only how many pairs there are.  N = 5 is the
-# default and is a no-op: `_configure(5)` returns before touching anything, so
-# the default path is the module exactly as it was.
-#
-# PLACEMENT.  Closed form, no RNG, so a run is reproducible and stock-vs-
-# optimized is comparing the identical initial condition:
-#
-#   body k (k = 1 .. N-5) is on an exactly circular Kepler orbit about the
-#   origin with semi-major axis  a_k = 40 + 3(k-1)  AU, phase  theta_k =
-#   k * golden angle (2.39996 rad), in a plane tilted by  i_k = 0.05*(k mod 5)
-#   rad, and speed  v_k = sqrt(SOLAR_MASS / a_k)  -- which is the exact
-#   circular speed in these units, where G = 1 and SOLAR_MASS = 4*pi^2 (so a
-#   body at 1 AU takes 1 year, as Earth must).
-#
-# Why this particular scheme, in order of importance:
-#
-#   * It cannot blow up.  On a circular orbit |r_k| stays equal to a_k, so the
-#     separation of any two added bodies is bounded below by |a_i - a_j| >= 3
-#     AU for the whole run, and every added body stays >= 10 AU outside
-#     Neptune (30 AU) and 40 AU from the sun.  There is no close encounter to
-#     make `dsq ** -1.5` explode.  Measured over the full 20,000 steps
-#     (dev/nbody/verify.py --bodies 5,...,200): no inf/nan at any N, and the
-#     total energy drift stays at 7.9e-5 to 8.3e-5 relative -- essentially the
-#     stock 5-body system's own symplectic-Euler truncation error, unchanged,
-#     because the added orbits are wide enough that dt = 0.01 over-resolves
-#     them and they contribute nothing to the drift budget.
-#   * The golden angle keeps the phases from ever lining up into a shell that
-#     would make the system degenerate/symmetric.
-#   * Masses are 1e-5 to 1.9e-5 solar masses -- between 1/5 and 1/3 of
-#     Neptune -- so the added bodies perturb each other ~500x more weakly than
-#     the sun pulls them (neighbour/central acceleration ratio 1.8e-3 at
-#     a = 40 AU), and even at N = 200 the total added mass is ~2e-3 solar
-#     masses, about two Jupiters.  The system stays a dominated-central-mass
-#     system, which is what the stock one is.
-#   * `(k % 5)` and `(k % 8)/8` are exact in binary, so inclination and mass
-#     carry no rounding of their own.  a_k, theta_k and v_k go through libm
-#     cos/sin/sqrt, so the *table* is only reproducible for a given libm --
-#     but stock and optimized read the identical table inside one process, so
-#     the A/B and the bit-exactness claim are unaffected either way.
-#
-# offset_momentum() is untouched and still zeroes the total momentum: it sums
-# m*v over `bodies` -- whatever is in SYSTEM -- and dumps the negative into
-# the reference body.  Measured, the sun's resulting |v| is 3.298e-3 AU/yr at
-# N = 5 and 3.293e-3 at N = 200: the added bodies' momenta very nearly cancel
-# each other (golden-angle phases), so the sun barely notices them.  The
-# closest pair in the initial condition is 4.98 AU at every N -- and that pair
-# is Jupiter/Saturn, i.e. the stock system's own minimum, not anything added.
-# ---------------------------------------------------------------------------
+# --bodies N appends N-5 further bodies so the same all-pairs algorithm runs
+# at a larger N. The integrator, step count and operation order are unchanged.
+# N = 5 is the default and a no-op. Placement is closed-form and RNG-free, on
+# wide circular orbits that stay >= 3 AU apart, so nothing can blow up and a
+# run is reproducible. dev/nbody/FINDINGS.md section 7 has the derivation and
+# the measured energy drift.
 
 _GOLDEN_ANGLE = PI * (3.0 - 5.0 ** 0.5)
 
@@ -186,17 +131,10 @@ def _extra_bodies(n):
 
 
 # Above this many pairs, stop unrolling and use the rolled loop instead.
-#
-# Partial evaluation is O(N^2) in *source size*, and CPython's compiler needs
-# roughly 40 kB of working set per emitted pair. Measured peak RSS: 174 MB at
-# N = 100, 629 MB at N = 200, 2.44 GB at N = 400, and N = 700 OOM-killed a 7 GB
-# machine outright. Compile time grows the same way (~55-70 us per pair: 1.3 s
-# at N = 200, 9 s at N = 500) and every pyperf worker pays it again.
-#
-# 20,000 pairs is N = 200. Past that the technique is still a speedup -- it is
-# 1.37x at N = 400 -- but it stops being a sane thing to do, so the benchmark
-# declines to do it rather than trying and dying. Override with
-# NBODY_MAX_UNROLL_PAIRS to reproduce the wall deliberately.
+# Emitted source is O(N^2) and CPython needs ~40 kB of working set per pair:
+# 20,000 pairs is N = 200, and N = 700 OOM-killed a 7 GB machine. Past the
+# limit the technique still wins (1.37x at N = 400) but stops being sane.
+# Override with NBODY_MAX_UNROLL_PAIRS.
 _MAX_UNROLL_PAIRS = int(os.environ.get("NBODY_MAX_UNROLL_PAIRS", 20000))
 
 
@@ -267,59 +205,26 @@ def _configure(nbodies):
 # ---------------------------------------------------------------------------
 # OPTIMISATION: partial evaluation of advance()
 #
-# ~95% of this benchmark's runtime is the doubly nested loop below: 20,000
-# integration steps x 10 body pairs.  The inner loop re-discovers, 20,000
-# times, a schedule that is fixed for the whole run -- which bodies interact,
-# in which order, with which masses.  Only the 30 position/velocity floats
-# actually change.
+# ~95% of runtime is 20,000 steps x 10 pairs, and the inner loop re-discovers
+# a schedule that is fixed for the whole run. So compute it once at import
+# time and emit a straight-line advance(dt, n) with every coordinate a local
+# and every mass a literal. State is read out of the body lists before the
+# step loop and written back after, so report_energy() and offset_momentum()
+# see the same objects as before.
 #
-# So we compute that schedule once, at import time, and emit a straight-line
-# `advance(dt, n)` in which every position and velocity component is a Python
-# *local* (LOAD_FAST/STORE_FAST) and every mass is a *literal* (LOAD_CONST).
-# State is read out of the body lists into locals before the step loop and
-# written back after it, so `report_energy()` and `offset_momentum()` observe
-# exactly the same objects as before.
+# Per step this drops 1484 bytecodes to 881, and 150 list subscripts to 4
+# (dev/nbody/opcount.py). On 3.10 a list subscript is a full PyObject_GetItem
+# round trip, which is where the speedup comes from.
 #
-# What this removes, per integration step (measured with sys.monitoring on
-# CPython 3.12, dev/nbody/opcount.py):
-#     stock       1484 bytecodes,  150 of them BINARY_SUBSCR/STORE_SUBSCR
-#     generated    881 bytecodes,    4 of them BINARY_SUBSCR/STORE_SUBSCR
-# On CPython 3.10 a list subscript is a full PyObject_GetItem round trip via
-# _PyNumber_Index/PyLong_AsSsize_t; removing 146 of them per step is where the
-# speedup comes from.
-#
-# The emitter is generic in N -- it walks the same `bodies`/`pairs` the stock
-# loop walks, just at import time -- so this is a specialisation of the given
-# workload, not a hand-written answer.  The physics, the integrator, the
-# operation order and the trajectory are unchanged.  `--bodies N` exercises
-# exactly that: run it at N = 100 and it emits a 100-body kernel.
-#
-# The cost of being generic in N is that the emitted code is O(N^2) in *size*
-# (12 lines per pair, N(N-1)/2 pairs), and unlike the arithmetic that cost is
-# paid at import time and in instruction-fetch bandwidth, not in flops.
-# Measured on CPython 3.10, WSL2 (dev/nbody/sweep_n.py), at constant total
-# work: the kernel speedup is ~1.5x for N <= 30 and decays gently to 1.37x at
-# N = 400, where the emitted source is 29.9 MB / 961k lines and the code object
-# is 14.7 MB.  It never stops paying -- there is no crossover up to N = 400,
-# which is simply the largest N that fits in this machine's RAM at compile
-# time.  See dev/nbody/FINDINGS.md section 7.  At the benchmark's own N = 5
-# none of this applies; it is a note for anyone who raises N.
-#
-# Arithmetic: with _BIT_EXACT = True (the default) the emitted code performs
-# the *identical* floating-point operations, in the identical order, as the
-# stock loop -- including `dt * (dsq ** -1.5)`.  Verified: after 20,000 steps
-# the body-state vector and report_energy() are bit-for-bit equal to stock
-# (max |delta| == 0.0).  Setting _BIT_EXACT = False emits the cheaper but not
-# bit-identical `dt / (dsq * sqrt(dsq))` -- the same mathematical quantity via
-# hardware SQRTSD instead of a libm pow() call -- worth about another 1% on
-# CPython 3.12 (more on 3.10, where pow() is a larger share of the profile),
-# at ~1e-14 relative divergence in the reported energy.
+# The emitter walks whatever bodies/pairs it is handed, so this specialises
+# the given workload rather than hand-writing an answer for five bodies. The
+# emitted code performs the identical FP operations in the identical order as
+# stock, including dt * (dsq ** -1.5): after 20,000 steps the state vector and
+# report_energy() are bit-for-bit equal (max |delta| == 0.0).
+# dev/nbody/FINDINGS.md sections 2 and 7.
 # ---------------------------------------------------------------------------
 
-_BIT_EXACT = True
-
-
-def _advance_source(bodies, pairs, bit_exact=_BIT_EXACT, hoist=None):
+def _advance_source(bodies, pairs, hoist=None):
     """Emit straight-line source for advance(dt, n) over `bodies`/`pairs`.
 
     `hoist` overrides the slot-index heuristic below; it exists so the A/B in
@@ -328,26 +233,15 @@ def _advance_source(bodies, pairs, bit_exact=_BIT_EXACT, hoist=None):
     index = {id(b): i for i, b in enumerate(bodies)}
     out = ["def advance(dt, n):"]
     add = out.append
-    # LOAD_FAST/STORE_FAST carry a one-byte oparg, so a local whose slot index
-    # is >= 256 costs an extra EXTENDED_ARG dispatch every time it is touched.
-    # co_varnames is ordered by first binding, and the per-pair temporaries are
-    # bound last -- so above 30 bodies (8 locals per body + 10) the *hottest*
-    # names in the function, dx/dy/dz/mag/b1m/b2m, are exactly the ones that
-    # land above the boundary.  Binding them here first moves them to slots
-    # 3..8.  Measured on CPython 3.10 (dev/nbody/sweep_n.py --emitter-ab), at
-    # N = 200: EXTENDED_ARG falls from 36.3% of emitted instructions to 17.6%,
-    # bytecodes per pair from 114.3 to 88.3, and the kernel runs 1.13x faster.
-    # Without it there is a visible cliff at exactly N = 31, the first N whose
-    # local count exceeds 255.  These are dead stores, so this changes no
-    # arithmetic; it is emitted only when it can matter, which leaves the
-    # shipped N = 5 source byte-identical to what it was before.
+    # A local whose slot index is >= 256 costs an EXTENDED_ARG dispatch every
+    # time it is touched, and the per-pair temporaries bind last. Binding them
+    # first moves them to low slots: at N = 200 that is 1.13x, and it removes a
+    # cliff at N = 31. Dead stores, so no arithmetic changes, and it is emitted
+    # only when it can matter -- the shipped N = 5 source is unchanged.
     if hoist is None:
         hoist = 8 * len(bodies) + 10 > 255
     if hoist:
         add("    dx = dy = dz = mag = b1m = b2m = 0.0")
-        if not bit_exact:
-            add("    dsq = 0.0")
-    add("    sqrt = _sqrt")
     for i in range(len(bodies)):
         add("    r%d = _bodies[%d][0]; v%d = _bodies[%d][1]" % (i, i, i, i))
         add("    x%d = r%d[0]; y%d = r%d[1]; z%d = r%d[2]" % ((i,) * 6))
@@ -358,13 +252,9 @@ def _advance_source(bodies, pairs, bit_exact=_BIT_EXACT, hoist=None):
         add("        dx = x%d - x%d" % (i, j))
         add("        dy = y%d - y%d" % (i, j))
         add("        dz = z%d - z%d" % (i, j))
-        if bit_exact:
-            # inlined exactly as stock writes it: same ops, same order
-            add("        mag = dt * ((dx * dx + dy * dy + dz * dz)"
-                " ** (-1.5))")
-        else:
-            add("        dsq = dx * dx + dy * dy + dz * dz")
-            add("        mag = dt / (dsq * sqrt(dsq))")
+        # inlined exactly as stock writes it: same ops, same order
+        add("        mag = dt * ((dx * dx + dy * dy + dz * dz)"
+            " ** (-1.5))")
         add("        b1m = %r * mag" % (b1[2],))
         add("        b2m = %r * mag" % (b2[2],))
         add("        ux%d -= dx * b2m" % i)
@@ -389,7 +279,7 @@ def _build_advance(bodies=SYSTEM, pairs=PAIRS):
     # code is O(N^2) in size, so at --bodies 200 it is 239k lines / 9.4 MB and
     # generating it twice is 1.4 s of pure waste.
     src = _advance_source(bodies, pairs)
-    namespace = {"_sqrt": sqrt, "_bodies": bodies}
+    namespace = {"_bodies": bodies}
     exec(compile(src, "<nbody-advance>", "exec"), namespace)
     fn = namespace["advance"]
     fn.__source__ = src
@@ -550,7 +440,8 @@ def _backend_metadata(runner, module, requested):
             runner.metadata['hwsw_native_module'] = path
             try:
                 with open(path, 'rb') as fh:
-                    runner.metadata['hwsw_native_sha256'] =                         hashlib.sha256(fh.read()).hexdigest()
+                    runner.metadata['hwsw_native_sha256'] = \
+                        hashlib.sha256(fh.read()).hexdigest()
             except OSError:                              # pragma: no cover
                 pass
 

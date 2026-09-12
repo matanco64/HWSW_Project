@@ -1,13 +1,11 @@
 # Shared stage library for script_<bench>.sh. Sourced, never executed.
 #
-# The three runners used to be three copies of the same 130 lines, and they
-# drifted: pyflate pinned HWSW_BACKEND while profiling and nbody did not, and
-# pyflate's build hint pointed at target/wheels while nbody's pointed at the
-# committed wheels/ directory. Both drifts changed what a reader would actually
-# measure. One library, three thin wrappers, so a fix lands everywhere at once.
+# The three runners used to be three copies of the same 130 lines and had
+# drifted in ways that changed what a reader would measure. One library, three
+# thin wrappers, so a fix lands everywhere at once.
 #
-# A wrapper sets BENCH (and optionally PROFILE_LOOPS / PROFILE_VALUES) and then
-# calls `run_stage "$@"`.
+# A wrapper sets BENCH (and optionally PROFILE_LOOPS / PROFILE_VALUES) and
+# then calls `run_stage "$@"`.
 
 set -euo pipefail
 
@@ -25,19 +23,10 @@ BM_OPT="$ROOT/benchmarks/bm_$BENCH/run_benchmark.py"
 HAS_NATIVE="${HAS_NATIVE:-1}"    # 0 for a benchmark with no rust/<bench> crate
 
 # ---------------------------------------------------------------------------
-# Results directory
-#
-# Never the top-level results/. That directory holds the captures the reports
-# quote, and a rerun that lands on top of them destroys the evidence a reader
-# is meant to be checking against. Each run gets its own directory under
-# results/runs/, with results/runs/latest pointing at the current one so
-# stage-at-a-time use still works:
-#
-#   ./script_nbody.sh all        # new directory, latest repointed
-#   ./script_nbody.sh baseline   # new directory, latest repointed
-#   ./script_nbody.sh compare    # appends to that same directory
-#
-# HWSW_RESULTS=<dir> overrides. HWSW_FRESH=1 forces a new directory.
+# Results directory: never the top-level results/, which holds the captures the
+# reports quote. Each run gets results/runs/<stamp>_<bench>/ with
+# results/runs/latest pointing at it, so stage-at-a-time use still works.
+# HWSW_RESULTS=<dir> overrides; HWSW_FRESH=1 forces a new directory.
 # ---------------------------------------------------------------------------
 RUNS="$ROOT/results/runs"
 _new_run_dir() {
@@ -141,14 +130,11 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Backend discipline
-#
-# HWSW_BACKEND selects the Python or native path, and pyperf re-executes its
-# workers with a scrubbed environment, so it has to be passed through
-# --inherit-environ or the workers measure whatever the import happened to
-# find. Every backend-sensitive invocation goes through these two helpers, and
-# every produced JSON is checked against what was asked for -- an unchecked
-# request is exactly how a native-vs-native comparison got recorded once.
+# Backend discipline: pyperf scrubs the worker environment, so HWSW_BACKEND has
+# to be forwarded with --inherit-environ or the workers measure whatever the
+# import happened to find. Every JSON produced is then checked against what was
+# requested -- an unchecked request is how a native-vs-native comparison got
+# recorded once.
 # ---------------------------------------------------------------------------
 pinned() {                       # pinned <backend> <cmd...>
     local backend="$1"; shift
@@ -266,19 +252,12 @@ _profile_one() {
 profile() {
     require_perf
     # Profile shape with python3-dbg (symbols); timings here are NOT quotable.
-    # Event choice. cpu-clock is a software timer and samples in proportion to
-    # elapsed CPU time, which is what a "where does the time go" flame graph
-    # wants, so it stays the default here.
-    #
-    # On the guest PMU as observed in these runs: `perf stat -e cycles` counted
-    # correctly, while `perf record -e cycles -F <n>` returned zero samples at
-    # every frequency tried and `-c <period>` worked (2,298 samples at
-    # -c 2000000, DWARF unwinding, clean symbols). Earlier zeros from `perf
-    # stat` came from requesting six events against four general-purpose
-    # counters. That is a working configuration, not a proven KVM limitation;
-    # for cycle-accurate work here, use `-e cycles -c 2000000`.
-    # NOTE: 'pyperf system tune' (setup) sets perf_event_max_sample_rate=1, which
-    # throttles perf record to 1 Hz — restore a usable rate before recording.
+    # cpu-clock samples in proportion to elapsed CPU time, which is what a
+    # "where does the time go" flame graph wants. On this guest PMU
+    # `perf record -e cycles -F <n>` gave zero samples at every frequency tried
+    # while `-c 2000000` worked -- use that for cycle-accurate work.
+    # NOTE: `pyperf system tune` sets perf_event_max_sample_rate=1, throttling
+    # perf record to 1 Hz -- restore a usable rate before recording.
     sudo sysctl -w kernel.perf_event_max_sample_rate=100000 \
                   kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
     # Both sides: 'stock' is the Initial Analysis evidence, 'opt' shows the
@@ -338,17 +317,11 @@ ensure_native_module() {
 }
 
 native() {
-    # The native (Rust) back end measured against the pure-Python fallback of
-    # the SAME file, on the same interpreter, with the same pyperf harness and
-    # the same rigor -- so HWSW_BACKEND is the only difference between the two
-    # numbers.
-    #
-    # Deliberately NOT run through pyperformance: pyperformance builds its own
-    # venv, that venv has no extension wheel in it, and installing into a venv
-    # it manages and may discard is fragile. Running the deliverable directly
-    # under its own pyperf Runner keeps both sides identical. The baseline vs
-    # optimized comparison above stays the course A/B (stock vs our Python);
-    # this is the accelerator tier on top of it.
+    # The native back end against the pure-Python fallback of the SAME file,
+    # same interpreter, harness and rigor, so HWSW_BACKEND is the only
+    # difference. Deliberately not run through pyperformance, which builds its
+    # own venv with no extension wheel in it. baseline vs optimized above stays
+    # the course A/B; this is the accelerator tier on top of it.
     if ! python3 -c "import ${BENCH}_rs" 2>/dev/null; then
         echo "native stage: ${BENCH}_rs is not installed. Build and install it:" >&2
         echo "  ./script_$BENCH.sh wheel        # or: ./tools/build_wheel.sh $BENCH" >&2
@@ -422,13 +395,10 @@ run_stage() {
     RES="$(_resolve_res "$stage")"
     BM_STOCK="$(locate_stock)"
 
-    # Timed stages (baseline, optimized, native) run on one guest CPU through
-    # pyperf/pyperformance --affinity -- the protocol the preserved pyflate
-    # headline was measured with. The scripts used to leave this out, so the
-    # documented route and the route that produced the quoted numbers differed.
-    # HWSW_CPU=<n> picks the CPU, HWSW_CPU=none disables pinning, and the
-    # default is the lowest CPU this process may run on. Profiling is unpinned:
-    # its timings are never quoted.
+    # Timed stages (baseline, optimized, native) run on one guest CPU via
+    # --affinity, the protocol the preserved pyflate headline was measured
+    # with. HWSW_CPU=<n> picks the CPU, HWSW_CPU=none disables pinning.
+    # Profiling is unpinned: its timings are never quoted.
     CPU=""
     CPU_ARGS=()
     if [ "${HWSW_CPU:-auto}" != none ]; then
