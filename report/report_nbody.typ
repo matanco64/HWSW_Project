@@ -82,7 +82,7 @@ different measures. Both the table and the groups are regenerated from
 contributing symbol; an earlier draft quoted 14.4% for the list group, which the profile it
 then cited did not support.
 
-#figure(image("fig/print_nbody_stock.svg", width: 100%),
+#figure(flamefig("fig/print_nbody_stock.svg", width: 100%),
   caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
   and enlarged. All original frames, widths and startup context are retained. Percentages
   describe the selected inclusive call path, not a function's total self time.])
@@ -158,7 +158,7 @@ L1 events are omitted because an earlier capture returned invalid load counts.
 #pagebreak()
 = 4. What changes when N grows?
 
-#figure(image("fig/print_nbody_opt.svg", width: 100%),
+#figure(flamefig("fig/print_nbody_opt.svg", width: 100%),
   caption: [Full optimized Python-frame profile with the integration call path enlarged.
   Integration remains the hotspot. Independent normalization does not display the absolute
   runtime reduction from 231 to 143 ms.])
