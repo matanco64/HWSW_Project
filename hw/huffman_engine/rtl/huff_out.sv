@@ -38,6 +38,12 @@ module huff_out (
 
     assign m_sym_tdata  = slot0[31:0];
     assign m_sym_tlast  = slot0[32];
+    // S1 (dv_signoff review) considered and REJECTED: masking the handshake with !flush_i
+    // over-withdraws — on ERR the last valid beat already in the skid must still deliver in
+    // the flush cycle (ERR_NOCODE delivers the N valid symbols before the erroring one;
+    // golden/testplan expects SYMBOLS = N). The "flush-cycle transfer" the reviewer flagged is
+    // the intended valid-beat delivery, not a leak. flush clears the NEXT state (v0_n/v1_n),
+    // withdrawing only beats not yet handshaked after this cycle. Left as-is.
     assign m_sym_tvalid = v0;
     assign take   = v0 && m_sym_tready;
     assign full_o = v0 && v1;

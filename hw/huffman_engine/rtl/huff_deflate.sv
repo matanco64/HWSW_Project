@@ -87,13 +87,15 @@ module huff_deflate (
     // extra-bit value (R14): the RAW aligner window has the next stream bit at [5],
     // ascending — DEFLATE extras are LSB-first, so the value is simply the slice starting
     // at bit 5 masked to n bits
+    // verilator lint_off UNUSEDSIGNAL
+    // Only w[17:5] carry the ≤13 LSB-first extra bits; [19:18] and the [4:0] zero-pad are
+    // deliberately unread (S3: the former dead pad_zero guard is removed).
     function automatic logic [12:0] rev_extract(input logic [19:0] w, input logic [3:0] n);
         logic [12:0] sl;
-        logic        pad_zero;
-        pad_zero = |{w[19:18], w[4:0]};  // [19:18] beyond the 13 extras; [4:0] zero pad
         sl = w[17:5];                   // up to 13 extra bits, LSB (next stream bit) at w[5]
-        rev_extract = (sl & ((13'd1 << n) - 13'd1)) & {13{!pad_zero | pad_zero}};
+        rev_extract = sl & ((13'd1 << n) - 13'd1);   // mask to n bits
     endfunction
+    // verilator lint_on UNUSEDSIGNAL
 
     always_comb begin
         st_n         = st;
@@ -110,7 +112,7 @@ module huff_deflate (
         didx  = dist_sym_i[4:0];
         lextra = LEN_EXTRA[32'(lidx)*3 +: 3];
         dextra = DIST_EXTRA[32'(didx)*4 +: 4];
-        extra_bits = rev_extract(window_i, {1'b0, len_val[2:0]});  // placeholder, refined below
+        extra_bits = 13'd0;             // S4: default; the per-state D_LEXTRA/D_DEXTRA recompute
         case (st)
             D_IDLE: begin
                 if (mode_deflate_i && decode_en_i && c1_valid_i) begin
