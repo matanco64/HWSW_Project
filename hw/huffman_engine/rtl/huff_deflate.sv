@@ -71,8 +71,14 @@ module huff_deflate (
     logic [4:0]  lidx;                  // Length code index (sym-257)
     logic [15:0] dist_val, dist_val_n;  // Resolved distance (1..24577... 15b + carry)
     logic [4:0]  didx;                  // Distance code index
-    logic [2:0]  lextra;                // Length extra count
-    logic [3:0]  dextra;                // Distance extra count
+    logic [2:0]  lextra;                // Length extra count (combinational, from c1_sym_i)
+    logic [3:0]  dextra;                // Distance extra count (combinational, from dist_sym_i)
+    // The extra counts must be LATCHED with their symbol: by D_LEXTRA/D_DEXTRA the C1
+    // pipeline has advanced and c1_sym_i/dist_sym_i no longer hold this pair's codes, so a
+    // live recompute reads the wrong count (0) and the extra bits are never consumed — the
+    // distance decode then reads the length-extra bit (dv_coverage DEFLATE finding).
+    logic [2:0]  lextra_q, lextra_q_n;  // Latched length extra count
+    logic [3:0]  dextra_q, dextra_q_n;  // Latched distance extra count
     logic [12:0] extra_bits;            // Extracted extra-bit value (LSB-first per RFC)
 
     // extra-bit value (R14): the RAW aligner window has the next stream bit at [5],
@@ -90,6 +96,8 @@ module huff_deflate (
         st_n         = st;
         len_val_n    = len_val;
         dist_val_n   = dist_val;
+        lextra_q_n   = lextra_q;
+        dextra_q_n   = dextra_q;
         extra_consume_o = 5'd0;
         dist_issue_o = 1'b0;
         emit_o       = 1'b0;
@@ -106,7 +114,8 @@ module huff_deflate (
                     if (!c1_sym_valid_i || c1_sym_i >= 9'd286) begin
                         err_symbol_o = 1'b1;
                     end else if (c1_sym_i >= 9'd257) begin
-                        len_val_n = LEN_BASE[32'(lidx)*9 +: 9];
+                        len_val_n  = LEN_BASE[32'(lidx)*9 +: 9];
+                        lextra_q_n = lextra;          // latch with the length symbol
                         st_n = D_LEXTRA;
                     end
                     // literals/EOB are emitted by the main path (TYPE 0 / TYPE 3)
@@ -114,9 +123,9 @@ module huff_deflate (
             end
             D_LEXTRA: begin
                 if (occ_ok_i && !stall_i) begin
-                    extra_bits = rev_extract(window_i, {1'b0, lextra});
+                    extra_bits = rev_extract(window_i, {1'b0, lextra_q});
                     len_val_n  = len_val + 9'(extra_bits);
-                    extra_consume_o = {2'd0, lextra};
+                    extra_consume_o = {2'd0, lextra_q};
                     st_n = D_DIST;
                 end
             end
@@ -133,15 +142,16 @@ module huff_deflate (
                         st_n = D_IDLE;
                     end else begin
                         dist_val_n = 16'(DIST_BASE[32'(didx)*15 +: 15]);
+                        dextra_q_n = dextra;          // latch with the distance symbol
                         st_n = D_DEXTRA;
                     end
                 end
             end
             D_DEXTRA: begin
                 if (occ_ok_i && !stall_i) begin
-                    extra_bits = rev_extract(window_i, dextra);
+                    extra_bits = rev_extract(window_i, dextra_q);
                     dist_val_n = dist_val + 16'(extra_bits);
-                    extra_consume_o = {1'd0, dextra};
+                    extra_consume_o = {1'd0, dextra_q};
                     st_n = D_EMIT;
                 end
             end
@@ -164,6 +174,8 @@ module huff_deflate (
         st       <= st_n;
         len_val  <= len_val_n;
         dist_val <= dist_val_n;
+        lextra_q <= lextra_q_n;
+        dextra_q <= dextra_q_n;
     end
 
     assign busy_o = (st != D_IDLE);

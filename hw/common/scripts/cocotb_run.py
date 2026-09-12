@@ -28,6 +28,8 @@ def main() -> int:
 
     sources = [Path(s) for s in a.sources]
     build_args = []
+    for d in os.environ.get("EXTRA_DEFINES", "").split():
+        build_args += [f"-D{d}"]
     if a.sim == "verilator":
         build_args += ["-Wno-fatal", "--timing", "--assert"]  # arm SVAs in regression (rcp/sqrt II guards)
         build_args += ["-DSIMULATION"]  # compile `ifdef SIMULATION` guards (B1: they were dead in every build)
