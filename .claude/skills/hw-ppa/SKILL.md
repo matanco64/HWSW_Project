@@ -10,6 +10,12 @@ KPI. Outputs: `hw/<module>/docs/ppa.md`, `hw/<module>/synth/` (`yosys.ys`, `area
 `config.json`, `runs/`), die shot PNG for the presentation. Toolchain: `hw/FLOW.md` "Toolchain"
 (sky130_fd_sc_hd tt 25 °C 1.8 V; OpenLane 2 via `hw/setup.sh --with-openlane`).
 
+Requirement source: `project_instructions.md` §7 — a trade-off DISCUSSION with a defined
+operating frequency ("not expected to synthesize"). Step 2's numbers plus one measured
+trade-off satisfy it; OpenLane signoff is bonus evidence. When it has cost two failed runs
+or a day, re-read §7 and close the gate with what is in hand (OpenLane row: honest attempt
+note).
+
 ## Procedure
 
 1. `python3 tools/hw/status.py set <module> ppa in_progress`.
@@ -32,7 +38,14 @@ KPI. Outputs: `hw/<module>/docs/ppa.md`, `hw/<module>/synth/` (`yosys.ys`, `area
    Run `make -C hw/<module> openlane` (= `openlane synth/config.json`). Within a minute of
    launch, confirm the config took: the log head has no `WARNING ... configuration variable`
    line and `synth/runs/<tag>/resolved.json` holds every variable you set (OpenLane 1 names
-   such as `SYNTH_NO_FLAT` are warned-and-ignored). Read `synth/runs/<run>/final/metrics.json`:
+   such as `SYNTH_NO_FLAT` are warned-and-ignored). Set CLOCK_PERIOD from measurement, not
+   hope: a cheap first pass to post-CTS STA (`*-stamidpnr*/ws.max.rpt`) gives the true worst
+   path; sign off at ≈1.5× that — an unachievable clock makes repair bloat the netlist and
+   congests routing into GRT-0607. A dead run resumes: `openlane --run-tag <tag> --from
+   <Step.Id> synth/config.json` (completed steps' state is reused — never restart from
+   scratch). Watch runs by `ps -eo comm=` names (`.openlane-wrapp`/`.openroad-wrapp`/
+   `.yosys-wrapped`); `pgrep -f` matches the checking shell itself.
+   Read `synth/runs/<run>/final/metrics.json`:
    `timing__setup__ws` → Fmax = 1/(period − ws); `design__instance__area`; `power__total`
    (from the STA/power step); DRC/LVS counts. Record `ppa.fmax_mhz`, `ppa.power_mw`.
 5. **Die shot.** `final/gds` rendered with klayout (`klayout -z -rd input=... -r
