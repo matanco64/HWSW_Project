@@ -48,9 +48,9 @@ TOL_STATE = 1e-11
 TOL_ENERGY = 1e-12
 
 
-def make_rust():
+def make_rust(n=5):
     sysr = nbody_rs.System(
-        [(list(r), list(v), m) for (r, v, m) in common.fresh_bodies()])
+        [(list(r), list(v), m) for (r, v, m) in common.fresh_bodies(n)])
     sysr.offset_momentum(0)
     return sysr
 
@@ -65,22 +65,20 @@ def dump_rust(sysr):
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--tolerance", action="store_true",
-                    help="require closeness (state inf-rel <= %g, energy rel "
-                         "<= %g) instead of exact equality"
-                         % (TOL_STATE, TOL_ENERGY))
-    args = ap.parse_args()
-    contract = "tolerance" if args.tolerance else "exact equality"
-    print("python %s | steps=%d rounds=%d | contract: %s"
-          % (sys.version.split()[0], STEPS, ROUNDS, contract))
+def check_correctness(n, tolerance):
+    """Compare the Rust kernel with stock at `n` bodies. True if the contract holds.
 
-    # ---- correctness -----------------------------------------------------
-    py = t0_stock.make_state()
-    rs = make_rust()
+    Run at more than the stock five because that is what the native path is
+    actually used for: --bodies N and the big-N sweep in results/ both drive
+    this kernel, and pair order at N > 5 is generated code that N = 5 never
+    exercises.
+    """
+    print("\n=== N = %d (%d pairs), %d steps ==="
+          % (n, n * (n - 1) // 2, STEPS))
+    py = t0_stock.make_state(n)
+    rs = make_rust(n)
     e0_py, e0_rs = t0_stock.energy(py), rs.energy()
-    print("\ninitial energy   py %r\n                 rs %r\n   equal: %s"
+    print("initial energy   py %r\n                 rs %r\n   equal: %s"
           % (e0_py, e0_rs, e0_py == e0_rs))
 
     t0_stock.advance(py, 0.01, STEPS)
@@ -89,8 +87,7 @@ def main():
     e_py, e_rs = t0_stock.energy(py), rs.energy()
     max_abs = max(abs(x - y) for x, y in zip(a, b))
     scale = max(abs(x) for x in a)
-    print("\nafter %d steps   py %r\n                 rs %r" % (STEPS, e_py,
-                                                                e_rs))
+    print("after %d steps   py %r\n                 rs %r" % (STEPS, e_py, e_rs))
     print("   state bit-identical : %s" % (a == b,))
     print("   energy bit-identical: %s" % (e_py == e_rs,))
     print("   max |delta| state   : %.3e  (inf-rel %.3e)"
@@ -105,17 +102,42 @@ def main():
     exact = (a == b) and (e_py == e_rs)
     inf_rel = max_abs / scale if scale else 0.0
     close = inf_rel <= TOL_STATE and e_rel <= TOL_ENERGY
-    ok = close if args.tolerance else exact
+    ok = close if tolerance else exact
     if not ok:
-        if args.tolerance:
-            print("\n*** FAIL: exceeds tolerance (state %g / energy %g); "
-                  "bit-identical=%s" % (TOL_STATE, TOL_ENERGY, exact))
+        if tolerance:
+            print("*** FAIL at N = %d: exceeds tolerance (state %g / energy "
+                  "%g); bit-identical=%s"
+                  % (n, TOL_STATE, TOL_ENERGY, exact))
         else:
-            print("\n*** FAIL: nbody_rs is not bit-identical to stock, which "
-                  "is the declared contract. The tolerance check %s -- rerun "
-                  "with --tolerance only after the reports have been changed "
-                  "to claim closeness rather than equality."
-                  % ("passes" if close else "also fails"))
+            print("*** FAIL at N = %d: nbody_rs is not bit-identical to stock, "
+                  "which is the declared contract. The tolerance check %s -- "
+                  "rerun with --tolerance only after the reports have been "
+                  "changed to claim closeness rather than equality."
+                  % (n, "passes" if close else "also fails"))
+    return ok
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--tolerance", action="store_true",
+                    help="require closeness (state inf-rel <= %g, energy rel "
+                         "<= %g) instead of exact equality"
+                         % (TOL_STATE, TOL_ENERGY))
+    ap.add_argument("--bodies", default="5",
+                    help="comma-separated body counts to check (default 5); "
+                         "the speed numbers below always use the benchmark's "
+                         "own N = 5")
+    args = ap.parse_args()
+    bodies_list = [int(x) for x in args.bodies.split(",") if x.strip()]
+    contract = "tolerance" if args.tolerance else "exact equality"
+    print("python %s | steps=%d rounds=%d | contract: %s | N: %s"
+          % (sys.version.split()[0], STEPS, ROUNDS, contract,
+             ",".join(str(n) for n in bodies_list)))
+
+    # ---- correctness -----------------------------------------------------
+    ok = True
+    for n in bodies_list:
+        ok = check_correctness(n, args.tolerance) and ok
 
     # ---- speed (interleaved, min-of-rounds) ------------------------------
     tpy = trs = float("inf")
