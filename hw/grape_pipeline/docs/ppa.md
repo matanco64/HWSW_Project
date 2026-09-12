@@ -79,8 +79,39 @@ routing. That STA is what we report:
 **Fmax vs KPI.** The critical path is the **3-wide accumulate issue picker** (`g_add[*]` —
 the K1-fix logic from dv_signoff, see trade-off above), driven by the FSM state register. The
 achievable ~11.15 MHz misses the 20 ns / 50 MHz PRD target by **~4.5×**. The documented RTL
-follow-up is to **pipeline the accumulate picker** (break the FSM-state → 3-wide-adder path into
-stages); that is a datapath change deferred to a future RTL iteration, not a PPA-stage fix.
+follow-up was to **pipeline the accumulate picker** (break the FSM-state → 3-wide-adder path into
+stages) — see the addendum below, which took a better route.
+
+## Addendum (2026-09-13) — accumulate picker restructured to parallel-prefix
+
+The 11.15 MHz worst path above was the accumulate issue picker: a **~60-iteration in-order
+`always_comb` scan** carried across iterations by `lane_hold[15]` and `slots_used`, i.e. a
+~60-deep combinational chain feeding the FP64 adder operand muxes. Rather than *pipeline* it
+(which would add a cycle and lift K1 above 124), `grape_accum.sv` now computes the two prefix
+operations as **balanced Hillis-Steele trees** (`~log₂(60) ≈ 6` deep):
+
+- `is_first_on_lane` (was `lane_hold`): inclusive prefix-OR of per-lane one-hots → only the
+  lowest-index considered op per lane stays eligible (identical selection to the linear scan).
+- slot index (was `slots_used`): inclusive prefix-sum of the eligible bits → op *e* issues iff
+  `popcount(eligible[0..e-1]) < nslots` and takes `slot_q[pfx[e]]`. The issue loop then reads
+  only precomputed per-op values — no cross-iteration carry — so it maps to muxes, not a chain.
+
+**Bit-exactness (the gating evidence):** every output (`add_*`, `mul_*`, `bc_set`,
+`acc_iss_set`, `integ_*_set`) is identical to the linear-scan baseline. Verified firsthand on
+the merged tree — `make -C hw/grape_pipeline sim` **9/9 PASS**, `full_benchmark` 20,000 steps
+**0 mismatches** vs `emulation.advance`, **K1 worst = 124.0 (unchanged)**, |dE/E| = 1.674e-14,
+r/v deviation identical to baseline; Icarus 4-state 9/9; lint clean. The reduction is on the
+same `u_fsm` → `g_add[*]` path the STA flagged, so it is the correct structural target.
+
+**New Fmax — measurement pending.** A comparable number requires re-running OpenLane **through
+the post-CTS STA** (`30/35/37-openroad-stamidpnr`, which run *before* global routing — the
+GRT-0607 step that killed every prior run — so this step completes). The **pre-PnR** STA
+(`12-openroad-staprepnr`) is *not* a valid comparable: its worst path is the fanout-2253
+`commit`→register-file broadcast net (~221 ns, a pre-placement wireload artifact that CTS
+buffering resolves), which is unchanged by this restructure; the picker only becomes critical
+post-CTS. This measurement is queued to run solo (memory-bound on the 24 GB host). Until it
+lands, the claim here is the **structural** improvement (60→6 logic levels on the flagged path,
+bit-exact, K1 preserved), not a specific new MHz.
 
 **§7 framing.** Per project_instructions.md §7 ("You are not expected to synthesize"), the
 requirement is a trade-off **discussion with a defined operating frequency**. That is satisfied

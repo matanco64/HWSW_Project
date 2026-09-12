@@ -118,7 +118,6 @@ module grape_accum #(
     logic [2:0]  iss_fld  [3];                         // Target field
     logic [1:0]  iss_comp [3];                         // Target component
     logic [14:0] bc_set;                               // Lanes issued this cycle
-    logic [14:0] lane_hold;                            // Scan: lane has an earlier unissued op
     logic [1:0]  slot_q [3];                           // Free-slot queue (unit ids)
     logic [1:0]  nslots;                               // Free slots this cycle (0..3)
     logic [1:0]  slots_used;                           // Slots consumed by the scan
@@ -128,12 +127,21 @@ module grape_accum #(
     logic [3:0]  m_iss_l [3];                          // Issued integrate lane per MUL unit
     logic [14:0] integ_mul_set;                        // Integrate muls issuing this cycle
     logic [14:0] integ_add_set;                        // Integrate adds issuing this cycle
-    // per-op scan temps
-    logic [2:0]  e_body;                               // Op target body
-    logic [1:0]  e_comp;                               // Op component
-    logic [3:0]  e_lane;                               // Op lane
-    logic [63:0] e_opa;                                // Op operand a (working or bypass)
-    logic        e_byp;                                // Lane clears this cycle
+    // ---- parallel-prefix accumulate issue (log-depth replacement for the linear lane_hold/
+    // slots_used scan): per-op decode, a Hillis-Steele prefix-OR of per-lane one-hots for
+    // "first considered op on a lane", and a prefix count of eligible ops for the slot index.
+    logic             acc_cons  [N_ACC];               // Considered: run & valid & !issued
+    logic [2:0]       acc_ebody [N_ACC];               // Op target body
+    logic [1:0]       acc_ecomp [N_ACC];               // Op component
+    logic [3:0]       acc_elane [N_ACC];               // Op lane (body*3+comp, 4-bit as before)
+    logic [63:0]      acc_eopa  [N_ACC];               // Op operand a (working v or retire bypass)
+    logic             acc_first [N_ACC];               // Lowest-index considered op on its lane
+    logic             acc_elig  [N_ACC];               // Eligible (first & ready & no hazard)
+    logic [5:0]       acc_pfx   [N_ACC];               // #eligible ops strictly before e (0..60)
+    logic [5:0]       acc_nelig;                        // Total eligible this cycle
+    logic [1:0]       acc_count;                        // Accumulate ops issued = min(nelig,nslots)
+    logic [14:0]      l_scan [7][N_ACC];               // Lane-seen inclusive prefix-OR stages
+    logic [5:0]       c_scan [7][N_ACC];               // Eligible-count inclusive prefix-sum stages
 
     logic [2:0] p_body;                                // lane_pend decode temp
     always_comb begin
@@ -153,6 +161,59 @@ module grape_accum #(
         acc_done = (acc_issued & acc_valid_mask) == acc_valid_mask;
     end
 
+    // ---- parallel-prefix accumulate issue precompute (log2(60) depth) --------------------------
+    // Equivalent to the linear in-order scan: only the lowest-index considered op per lane is
+    // eligible (lane_hold), and eligible ops take free slots in index order (slots_used). Both
+    // prefixes are computed as balanced trees instead of a 60-deep carry chain.
+    always_comb begin
+        // base decode + per-lane one-hot for the "first considered op on a lane" scan
+        for (int e = 0; e < N_ACC; e++) begin
+            acc_cons[e] = run_i && acc_valid_mask[e] && !acc_issued[e];
+            if ((e % 6) <= 2) begin
+                acc_ebody[e] = pairs_i[(e / 6)*16 +: 3];
+            end else begin
+                acc_ebody[e] = pairs_i[(e / 6)*16+8 +: 3];
+            end
+            acc_ecomp[e] = 2'((e % 6) % 3);
+            acc_elane[e] = 4'(({1'b0, acc_ebody[e]} * 4'd3) + {2'd0, acc_ecomp[e]});
+            l_scan[0][e] = acc_cons[e] ? (15'(15'd1 << acc_elane[e])) : 15'd0;
+        end
+        // inclusive prefix-OR of the lane one-hots (Hillis-Steele; offsets 1,2,4,8,16,32)
+        for (int e = 0; e < N_ACC; e++) l_scan[1][e] = l_scan[0][e] | ((e >=  1) ? l_scan[0][e- 1] : 15'd0);
+        for (int e = 0; e < N_ACC; e++) l_scan[2][e] = l_scan[1][e] | ((e >=  2) ? l_scan[1][e- 2] : 15'd0);
+        for (int e = 0; e < N_ACC; e++) l_scan[3][e] = l_scan[2][e] | ((e >=  4) ? l_scan[2][e- 4] : 15'd0);
+        for (int e = 0; e < N_ACC; e++) l_scan[4][e] = l_scan[3][e] | ((e >=  8) ? l_scan[3][e- 8] : 15'd0);
+        for (int e = 0; e < N_ACC; e++) l_scan[5][e] = l_scan[4][e] | ((e >= 16) ? l_scan[4][e-16] : 15'd0);
+        for (int e = 0; e < N_ACC; e++) l_scan[6][e] = l_scan[5][e] | ((e >= 32) ? l_scan[5][e-32] : 15'd0);
+        // is_first, eligibility, operand-a (with retire bypass), and the eligible-count base
+        for (int e = 0; e < N_ACC; e++) begin
+            acc_first[e] = acc_cons[e]
+                           && !((e == 0) ? 1'b0 : l_scan[6][e-1][acc_elane[e]]);
+            acc_elig[e]  = acc_first[e] && force_ready_i[e / 6]
+                           && (!busy_bc[acc_elane[e]] || bc_clr[acc_elane[e]]);
+            acc_eopa[e]  = body_field(working_flat_i, acc_ebody[e],
+                                      3'({1'b0, acc_ecomp[e]} + 3'd3));
+            if (busy_bc[acc_elane[e]] && bc_clr[acc_elane[e]]) begin
+                for (int u = 0; u < 3; u++) begin
+                    if (ret_acc_v[u] && ret_lane[u] == acc_elane[e]) begin
+                        acc_eopa[e] = add_r_i[u*64 +: 64];
+                    end
+                end
+            end
+            c_scan[0][e] = {5'd0, acc_elig[e]};
+        end
+        // inclusive prefix count of eligible ops (Hillis-Steele; same offsets)
+        for (int e = 0; e < N_ACC; e++) c_scan[1][e] = c_scan[0][e] + ((e >=  1) ? c_scan[0][e- 1] : 6'd0);
+        for (int e = 0; e < N_ACC; e++) c_scan[2][e] = c_scan[1][e] + ((e >=  2) ? c_scan[1][e- 2] : 6'd0);
+        for (int e = 0; e < N_ACC; e++) c_scan[3][e] = c_scan[2][e] + ((e >=  4) ? c_scan[2][e- 4] : 6'd0);
+        for (int e = 0; e < N_ACC; e++) c_scan[4][e] = c_scan[3][e] + ((e >=  8) ? c_scan[3][e- 8] : 6'd0);
+        for (int e = 0; e < N_ACC; e++) c_scan[5][e] = c_scan[4][e] + ((e >= 16) ? c_scan[4][e-16] : 6'd0);
+        for (int e = 0; e < N_ACC; e++) c_scan[6][e] = c_scan[5][e] + ((e >= 32) ? c_scan[5][e-32] : 6'd0);
+        // exclusive prefix = #eligible strictly before e; total eligible = inclusive at the end
+        for (int e = 0; e < N_ACC; e++) acc_pfx[e] = (e == 0) ? 6'd0 : c_scan[6][e-1];
+        acc_nelig = c_scan[6][N_ACC-1];
+    end
+
     always_comb begin
         add_valid_o = 3'b000;
         add_sub_o   = 3'b000;
@@ -166,7 +227,6 @@ module grape_accum #(
             m_iss_l[u] = 4'd0;
         end
         bc_set      = 15'd0;
-        lane_hold   = 15'd0;
         acc_iss_set = '0;
         for (int u = 0; u < 3; u++) begin
             iss_sub[u]  = 1'b0;
@@ -186,49 +246,26 @@ module grape_accum #(
                 nslots = nslots + 2'd1;
             end
         end
-        slots_used = 2'd0;
-        e_body = 3'd0;
-        e_comp = 2'd0;
-        e_lane = 4'd0;
-        e_opa  = 64'd0;
-        e_byp  = 1'b0;
-        // in-order scan: an op may issue iff no earlier unissued op holds its lane
+        // accumulate issue: the first `nslots` eligible ops (index order) issue, op e taking
+        // free slot slot_q[acc_pfx[e]] — identical decisions to the linear scan, but each op's
+        // issue is a pure function of the precomputed prefixes (no 60-deep carry chain).
         for (int e = 0; e < N_ACC; e++) begin
-            if (run_i && acc_valid_mask[e] && !acc_issued[e]) begin
-                if ((e % 6) <= 2) begin
-                    e_body = pairs_i[(e / 6)*16 +: 3];
-                end else begin
-                    e_body = pairs_i[(e / 6)*16+8 +: 3];
-                end
-                e_comp = 2'((e % 6) % 3);
-                e_lane = 4'(({1'b0, e_body} * 4'd3) + {2'd0, e_comp});
-                e_byp  = bc_clr[e_lane];
-                if (!lane_hold[e_lane] && force_ready_i[e / 6]
-                    && (!busy_bc[e_lane] || e_byp) && slots_used < nslots) begin
-                    // bypass operand: the retiring unit's result for this lane (R5)
-                    e_opa = body_field(working_flat_i, e_body, 3'({1'b0, e_comp} + 3'd3));
-                    if (busy_bc[e_lane] && e_byp) begin
-                        for (int u = 0; u < 3; u++) begin
-                            if (ret_acc_v[u] && ret_lane[u] == e_lane) begin
-                                e_opa = add_r_i[u*64 +: 64];
-                            end
-                        end
-                    end
-                    iss_v[slot_q[slots_used]]      = 1'b1;
-                    iss_sub[slot_q[slots_used]]    = ((e % 6) <= 2);
-                    iss_a[slot_q[slots_used]]      = e_opa;
-                    iss_b[slot_q[slots_used]]      = force_flat_i[e*64 +: 64];
-                    iss_ia[slot_q[slots_used]]     = 1'b0;
-                    iss_body[slot_q[slots_used]]   = e_body;
-                    iss_fld[slot_q[slots_used]]    = 3'({1'b0, e_comp} + 3'd3);
-                    iss_comp[slot_q[slots_used]]   = e_comp;
-                    bc_set[e_lane]  = 1'b1;
-                    acc_iss_set[e]  = 1'b1;
-                    slots_used = slots_used + 2'd1;
-                end
-                lane_hold[e_lane] = 1'b1;          // later same-lane ops wait (chain order)
+            if (acc_elig[e] && acc_pfx[e] < {4'd0, nslots}) begin
+                iss_v[slot_q[acc_pfx[e][1:0]]]    = 1'b1;
+                iss_sub[slot_q[acc_pfx[e][1:0]]]  = ((e % 6) <= 2);
+                iss_a[slot_q[acc_pfx[e][1:0]]]    = acc_eopa[e];
+                iss_b[slot_q[acc_pfx[e][1:0]]]    = force_flat_i[e*64 +: 64];
+                iss_ia[slot_q[acc_pfx[e][1:0]]]   = 1'b0;
+                iss_body[slot_q[acc_pfx[e][1:0]]] = acc_ebody[e];
+                iss_fld[slot_q[acc_pfx[e][1:0]]]  = 3'({1'b0, acc_ecomp[e]} + 3'd3);
+                iss_comp[slot_q[acc_pfx[e][1:0]]] = acc_ecomp[e];
+                bc_set[acc_elane[e]] = 1'b1;
+                acc_iss_set[e]       = 1'b1;
             end
         end
+        // slots consumed by accumulate; integrate adds continue from here (accumulate priority)
+        acc_count  = (acc_nelig >= {4'd0, nslots}) ? nslots : acc_nelig[1:0];
+        slots_used = acc_count;
         // integrate adds: ready lanes take the remaining slots (accumulate has priority)
         integ_add_set = 15'd0;
         for (int l = 0; l < 15; l++) begin
