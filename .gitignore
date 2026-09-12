@@ -34,3 +34,4 @@ tmp/*
 
 # Private working notes and self-assessment, not part of the submission
 output/
+.claude/worktrees/
