@@ -166,7 +166,8 @@ The native row is the same measurement as the Python + Rust row on page 1. The P
 benchmark file with its Python back end directly under pyperf, not through pyperformance, so it differs
 slightly from page 1′s optimized Python; both cover the complete benchmark. HWSW_BACKEND=python|
 native|auto selects the implementation; native mode requires the extension, while auto mode falls back.
-Pyperf workers need --inherit-environ HWSW_BACKEND.
+The benchmark forwards the variable to pyperf’s workers itself, so a scrubbed worker environment cannot
+quietly change which back end is measured.
 The submitted Rust source was rebuilt on the VM. Ten Rust unit tests and seven blocks across five
 Python/bz2 fixtures passed, including exact ending bit positions. A dispatch check confirmed that native and
 auto load the new extension and call it once per block. The crate separates Python bindings, bit reading,

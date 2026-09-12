@@ -124,8 +124,9 @@ The separate kernel experiment (228.49 → 9.48 ms, 24.1×) compares native exec
 Both the baseline and timing protocol must be specified when comparing these ratios.
 
 Backend selection is explicit: `HWSW_BACKEND=python|native|auto`. Native mode fails if the
-wheel is unavailable; auto mode falls back to Python. Pyperf workers must receive the variable
-through `--inherit-environ HWSW_BACKEND`; result metadata identifies what ran.
+wheel is unavailable; auto mode falls back to Python. The benchmark appends the variable to
+pyperf's inherited environment itself, so the workers receive it even when the caller omits
+`--inherit-environ`; result metadata identifies what actually ran.
 
 == Matched-work CPU counters
 

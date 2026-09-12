@@ -168,7 +168,8 @@ runs the same benchmark file with its Python back end directly under pyperf, not
 pyperformance, so it differs slightly from page 1's optimized Python; both cover the complete
 benchmark.
 `HWSW_BACKEND=python|native|auto` selects the implementation; native mode requires the extension,
-while auto mode falls back. Pyperf workers need `--inherit-environ HWSW_BACKEND`.
+while auto mode falls back. The benchmark forwards the variable to pyperf's workers itself, so a
+scrubbed worker environment cannot quietly change which back end is measured.
 
 *The submitted Rust source was rebuilt on the VM.* Ten Rust unit tests and seven blocks
 across five Python/`bz2` fixtures passed, including exact ending bit positions. A dispatch
