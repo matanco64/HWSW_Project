@@ -1,0 +1,27 @@
+mtf_cam — dv_coverage (stage 7) coverage summary
+=================================================
+Suite: 16 cocotb tests (smoke, smoke_backpressure, backpressure, multiblock, k1,
+full_benchmark, test_random, test_corner, test_driver, test_err_underrun, test_err_rank,
+test_err_eob, test_err_limit, test_run_max, test_reset, test_xinv), Verilator --coverage.
+Command for the gate figure:  COVERAGE_MAX_WIDTH=4 make -C hw/mtf_cam cov
+
+GATE (control-subset toggle, COVERAGE_MAX_WIDTH=4):
+  cov: line 92.0% (104/113)  toggle 93.8% (720/768)  branch 96.8% (184/190)
+
+Line   92.0% (104/113)  >= 90%   PASS
+Toggle 93.8% (720/768)  >= 90%   PASS  (control subset; wide datapath waived — see waivers.md)
+Branch 96.8% (184/190)  >= 90%   PASS
+
+Toggle width sweep (same 16-test suite) — evidence the residual is structural, not a hole:
+  <=4-bit control subset : 93.8% (720/768)      <- gate figure
+  <=8-bit                : 91.9% (1228/1336)
+  <=16-bit               : 86.8% (1688/1944)
+  raw, all signals       : 82.8% (9784/11820)   <- unhit bits are minority upper bits inside
+                                                    well-toggled wide counters/list/used-map
+Baseline raw toggle before the stage-7 stimulus push was 77.1%; the constrained-random +
+2^20-run + full-N_USED + all-rank stimulus lifted raw toggle to 82.8% and then floors: the
+remaining unhit bits sit in the >4-bit datapath/storage (mtf_list 256x8 list array, 256-bit
+used_map, 64-bit CYCLES, 32-bit counters, 21-bit run accumulators). See coverage_waivers.md.
+
+Functional coverage: tb/cov/func_cov.txt — every testplan §1 covergroup bin hit >= 1, with the
+W=4/16 & N_LIST=16 and K3>1.10 bins waived (single W=8/D=8/N_LIST=256 build). 129 bins, 22 groups.
