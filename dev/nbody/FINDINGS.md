@@ -494,22 +494,19 @@ flame-graph plateaus in a row is a dull deck.
 `advance = _build_advance()`, built from `_advance_source(bodies, pairs)` at
 import time, outside the timed region.
 
-**`_BIT_EXACT = True` is the shipped default**, chosen deliberately: it costs
-nothing measurable (see 2.3 - the sqrt variant came out *slower* on the 3.10
-pyperf pair) and buys a claim that cannot be attacked.
-Setting it to `False` emits the `sqrt` route; the flag is one token and is
-documented in the file, so a grader can flip it and diff the two.
+**The shipped emitter is bit-exact only.** It emits stock's own
+`dt * (dsq ** -1.5)`. The `sqrt` route came out *slower* on the 3.10 pyperf
+pair (see 2.3), so the shipped file no longer carries a flag for it at all;
+`run_benchmark_sqrt.py` in this directory is that variant, kept for the A/B.
 
-**The Rust path is deliberately NOT wired into `run_benchmark.py`**, not even
-behind a try/except import. Reasons: (a) the pure-Python tier already clears the
-bar by 7-12x, so the Rust wheel would add a build dependency to the measured venv
-for no marginal credit; (b) an optional import that silently falls back makes the
-*measured configuration ambiguous*, which is exactly the sort of thing that
-undermines a performance claim; (c) it keeps the shipped diff to one function.
-The crate stands on its own as a tier and as the accelerator's behavioural spec,
-and can be wired in later by adding the wheel to
-`benchmarks/bm_nbody/requirements.txt` if the course staff want the aggressive
-number.
+**The Rust path IS wired into `run_benchmark.py`** (since 8ab44e6), as an
+optional import selected by `HWSW_BACKEND=auto|python|native`. This reverses
+what this section used to say. The objection recorded at the time -- that an
+optional import with a silent fallback makes the measured configuration
+ambiguous -- was answered rather than dropped: the back end that actually ran
+is written into every result JSON's metadata, the runner asserts it against
+what was requested, and the reports quote the Python and native tiers as
+separate rows with separate baselines.
 
 | file | what |
 |---|---|

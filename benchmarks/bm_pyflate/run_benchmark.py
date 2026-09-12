@@ -39,6 +39,7 @@ inherited from upstream, is not reached by this benchmark, and is left
 untouched.
 """
 
+import collections
 import hashlib
 import io
 import os
@@ -66,15 +67,21 @@ _BACKEND = os.environ.get("HWSW_BACKEND", "auto").lower()
 if _BACKEND not in ("auto", "python", "native"):
     raise SystemExit("HWSW_BACKEND must be one of: auto, python, native")
 
+# Not just ImportError: a wheel built against a different libc or CPython
+# ABI raises OSError here, and `auto` has to fall back rather than take the
+# whole benchmark down. `native` still fails loudly, with the real reason.
 try:
     import pyflate_rs
-except ImportError:                                          # pragma: no cover
+    _native_import_error = None
+except Exception as exc:                                     # pragma: no cover
     pyflate_rs = None
+    _native_import_error = exc
 
 if _BACKEND == "python":
     pyflate_rs = None
 elif _BACKEND == "native" and pyflate_rs is None:
-    raise SystemExit("HWSW_BACKEND=native but pyflate_rs is not importable")
+    raise SystemExit("HWSW_BACKEND=native but pyflate_rs is not importable: %r"
+                     % (_native_import_error,))
 
 
 int2byte = struct.Struct(">B").pack
@@ -470,17 +477,19 @@ def bwt_transform(L):
     sort of 336,184 bytes -- and then called `F.find()` 256 times, purely to
     learn where each symbol's bucket starts.  A counting sort gets the same
     answer in O(n + 256): count the symbols, prefix-sum the counts, then place
-    each position into its bucket.
+    each position into its bucket.  The histogram goes through
+    `collections.Counter`, whose `_count_elements` tallies the 336,184 bytes in
+    C rather than in a Python loop.  Measured interleaved on CPython 3.14 that
+    is 0.4 ms of the whole decode -- small, but free, and it is what the
+    measured T3 tier in dev/pyflate/ actually used.  Unmeasured on the VM's
+    3.10, where an unspecialized loop body should make the gap wider.
     """
-    counts = [0] * 256
-    for symbol in L:
-        counts[symbol] += 1
-
-    base = []
+    cnt = collections.Counter(L)
+    base = [0] * 256
     total = 0
-    for c in counts:
-        base.append(total)
-        total += c
+    for symbol in range(256):
+        base[symbol] = total
+        total += cnt.get(symbol, 0)
 
     pointers = [-1] * len(L)
     for i, symbol in enumerate(L):
