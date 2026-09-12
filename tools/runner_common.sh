@@ -197,6 +197,16 @@ EOF
 # ---------------------------------------------------------------------------
 setup() {
     sudo apt-get install -y python3-dbg linux-tools-generic git >/dev/null || true
+    # The course VM ships pyperformance; a fresh host does not, and
+    # check_prereqs exits without it -- so "setup installs the prerequisites"
+    # has to be true rather than merely intended. Pinned, because a different
+    # pyperformance supplies a different stock benchmark to measure against.
+    python3 -c "import pyperformance" 2>/dev/null || \
+        python3 -m pip install --user "pyperformance==$EXPECT_PYPERFORMANCE" || \
+        _warn "could not install pyperformance==$EXPECT_PYPERFORMANCE (see check_prereqs)"
+    # py-spy supplies the Python-frame flame graphs in the profile stage; perf
+    # covers the C frames whether or not this succeeds.
+    command -v py-spy >/dev/null 2>&1 || python3 -m pip install --user py-spy || true
     [ -d "$HOME/FlameGraph" ] || git clone --depth 1 https://github.com/brendangregg/FlameGraph "$HOME/FlameGraph"
     # KVM guest quirks: allow perf sampling; NOTE not persisted across VM reboots.
     sudo sysctl -w kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
@@ -303,6 +313,30 @@ wheel() {
         --record "$RES/wheel_$BENCH.json"
 }
 
+# Make ${BENCH}_rs importable before the native stage runs. A fresh clone has
+# no extension installed, so `all` used to run the entire suite and only then
+# fail in native -- reporting an incomplete run for a repository that ships a
+# prebuilt wheel. Build from this checkout where the Rust toolchain exists
+# (the honest route: it measures the source in front of you), otherwise install
+# the committed wheel the canonical run measured. Say which one happened.
+ensure_native_module() {
+    python3 -c "import ${BENCH}_rs" 2>/dev/null && return 0
+    if command -v maturin >/dev/null 2>&1 && command -v cargo >/dev/null 2>&1; then
+        echo "== $BENCH / wheel (building ${BENCH}_rs from this checkout)"
+        if wheel; then
+            return 0
+        fi
+        _warn "building ${BENCH}_rs failed; falling back to the committed wheel"
+    fi
+    local prebuilt
+    prebuilt="$(ls "$ROOT/rust/$BENCH"/wheels/*.whl 2>/dev/null | head -n 1)"
+    [ -n "$prebuilt" ] || { _warn "no committed wheel under rust/$BENCH/wheels/"; return 1; }
+    echo "== $BENCH / wheel (installing committed $(basename "$prebuilt"))"
+    echo "   NOTE: the binary the canonical run measured, not a build of this checkout."
+    python3 -m pip install --user --force-reinstall "$prebuilt" >/dev/null || return 1
+    python3 -c "import ${BENCH}_rs" 2>/dev/null
+}
+
 native() {
     # The native (Rust) back end measured against the pure-Python fallback of
     # the SAME file, on the same interpreter, with the same pyperf harness and
@@ -359,19 +393,30 @@ EOF
 run_stage() {
     local stage="${1:-all}"
     case "$stage" in
-        wheel|native)
-            [ "$HAS_NATIVE" = 1 ] || {
-                echo "$BENCH has no rust/ crate, so there is no '$stage' stage." >&2
-                exit 2; } ;;&
         setup|baseline|profile|optimized|compare|wheel|native|all) ;;
         *) echo "usage: script_$BENCH.sh setup|baseline|profile|optimized|compare|wheel|native|all" >&2
            exit 2 ;;
+    esac
+    # A `;;&` fallthrough would fold this into the case above, but that is a
+    # bash 4 feature and the test suite runs this file under macOS's bash 3.2.
+    case "$stage" in
+        wheel|native)
+            [ "$HAS_NATIVE" = 1 ] || {
+                echo "$BENCH has no rust/ crate, so there is no '$stage' stage." >&2
+                exit 2; } ;;
     esac
 
     # setup installs the prerequisites, so it cannot require them first.
     if [ "$stage" = setup ]; then
         setup
         return
+    fi
+
+    # `all` begins by installing the prerequisites, so everything that needs
+    # them -- locating the stock benchmark through the installed pyperformance,
+    # and check_prereqs itself -- has to follow it rather than precede it.
+    if [ "$stage" = all ]; then
+        setup
     fi
 
     RES="$(_resolve_res "$stage")"
@@ -406,8 +451,6 @@ run_stage() {
         return
     fi
 
-    setup
-
     baseline; profile; optimized; compare
     if [ "$HAS_NATIVE" != 1 ]; then
         echo "== done: $RES (no native tier for $BENCH)"
@@ -417,6 +460,9 @@ run_stage() {
     # full course A/B -- but "optional" must not mean "silent". The old
     # `native || true` swallowed a real failure and left an incomplete results
     # directory looking complete.
+    # native() prints its own instructions when the module is missing, so a
+    # failure here still explains itself.
+    ensure_native_module || true
     local native_rc=0
     native || native_rc=$?
     if [ "$native_rc" -ne 0 ]; then
