@@ -54,7 +54,15 @@ echo "python: $("$PY" -VV 2>&1 | head -1)"
 check unit-tests            "$PY" -m unittest discover -s tests -v
 check nbody-python-exact    "$PY" dev/nbody/verify.py --steps 20000
 check nbody-python-exact-N  "$PY" dev/nbody/verify.py --steps 2000 --bodies 5,10,20
-native nbody_rs   nbody-native-exact    env NBODY_ROUNDS=3 "$PY" dev/nbody/rs_check.py
+# The rolled fallback above _MAX_UNROLL_PAIRS had no oracle: verify.py topped out
+# at N = 200 (19,900 pairs), just under the 20,000 limit, so the generated kernel
+# was the only thing ever checked. Lowering the limit reaches the same code at
+# N = 6, for a fraction of the work.
+check nbody-python-exact-rolled \
+    env NBODY_MAX_UNROLL_PAIRS=0 "$PY" dev/nbody/verify.py --steps 2000 --bodies 6,10
+# --bodies: the native path is what --bodies N and the big-N sweep drive, and
+# pair order above five bodies is generated code that N = 5 never exercises.
+native nbody_rs   nbody-native-exact    env NBODY_ROUNDS=3 "$PY" dev/nbody/rs_check.py --bodies 5,10,31
 native pyflate_rs pyflate-native-exact  "$PY" dev/pyflate/rs_check.py
 
 if ls report_*.txt >/dev/null 2>&1; then
