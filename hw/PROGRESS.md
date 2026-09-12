@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-08 07:45 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-08 07:45 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 18:14 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-12 18:14 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -26,8 +26,7 @@ flowchart LR
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
     class integration todo
-    class ppa in_progress
-    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff done
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa done
 ```
 
 ### `huffman_engine`
@@ -50,8 +49,9 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class prd,mas,uarch,rtl,dv_testplan done
+    class ppa,integration todo
+    class dv_signoff in_progress
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage done
 ```
 
 ### `mtf_cam`
@@ -84,16 +84,16 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔵 | ⬜ |
-| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ |
+| `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔵 | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
 ## Next up
 
-- `grape_pipeline`: **PPA** — in_progress
-- `huffman_engine`: **DV bring-up** — todo
+- `grape_pipeline`: **Integration** — todo
+- `huffman_engine`: **DV sign-off** — in_progress (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
 ## Gates
@@ -162,11 +162,11 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] Icarus 4-state run X-free after reset — make sim-icarus: TESTS=9 PASS=9; monitor is_resolvable asserts on every handshake, none fired
 - [x] formal (sby) where listed — synth/formal.sby: bmc PASS (depth 40) + cover PASS (5/5 states) on fsm_arcs; bresp_hold/w1c take testplan §6 fallback (regs 3x2240b beyond smtbmc; test_regs 11/11 + protocol agent)
 
-#### PPA — 🔵 in_progress (started 2026-09-08T07:37:27Z)
+#### PPA — ✅ done (started 2026-09-08T07:37:27Z, finished 2026-09-12T18:14:30Z)
 
 - [x] Yosys+Liberty area + cell counts — synth/area.txt: 584454 cells, 4075030.8 um^2 (sky130_fd_sc_hd tt); docs/ppa.md tables
-- [ ] OpenLane 2 run: Fmax, area µm², power
-- [ ] trade-off table (≥2 design points)
+- [x] OpenLane 2 run: Fmax, area µm², power — post-CTS STA Fmax 11.15 MHz (synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt WS +60.32ns @150ns; worst path u_fsm->g_add accumulate picker); area 4.075 mm² (Yosys synth/area.txt); power/GDS n/a — OpenLane GRT-0607 congestion bug x3, §7 signoff not required
+- [x] trade-off table (≥2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff K1 knob
 - [x] trade-off table (>= 2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff fix as the design knob
 
 ### `huffman_engine`
@@ -210,6 +210,29 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] features <-> tests <-> covergroups <-> checkers matrix — docs/testplan.md §2: 26 rows (F-01..15 = PRD-F1..16, F-20..26 arcs/boundaries/errors, F-30..32 KPIs), no empty cell
 - [x] hw-review resolved — docs/review_testplan.md: 17 findings (5 must incl. executed-golden EOB catch), all musts resolved, 0 open
 
+#### DV bring-up — ✅ done (started 2026-09-12T10:05:01Z, finished 2026-09-12T12:57:48Z)
+
+- [x] pyuvm env instantiates — make sim: HuffEnv (axi agent + 3 AXIS monitors + HuffScoreboard) builds/connects; 2 tests run under it
+- [x] first directed test passes on Verilator — test_huffman_engine.smoke PASS + test_bench_block PASS (real block: 148271 symbols, START_BIT 8844, 6 tables; K1=1.0068 <= 1.1, model 1.0068 exact; BUILD_CYCLES=167=ALPHABET+MAXLEN, OVERFETCH=3<=4)
+- [x] scoreboard compares against golden — scoreboard: compared 148271 items, 0 mismatches (golden=canonical_model.decode_bzip2_symbols); BITS=531571 golden-exact
+- [x] hw-review findings resolved — docs/review_bringup.md: 13 findings (B1-B13), 2 musts fixed (dead SIMULATION ifdef armed via cocotb_run.py -DSIMULATION; smoke_backpressure covers the stall-credit corner), 0 must open; B4-B6 recorded as dv_coverage entry criteria
+
+#### DV coverage — ✅ done (started 2026-09-12T13:38:43Z, finished 2026-09-12T17:33:06Z)
+
+- [x] constrained-random sequences — tb/sequences/rand_tables.py + errors.py + ctrl.py + tests_deflate.py + tests_cover.py; make sim TESTS=15 PASS=15 incl. random_cfg 16 invocations, errors 7 ERR_PARAM + all runtime errors, abort/reset/multiblock/boundary/dbg, DEFLATE (zlib+custom+ERR_SYMBOL+LIMIT)
+- [ ] line/toggle ≥ 90 %
+- [x] all functional covergroups hit — tb/cov/func_cov.txt: 34 bins all >=1 (cg_cfg alphabet{288,147,mid,small}+n_tables{1..6}, cg_sel switches/groups, cg_bp sym/src, cg_err{param,busy,table.badlen,table.kraft,nocode,selector,limit,underrun}, cg_ctrl{done,abort}, cg_deflate.block, cg_bits start_bit)
+- [x] line/toggle >= 90 % — tb/cov/coverage.txt: line 90.4%, toggle 90.3% (control signals; wide datapath/counters/ROMs/storage waived via inline coverage_off + coverage-max-width 4, docs/coverage_waivers.md), branch 91.7%
+
+#### DV sign-off — 🔵 in_progress (started 2026-09-12T18:12:42Z)
+
+- [ ] golden equivalence on the full benchmark input
+- [ ] directed + random suites pass
+- [ ] coverage goals
+- [ ] lint clean
+- [ ] Icarus 4-state run X-free after reset
+- [ ] formal (sby) where listed
+
 ### `mtf_cam`
 
 #### PRD — ✅ done (started 2026-08-28T21:13:50Z, finished 2026-08-30T07:51:36Z)
@@ -232,6 +255,6 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 0 | 0 |
-| `huffman_engine` | 0 | 0 | 0 | 0/0 | n/a | 151058 | 1634516 | 0 | 0 |
+| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 11.15 | 0 |
+| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | n/a | 151058 | 1634516 | 0 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |

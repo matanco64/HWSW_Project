@@ -7,9 +7,10 @@
   numbers from `synth/area.txt` (script `synth/yosys_area.gen.ys`, target `make area`).
 - Clock target: 50 MHz (MAS §3; uArch §6 budget shows ≤ 13 ns worst comb on the C0-free
   datapath — the schedule fabric — with headroom at 20 ns).
-- OpenLane 2 sign-off (Fmax/power/die shot): **pending toolchain install** (`hw/setup.sh
-  --with-openlane` = Nix + flake; needs an interactive install). This section is completed
-  when that lands; the gate row records the state honestly.
+- OpenLane 2 sign-off (Fmax/power/die shot): **attempted, did not converge to GDS** (8 runs on
+  this 24 GB WSL host). It DID complete synthesis + placement + CTS + post-CTS static timing
+  before dying in global routing, so the Fmax below is real STA, not an estimate. Power and the
+  die shot need signoff/GDS, which was never reached. See "OpenLane 2 (sign-off) — outcome" below.
 
 ## Yosys + Liberty (fast gate)
 
@@ -50,16 +51,49 @@ Secondary observations for the report:
 - K5-type soft comparisons belong to the huffman module (its PRD carries the 1.0 mm² soft
   ceiling); grape's PRD carries no area ceiling — 4.075 mm² is reported, not gated.
 
-## OpenLane 2 (sign-off) — pending
+## OpenLane 2 (sign-off) — outcome
 
-`synth/config.json` prepared (DESIGN_NAME grape_pipeline, CLOCK_PORT clk, CLOCK_PERIOD 20.0);
-run `make -C hw/grape_pipeline openlane` once `hw/setup.sh --with-openlane` has been executed
-(interactive Nix install). Then: Fmax = 1/(20 ns − ws), `design__instance__area`,
-`power__total`, DRC/LVS counts, and `docs/dieshot_grape_pipeline.png` via klayout — recorded
-here and in STATUS metrics.
+OpenLane 2 signoff was attempted **eight times** on this 24 GB WSL host and never reached GDS.
+The saga, for the record:
+
+| Runs | Symptom | Response |
+|---|---|---|
+| 1–3 | Synthesis OOM / process restart | raised WSL memory budget |
+| 4–5 | Flat-synthesis OOM (whole netlist flattened at once) | fixed with `SYNTH_HIERARCHY_MODE deferred_flatten` |
+| 6, 7, 7b | OpenROAD **GRT-0607** in global routing — *"Unable to update: position not found in 2D heap"* — hit **three times**, even at a relaxed 150 ns clock with `GRT_ALLOW_CONGESTION` and a lean netlist | not a config knob: an OpenROAD global-router limitation on this congested 584 k-cell design |
+
+The last run (`grape_relaxed`, 150 ns clock) got the furthest — it completed synthesis,
+placement, CTS and **post-CTS static timing**, producing real timing data before dying in
+routing. That STA is what we report:
+
+| Metric | Value | Source |
+|---|---|---|
+| Post-CTS worst setup slack | **+60.3164 ns** @ 150 ns period | `synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt` (`timing__setup__ws__corner:nom_tt_025C_1v80`) |
+| Achievable period | 150 − 60.3164 = **89.68 ns** | derived |
+| **Fmax** | **≈ 11.15 MHz** (1 / 89.68 ns) | derived from the slack above |
+| Worst path | `u_fsm._948_` (state FF) → `g_add[1].u_add._6265_` (accumulate-picker adder) | `synth/runs/grape_relaxed/35-openroad-stamidpnr-1/checks.rpt` Startpoint/Endpoint |
+| Area (post-place, µm²) | not reported — OpenLane never reached signoff; use Yosys 4.075 mm² (§ Yosys) | — |
+| Power (mW) | **not obtained** — needs signoff/GDS, never reached | — |
+| Die shot | **not obtained** — no GDS produced | — |
+
+**Fmax vs KPI.** The critical path is the **3-wide accumulate issue picker** (`g_add[*]` —
+the K1-fix logic from dv_signoff, see trade-off above), driven by the FSM state register. The
+achievable ~11.15 MHz misses the 20 ns / 50 MHz PRD target by **~4.5×**. The documented RTL
+follow-up is to **pipeline the accumulate picker** (break the FSM-state → 3-wide-adder path into
+stages); that is a datapath change deferred to a future RTL iteration, not a PPA-stage fix.
+
+**§7 framing.** Per project_instructions.md §7 ("You are not expected to synthesize"), the
+requirement is a trade-off **discussion with a defined operating frequency**. That is satisfied
+here: the Yosys area/cell counts, the measured 2-point K1 trade-off table, and this post-CTS STA
+together define the operating point (~11.15 MHz achievable on this netlist) and its cost. Full
+OpenLane signoff (power, die shot) was **bonus**, not a §7 requirement, and did not converge
+because of the OpenROAD GRT-0607 router bug — an environment/tool limitation, not a design gap.
 
 ## Report §7 mapping
 
 Performance: K1 124 cycles/step measured on the full benchmark (2.48 M cycles / 20 k steps =
-49.6 ms @ 50 MHz for the compute; SW baseline comparison in `hw-integrate`). Area: 4.075 mm²
-sky130 HD, trade-off table above. Power: OpenLane pending.
+49.6 ms at the 50 MHz PRD target; **but the achievable clock from post-CTS STA is ~11.15 MHz →
+~225 ms** — both quoted in `hw-integrate`). Area: 4.075 mm² sky130 HD, trade-off table above.
+Fmax: ~11.15 MHz from post-CTS STA (`synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt`),
+critical path the accumulate picker → 50 MHz missed ~4.5×, RTL fix = pipeline the picker.
+Power/die shot: not obtained (OpenLane GRT-0607, signoff not §7-required).
