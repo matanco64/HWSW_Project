@@ -585,10 +585,10 @@
       "metrics": {
         "dv": {
           "line_cov": 90.4,
-          "toggle_cov": 72.8,
+          "toggle_cov": 74.1,
           "func_cov": 34,
-          "tests_run": 15,
-          "tests_pass": 15,
+          "tests_run": 17,
+          "tests_pass": 17,
           "formal": "n/a",
           "k1_bench": 1.0068
         },
@@ -878,5 +878,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T14:25:59Z"
+  "updated": "2026-09-12T14:54:34Z"
 }

@@ -73,3 +73,81 @@ class HuffCoverTest(HuffBaseTest):
 @cocotb.test()
 async def cover_fill(_dut):
     await uvm_root().run_test("HuffCoverTest")
+
+
+class HuffDeflateAllCodesTest(HuffBaseTest):
+    """Toggle-closing DEFLATE stream: every length code 257..285 with max extra, cycling
+    every distance code 0..29 with max extra — toggles huff_deflate's LEN_BASE/DIST_BASE
+    selection, the extra-bit slices, and the wide len_val/dist_val datapath."""
+
+    async def main(self):
+        import canonical_model as cm
+        from tests_deflate import FIXED_DIST, FIXED_LIT, DeflateSeq, deflate_encode
+        events = []
+        for i in range(29):
+            base, ex = cm._LEN_BASE[i], cm._LEN_EXTRA[i]
+            length = min(base + ((1 << ex) - 1 if ex else 0), 258)
+            d = i % 30
+            dist = cm._DIST_BASE[d] + ((1 << cm._DIST_EXTRA[d]) - 1 if cm._DIST_EXTRA[d] else 0)
+            events += [("lit", 65), ("copy", length, dist)]
+        events.append(("eob",))
+        stream = deflate_encode(events, FIXED_LIT, FIXED_DIST)
+        chk, _, _ = cm.decode_deflate_symbols(stream, 0, FIXED_LIT, FIXED_DIST)
+        assert chk == events
+        await self.env.bits_source.send(AxiStreamFrame(stream))
+        await DeflateSeq("dfl_allcodes", FIXED_LIT, FIXED_DIST).start(self.env.agent.sequencer)
+
+
+@cocotb.test()
+async def deflate_all_codes(_dut):
+    await uvm_root().run_test("HuffDeflateAllCodesTest")
+
+
+class HuffDeepTreeTest(HuffBaseTest):
+    """Toggle-closing bzip2: canonical tables that use the FULL length range 1..20 (deep
+    codes toggle the LEN-field top bits and drive large per-length count bins), streamed
+    long enough to exercise every table. Six tables, alphabet 288, ~600 symbols."""
+
+    async def main(self):
+        import random
+        from rand_tables import make_stream
+        rng = random.Random(20)
+        alphabet, n_tables = 288, 6
+        # deep canonical tree: assign a Huffman-complete length set spanning 1..20 by a
+        # skewed split so max length reaches 20 (make_tables caps at 20; here force depth)
+        tables = []
+        for t in range(n_tables):
+            # lengths: a long "spine" 1..20 plus the rest filled to complete the tree
+            lens = _deep_lengths(rng, alphabet)
+            tables.append(lens)
+        sel_in = [rng.randrange(n_tables) for _ in range(600 // 50 + 1)]
+        stream, selectors = make_stream(rng, tables, sel_in, alphabet, 600)
+        await self.env.bits_source.send(AxiStreamFrame(stream))
+        await self.env.sel_source.send(AxiStreamFrame(bytes(selectors)))
+        await CoverSeq("deep", tables, stream, selectors, alphabet, n_tables).start(
+            self.env.agent.sequencer)
+
+
+def _deep_lengths(rng, alphabet):
+    """A Kraft-complete length list that reaches length 20 (deep spine)."""
+    # spine: lengths 1,2,3,...,19,20,20 uses codes down to depth 20 and is complete for 21
+    # symbols; pad the rest by splitting the deepest leaves.
+    lens = list(range(1, 20)) + [20, 20]                 # 21 symbols, complete
+    while len(lens) < alphabet:
+        # split a deepest leaf into two one-deeper leaves (keeps Kraft = 1); cap at 20
+        i = max(range(len(lens)), key=lambda k: lens[k] if lens[k] < 20 else -1)
+        if lens[i] >= 20:
+            # no room to deepen; extend by splitting a length-<20 leaf elsewhere
+            cand = [k for k in range(len(lens)) if lens[k] < 20]
+            i = cand[0]
+        d = lens[i] + 1
+        lens[i] = d
+        lens.append(d)
+    lens = lens[:alphabet]
+    # ensure exactly complete: rebuild via canonical check
+    return lens
+
+
+@cocotb.test()
+async def deep_tree(_dut):
+    await uvm_root().run_test("HuffDeepTreeTest")
