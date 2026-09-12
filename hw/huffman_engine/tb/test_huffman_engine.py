@@ -9,6 +9,7 @@ from cocotbext.axi import AxiStreamFrame
 from pyuvm import ConfigDB, uvm_root
 
 from base_test import BaseTest
+from bench import BenchSeq
 from env import HuffEnv
 from smoke import SmokeSeq
 
@@ -43,3 +44,33 @@ class HuffSmokeTest(HuffBaseTest):
 @cocotb.test()
 async def smoke(_dut):
     await uvm_root().run_test("HuffSmokeTest")
+
+
+class HuffBenchBlockTest(HuffBaseTest):
+    """testplan test_bench_block (F-30): the real benchmark block — 148,271 symbols,
+    6 tables, START_BIT 8,844 — trace-exact via the scoreboard, K1 enforced here."""
+
+    k1_enforce = True
+
+    async def main(self):
+        import json
+        import pathlib
+        vecdir = pathlib.Path(__file__).resolve().parent / "vectors"
+        vec = json.loads((vecdir / "bench_block.json").read_text())
+        stream = (vecdir / "bench_stream.bin").read_bytes()
+        await self.queue_streams(stream, bytes(vec["selectors"]))
+        seq = BenchSeq("bench", vec=vec)
+        await seq.start(self.env.agent.sequencer)
+        c = seq.counters
+        assert c["symbols"] == vec["n_symbols"], (c, vec["n_symbols"])
+        k1 = c["cycles"] / c["symbols"]
+        self.logger.info(f"bench block: CYCLES={c['cycles']} SYMBOLS={c['symbols']} "
+                         f"BITS={c['bits']} BUILD_CYCLES={c['build_cycles']} "
+                         f"OVERFETCH={c['overfetch']} K1={k1:.4f}")
+        if self.k1_enforce:
+            assert k1 <= 1.1, f"K1 {k1:.4f} > 1.1 (PRD KPI, model 1.0068)"
+
+
+@cocotb.test()
+async def bench_block(_dut):
+    await uvm_root().run_test("HuffBenchBlockTest")
