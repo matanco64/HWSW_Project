@@ -34,15 +34,21 @@ _BACKEND = os.environ.get("HWSW_BACKEND", "auto").lower()
 if _BACKEND not in ("auto", "python", "native"):
     raise SystemExit("HWSW_BACKEND must be one of: auto, python, native")
 
+# Not just ImportError: a wheel built against a different libc or CPython
+# ABI raises OSError here, and `auto` has to fall back rather than take the
+# whole benchmark down. `native` still fails loudly, with the real reason.
 try:
     import nbody_rs
-except ImportError:                                          # pragma: no cover
+    _native_import_error = None
+except Exception as exc:                                     # pragma: no cover
     nbody_rs = None
+    _native_import_error = exc
 
 if _BACKEND == "python":
     nbody_rs = None
 elif _BACKEND == "native" and nbody_rs is None:
-    raise SystemExit("HWSW_BACKEND=native but nbody_rs is not importable")
+    raise SystemExit("HWSW_BACKEND=native but nbody_rs is not importable: %r"
+                     % (_native_import_error,))
 
 __contact__ = "collinwinter@google.com (Collin Winter)"
 DEFAULT_ITERATIONS = 20000
