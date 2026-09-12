@@ -181,6 +181,17 @@ EOF
 # ---------------------------------------------------------------------------
 # Stages
 # ---------------------------------------------------------------------------
+# pip refuses --user inside a virtualenv, and the course's own guide sets
+# pyperformance up in one; outside a venv --user is what avoids needing root.
+# Pick per interpreter rather than assuming either.
+_pip_install() {
+    if python3 -c 'import sys; raise SystemExit(0 if sys.prefix != sys.base_prefix else 1)'; then
+        python3 -m pip install "$@"
+    else
+        python3 -m pip install --user "$@"
+    fi
+}
+
 setup() {
     sudo apt-get install -y python3-dbg linux-tools-generic git >/dev/null || true
     # The course VM ships pyperformance; a fresh host does not, and
@@ -188,11 +199,11 @@ setup() {
     # has to be true rather than merely intended. Pinned, because a different
     # pyperformance supplies a different stock benchmark to measure against.
     python3 -c "import pyperformance" 2>/dev/null || \
-        python3 -m pip install --user "pyperformance==$EXPECT_PYPERFORMANCE" || \
+        _pip_install "pyperformance==$EXPECT_PYPERFORMANCE" || \
         _warn "could not install pyperformance==$EXPECT_PYPERFORMANCE (see check_prereqs)"
     # py-spy supplies the Python-frame flame graphs in the profile stage; perf
     # covers the C frames whether or not this succeeds.
-    command -v py-spy >/dev/null 2>&1 || python3 -m pip install --user py-spy || true
+    command -v py-spy >/dev/null 2>&1 || _pip_install py-spy || true
     [ -d "$HOME/FlameGraph" ] || git clone --depth 1 https://github.com/brendangregg/FlameGraph "$HOME/FlameGraph"
     # KVM guest quirks: allow perf sampling; NOTE not persisted across VM reboots.
     sudo sysctl -w kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
@@ -312,7 +323,7 @@ ensure_native_module() {
     [ -n "$prebuilt" ] || { _warn "no committed wheel under rust/$BENCH/wheels/"; return 1; }
     echo "== $BENCH / wheel (installing committed $(basename "$prebuilt"))"
     echo "   NOTE: the binary the canonical run measured, not a build of this checkout."
-    python3 -m pip install --user --force-reinstall "$prebuilt" >/dev/null || return 1
+    _pip_install --force-reinstall "$prebuilt" >/dev/null || return 1
     python3 -c "import ${BENCH}_rs" 2>/dev/null
 }
 
