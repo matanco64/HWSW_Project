@@ -19,5 +19,6 @@
     "FP_CORE_UTIL": 32,
     "PL_TARGET_DENSITY_PCT": 37,
     "SYNTH_HIERARCHY_MODE": "deferred_flatten",
-    "GRT_ADJUSTMENT": 0.15
+    "GRT_ADJUSTMENT": 0.15,
+    "GRT_ALLOW_CONGESTION": true
 }

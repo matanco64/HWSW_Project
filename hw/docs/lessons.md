@@ -309,3 +309,32 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   from frozen byte counts; a 5-line RSS sampler alongside the launch turns the next failure
   into a number. When comparing frozen log sizes across runs, subtract the log-head config
   echo first — 486 B of deprecation warning nearly masked that runs 4 and 5 died identically.
+
+## 2026-09-12 — grape_pipeline/ppa (runs 6–7) + scope check
+
+- **Read the assignment before campaigning**: days went into OpenLane signoff before anyone
+  re-read `project_instructions.md` §7 — "You are **not expected to synthesize**… discuss the
+  **expected** trade-offs." The Yosys numbers + the measured two-point K1 trade-off already
+  exceeded the requirement; OpenLane was bonus material all along. New rule: a stage skill's
+  first step names the REQUIREMENT SOURCE (course doc §, PRD row) its gate serves; when a
+  gate's cost explodes (>2 failed runs, >1 day), re-read that source before the next retry.
+  Skill: `hw-ppa` (and the pattern generalizes to every `hw-*` stage).
+- **OpenLane runs are resumable mid-flow** — `openlane --run-tag <tag> --from <Step.Id>`
+  reuses every completed step's `state_out.json`. Two VM deaths cost ~zero recompute once
+  this was used; the days lost earlier to restart-from-scratch were unnecessary. Skill:
+  `hw-ppa` step 4.
+- **An unachievable clock poisons more than timing**: at 20 ns (WNS −128 ns), repair_timing
+  inserted thousands of futile buffers, and the bloated netlist then congested global routing
+  into a known OpenROAD crash (GRT-0607, twice — second time after GRT_ADJUSTMENT 0.15 bought
+  1.3 h). At 150 ns the same design met timing (+60 ns WS), repair was minutes, and routing
+  entered far leaner. Measure first (post-CTS STA gives true Fmax cheaply), then set
+  CLOCK_PERIOD ≈ 1.5× the measured worst path for the signoff run. Skill: `hw-ppa` step 4.
+- **`pgrep -f` self-match bit AGAIN** (the dv_signoff lesson, re-learned verbatim): a
+  post-restart "driver ALIVE" verdict was the checking shell matching itself; the run had
+  been dead 4 h. The lessons file documented it; the check was still typed from habit.
+  Process-shaped lessons need to live in the COMMANDS a skill prescribes (`ps -eo comm=` by
+  name), not only in prose. Skill: `hw-dv-signoff` overlay already has it; `hw-ppa` monitor
+  guidance now needs the same concrete command.
+- **Laptop sleep freezes the WSL VM**: wall-clock tripled on every long run (12.7 h and 6.8 h
+  frozen gaps); "no progress for days" was ~1.5 days of compute. Diagnose with step-log
+  mtime gaps + RSS-growth-rate vs wall time before blaming the tool.
