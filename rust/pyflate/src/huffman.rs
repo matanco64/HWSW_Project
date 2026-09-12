@@ -4,9 +4,10 @@ use crate::bit_reader::BitReader;
 
 /// Per-group table width; each full table occupies 8 KiB.
 pub(crate) const PRIMARY_BITS: u32 = 11;
-/// Legacy accepted limit retained for API compatibility; the benchmark's
-/// bzip2 header parser restricts format code lengths to 20 bits.
-const MAX_CODE_LEN: u32 = 23;
+/// bzip2 codes are at most 20 bits, and the Python header parser rejects
+/// anything longer before it reaches this crate. Accepting 23 here, as an
+/// earlier revision did, left the two sides disagreeing about what is valid.
+const MAX_CODE_LEN: u32 = 20;
 
 pub(crate) struct Group {
     /// Effective primary width, `min(PRIMARY_BITS, max_len)`.
@@ -48,7 +49,7 @@ impl Group {
         let max_len = lengths.iter().copied().max().unwrap() as u32;
         if max_len > MAX_CODE_LEN {
             return Err(format!(
-                "code length {max_len} exceeds the decoder's legacy limit {MAX_CODE_LEN}"
+                "code length {max_len} exceeds the bzip2 maximum {MAX_CODE_LEN}"
             ));
         }
 

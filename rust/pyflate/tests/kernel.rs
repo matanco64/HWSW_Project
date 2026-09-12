@@ -163,3 +163,137 @@ fn configuration_validates_alphabet_groups_and_selectors() {
     assert!(Decoder::new(&[], vec![vec![2; 4]; 2], vec![0], 4, b"a".to_vec()).is_err());
     assert!(Decoder::new(&[], vec![], vec![], 2, vec![]).is_err());
 }
+
+// ---------------------------------------------------------------------------
+// Property test: random canonical codes, encoded independently, decoded back.
+//
+// The other tests here pin hand-written tables, and rs_check.py drives the one
+// shipped stream, whose codes exercise the long-code fallback for 0.4% of its
+// symbols. Neither says much about a table shape the benchmark happens not to
+// contain. This builds random Kraft-complete length sets, assigns canonical
+// codes with an encoder written independently of the decoder, and requires the
+// decoder to return both the symbol and the bit position it consumed.
+// ---------------------------------------------------------------------------
+
+/// Deterministic xorshift64; the harness deliberately has no dependencies.
+struct Rng(u64);
+
+impl Rng {
+    fn next(&mut self) -> u64 {
+        let mut x = self.0;
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+        self.0 = x;
+        x
+    }
+
+    fn below(&mut self, n: usize) -> usize {
+        (self.next() % n as u64) as usize
+    }
+}
+
+/// Random Kraft-complete lengths: start from one leaf and split a random leaf
+/// until there are `n` of them, so sum(2^-len) == 1 holds by construction.
+/// `skew` always splits the deepest available leaf, which drives the tree down
+/// to `max_len` and is what reaches codes longer than the primary table; the
+/// balanced random shape rarely gets past 11 bits on its own.
+fn random_lengths(rng: &mut Rng, n: usize, max_len: u8, skew: bool) -> Option<Vec<u8>> {
+    let mut depths: Vec<u8> = vec![0];
+    while depths.len() < n {
+        let open: Vec<usize> = (0..depths.len()).filter(|&i| depths[i] < max_len).collect();
+        if open.is_empty() {
+            return None;
+        }
+        let i = if skew {
+            *open.iter().max_by_key(|&&i| depths[i]).unwrap()
+        } else {
+            open[rng.below(open.len())]
+        };
+        let d = depths[i] + 1;
+        depths[i] = d;
+        depths.push(d);
+    }
+    Some(depths)
+}
+
+/// Canonical assignment: sorted by (length, symbol), incrementing, shifted left
+/// at every length step. Written out longhand so it shares no code with the
+/// table builder it is checking.
+fn canonical_codes(lengths: &[u8]) -> Vec<(u32, u32)> {
+    let max_len = u32::from(*lengths.iter().max().unwrap());
+    let mut out = vec![(0u32, 0u32); lengths.len()];
+    let mut code: u32 = 0;
+    for l in 1..=max_len {
+        for (sym, &len) in lengths.iter().enumerate() {
+            if u32::from(len) == l {
+                out[sym] = (code, l);
+                code += 1;
+            }
+        }
+        code <<= 1;
+    }
+    out
+}
+
+fn write_bits(out: &mut Vec<u8>, bit_pos: &mut usize, code: u32, len: u32) {
+    for k in (0..len).rev() {
+        let bit = ((code >> k) & 1) as u8;
+        let idx = *bit_pos / 8;
+        while idx >= out.len() {
+            out.push(0);
+        }
+        out[idx] |= bit << (7 - *bit_pos % 8);
+        *bit_pos += 1;
+    }
+}
+
+#[test]
+fn random_canonical_tables_round_trip() {
+    let mut rng = Rng(0x9E37_79B9_7F4A_7C15);
+    let mut long_code_trials = 0;
+    let mut trials = 0;
+    for trial in 0..600 {
+        let n = 2 + rng.below(60);
+        let max_len = (2 + rng.below(19)) as u8; // bzip2 caps code lengths at 20
+        let skew = trial % 2 == 0;
+        let lengths = match random_lengths(&mut rng, n, max_len, skew) {
+            Some(l) => l,
+            None => continue,
+        };
+        let group = match Group::build(&lengths) {
+            Ok(g) => g,
+            Err(_) => continue,
+        };
+        trials += 1;
+        if lengths.iter().any(|&l| u32::from(l) > huffman::PRIMARY_BITS) {
+            long_code_trials += 1;
+        }
+
+        let codes = canonical_codes(&lengths);
+        let seq: Vec<usize> = (0..64).map(|_| rng.below(n)).collect();
+        let mut data = Vec::new();
+        let mut bit_pos = 0usize;
+        for &s in &seq {
+            let (code, len) = codes[s];
+            write_bits(&mut data, &mut bit_pos, code, len);
+        }
+        data.extend_from_slice(&[0u8; 8]);
+
+        let mut reader = BitReader::new(&data, 0).unwrap();
+        for &s in &seq {
+            // decode() is the hot path and assumes the accumulator is full --
+            // the real loop in decoder.rs refills the same way. Without this it
+            // underflows nbits once fewer than pb bits are buffered.
+            reader.refill().unwrap();
+            let got = group.decode(&mut reader).unwrap();
+            assert_eq!(got, (s as u32, codes[s].1), "symbol mismatch, lengths {lengths:?}");
+        }
+        assert_eq!(reader.bit_pos(), bit_pos as u64, "bit position, lengths {lengths:?}");
+    }
+    assert!(trials > 100, "only {trials} usable trials");
+    assert!(
+        long_code_trials > 50,
+        "only {long_code_trials} trials exercised the long-code fallback"
+    );
+}
