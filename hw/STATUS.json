@@ -523,7 +523,7 @@
           }
         },
         "dv_signoff": {
-          "state": "in_progress",
+          "state": "review",
           "started": "2026-09-12T18:12:42Z",
           "finished": "",
           "gate": {
@@ -899,5 +899,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T18:50:49Z"
+  "updated": "2026-09-12T18:50:57Z"
 }
