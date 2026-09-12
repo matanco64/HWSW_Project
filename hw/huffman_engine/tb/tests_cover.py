@@ -14,6 +14,7 @@ from env import (CYCLES_HI, CYCLES_LO, DBG_DATA, DBG_SEL, IRQ_EN, ID_REG, N_TABL
                  SYMBOL_LIMIT, LEN_BASE, CTRL, ST_BUSY)
 from rand_tables import make_tables, make_stream
 from smoke import HuffBaseSeq, pack_lengths
+from test_huffman_engine import HuffBaseTest
 
 
 class CoverSeq(HuffBaseSeq):
@@ -41,8 +42,8 @@ class CoverSeq(HuffBaseSeq):
                 busy_seen = True
             elif busy_seen and (st & ST_DONE):
                 break
-        # IRQ must be asserted with DONE unmasked
-        irq = int(self.env.dut.irq.value) if hasattr(self, "env") else 1
+        # IRQ must be asserted with DONE unmasked (level irq, MAS 0x010)
+        assert int(cocotb.top.irq.value) == 1, "IRQ not asserted with DONE unmasked"
         await self.rd(CYCLES_LO)
         await self.rd(CYCLES_HI)                      # 0x044: high word toggle/read
         await self.rd(SYMBOLS)

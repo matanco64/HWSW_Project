@@ -492,21 +492,23 @@
           }
         },
         "dv_coverage": {
-          "state": "todo",
-          "started": "",
+          "state": "in_progress",
+          "started": "2026-09-12T13:38:43Z",
           "finished": "",
           "gate": {
             "constrained-random sequences": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/sequences/rand_tables.py + errors.py + ctrl.py + tests_deflate.py + tests_cover.py; make sim TESTS=15 PASS=15 incl. random_cfg 16 invocations, errors 7 ERR_PARAM + all runtime errors, abort/reset/multiblock/boundary/dbg, DEFLATE (zlib+custom+ERR_SYMBOL+LIMIT)",
+              "at": "2026-09-12T14:25:59Z"
             },
             "line/toggle ≥ 90 %": {
               "result": "n/a",
               "evidence": ""
             },
             "all functional covergroups hit": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/cov/func_cov.txt: 34 bins all >=1 (cg_cfg alphabet{288,147,mid,small}+n_tables{1..6}, cg_sel switches/groups, cg_bp sym/src, cg_err{param,busy,table.badlen,table.kraft,nocode,selector,limit,underrun}, cg_ctrl{done,abort}, cg_deflate.block, cg_bits start_bit)",
+              "at": "2026-09-12T14:25:59Z"
             }
           }
         },
@@ -582,11 +584,11 @@
       },
       "metrics": {
         "dv": {
-          "line_cov": 0,
-          "toggle_cov": 0,
-          "func_cov": 0,
-          "tests_run": 3,
-          "tests_pass": 3,
+          "line_cov": 90.4,
+          "toggle_cov": 72.8,
+          "func_cov": 34,
+          "tests_run": 15,
+          "tests_pass": 15,
           "formal": "n/a",
           "k1_bench": 1.0068
         },
@@ -876,5 +878,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T12:57:48Z"
+  "updated": "2026-09-12T14:25:59Z"
 }
