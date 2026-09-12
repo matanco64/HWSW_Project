@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 18:14 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-12 18:14 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 18:19 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-12 18:19 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -25,8 +25,7 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class integration todo
-    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa done
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration done
 ```
 
 ### `huffman_engine`
@@ -84,7 +83,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | PRD | MAS | uArch | RTL | DV testplan | DV bring-up | DV coverage | DV sign-off | PPA | Integration |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ |
+| `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔵 | ⬜ | ⬜ |
 | `mtf_cam` | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
@@ -92,7 +91,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 ## Next up
 
-- `grape_pipeline`: **Integration** — todo
+- `grape_pipeline`: all stages done
 - `huffman_engine`: **DV sign-off** — in_progress (checkpoint — needs human approval)
 - `mtf_cam`: **uArch** — todo (checkpoint — needs human approval)
 
@@ -169,6 +168,12 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] trade-off table (≥2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff K1 knob
 - [x] trade-off table (>= 2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff fix as the design knob
 
+#### Integration — ✅ done (started 2026-09-12T18:19:16Z, finished 2026-09-12T18:19:22Z)
+
+- [x] register map ↔ driver model consistent — driver/check_regmap.py -> 0 differences (15 rows vs docs/mas.md §4, ID_VALUE 0x47525031); driver/test_driver.py -> ALL 4 PASS (full advance = 2,480,000 cycles)
+- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=231ms (results/baseline_nbody_stats.txt), f=0.95, cycles=2.48M (124 cyc/step), Fmax — Amdahl 3.78-4.45x @50MHz PRD target, ~1.0x @ achievable 11.15 MHz (accumulate-picker path); ideal 20x, sensitivity rows
+- [x] report §7 bullets mapped — docs/integration.md §4: 7 §7 bullets each mapped to a file/section (rtl/, mas §2/§3/§6/§7, uarch, prd+integration §3, ppa)
+
 ### `huffman_engine`
 
 #### PRD — ✅ done (started 2026-08-28T19:34:34Z, finished 2026-08-28T20:54:29Z)
@@ -226,12 +231,12 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 #### DV sign-off — 🔵 in_progress (started 2026-09-12T18:12:42Z)
 
-- [ ] golden equivalence on the full benchmark input
-- [ ] directed + random suites pass
-- [ ] coverage goals
-- [ ] lint clean
-- [ ] Icarus 4-state run X-free after reset
-- [ ] formal (sby) where listed
+- [x] golden equivalence on the full benchmark input — test_bench_block PASS: the entire benchmark (interpreter.tar.bz2 = 1 bzip2 block, 148271 symbols, START_BIT 8844, 6 tables) trace-exact vs canonical_model (148271 beats, 0 mismatches); BITS 531571, K1=1.0068<=1.1; multi-block contract via test_multiblock
+- [x] directed + random suites pass — make sim: TESTS=17 PASS=17 FAIL=0 (smoke, backpressure, bench_block, random_cfg/busy, errors_reject/runtime, abort, reset, multiblock, sel_boundary, dbg, first_latency, deflate, deflate_all_codes, deep_tree, cover_fill)
+- [x] coverage goals — dv_coverage gate: func 34/34, line 90.4%, branch 91.7%, toggle 90.3% (control-subset, coverage_waivers.md)
+- [x] lint clean — make lint: clean (12 files)
+- [x] Icarus 4-state run X-free after reset — make sim-icarus: TESTS=17 PASS=17; AXIS/AXI monitors assert is_resolvable on every handshake+beat field after reset, none fired
+- [x] formal (sby) where listed — synth/formal.sby: ctrl_arcs (FSM arcs+termination) + skid (no loss/dup, PRD-F6) BMC+cover 4/4 PASS; aligner 128b-cap property takes testplan §6 documented fallback (aligner unit TB 13/13 + AXIS protocol agent)
 
 ### `mtf_cam`
 
@@ -256,5 +261,5 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 11.15 | 0 |
-| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | n/a | 151058 | 1634516 | 0 | 0 |
+| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 0 | 0 |
 | `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
