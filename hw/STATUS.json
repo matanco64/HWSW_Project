@@ -274,21 +274,24 @@
           }
         },
         "integration": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-12T18:19:16Z",
+          "finished": "2026-09-12T18:19:22Z",
           "gate": {
             "register map ↔ driver model consistent": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "driver/check_regmap.py -> 0 differences (15 rows vs docs/mas.md §4, ID_VALUE 0x47525031); driver/test_driver.py -> ALL 4 PASS (full advance = 2,480,000 cycles)",
+              "at": "2026-09-12T18:19:16Z"
             },
             "cycle-accurate speedup estimate vs results/baseline_*": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §3: T=231ms (results/baseline_nbody_stats.txt), f=0.95, cycles=2.48M (124 cyc/step), Fmax — Amdahl 3.78-4.45x @50MHz PRD target, ~1.0x @ achievable 11.15 MHz (accumulate-picker path); ideal 20x, sensitivity rows",
+              "at": "2026-09-12T18:19:16Z"
             },
             "report §7 bullets mapped": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §4: 7 §7 bullets each mapped to a file/section (rtl/, mas §2/§3/§6/§7, uarch, prd+integration §3, ppa)",
+              "at": "2026-09-12T18:19:16Z"
             }
           }
         }
@@ -525,28 +528,34 @@
           "finished": "",
           "gate": {
             "golden equivalence on the full benchmark input": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "test_bench_block PASS: the entire benchmark (interpreter.tar.bz2 = 1 bzip2 block, 148271 symbols, START_BIT 8844, 6 tables) trace-exact vs canonical_model (148271 beats, 0 mismatches); BITS 531571, K1=1.0068<=1.1; multi-block contract via test_multiblock",
+              "at": "2026-09-12T18:16:49Z"
             },
             "directed + random suites pass": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim: TESTS=17 PASS=17 FAIL=0 (smoke, backpressure, bench_block, random_cfg/busy, errors_reject/runtime, abort, reset, multiblock, sel_boundary, dbg, first_latency, deflate, deflate_all_codes, deep_tree, cover_fill)",
+              "at": "2026-09-12T18:16:58Z"
             },
             "coverage goals": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "dv_coverage gate: func 34/34, line 90.4%, branch 91.7%, toggle 90.3% (control-subset, coverage_waivers.md)",
+              "at": "2026-09-12T18:16:49Z"
             },
             "lint clean": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make lint: clean (12 files)",
+              "at": "2026-09-12T18:16:49Z"
             },
             "Icarus 4-state run X-free after reset": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim-icarus: TESTS=17 PASS=17; AXIS/AXI monitors assert is_resolvable on every handshake+beat field after reset, none fired",
+              "at": "2026-09-12T18:18:27Z"
             },
             "formal (sby) where listed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/formal.sby: ctrl_arcs (FSM arcs+termination) + skid (no loss/dup, PRD-F6) BMC+cover 4/4 PASS; aligner 128b-cap property takes testplan §6 documented fallback (aligner unit TB 13/13 + AXIS protocol agent)",
+              "at": "2026-09-12T18:16:49Z"
             }
           }
         },
@@ -596,7 +605,7 @@
           "func_cov": 34,
           "tests_run": 17,
           "tests_pass": 17,
-          "formal": "n/a",
+          "formal": 4,
           "k1_bench": 1.0068
         },
         "ppa": {
@@ -885,5 +894,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T18:14:30Z"
+  "updated": "2026-09-12T18:19:22Z"
 }
