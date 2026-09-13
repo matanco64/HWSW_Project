@@ -510,3 +510,21 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   (grep for the named mechanism, check the DV assertion that would catch it) before applying any
   fix — the finding may already be resolved, differently, on main. Skill target: hw-review should
   note that findings from an isolated worktree are provisional until reconciled with the merge base.
+
+## 2026-09-13 — mtf_cam/dv_signoff (formal)
+
+- **The built-in Yosys Verilog frontend silently drops `bind` and hierarchical reads — use
+  `read_slang`.** A formal harness that `bind`s a checker or reads `dut.internal` compiles to a
+  VACUOUS pass under the built-in frontend (no error, no binding). Any invariant that must observe
+  DUT internals (here the move-to-front list permutation over `mtf_list.lst`/`rem_q`) must use the
+  slang frontend (`read_slang ... --top`), and non-vacuity must be independently confirmed (a
+  reachable `cover`, or a real counterexample during development). Skill target: hw-review RTL mode
+  (formal soundness) and hw-dv-signoff should require a non-vacuity check on every formal harness.
+- **Deep priority-encoder / combinational-chain fills cap BMC depth far below a nominal target.**
+  mtf_list's 256-deep lowest-set-bit fill (~530 logic levels) walls every BMC engine
+  (smtbmc+boolector/yices/z3, btormc, abc bmc3/pdr) at k~=6; the DUT alone unrolls to depth 22 in
+  seconds but ANY real invariant across the unrolled fill is intractable. The right structure is
+  the one the testplan pre-authorized: prove the invariant UNBOUNDED at a small parametrization
+  (N_LIST=16 k-induction, strictly stronger than any bounded check) and treat the wide-width run as
+  a shallow bounded sanity check. Set a testplan formal-depth target from the design's logic depth,
+  not a fixed number, and state the fallback explicitly so sign-off records it honestly.
