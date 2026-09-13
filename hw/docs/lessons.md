@@ -567,3 +567,17 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   hides that the block itself is excellent. integration.md states both and shows 25x on a 13.4%
   slice = 1.148x by Amdahl (same result), plus the chained-accelerator ceiling (f->0.63 => ~2.7x).
   Matches the grape/huffman framing — this is now the settled house style for §7 speedup reporting.
+
+## 2026-09-14 — grape_pipeline/ppa (parallel-prefix restructure, measured)
+
+- **Flattening a deep linear scan to parallel-prefix is a measurable, zero-cost Fmax win when
+  latency must be preserved.** grape's accumulate-issue picker was a ~60-deep in-order always_comb
+  scan (lane_hold + slots_used carry) — the post-CTS STA critical path at 11.15 MHz. Restructuring
+  the two prefix ops into Hillis-Steele trees (~6 deep) measured **11.15 → 19.46 MHz (1.75x,
+  post-CTS STA, apples-to-apples)** with the picker path DROPPING OUT of the critical path
+  entirely, at **bit-exact** output and **unchanged K1=124** — strictly better than the "pipeline
+  the picker" fix ppa.md originally proposed (which would have cost a cycle). Lesson for the flow:
+  when a combinational scan is the STA critical path and latency is load-bearing (a KPI cycle
+  count), reach for parallel-prefix (flatten) before pipelining (stage). Confirm bit-exactness with
+  the full regression, then merge — the win is real and free. The next limiter simply moves to the
+  next-deepest path (here FSM->integrate-multiply), which becomes the follow-on target.
