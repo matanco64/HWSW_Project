@@ -558,3 +558,12 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   single endpoint. When one structural path dominates, resizing can't fix it — the RTL fix
   (register the read-mux, a pipeline stage) is the real lever, and PPA should name it rather than
   chase resizer convergence. Matches the grape "pipeline the picker" pattern.
+
+## 2026-09-13 — mtf_cam/integration
+
+- **Report the accelerator speedup at BOTH altitudes and show they're the same number.** mtf_cam's
+  end-to-end Amdahl speedup is only ~1.15x because move-to-front is 13.4% of pyflate; the module-
+  level figure (PRD K5) is ~25x. Neither alone is honest: 25x hides that it's a small slice, 1.15x
+  hides that the block itself is excellent. integration.md states both and shows 25x on a 13.4%
+  slice = 1.148x by Amdahl (same result), plus the chained-accelerator ceiling (f->0.63 => ~2.7x).
+  Matches the grape/huffman framing — this is now the settled house style for §7 speedup reporting.
