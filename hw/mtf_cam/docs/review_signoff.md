@@ -58,6 +58,25 @@ met at the depth target with two honest scopings: full generality is unbounded o
 and the 256 depth-24 result fixes the occupancy. Documented in `synth/formal.sby` header.
 **Not a correctness gap.**
 
+**Unbounded-256 exhaustively attempted (round 2, PDR/IC3).** A dedicated effort built an O(N)
+single-free-witness-value permutation encoding (`PERM_WITNESS`, sound: quantified over one free
+byte value held stable) and ran it as an unbounded `mode prove` under the strongest available
+model checkers. Results (each 900 s time-boxed, in scratch workdirs):
+- **rIC3** (state-of-the-art Rust IC3/PDR): **TIMEOUT** at N_LIST=256.
+- **ABC PDR** (`abc pdr`): **TIMEOUT** at N_LIST=256.
+- smtbmc k-induction (round 1): step times out.
+- fill-abstracted **general-occupancy** (free used set) under rIC3: **TIMEOUT** (unbounded not
+  reached; bounded only to ~depth 3–11).
+- Non-vacuity of the witness encoding **confirmed**: the mutation task (assert "no value ever
+  live") correctly **FAILS** with a CEX, so the check genuinely bites.
+
+**Conclusion:** an unbounded permutation proof at the full N_LIST=256 width is beyond every
+available engine (smtbmc, ABC PDR, rIC3) — a genuine model-checking wall (the 256-wide bijection
+is SAT-hard), not an effort gap. The strongest honest N_LIST=256 guarantee is the **depth-24
+fill-abstracted move-preservation** above, with the complete unbounded proof standing at
+N_LIST=16. The round-2 witness encoding (a failing base-case WIP without the domain strengthening)
+was reverted; the harness stays at the clean depth-24 state.
+
 ## Stale-worktree finding reconciliation
 
 A resumed pre-stage RTL agent (worktree at `05f4cf9`, an early provisional baseline) reported an

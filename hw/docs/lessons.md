@@ -528,3 +528,17 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   (N_LIST=16 k-induction, strictly stronger than any bounded check) and treat the wide-width run as
   a shallow bounded sanity check. Set a testplan formal-depth target from the design's logic depth,
   not a fixed number, and state the fallback explicitly so sign-off records it honestly.
+
+## 2026-09-13 — mtf_cam/dv_signoff (formal, round 2)
+
+- **An unbounded permutation proof over a wide (256-entry) shuffle network is a genuine
+  model-checking wall — set the formal target from what the engines can do, not a nominal depth.**
+  Proving move-to-front preserves a permutation at N_LIST=256 was attempted exhaustively:
+  smtbmc k-induction (step timeout), ABC PDR (timeout 900s), and rIC3 / state-of-the-art IC3
+  (timeout 900s), on an O(N) single-free-witness-value encoding (sound, non-vacuity confirmed by a
+  mutation CEX). All wall — the 256-wide bijection is SAT-hard. The tractable-and-strong result is:
+  prove it UNBOUNDED at a small width (N_LIST=16 k-induction, value-agnostic move logic makes this
+  representative) + a fill-abstracted bounded move-preservation at the production width (depth 24,
+  concrete occupancy). Skill target: hw-dv-testplan should express formal depth targets for wide
+  datapaths as "unbounded at reduced width + bounded-N at full width via abstraction", not a single
+  bounded depth the solver may not reach — and record which engines were tried so sign-off is honest.
