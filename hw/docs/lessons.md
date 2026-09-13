@@ -542,3 +542,19 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   concrete occupancy). Skill target: hw-dv-testplan should express formal depth targets for wide
   datapaths as "unbounded at reduced width + bounded-N at full width via abstraction", not a single
   bounded depth the solver may not reach — and record which engines were tried so sign-off is honest.
+
+## 2026-09-13 — mtf_cam/ppa
+
+- **OpenLane GRT-0607 correlates with design size/congestion, not config — confirmed across three
+  modules.** mtf_cam (~27k gates) converged cleanly through synthesis → placement → CTS →
+  post-CTS STA with NO GRT-0607, the deepest OpenLane run in the project; grape (584k gates) hit
+  GRT-0607 three times and huffman (151k) also struggled. This retroactively validates the grape
+  advisor call: GRT-0607 was an OpenROAD global-router limit on a large congested netlist, not a
+  fixable knob. Takeaway for the flow: expect OpenLane to reach real post-CTS STA (hence a real
+  Fmax) on small-to-mid designs; on large ones, plan to close on post-CTS STA + honest note per §7.
+- **A W-invariant hot block sets the Fmax floor and defeats the post-CTS resizer.** mtf_cam's
+  256-entry shift-register CAM read-mux is the critical path at every W (68% of area, W-invariant);
+  the post-CTS timing-driven resizer oscillated 730+ iterations (WNS ~ -30ns, repair bloat) on that
+  single endpoint. When one structural path dominates, resizing can't fix it — the RTL fix
+  (register the read-mux, a pipeline stage) is the real lever, and PPA should name it rather than
+  chase resizer convergence. Matches the grape "pipeline the picker" pattern.

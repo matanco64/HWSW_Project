@@ -842,9 +842,9 @@
           }
         },
         "dv_signoff": {
-          "state": "review",
+          "state": "done",
           "started": "2026-09-13T06:15:12Z",
-          "finished": "",
+          "finished": "2026-09-13T15:10:24Z",
           "gate": {
             "golden equivalence on the full benchmark input": {
               "result": "pass",
@@ -884,21 +884,24 @@
           }
         },
         "ppa": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-13T15:11:59Z",
+          "finished": "2026-09-13T15:35:00Z",
           "gate": {
             "Yosys+Liberty area + cell counts": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "synth/area.txt (reproduced firsthand via make area): 18,814 sky130_fd_sc_hd cells, 187,389.72 um^2 (0.187 mm^2) @ W=8; mtf_list CAM = 68% (W-invariant); per-module in area_permodule.txt",
+              "at": "2026-09-13T15:34:34Z"
             },
             "OpenLane 2 run: Fmax, area µm², power": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "OpenLane converged through post-CTS STA (no GRT-0607, deepest run in project): synth/runs/signoff/31-openroad-stamidpnr-1/ws.max.rpt worst setup slack -6.5964 ns @ 20ns tt -> 26.596 ns -> Fmax ~37.6 MHz; critical path = mtf_list CAM read-mux (confirms uArch §6); power ~13.7 mW post-CTS indicative; closed before GDS (resizer non-convergent, time-boxed per §7)",
+              "at": "2026-09-13T15:34:34Z"
             },
             "trade-off table (≥2 design points)": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/ppa.md §2: 3 design points W=4/8/16 (18,321/18,814/22,250 cells; 181,832/187,390/207,827 um^2; K3 1.175/1.063/1.023) -> W=8 chosen (smallest meeting K3<=1.10); 5.3x under 1.0mm^2 soft ceiling",
+              "at": "2026-09-13T15:34:34Z"
             }
           }
         },
@@ -932,10 +935,10 @@
           "formal": "pass"
         },
         "ppa": {
-          "cells": 0,
-          "area_um2": 0,
-          "fmax_mhz": 0,
-          "power_mw": 0
+          "cells": 18814,
+          "area_um2": 187390,
+          "fmax_mhz": 37.6,
+          "power_mw": 13.7
         }
       }
     }
@@ -957,5 +960,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-13T13:49:03Z"
+  "updated": "2026-09-13T15:35:00Z"
 }
