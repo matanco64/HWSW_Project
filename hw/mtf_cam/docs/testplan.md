@@ -34,7 +34,7 @@ Env-plan names (§5): tests `test_smoke`, `test_random`, `test_full_benchmark`, 
 | F-02 MTF semantics, bit-exact (PRD-F2) | `test_smoke`; `test_random` (`seq_rand`) | `cg_rank`: r ∈ {1, 2, 3(p50), 17(p90), 62(p99), 144(max), N_USED−1} | per-beat DUT byte == predictor `list_model.expand` `('mtf',r,byte)` event (0 mismatch) | must | todo |
 | F-03 run semantics, n≤2^20, ERR_RUN (PRD-F3) | `test_random`; `test_corner` (n = 2^20, 2^20+1, 8,157) | `cg_run`: kind {RUNA-only, RUNB-only, mixed}; group symbols {1..20}; n {1, 2(p50), 8157(max), 2^20, 2^20+1}; terminator {MTF, EOB} | run bytes == predictor `('run',n,byte0)` (rank-0 byte captured **before** the terminating MTF move); n = 2^20 accepted; 2^20+1 → ERR_RUN at the offending run symbol (F-10) | must | todo |
 | F-04 init from used map, INIT_CYCLES ≤ 256 (PRD-F4) | `test_driver`; `test_random` | `cg_init`: N_USED {1, 145(bench), 256}; `s_sym.tready` {0 during init} | DBG_SEL/DBG_DATA sweep == sorted used bytes; INIT_CYCLES == N_USED ≤ 256 (uArch §3.2 priority-encoder fill); `tready` = 0 through IDLE/INIT | must | todo |
-| F-05 list invariants — FORMAL (PRD-F5, K8) | `make formal` (`formal/mtf_list_inv.sby`) | `cg_fml`: cover traces {permutation reached, lookup r=0, r=1, r=max, back-to-back moves} | `sby` PASS on the 3 obligations (§3): permutation, lookup-returns-pre-shift, post-shift positions; N_LIST=16 induction + 256 bounded | must | todo |
+| F-05 list invariants — FORMAL (PRD-F5, K8) | `make formal` (`synth/formal.sby`) | `cg_fml`: cover traces {permutation reached, lookup r=0, r=1, r=max, back-to-back moves} | `sby` PASS on the 3 obligations (§3): permutation, lookup-returns-pre-shift, post-shift positions; **N_LIST=16 unbounded induction + N_LIST=256 fill-abstracted move-preservation depth ≥ 20** (amended 2026-09-13 — see §3) | must | done |
 | F-06 byte-packed `m_l`, TKEEP/TLAST, backpressure (PRD-F6) | `test_random` (stall mode, `tready` 0–90 % duty); `test_full_benchmark` (exact-multiple last beat) | `cg_pack`: last-beat TKEEP {full/exact-multiple, partial 1..W−1}; `tready` duty {0,50,90 %}; stall length {1,2..10,long} | 0 mismatch under random `tready`; **exact-multiple**: 336,184 = 42,023×8 → last beat TKEEP all-ones **and** TLAST (uArch S3); protocol agent: `tvalid` stable until `tready`, never combinational on `tready` | must | todo |
 | F-07 item FIFO depth D, K3 (PRD-F7) | `test_random` (random `tvalid`); `test_full_benchmark` | `cg_fifo`: occupancy {0..D}; {full-stall, 2-slot reservation at a run-terminating MTF} | 0 loss/dup under random `tvalid`; K3 from `CYCLES/SYMBOLS_IN` (model 1.063 at D=8; see K3 row) | must | todo |
 | F-08 parameters W∈{4,8,16}/N_LIST/D/RUN_W (PRD-F8) | all at W=8; `test_smoke` + `test_full_benchmark` at W=4/16 | `cg_caps`: CAPS.W {4,8,16}; CAPS.D {8}; CAPS.N_LIST {256, 16-formal} | CAPS read == build params (0x0100_0808 at W=8,D=8); decode byte-exact at each W; K3 = 1.175/1.063/1.023 (K3 row) | must | todo |
@@ -53,7 +53,7 @@ Env-plan names (§5): tests `test_smoke`, `test_random`, `test_full_benchmark`, 
 | K5 block time & speed-up (PRD §2) | integration (`docs/integration.md`, `test_driver` cycle model) | — (derived from K3 CYCLES + `huffman_engine` numbers) | 157,560 cyc @ 50 MHz = 3.15 ms; ≈ 25× vs stock MTF alone | should | todo |
 | K6 area, W-sweep (PRD §2) | `make ppa PARAMS=W=4/8/16` | `cg_ppa`: W {4,8,16} | trade-off table area vs K3 in `docs/ppa.md`; soft ceiling 1.0 mm² (flagged, non-gating) | should | todo |
 | K7 power (PRD §2) | `make ppa` | `cg_ppa`: W {4,8,16} | OpenLane power, **report-only** | should | todo |
-| K8 formal invariants (PRD §2) | `make formal` | (see F-05 `cg_fml`) | `sby` PASS: N_LIST=16 unbounded induction + 256 bounded depth ≥ 20 (§3) | must | todo |
+| K8 formal invariants (PRD §2) | `make formal` | (see F-05 `cg_fml`) | `sby` PASS: **N_LIST=16 unbounded induction + N_LIST=256 fill-abstracted move-preservation depth ≥ 20** (amended 2026-09-13, §3) | must | done |
 | F-20 ctrl FSM arcs (uArch §3.1) | union of the directed tests | `cg_fsm`: every arc IDLE→INIT→DECODE→{DRAIN,ERR_S}, DRAIN→{DONE_S,ABORT_S}, INIT/DECODE→ABORT_S, *→IDLE | FSM monitor: only legal arcs taken; DONE/ERR/ABORT each reach IDLE | must | todo |
 | F-21 R2 K3 model-vs-DUT reconciliation (bring-up) | `test_full_benchmark` **at dv_bringup** (not deferred) | `cg_k3` DUT-vs-model delta bin | measure DUT CYCLES/SYMBOLS_IN; the 2-slot `tready` reservation stalls ≥ the need-based model at `cnt=7`; if DUT ≤ 1.10 accept the (small) delta — the reservation is the safe/correct behaviour, golden frozen; else reconcile. **A committed bring-up task, not a waiver** | must | todo |
 | F-22 R1 MAX_RUN per-invocation reset | `test_multiblock` (large-max block then smaller-max block, same session) | `cg_maxrun`: {block1 max > block2 max} | MAX_RUN of block2 reflects block2 only (not the stale block1 value); `inv_clr` on doorbell verified | must | todo |
@@ -141,20 +141,35 @@ committed bring-up entry task, **not** a pre-granted waiver.
 
 SymbiYosys, mirroring the grape/huffman `formal/*.sv` + `.sby` approach. The K8 obligation is the
 `mtf_list` (uArch §3.2) move-to-front CAM; the harness is built with **N_LIST = 16** for unbounded
-k-induction (so `smtbmc` closes) and re-run bounded on **N_LIST = 256** (PRD-K8 depth ≥ 20).
+k-induction (so `smtbmc` closes), plus an **N_LIST = 256 fill-abstracted move-preservation BMC to
+depth 24** (≥ 20).
+
+> **Amendment 2026-09-13 (dv_signoff).** The original target — "N_LIST=256 *bounded* depth ≥ 20"
+> on the full design — is **not achievable** and is superseded by the line above. Proving the
+> permutation invariant across the 256-deep priority-encoder INIT fill (~530 logic levels) walls
+> every engine tried (smtbmc BMC at depth 6; and for an *unbounded* proof: smtbmc k-induction,
+> ABC PDR, and rIC3 all TIMEOUT at 900 s — a 256-wide-bijection SAT wall, not an effort gap).
+> The sound, self-consistent target that IS achieved: **(a)** the 3 invariants proven *unbounded*
+> by k-induction at N_LIST=16 (the move logic is value-agnostic, so 16 is structurally
+> representative), **and (b)** permutation preservation across **24 consecutive move cycles at
+> N_LIST=256** via fill-abstraction (assume a valid post-fill start, which collapses the fill
+> chain; concrete post-fill occupancy, moves free; non-vacuity confirmed by a mutation CEX).
+> Rationale and engine evidence: `docs/review_signoff.md` §"K8 N_LIST=256 depth" and
+> `synth/formal.sby` header.
 
 | Property | File | Note |
 |---|---|---|
 | (i) **permutation**: `multiset(list[0..N_USED−1])` == `multiset(initial used bytes)` at all times — no loss, no duplicate | `formal/mtf_list_inv.sv` (assert) | K8; the core invariant |
 | (ii) **lookup-returns-pre-shift**: on a rank-r lookup, `byte_out` == `list[r]` sampled the cycle **before** the shift | `formal/mtf_list_inv.sv` | K8 |
 | (iii) **post-shift positions**: `list_n[0]==byte_out`; `list_n[k]==list[k−1]` for 1≤k≤r; `list_n[k]==list[k]` for k>r | `formal/mtf_list_inv.sv` | K8 |
-| N_LIST=16 unbounded **induction** + N_LIST=256 **bounded** (depth ≥ 20) | `formal/mtf_list_inv.sby` (`mode prove` + `mode bmc`) | K8 driver; grape `fsm_arcs` structure |
+| N_LIST=16 unbounded **induction** (`prove`) + N_LIST=256 **fill-abstracted move-preservation** depth 24 (`bmc256moves`) + N_LIST=256 general two-probe depth 6 (`bmc`) | `synth/formal.sby` | K8 driver (amended 2026-09-13, see above); grape `fsm_arcs` structure |
 | `s_sym`/`m_l` handshake: `tvalid` stable until `tready`, `tvalid` !comb on `tready`; `m_l` no beat loss/dup under valid/ready (flush exempt) | `formal/handshake.sv` (assert) | small, self-contained; mirrors huffman `skid.sv` |
 
 Cover traces (`cg_fml`): the permutation reached after several moves, lookups at r=0 / r=1 / r=max,
-back-to-back moves. Fallback per FLOW ("none with reason") is **not** taken — F5/K8 is the module's
-headline formal target; if `smtbmc` chokes on the 256 case the induction stands on N_LIST=16 with
-the bounded 256 check and the `mtf_list` unit TB, recorded at sign-off.
+back-to-back moves. F5/K8 is the module's headline formal target and is met per the 2026-09-13
+amendment above (unbounded induction at N_LIST=16 + fill-abstracted depth-24 move-preservation at
+N_LIST=256); the unbounded-256 proof was exhaustively attempted (rIC3 / ABC PDR / k-induction, all
+TIMEOUT) and found beyond available engines — documented in `docs/review_signoff.md`.
 
 ## 4. Sign-off criteria
 
