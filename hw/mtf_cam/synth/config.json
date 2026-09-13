@@ -1,0 +1,22 @@
+{
+    "DESIGN_NAME": "mtf_cam",
+    "VERILOG_FILES": [
+        "dir::../rtl/item_fifo.sv",
+        "dir::../rtl/mtf_run.sv",
+        "dir::../rtl/mtf_list.sv",
+        "dir::../rtl/mtf_expand.sv",
+        "dir::../rtl/mtf_pack.sv",
+        "dir::../rtl/mtf_regs.sv",
+        "dir::../rtl/mtf_ctrl.sv",
+        "dir::../rtl/mtf_cam.sv",
+        "dir::../../common/rtl/axi_lite_if.sv"
+    ],
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 20.0,
+    "RUN_LINTER": false,
+    "FP_CORE_UTIL": 35,
+    "PL_TARGET_DENSITY_PCT": 40,
+    "SYNTH_HIERARCHY_MODE": "deferred_flatten",
+    "GRT_ADJUSTMENT": 0.15,
+    "GRT_ALLOW_CONGESTION": true
+}

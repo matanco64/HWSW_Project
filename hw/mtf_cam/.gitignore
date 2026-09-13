@@ -1,3 +1,10 @@
 synth/formal_*/
 synth/formal/
 sim_build_cov/
+# PPA (stage 9) local artifacts: OpenLane run tree is covered by root hw/**/runs/;
+# the write_json netlist dump (~10 MB) and yosys logs are regenerable, not tracked.
+synth/*_synth.json
+synth/*.log
+# dv_signoff formal scratch (root dirs, not under synth/)
+scratch_*/
+scratch_*.sby

@@ -1,0 +1,14 @@
+# mtf_cam area at W=4 (design point for the PPA trade-off study).
+# Mirrors hw/common/synth/yosys_area.ys but overrides the W parameter via chparam.
+# Run from hw/mtf_cam:  yosys -q -l synth/yosys_w4.log -s synth/yosys_area_w4.ys
+read_verilog -sv ../common/rtl/axi_lite_if.sv \
+    rtl/item_fifo.sv rtl/mtf_run.sv rtl/mtf_list.sv rtl/mtf_expand.sv \
+    rtl/mtf_pack.sv rtl/mtf_regs.sv rtl/mtf_ctrl.sv rtl/mtf_cam.sv
+chparam -set W 4 mtf_cam
+hierarchy -check -top mtf_cam
+synth -top mtf_cam -flatten
+tee -q -o synth/area_w4.txt stat
+dfflibmap -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+opt_clean
+tee -q -a synth/area_w4.txt stat -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
