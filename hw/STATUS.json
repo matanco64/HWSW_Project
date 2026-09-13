@@ -816,21 +816,28 @@
           }
         },
         "dv_coverage": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-12T22:22:27Z",
+          "finished": "2026-09-13T06:13:57Z",
           "gate": {
             "constrained-random sequences": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/sequences/random_streams.py (seeded, SEED= logged, golden-round-tripped); make sim TESTCASE=test_random PASS; full suite 16/16 PASS (10 new: random, corner, driver, err_underrun/rank/eob/limit, run_max, reset, xinv)",
+              "at": "2026-09-13T06:12:23Z"
             },
             "line/toggle ≥ 90 %": {
               "result": "n/a",
               "evidence": ""
             },
             "all functional covergroups hit": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "tb/cov/func_cov.txt: 129 bins across 21 testplan covergroups, every bin >= 1; waived cg_caps.w_4/w_16/n_list_16, cg_k2/k3.w_4/w_16, cg_k3.gt_1p10 (separate param builds / failure-only bin, testplan F-08/K2/K3); cg_fml deferred to formal at dv_signoff",
+              "at": "2026-09-13T06:12:23Z"
+            },
+            "line/toggle >= 90 %": {
+              "result": "pass",
+              "evidence": "make cov (COVERAGE_MAX_WIDTH=4) firsthand: line 92.0% (104/113), toggle 93.8% control-subset (720/768), branch 96.8% (184/190); wide-datapath toggle waived (mtf_list 256x8 CAM, 256-bit used_map, lifetime counters) per docs/coverage_waivers.md — huffman precedent; 9 uncovered lines are unreachable defensive RTL (FSM default, fill else-arm, abort+doorbell corner, SVA decls)",
+              "at": "2026-09-13T06:12:23Z"
             }
           }
         },
@@ -906,9 +913,9 @@
       },
       "metrics": {
         "dv": {
-          "line_cov": 0,
-          "toggle_cov": 0,
-          "func_cov": 0,
+          "line_cov": 92,
+          "toggle_cov": 93.8,
+          "func_cov": 129,
           "tests_run": 6,
           "tests_pass": 6,
           "formal": "n/a"
@@ -939,5 +946,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-12T21:22:18Z"
+  "updated": "2026-09-13T06:13:57Z"
 }
