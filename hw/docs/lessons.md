@@ -496,3 +496,17 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   coverage_waivers.md with a width-sweep proof. No skill change — the huffman lesson already covers
   it; this is the second confirming data point (FP64 datapath modules reach 96% raw, value-domain
   control modules cannot).
+
+## 2026-09-13 — mtf_cam/dv_signoff (process)
+
+- **A code review from a stale worktree must be reconciled against merged main before acting.**
+  A resumed pre-stage RTL agent (worktree at 05f4cf9, an early provisional) reported an
+  INIT_CYCLES = N_USED+1 `must` (257 at N_USED=256, over the MAS §4 ≤256 bound) and "fixed" it in
+  its worktree. But merged main was produced by a later RTL iteration using a different INIT-exit
+  mechanism (`init_active = init_start ∥ state==S_INIT`) that already computes N_USED — proven
+  empirically: `test_corner`'s nused256 case reads INIT_CYCLES and the scoreboard asserts
+  ==256, passing 16/16. The worktree fix (init_last_o) was for code not in the tree. Lesson:
+  when a background/worktree agent reports a finding, verify it against the CURRENT merged RTL
+  (grep for the named mechanism, check the DV assertion that would catch it) before applying any
+  fix — the finding may already be resolved, differently, on main. Skill target: hw-review should
+  note that findings from an isolated worktree are provisional until reconciled with the merge base.
