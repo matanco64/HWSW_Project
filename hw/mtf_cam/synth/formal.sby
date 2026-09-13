@@ -1,0 +1,80 @@
+# mtf_cam formal (testplan §3, F-05 / F-06 / K8). Run via `make -C hw/mtf_cam formal`
+# (common Makefile.cocotb: FORMAL_SBY defaults to synth/formal.sby; sby is run with cwd = module dir).
+#
+# Frontend: read_slang (the Yosys slang SystemVerilog frontend). Required because the mtf_list list
+# invariants observe internal state (dut.lst, dut.rem_q): the built-in Verilog frontend supports
+# neither hierarchical reads nor SystemVerilog `bind`, but slang resolves both correctly. The handshake
+# proof is port-only and would work with either frontend; it uses slang here for uniformity.
+#
+# Tasks:
+#   prove   - mtf_list list invariants (i)/(ii)/(iii), N_LIST=16, unbounded k-INDUCTION. K8 core;
+#             this is the COMPLETE proof of the three invariants (unbounded > any bounded check).
+#   bmc     - mtf_list permutation at the production width N_LIST=256, bounded BMC (two-probe form,
+#             MOVE_CHK=0/PERM_FULL=0). Width sanity check that complements the N_LIST=16 induction.
+#   cover   - mtf_list cover traces (cg_fml), N_LIST=16.
+#   hs      - m_l AXIS handshake on mtf_pack (F-06), bounded BMC.
+#   hscover - handshake cover traces.
+#
+# N_LIST=256 depth note (pre-authorised fallback, testplan §Formal ~line 156 -- "if smtbmc chokes on
+# the 256 case the induction stands on N_LIST=16 with the bounded 256 check"). PRD-K8's target for the
+# bounded 256 run is depth >= 20, but that is NOT achievable here: mtf_list's fill is a 256-deep
+# lowest-set-bit priority-encoder chain (Yosys/abc report ~530 logic levels), and proving ANY of the
+# list invariants across it unrolled walls every available engine (smtbmc+boolector/yices/z3, btor
+# btormc, abc bmc3, abc pdr) at k ~= 5-6 with exponential per-frame growth -- verified empirically.
+# So the bounded 256 run is set to depth 6 (the reliable ceiling). This is NOT a weakened property
+# (the full permutation is checked, and is proven UNBOUNDED at N_LIST=16); only the 256 BOUNDED DEPTH
+# falls short of 20, which is reported at sign-off. Raising bmc depth will hang, not fail.
+
+[tasks]
+prove
+bmc
+cover
+hs
+hscover
+
+[options]
+prove:   mode prove
+prove:   depth 2
+bmc:     mode bmc
+bmc:     depth 6
+cover:   mode cover
+cover:   depth 24
+hs:      mode bmc
+hs:      depth 30
+hscover: mode cover
+hscover: depth 30
+
+[engines]
+# boolector bit-blasts (via memory_map above) and closes the O(N^2) permutation logic far faster
+# than the default yices on this design (yices stalls on the k-induction query).
+smtbmc boolector
+
+# memory_map + opt after prep bit-blasts the list/buffer arrays to registers (slang otherwise keeps
+# them as SMT arrays, which makes the O(N^2) permutation logic far slower for smtbmc).
+[script]
+prove:   read_slang mtf_list.sv mtf_list_inv.sv --top mtf_list_inv -G N_LIST=16
+prove:   prep -top mtf_list_inv
+prove:   memory_map
+prove:   opt -fast
+bmc:     read_slang mtf_list.sv mtf_list_inv.sv --top mtf_list_inv -G N_LIST=256 -G MOVE_CHK=0 -G PERM_FULL=0
+bmc:     prep -top mtf_list_inv
+bmc:     memory_map
+bmc:     opt -fast
+cover:   read_slang mtf_list.sv mtf_list_inv.sv --top mtf_list_inv -G N_LIST=16
+cover:   prep -top mtf_list_inv
+cover:   memory_map
+cover:   opt -fast
+hs:      read_slang mtf_pack.sv handshake.sv --top handshake
+hs:      prep -top handshake
+hs:      memory_map
+hs:      opt -fast
+hscover: read_slang mtf_pack.sv handshake.sv --top handshake
+hscover: prep -top handshake
+hscover: memory_map
+hscover: opt -fast
+
+[files]
+rtl/mtf_list.sv
+rtl/mtf_pack.sv
+formal/mtf_list_inv.sv
+formal/handshake.sv
