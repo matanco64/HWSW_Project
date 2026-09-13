@@ -471,3 +471,28 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
 - No other friction: the replay-scoreboard pattern ported cleanly from huffman; R1 (MAX_RUN
   per-invocation reset) and R2 (DUT K3=1.0686 vs model 1.063) were answered green on first
   full-benchmark run — the two-wide item FIFO and inv_clr wiring specified in uArch/RTL held.
+
+## 2026-09-13 — mtf_cam/dv_coverage
+
+- **cocotbext-axi `clear_pause_generator()` leaves `.pause` latched True.** Calling it to stop
+  backpressure does NOT restore `tready` — the sink's `.pause` stays asserted, `m_ready` stalls,
+  and the drain deadlocks. Fix: an explicit `sink_ready()` that clears the latch (`sink.pause =
+  False`) rather than relying on `clear_pause_generator()`. Skill target: `tb-best-practices`
+  backpressure-sink pattern should state this (the pause generator and the pause latch are two
+  separate pieces of state).
+- **Constrained-random stimulus must respect the golden's token grammar.** Adjacent random
+  run-tokens (RUNA/RUNB) with no separating MTF symbol merge into ONE bijective-base-2 group and
+  overflow ERR_RUN/ERR_LIMIT — a stimulus bug that masquerades as a DUT error. The generator must
+  separate runs with an MTF, mirroring how the golden encoder groups them. Generalizes: a random
+  sequence generator is only valid if it can only emit strings the golden model itself can produce.
+- **Doorbell-windowed scoreboards must pre-pass for ACCEPTED doorbells.** A busy-rejected or
+  ERR_PARAM doorbell is not an invocation boundary; windowing symbols on every CTRL-write (not just
+  accepted ones) truncates the real invocation's stream. Reinforces the huffman
+  doorbell-acceptance-model lesson — same class, now proven on a second module.
+- **Toggle floor on control/storage/CAM modules is structural (confirms the huffman lesson).** The
+  256x8 move-to-front CAM, 256-bit used-map and lifetime counters cannot toggle their upper bits at
+  realistic block sizes; raw toggle floored at 82.8% after a full stimulus push, control-subset
+  (COVERAGE_MAX_WIDTH=4) = 93.8%. Same sanctioned approach as huffman, documented in
+  coverage_waivers.md with a width-sweep proof. No skill change — the huffman lesson already covers
+  it; this is the second confirming data point (FP64 datapath modules reach 96% raw, value-domain
+  control modules cannot).
