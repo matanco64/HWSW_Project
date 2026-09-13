@@ -1,0 +1,13 @@
+# mtf_cam per-module area attribution (W=8, non-flattened) for the PPA area breakdown.
+# Each submodule is instantiated once under the top, so local Liberty areas attribute
+# the design to blocks. Run from hw/mtf_cam:
+#   yosys -q -l synth/yosys_permodule.log -s synth/yosys_area_permodule.ys
+read_verilog -sv ../common/rtl/axi_lite_if.sv \
+    rtl/item_fifo.sv rtl/mtf_run.sv rtl/mtf_list.sv rtl/mtf_expand.sv \
+    rtl/mtf_pack.sv rtl/mtf_regs.sv rtl/mtf_ctrl.sv rtl/mtf_cam.sv
+hierarchy -check -top mtf_cam
+synth -top mtf_cam
+dfflibmap -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+opt_clean
+tee -q -o synth/area_permodule.txt stat -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib

@@ -1,0 +1,12 @@
+# Yosys area script template; hw/common/Makefile.cocotb substitutes mtf_cam /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/item_fifo.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_cam.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_ctrl.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_expand.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_list.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_pack.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_regs.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_run.sv /home/yuvalk/HWSW/HWSW_Proj/hw/common/rtl/axi_lite_if.sv /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/synth.
+# Produces /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/synth/area.txt with a technology-independent `stat` followed by the
+# sky130_fd_sc_hd Liberty-mapped `stat -liberty` (cell counts + chip area in um^2).
+read_verilog -sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/item_fifo.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_cam.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_ctrl.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_expand.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_list.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_pack.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_regs.sv /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/rtl/mtf_run.sv /home/yuvalk/HWSW/HWSW_Proj/hw/common/rtl/axi_lite_if.sv
+hierarchy -check -top mtf_cam
+synth -top mtf_cam -flatten
+tee -q -o /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/synth/area.txt stat
+dfflibmap -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+opt_clean
+tee -q -a /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/synth/area.txt stat -liberty /home/yuvalk/HWSW/HWSW_Proj/hw/tools/pdk/sky130_fd_sc_hd__tt_025C_1v80.lib
+write_json /home/yuvalk/HWSW/HWSW_Proj/hw/mtf_cam/synth/mtf_cam_synth.json
