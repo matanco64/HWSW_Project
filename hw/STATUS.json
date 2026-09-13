@@ -906,21 +906,24 @@
           }
         },
         "integration": {
-          "state": "todo",
-          "started": "",
-          "finished": "",
+          "state": "done",
+          "started": "2026-09-13T15:35:33Z",
+          "finished": "2026-09-13T15:51:57Z",
           "gate": {
             "register map ↔ driver model consistent": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "driver/check_regmap.py firsthand: 0 differences (18 rows, driver == mas.md §4 == rtl/mtf_regs.sv, ID 'MTF1'); driver/test_driver.py: ALL 5 driver-model tests PASS (regmap, id/caps, full_expand, err_param, err_busy); tb/test_driver_model.py RTL-cosim 0 mismatches; make sim still 16/16",
+              "at": "2026-09-13T15:51:56Z"
             },
             "cycle-accurate speedup estimate vs results/baseline_*": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §3: T=1.12s (baseline_pyflate_stats.txt), f=0.1344 (move_to_front share), t_hw=158,441 cyc / 37.6 MHz = 4.214 ms -> Amdahl S~1.15x, ideal 1/(1-f)=1.155x; reconciles with PRD K5 stage-level ~25x (25x on a 13.4% slice = 1.148x end-to-end)",
+              "at": "2026-09-13T15:51:57Z"
             },
             "report §7 bullets mapped": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "docs/integration.md §4 rubric map: all 7 project_instructions.md §7 bullets each mapped to file+section; §5 has report_pyflate.txt paste text",
+              "at": "2026-09-13T15:51:57Z"
             }
           }
         }
@@ -960,5 +963,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-13T15:35:00Z"
+  "updated": "2026-09-13T15:51:57Z"
 }
