@@ -30,7 +30,12 @@ module mtf_list_inv #(
     parameter bit PERM_FULL   = 1'b1, // 1: universal present-mask permutation (inductive, N_LIST=16
                                       // `prove`); 0: two-probe permutation for the bounded N_LIST=256
                                       // `bmc` (the O(N^2) present-mask is intractable bit-blasted at 256)
-    parameter bit PROBE_CHK   = 1'b1  // 1: include the two-probe lst-content asserts (PERM_FULL=0 mode)
+    parameter bit PROBE_CHK   = 1'b1, // 1: include the two-probe lst-content asserts (PERM_FULL=0 mode)
+    parameter bit FILL_ABSTRACT = 1'b0, // 1: assume the DUT begins in a valid post-fill state so BMC
+                                        // spends its whole depth budget on MOVE operations (see g_fillabs)
+    parameter int FA_NUSED    = 0      // FILL_ABSTRACT: 0 = free used set (general); >0 = pin the
+                                       // canonical post-fill state used={0..FA_NUSED-1}, lst[i]=i (a
+                                       // concrete valid post-fill state; only the moves stay free)
 ) (
     input  logic                      clk,
     input  logic                      rst_n,
@@ -61,10 +66,25 @@ module mtf_list_inv #(
     assign unused = ^{dbg_data_o, 1'b0};
 
     // Reset assumed at t=0 (one cycle), free afterwards. Real use: read a rank, then move THAT rank.
+    // (FILL_ABSTRACT replaces the t=0 reset with an assumed valid post-fill state -- see g_fillabs.)
     logic past_valid = 1'b0;
     always_ff @(posedge clk) past_valid <= 1'b1;
-    always_comb if (!past_valid) assume (!rst_n);
+    always_comb if (!past_valid && !FILL_ABSTRACT) assume (!rst_n);
     always_comb assume (mv_rank == rd_rank);
+
+    // Fill abstraction (FILL_ABSTRACT, bmc256moves task): start the DUT in an ALREADY-FILLED state and
+    // forbid re-init (unconditional, so it holds even across a mid-trace reset), so BMC spends its whole
+    // depth budget on MOVE operations. With no init_start and rem_q==0 (assumed at t=0, held by the RTL)
+    // fill_src==0, so the 256-deep lowest-set-bit priority encoder collapses to a constant and stops
+    // walling the unrolling -- the reason plain bmc caps at depth ~6. The rest of the valid post-fill
+    // start state and the O(N) permutation pin live in g_fillabs below (after the popcnt helper). This
+    // proves "move-to-front PRESERVES the invariants for >=20 steps FROM a valid post-fill state" -- the
+    // fill's OWN correctness stays covered by the count assert and by the N_LIST=16 unbounded induction
+    // (prove). Per-step asserts come from the selected PERM_* branch (bmc256moves uses the cheap two-probe
+    // g_perm_probe; the encoder collapse is what lets it reach depth >=20).
+    generate if (FILL_ABSTRACT) begin : g_fillabs_noinit
+        always_comb assume (!init_start);               // no re-init during the abstracted move run
+    end endgenerate
 
     // Environment contract (MAS §5 / F-10): the controller only ever moves a LIVE rank. An
     // out-of-range rank is rejected as ERR_RANK before any move reaches mtf_list, so a move with
@@ -73,8 +93,11 @@ module mtf_list_inv #(
     always_comb if (mv_en) assume ({1'b0, mv_rank} < n_used_o);
 
     // Latch the used map exactly when the DUT does (same posedge, same source) so the permutation
-    // reference tracks the DUT's own rem_q consumption. Reset to 0 mirrors rem_q's reset.
-    logic [N_LIST-1:0] used_latched = {N_LIST{1'b0}};
+    // reference tracks the DUT's own rem_q consumption. Reset clears it, mirroring rem_q's reset.
+    // NOTE: no t=0 initializer (unlike a reset value) -- it is left free at t=0 exactly as the RTL's
+    // rem_q is, so every task's asserts (all gated by rst_n, which is assumed low at t=0) are unaffected,
+    // while FILL_ABSTRACT can assume a genuinely free (non-zero) used set for the post-fill start state.
+    logic [N_LIST-1:0] used_latched;
     always_ff @(posedge clk) begin
         if (!rst_n)          used_latched <= {N_LIST{1'b0}};
         else if (init_start) used_latched <= used_map;
@@ -94,6 +117,62 @@ module mtf_list_inv #(
         for (int b = 0; b < N_LIST; b++) popcnt += CW'(v[b]);
     endfunction
     always_comb if (rst_n) assert (n_used_o == popcnt(used_latched & ~dut.rem_q));
+
+    // FILL_ABSTRACT: pin a VALID post-fill state at t=0 -- rem_q==0 (fill done, collapses the encoder),
+    // filling done, n_used==popcount(used_latched), and the live prefix is a FULL permutation of the used
+    // set. The permutation is pinned in O(N) (NOT the O(N^2) present-mask, which walls the solver at 256
+    // exactly as plain bmc's encoder does) by asserting the live prefix is STRICTLY ASCENDING and every
+    // live entry is a used byte -- which is precisely the state the RTL's ascending priority-encoder fill
+    // produces. A strictly-ascending run of n_used distinct values, each drawn from the used set (of size
+    // popcount == n_used), is exactly that set: the full sorted permutation. This holds for an ARBITRARY
+    // free used_latched, so the start state is general (any used set, its canonical fill), not a single
+    // constant. The cheap two-probe per-step asserts (g_perm_probe) then verify the permutation is
+    // MAINTAINED across the move horizon (a move breaks the ordering but not the permutation). With the
+    // encoder collapsed the move-only unrolling reaches depth >=20. See synth/formal.sby (bmc256moves).
+    generate if (FILL_ABSTRACT) begin : g_fillabs
+        integer fa_i;
+        // Steady post-fill REGIME, held EVERY cycle: the fill is done (rem_q==0, filling_q==0) so the
+        // encoder is inert and the only DUT activity is move-to-front (init_start is already forbidden
+        // unconditionally by g_fillabs_noinit above). This is what collapses the 256-deep priority
+        // encoder and lets the BMC spend its whole depth budget on moves. n_used==popcount(used) pins
+        // the count in the regime.
+        always_comb if (rst_n) begin
+            assume (dut.filling_q == 1'b0);
+            assume (dut.rem_q == {N_LIST{1'b0}});
+            assume (n_used_o == popcnt(used_latched));
+        end
+        always_comb if (!past_valid) assume (rst_n);           // BMC: start live, not in reset
+        // t=0 ONLY: pin a valid permutation start -- the live prefix is STRICTLY ASCENDING and every live
+        // entry is a used byte, which is exactly the RTL's ascending priority-encoder fill output.
+        // Strictly-ascending n_used distinct values, each in the used set (size popcount==n_used), is that
+        // whole set: the full sorted permutation, for an ARBITRARY free used_latched (general, not a
+        // constant). O(N) assumes -- NOT the O(N^2) present-mask, which walls the solver at 256. A move
+        // breaks the ordering but not the permutation, so the per-step asserts then verify preservation.
+        always_comb if (!past_valid && (FA_NUSED == 0)) begin
+            for (fa_i = 0; fa_i < N_LIST; fa_i++) begin
+                if (CW'(fa_i) < n_used_o) begin
+                    assume (used_latched[dut.lst[fa_i][RW-1:0]]);            // each live entry is a used byte
+                    if (fa_i > 0)
+                        assume (dut.lst[fa_i] > dut.lst[fa_i-1]);           // strictly ascending => distinct
+                end
+            end
+        end
+        // FA_NUSED>0: pin the CONCRETE canonical post-fill state used={0..FA_NUSED-1}, lst[i]=i, so only
+        // the moves stay free. This removes the free used set and free initial list (the SAT-hard part of
+        // reasoning that a 256-wide shift is a bijection over an arbitrary permutation) while remaining a
+        // real reachable post-fill state (the fill of used_map with its low FA_NUSED bits set produces
+        // exactly lst[i]=i). Because the move logic is value-agnostic (it shuffles positions, never
+        // inspects values), preservation from this one concrete permutation carries the move-network
+        // correctness; the general (FA_NUSED=0) task covers arbitrary used sets to a shallower depth.
+        if (FA_NUSED > 0) begin : g_fa_concrete
+            always_comb if (!past_valid) begin
+                assume (used_latched == ((({{(N_LIST-1){1'b0}}, 1'b1}) << FA_NUSED) - 1'b1)); // {0..k-1}
+                for (fa_i = 0; fa_i < N_LIST; fa_i++) begin
+                    if (fa_i < FA_NUSED) assume (dut.lst[fa_i] == 8'(fa_i)); // identity fill
+                end
+            end
+        end
+    end endgenerate
 
     generate
     if (PERM_FULL) begin : g_perm_full
