@@ -308,7 +308,7 @@
         "ppa": {
           "cells": 584454,
           "area_um2": 4075031,
-          "fmax_mhz": 11.15,
+          "fmax_mhz": 19.46,
           "power_mw": 0
         }
       }
@@ -963,5 +963,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-13T15:51:57Z"
+  "updated": "2026-09-13T21:25:06Z"
 }
