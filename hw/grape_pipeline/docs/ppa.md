@@ -103,15 +103,27 @@ the merged tree — `make -C hw/grape_pipeline sim` **9/9 PASS**, `full_benchmar
 r/v deviation identical to baseline; Icarus 4-state 9/9; lint clean. The reduction is on the
 same `u_fsm` → `g_add[*]` path the STA flagged, so it is the correct structural target.
 
-**New Fmax — measurement pending.** A comparable number requires re-running OpenLane **through
-the post-CTS STA** (`30/35/37-openroad-stamidpnr`, which run *before* global routing — the
-GRT-0607 step that killed every prior run — so this step completes). The **pre-PnR** STA
-(`12-openroad-staprepnr`) is *not* a valid comparable: its worst path is the fanout-2253
-`commit`→register-file broadcast net (~221 ns, a pre-placement wireload artifact that CTS
-buffering resolves), which is unchanged by this restructure; the picker only becomes critical
-post-CTS. This measurement is queued to run solo (memory-bound on the 24 GB host). Until it
-lands, the claim here is the **structural** improvement (60→6 logic levels on the flagged path,
-bit-exact, K1 preserved), not a specific new MHz.
+**New Fmax — MEASURED (2026-09-14), post-CTS STA on the restructured netlist.** OpenLane run
+`grape_prefix2` reached post-CTS STA (the deepest grape run yet — it cleared synthesis, floorplan,
+placement and CTS; stopped in the post-CTS resizer, no GDS, per §7 — same as `grape_relaxed`).
+Apples-to-apples, both from `35-openroad-stamidpnr-1/ws.max.rpt` at `nom_tt_025C_1v80`, 150 ns
+period:
+
+| | worst setup slack | achievable period | Fmax | critical path |
+|---|---|---|---|---|
+| **Before** (linear scan) | +60.3164 ns | 89.68 ns | **11.15 MHz** | `u_fsm._948_` → `g_add[1].u_add._6265_` (accumulate-picker **adder**) |
+| **After** (parallel-prefix) | **+98.6212 ns** | **51.38 ns** | **≈ 19.46 MHz** | `u_fsm._947_` → `g_add[2].u_mul._35436_` (integrate **multiplier** operand) |
+
+**Result: Fmax 11.15 → 19.46 MHz (1.75×); worst-path delay 89.68 → 51.38 ns (−43%) — bit-exact,
+K1 = 124 unchanged.** The restructure did exactly what the STA flagged: the accumulate-picker path
+(`g_add[*].u_add`) **dropped out of the critical path entirely**; the new limiter is a different,
+faster path (FSM state → integrate-multiply operand). Still short of the 20 ns / 50 MHz target
+(~2.6×), but the documented picker bottleneck is removed at zero functional cost. The next
+limiter (the FSM→multiplier path) is the follow-on target if 50 MHz is pursued.
+(The **pre-PnR** STA `12-openroad-staprepnr` is *not* a valid comparable — its worst path is the
+fanout-2253 `commit`→RF broadcast net, ~221 ns, a pre-placement wireload artifact CTS resolves,
+unchanged by this restructure; the picker only becomes critical post-CTS. That is why the
+apples-to-apples numbers above are both post-CTS.)
 
 **§7 framing.** Per project_instructions.md §7 ("You are not expected to synthesize"), the
 requirement is a trade-off **discussion with a defined operating frequency**. That is satisfied
