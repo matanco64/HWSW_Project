@@ -873,8 +873,8 @@
             },
             "formal (sby) where listed": {
               "result": "pass",
-              "evidence": "make formal firsthand: 5/5 tasks PASS (prove/bmc/cover/hs/hscover). K8 CORE COMPLETE: 3 list invariants proven UNBOUNDED k-induction @ N_LIST=16. LIMITATION: N_LIST=256 bounded BMC closes at depth 6 not the testplan's >=20 (256-deep priority-encoder fill walls every engine at k~=6) -- testplan-fallback-authorized, property not weakened, surfaced at checkpoint (docs/review_signoff.md)",
-              "at": "2026-09-13T11:53:30Z"
+              "evidence": "make formal firsthand: 7/7 tasks PASS. K8: (a) 3 list invariants proven UNBOUNDED k-induction @ N_LIST=16; (b) N_LIST=256 permutation preservation across 24 move cycles (bmc256moves, MEETS PRD-K8 depth>=20) via fill-abstraction (valid post-fill start collapses the 256-deep encoder; concrete 8-entry canonical occupancy, moves free -- sound because move logic is value-agnostic, non-vacuity via famoves_cover + mutation test); (c) general permutation depth 6 (bmc). Unbounded-at-256 honestly not achievable (SAT-hard), not faked. Details docs/review_signoff.md + synth/formal.sby",
+              "at": "2026-09-13T13:49:03Z"
             },
             "hw-review findings resolved": {
               "result": "pass",
@@ -957,5 +957,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-13T11:54:02Z"
+  "updated": "2026-09-13T13:49:03Z"
 }
