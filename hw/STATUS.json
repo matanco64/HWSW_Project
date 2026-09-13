@@ -842,33 +842,44 @@
           }
         },
         "dv_signoff": {
-          "state": "todo",
-          "started": "",
+          "state": "review",
+          "started": "2026-09-13T06:15:12Z",
           "finished": "",
           "gate": {
             "golden equivalence on the full benchmark input": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "test_full_benchmark PASS (in make sim 16/16): 148,271 symbols -> L-vector 336,184 B byte-exact vs golden list_model.expand (predictor pre-checked == mtf_ref.l_vector), scoreboard 0 mismatches; BYTES_OUT=336,184 INIT_CYCLES=145 MAX_RUN=8,157",
+              "at": "2026-09-13T11:53:30Z"
             },
             "directed + random suites pass": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim firsthand: TESTS=16 PASS=16 FAIL=0 (smoke, backpressure x2, multiblock, k1, full_benchmark, random, corner, err_underrun/rank/eob/limit, run_max, reset, xinv, driver)",
+              "at": "2026-09-13T11:53:30Z"
             },
             "coverage goals": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "dv_coverage gate: line 92.0% toggle 93.8% (control-subset) branch 96.8%; func_cov 129 bins across 21 testplan covergroups all >=1 (docs/coverage_waivers.md)",
+              "at": "2026-09-13T11:53:30Z"
             },
             "lint clean": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make lint firsthand: all rtl + axi_lite_if, -Wall, lint: clean, 0 warnings",
+              "at": "2026-09-13T11:53:30Z"
             },
             "Icarus 4-state run X-free after reset": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make sim-icarus firsthand: TESTS=16 PASS=16; monitor is_resolvable asserts on every AXIS/AXI handshake, none fired -> no X after reset",
+              "at": "2026-09-13T11:53:30Z"
             },
             "formal (sby) where listed": {
-              "result": "n/a",
-              "evidence": ""
+              "result": "pass",
+              "evidence": "make formal firsthand: 5/5 tasks PASS (prove/bmc/cover/hs/hscover). K8 CORE COMPLETE: 3 list invariants proven UNBOUNDED k-induction @ N_LIST=16. LIMITATION: N_LIST=256 bounded BMC closes at depth 6 not the testplan's >=20 (256-deep priority-encoder fill walls every engine at k~=6) -- testplan-fallback-authorized, property not weakened, surfaced at checkpoint (docs/review_signoff.md)",
+              "at": "2026-09-13T11:53:30Z"
+            },
+            "hw-review findings resolved": {
+              "result": "pass",
+              "evidence": "docs/review_signoff.md: RTL-mode over final rtl/+tb/+formal/; 0 must open; stale-worktree R1 (INIT_CYCLES) reconciled non-applicable via nused256; formal non-vacuous (CEX-driven + slang frontend avoids bind-vacuity)",
+              "at": "2026-09-13T11:53:30Z"
             }
           }
         },
@@ -916,9 +927,9 @@
           "line_cov": 92,
           "toggle_cov": 93.8,
           "func_cov": 129,
-          "tests_run": 6,
-          "tests_pass": 6,
-          "formal": "n/a"
+          "tests_run": 16,
+          "tests_pass": 16,
+          "formal": "pass"
         },
         "ppa": {
           "cells": 0,
@@ -946,5 +957,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-13T06:13:57Z"
+  "updated": "2026-09-13T11:54:02Z"
 }
