@@ -1764,3 +1764,75 @@ Prompt: "also there is also need for only 1 HW proposal remove the HW proposal f
 
 2026-09-12T17:15:34Z — Claude Code session (auto-logged)
 Prompt: "you can also go back to work on the main repo and not the fresh clone, there is a bit of a conflict there"
+
+2026-09-12T22:20:40Z — Claude Code session (auto-logged)
+Prompt: "Your claude.ai usage limit has reset. Continue the task you were working on when the limit was reached; do not repeat work that is already complete."
+
+2026-09-14T18:08:37Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ cd /home/yuvalk/HWSW/HWSW_Proj && echo "BRANCH:" && git rev-parse --abbrev-ref HEAD && echo "STATUS:" && git status --short && echo "HEAD:" && git log --oneline -1
+BRANCH:
+main
+STATUS:
+ M prompt.txt
+HEAD:
+f1a2d36 (HEAD -> main) hw: advisor — grape parallel-prefix restructure measured 1.75x Fmax (flatten>pipeline when latency is load-bearing)"
+
+2026-09-14T18:11:15Z — Claude Code session (auto-logged)
+Prompt: "Push main to remote"
+
+2026-09-14T18:21:08Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git remote set-url origin git@github.com:matanco64/HWSW_Project.git && git push origin main
+The authenticity of host 'github.com (20.217.135.5)' can't be established.
+ED25519 key fingerprint is SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'github.com' (ED25519) to the list of known hosts.
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$  git push origin main
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ עןא דא
+עןא: command not found
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git st
+On branch main
+Your branch is ahead of 'origin/main' by 62 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   prompt.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")"
+
+2026-09-14T18:25:44Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git remote set-url origin https://github.com/matanco64/HWSW_Project.git
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git push origin main
+Enumerating objects: 1312, done.
+Counting objects: 100% (1243/1243), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (1139/1139), done.
+Writing objects: 100% (1180/1180), 102.00 MiB | 1.54 MiB/s, done.
+Total 1180 (delta 713), reused 16 (delta 5), pack-reused 0
+remote: Resolving deltas: 100% (713/713), completed with 32 local objects.
+remote: warning: File hw/huffman_engine/sim_build_cov/Vtop__pch.h.fast.gch is 81.15 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/grape_pipeline/sim_build_svaarmed/Vtop__pch.h.slow.gch is 76.32 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/huffman_engine/sim_build_cov/Vtop__pch.h.slow.gch is 80.33 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/huffman_engine/synth/huffman_engine_synth.json is 72.54 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/grape_pipeline/sim_build_cov/Vtop__pch.h.fast.gch is 86.35 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/grape_pipeline/sim_build_cov/Vtop__pch.h.slow.gch is 85.54 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: File hw/grape_pipeline/sim_build_svaarmed/Vtop__pch.h.fast.gch is 79.26 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: error: Trace: e74c4ec17a4bfc7a93afa8a3b14b61c15a73fd1b099e023d76104a5457814d5a
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File hw/grape_pipeline/synth/grape_pipeline_synth.json is 290.77 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+To https://github.com/matanco64/HWSW_Project.git
+ ! [remote rejected] main -> main (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/matanco64/HWSW_Project.git'"
