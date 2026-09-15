@@ -49,16 +49,29 @@ native() {                      # native <module> <name> <cmd...>
     fi
 }
 
+# The nbody oracles import the landed benchmark, which imports pyperf. Without
+# it they cannot run, and that is a missing prerequisite rather than a
+# correctness failure -- the same distinction the native checks already make.
+has_pyperf() { "$PY" -c "import pyperf" 2>/dev/null; }
+needs_pyperf() {                # needs_pyperf <name> <cmd...>
+    local name="$1"; shift
+    if has_pyperf; then
+        check "$name" "$@"
+    else
+        skip "$name" "pyperf not importable by $PY (pip install 'pyperformance==1.14.0')"
+    fi
+}
+
 echo "python: $("$PY" -VV 2>&1 | head -1)"
 
 check unit-tests            "$PY" -m unittest discover -s tests -v
-check nbody-python-exact    "$PY" dev/nbody/verify.py --steps 20000
-check nbody-python-exact-N  "$PY" dev/nbody/verify.py --steps 2000 --bodies 5,10,20
+needs_pyperf nbody-python-exact    "$PY" dev/nbody/verify.py --steps 20000
+needs_pyperf nbody-python-exact-N  "$PY" dev/nbody/verify.py --steps 2000 --bodies 5,10,20
 # The rolled fallback above _MAX_UNROLL_PAIRS had no oracle: verify.py topped out
 # at N = 200 (19,900 pairs), just under the 20,000 limit, so the generated kernel
 # was the only thing ever checked. Lowering the limit reaches the same code at
 # N = 6, for a fraction of the work.
-check nbody-python-exact-rolled \
+needs_pyperf nbody-python-exact-rolled \
     env NBODY_MAX_UNROLL_PAIRS=0 "$PY" dev/nbody/verify.py --steps 2000 --bodies 6,10
 # --bodies: the native path is what --bodies N and the big-N sweep drive, and
 # pair order above five bodies is generated code that N = 5 never exercises.
