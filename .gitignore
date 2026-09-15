@@ -38,3 +38,6 @@ tmp/*
 # Private working notes and self-assessment, not part of the submission
 output/
 .claude/worktrees/
+
+# make_submission.sh output; the archive is rebuilt from any commit on demand
+submission/
