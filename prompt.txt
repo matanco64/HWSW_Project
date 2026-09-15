@@ -667,3 +667,6 @@ are recorded in promts.txt (filename explicitly requested by the user).
 
 2026-09-15T15:21:31Z — Claude Code session (auto-logged)
 Prompt: "I updated some of the project, tell me what you think"
+
+2026-09-15T15:33:29Z — Claude Code session (auto-logged)
+Prompt: "yes also ensure it works on the remote machine (which is connected) and try to test a clean enviroment, I also would like to add a make_submission script"
