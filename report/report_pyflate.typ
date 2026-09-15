@@ -44,9 +44,9 @@ values per configuration, pinned to guest CPU 0, from revision 2c8c754 through t
 scripts and its own Rust build. Source: `results/vm_canonical_20260910_2c8c754/suite/`
 (Appendix A7). Development profiles and ablations are labeled separately.]
 
-Medians are 1,122.68, 280.43 and 169.67 ms, with interquartile ranges of 1.2-1.3% of the
-median. Worker grouping is milder than nbody's (ICC 0.48, 0.27 and 0.19), so the 120 values
-are worth about 61 to 87 independent observations; Appendix A5 gives the decomposition.
+Appendix A5 gives the timing distributions and worker-clustering analysis. The repeated
+measurements support a large improvement on this input; one bzip2 fixture does not establish
+the same speedup for every file, compression setting or interpreter.
 #pagebreak()
 = 2. Profiling: the whole decoding pipeline
 
@@ -56,7 +56,7 @@ about five entries visited by the symbol matcher, despite its table capacity of 
 A lookup table can remove this scan, but the measured scan is short; per-symbol interpreter
 work and the later transformations also deserve attention.
 
-#figure(flamefig("fig/print_pyflate_stock.svg", width: 100%),
+#figure(flamefig("fig/print_pyflate_stock.svg", width: 90%),
   caption: [Full stock Python-frame flame graph, retaining startup and harness context.
   Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
   percentages use the original whole-profile denominator; nested shares overlap.])
@@ -77,39 +77,16 @@ work and the later transformations also deserve attention.
   [`rle4_expand`], [--], [--], [5.74%], [5.74%],
 )
 
-*Self* is time in the function itself; *inclusive* is time in it and everything it calls.
-Shares are of each profile's own total and are not comparable between the two columns,
-which are independently normalized -- the optimized run is 4.00× shorter in absolute time.
-A dash means the function does not appear in that profile. The rewrite folded the stock bit
-reader and symbol matcher into one symbol-decode loop, `_decode_symbols_python` -- the Python
-back end the Rust kernel replaces -- and inlined its move-to-front as `l.append(l.pop(-r))`.
-The few `readbits` and `move_to_front` samples left in the optimized profile come from
-block-header selector parsing in `compute_selectors_list`.
+*Self* excludes callees; *inclusive* includes them. Each profile has its own denominator,
+so percentages locate remaining work rather than measure absolute speedup. The optimized
+symbol loop incorporates the old matcher, bit reader and most MTF handling; residual
+`readbits` / `move_to_front` calls parse header selectors. Figure labels aggregate a
+function's per-line frames, matching the table within rounding; outlines mark one frame.
 
-py-spy emits one frame per source line, so a function appears as several boxes side by side.
-The figure sums them, which is why its `find_next_symbol` label agrees with this table's
-40.86% inclusive rather than reporting the 18.82% of the single widest box it outlines.
-Regenerate both from the same recorded SVGs the figures use with
-`report/summarize_profiles.py`.
-
-*The table is the argument for what shipped.* In the stock profile the symbol loop and its
-bit reader account for the bulk of the work, and the inverse BWT (14.52% inclusive) is a minor
-share by comparison. After the rewrite, symbol decoding is still the largest single function
-(`_decode_symbols_python`, 32.79% self), but the inverse BWT now matches it: `bwt_reverse`
-holds 38.52% inclusive, most of it in `bwt_transform`. That is why the Rust kernel is drawn
-around the symbol decoder, and why the remaining Amdahl ceiling is the BWT.
-
-A separate *Windows / CPython 3.12.6* cProfile run gives
-`find_next_symbol` 0.519 s cumulative out of 1.186 s (43.8%), including its bit-reader
-callees. `decode_huffman_block` has 0.241 s *self* time and 1.172 s *cumulative* time:
-most of its inclusive cost is in functions it calls. Source: `dev/pyflate/FINDINGS.md` §3.
-That development run and the VM profile above agree on the ordering, not on the numbers;
-different machine, different interpreter, different estimator.
-
-#figure(image("fig/huffman_tree.svg", width: 100%),
-  caption: [Illustrative canonical Huffman codes. Codes of equal length are consecutive;
-  length-indexed ranges identify the symbol without scanning individual candidates.
-  The optimized implementation adds a primary lookup for short codes.])
+Symbol decoding is the largest optimized function (32.79% self), while whole inverse BWT
+accounts for 38.52% inclusive. Both matter for the next offload decision. These sparse
+profiles identify candidates; Section 4 explains why they cannot supply a precise Amdahl
+fraction for the separately measured native timing pair.
 
 #pagebreak()
 = 3. Changes that shipped
@@ -149,6 +126,72 @@ Raw output: `results/vm_rerun_20260910_3697a63/`.
   caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
   index-table construction remain visible beside `_decode_symbols_python`, the single
   symbol-decode loop that replaced the stock matcher and bit-reader frames.])
+
+#pagebreak()
+== Worked examples of the shipped transformations
+
+*Before/after: removing the per-symbol search.* The stock matcher visits Huffman entries
+and calls the bit reader for candidate lengths. The optimized loop peeks once into a flat
+table; a nonzero entry packs the symbol and consumed length. These excerpts summarize the
+control flow, omitting refill, table switches and output handling.
+
+#grid(columns: (1fr, 1fr), gutter: 12pt,
+  [*Stock matcher (schematic)*
+```python
+for entry in table:
+    code = field.snoopbits(entry.bits)
+    if code == entry.code:
+        field.readbits(entry.bits)
+        return entry.symbol
+```],
+  [*Optimized lookup (abbreviated)*
+```python
+v = tbl[peek(pb)]
+if v:
+    consume(v & 31)
+    symbol = v >> 5
+else:
+    # Extend bits using limit/base/perm.
+    symbol = canonical_fallback()
+```])
+
+`peek`, `consume` and `canonical_fallback` are explanatory names; the shipped loop performs
+these operations on local integers. Source: `build_huffman_table` and
+`_decode_symbols_python` in `benchmarks/bm_pyflate/run_benchmark.py`.
+
+#figure(image("fig/huffman_tree.svg", width: 100%),
+  caption: [Illustrative canonical Huffman codes. Codes of equal length are consecutive;
+  length-indexed ranges identify the symbol without scanning individual candidates.
+  The optimized implementation adds a primary lookup for short codes.])
+
+*A four-entry lookup, step by step.* Use the illustrated code lengths `[2,2,2,3,3]`
+and temporarily choose `pb = 2` (the shipped default is 11, capped by the longest code).
+The primary entries for `00`, `01`, `10`, `11` are `(a,2)`, `(b,2)`, `(c,2)`, and
+fallback. On input `01110`, peek `01`, output b and consume two bits; `110` remains.
+Peek `11`: its entry is zero, so extend to three bits. Now code 6 lies at or below
+`limit[3] = 7`; `base[3] = 3`, hence `perm[6 - 3] = perm[3] = d`. Consume three bits.
+Thus the stream decodes to b,d without searching individual symbols. With a three-bit
+primary table, `00x`, `01x` and `10x` each duplicate a two-bit code into two slots; the
+stored length still consumes only two bits, preserving the next symbol's first bit.
+
+*Counting-sort BWT construction.* For L = `banana`, counts are a:3, b:1, n:2.
+Prefix sums place their buckets at offsets 0, 3 and 4. Scanning L left to right stores each
+original index in the next slot of its bucket, giving `T = [1,3,5,0,2,4]`. Equal symbols keep
+their original order. The stock path sorts L and searches for bucket starts; the optimized
+path counts 256 possible byte values and fills T in O(n + 256) work. This constructs the
+traversal table; inverse BWT still follows `end = T[end]` once per output byte.
+
+*Reversed move-to-front.* Start with logical order `[a,b,c,d]`, rank 2 selecting c.
+The stock slicing update produces `[c,a,b,d]` by rebuilding the list. The optimized physical
+list is reversed, `[d,c,b,a]`. The non-run symbol is `r = rank + 1 = 3`; `pop(-3)` returns c,
+then `append(c)` leaves `[d,b,a,c]`, the reverse of the same logical answer. The pop shifts
+only two trailing entries and append places c at the logical front. This preserves the
+operation while moving O(rank) entries instead of rebuilding the whole alphabet.
+
+*RLE4 remains a separate final stage.* Four equal bytes followed by count k represent
+4+k copies. For example, `[A,A,A,A,2,B]` expands to six A bytes and one B. The implementation's
+regex locates runs in C and bulk byte operations construct the repeated span; it does not
+change the bzip2 representation or the linear size of the output.
 
 #pagebreak()
 = 4. Native execution: what improves, what remains
@@ -207,19 +250,29 @@ are omitted because an earlier capture returned invalid load counts.
 
 Amdahl's law gives `S = 1 / ((1 - f) + f/s)` for kernel speedup `s` and offloaded fraction
 `f` of *optimized Python* runtime. Even infinite symbol-decoder speed leaves BWT and RLE4.
+The sampled 32.79% decoder share is a hotspot locator, not a calibrated value of f for the
+native timing pair: it would imply a maximum 1.49× gain, below the measured 1.67×.
+Under the simple unchanged-residual model, 1.67× requires at least 40.1% offloadable work.
+Separate sampling, setup inside the decoder, and differences between measured runs prevent
+identifying f from this profile alone. Matched phase timing is needed to explain the ratio
+quantitatively; the end-to-end measurement itself remains the evidence for the speedup.
+
 Unlike nbody's native integration loop, this offload leaves over a billion instructions
 per decode in a largely Python pipeline. The next target is the *whole inverse BWT*, including table
-construction, not just its dependent traversal. Earlier VM phase timings put them at
-137.7 ms and 47.8 ms respectively (Appendix A3). A native port and working-set sweep would
+construction, not just its dependent traversal. Earlier VM phase timings measured *137.7 ms
+for whole inverse BWT* and *47.8 ms for traversal alone* (Appendix A3). The first includes
+construction and traversal; the two numbers must not be added. A native port and working-set sweep would
 test whether memory latency then becomes limiting; the present data do not establish that.
 
 #pagebreak()
-= 5. Hardware acceleration: measured
+= 5. Hardware acceleration: implementation and estimates
 
 `huffman_engine` followed by `mtf_cam` produces the same L-vector as the Rust kernel, over the
 same boundary. Software keeps block headers, inverse BWT, RLE4 and MD5. Both modules are
-implemented in SystemVerilog, verified, and taken through synthesis and place-and-route; the
-numbers below are measured, not targets.
+implemented in SystemVerilog and have module-level verification and synthesis evidence.
+Physical-design attempts stopped before routed sign-off. The on-chip chain and platform DMA
+boundary are the integration design; standalone module results do not establish a measured
+end-to-end hardware speedup.
 
 #figure(image("fig/decode_report.svg", width: 100%),
   caption: [AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays
@@ -247,33 +300,74 @@ expands RUNA/RUNB groups through a buffered output packer at eight bytes wide. I
   table.header([*sky130, Yosys + OpenLane*], [`huffman_engine`], [`mtf_cam`]),
   [Cells], [151,058], [18,814],
   [Area], [1.634 mm²], [0.187 mm²],
-  [Fmax], [≈ 8.9 MHz], [≈ 37.6 MHz],
-  [Power], [not reported], [≈ 13.7 mW],
+  [Timing-derived frequency], [≈ 8.9 MHz], [≈ 37.6 MHz],
+  [Power estimate], [not reported], [≈ 13.7 mW],
   [Cycles per symbol], [1.0068], [1.0686],
   [Directed + random tests], [17 / 17], [16 / 16],
   [Line / toggle coverage], [90.4% / 90.3%], [92.0% / 93.8%],
 )
 
-The two clocks are not measured the same way and must not be compared. `mtf_cam` closed
-post-CTS static timing at 37.6 MHz; `huffman_engine` is a pre-place-and-route estimate,
-because its placement did not converge, and its real figure is likely lower. Neither module
-reaches the 50 MHz design target, and for this workload that barely matters: the software
-residual dominates.
+*Evidence levels.* Huffman's 8.9 MHz comes from pre-placement static timing; MTF's
+37.6 MHz comes from post-CTS timing. These are different stages of physical estimation,
+not demonstrated silicon operating frequencies or directly comparable timing closure results.
+Placement, buffering and routing may change either estimate. Neither completed 50 MHz
+sign-off. MTF's 13.7 mW is a tool estimate using default switching activity at the run's
+clock constraint, not measured workload power at 37.6 MHz; it cannot support energy savings.
+Coverage percentages use the documented exclusions, and MTF invariant proofs are bounded
+to depth 24 rather than exhaustive. The regression counts are recorded results, not new runs
+performed for this report revision.
 
-Amdahl decides the end-to-end gain, not the clock. Huffman decoding is 49.6% of the stock
-benchmark and move-to-front a further 13.4%. Offloading Huffman alone gives *1.97×* at
-50 MHz and *1.93×* at the measured 8.9 MHz — a 5.6× clock difference worth 0.04× end to end,
-because 3 ms of hardware is negligible against 570 ms of surviving software. `mtf_cam` alone
-gives *1.15×*, which is a *25× speedup of its own stage* seen through a 13.4% slice. Chained
-on chip the two remove `f ≈ 0.63` of the benchmark, an ideal ceiling of *≈ 2.7×*.
+#pagebreak()
+== Conditional benefit and integration cost
 
-#note[*Trade-offs.* `huffman_engine` is storage-dominated: a 17.3 kbit symbol table and an
-8.6 kbit length window are flip-flops, because the open sky130 flow has no SRAM compiler.
-Mapping both to SRAM macros is the one change that would bring it under 1 mm², and it would
-cost nothing in cycles per symbol. `mtf_cam`'s output width was swept at W = 4, 8 and 16:
-W = 16 buys 0.040 cycles per symbol for 11% more area and is not worth it, so W = 8 ships.
-Formal proofs bound the MTF invariants to depth 24 on the 256-entry list rather than
-exhaustively; that limit is recorded, not papered over.]
+Use `Tnew = (1 - f)*Tstock + Thardware + Tinterface`. The older integration model assumes
+f = 0.496 for Huffman; using the canonical stock mean 1,123.49 ms gives about 1.97× at
+50 MHz (149,276 cycles = 2.99 ms), or 1.93× at 8.9 MHz (16.77 ms), before interface cost.
+The surviving software contributes about 566 ms. These are conditional projections, not
+measurements of the implemented hardware attached to Python.
+
+MTF's recorded RTL block takes 158,441 cycles (1.0686 cycles/symbol), about 4.21 ms at
+37.6 MHz. Its standalone model uses the sampled 13.44% stock MTF share and yields about
+1.15× end to end. The older isolated 80.4 ms MTF microbenchmark would imply a stage-only
+19.1× ratio at this clock, or 25.4× at the 50 MHz target; it is a different experiment from
+the whole-decoder profile and must not be substituted for that profile's runtime fraction.
+
+Adding the old Huffman assumption (49.6%) to the newer MTF profile share (13.44%) gives
+f ≈ 0.63 and an illustrative ideal ceiling near 2.7×. These fractions do not come from a
+single matched decomposition of the combined boundary, which also includes run expansion.
+That sum is therefore a sensitivity example, not a measured ceiling for the chained design.
+A chain comparison should time the exact replaced region and residual in the *same*
+optimized Python workload, then compare with the already delivered 170.01 ms hybrid path.
+A stock-based projection cannot demonstrate an improvement over that stronger baseline.
+
+The diagram's chain uses on-chip symbol transfer. A shared clock would be constrained by
+both modules; separate clocks would require an explicit clock-domain crossing. In either
+case, use a combined backpressure simulation rather than adding standalone cycles/symbol.
+Input DMA supplies compressed bits and selectors, and output DMA drains 336,184 L-vector
+bytes. Configuration, DMA setup, copies and cache maintenance contribute to Tinterface;
+transfer time may overlap compute only if buffers and bandwidth sustain it. The recorded
+module and driver tests do not measure these platform costs.
+
+== Area and throughput trade-offs
+
+Huffman storage includes a 17.3 kbit symbol table and an 8.6 kbit length window implemented
+as flops in this standard-cell flow. SRAM is a proposed alternative: the documented estimate
+is about 0.75 mm² of *remaining standard cells plus two macros*. Macro area, access latency,
+ports and integration must be established before claiming total area below 1 mm² or unchanged
+throughput. No SRAM version was synthesized here.
+
+#result-table(columns: (1fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*MTF output bytes/cycle*], [*Mapped area*], [*Modeled cycles/symbol*]),
+  [4-byte output], [0.182 mm²], [1.175],
+  [8-byte output (selected)], [0.187 mm²], [1.063],
+  [16-byte output], [0.208 mm²], [1.023],
+)
+
+W = 8 is the smallest modeled width meeting the 1.10 cycles/symbol goal; W = 16 costs
+10.9% more area for about 3.9% modeled throughput gain. The W-sweep uses the cycle model;
+the default RTL's measured 1.0686 includes additional implementation overhead. The CAM's
+68% area share explains why reducing packer width saves little total area. Timing must be
+checked for each implementation rather than assuming identical frequency across widths.
 
 = 6. Conclusion
 
@@ -281,9 +375,9 @@ The delivered Python-plus-Rust path decompresses the input in *170.01 ms*, achie
 *6.61× over stock* with byte-exact output. Python improvements provide 4.00× and the native
 decoder adds 1.67×, leaving BWT and RLE4 as the next software targets.
 
-Both accelerators are implemented and measured rather than proposed. The gain they buy is
-bounded by what stays in software: the inverse BWT and RLE4, which is the same ceiling the
-native decoder ran into.
+Both accelerators have RTL verification and synthesis evidence. Their end-to-end benefit
+remains conditional on the software fraction, platform interface and completed physical
+timing. Inverse BWT and RLE4 remain software work across both offload approaches.
 
 #text(size: 9pt)[*Evidence:* `hw/huffman_engine/docs/{ppa,integration}.md`,
 `hw/mtf_cam/docs/{ppa,integration}.md`. Methods and profiles: *report_appendix.pdf*.
