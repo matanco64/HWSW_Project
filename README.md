@@ -52,6 +52,7 @@ report_pyflate.pdf / report_nbody.pdf   Per-benchmark reports (course deliverabl
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable); thin
                                         wrappers over tools/runner_common.sh
 script_mdp.sh                           Same runner for mdp (candidate, not submitted)
+make_submission.sh                      Verify the deliverables and package them (see below)
 prompt.txt                              AI-tool prompt log (course deliverable)
 project_instructions.pdf / .md          Course assignment handout (+ text transcription)
 skills-lock.json                        Pinned sources/hashes of the imported skills (`npx skills update`)
@@ -284,6 +285,31 @@ mis-pinned runs.
 CPython 3.10 after building both wheels from the checkout with
 `tools/build_wheel.sh`. It measures nothing: shared runners are not a timing
 platform.
+
+## Packaging the submission
+
+```bash
+./make_submission.sh --check    # verify only
+./make_submission.sh            # ...then write submission/<date>_<rev>.zip
+```
+
+The archive is `git archive HEAD`, so it is exactly the committed tree: no
+`results/runs/`, no build artifacts, nothing uncommitted. A dirty working tree
+is refused for that reason. It is also byte-reproducible for a given revision --
+two runs of the same commit give the same SHA-256 (checked on the course VM) --
+so the printed digest is enough to tell whether an archive matches a commit. Before packaging it requires the named deliverables
+to exist and be non-empty, the two run scripts to be executable and to parse,
+committed SystemVerilog under `hw/*/rtl/`, and `tools/check_all.sh` to pass.
+
+It also requires `pyperf` to be importable. `check_all.sh` skips the
+bit-exactness oracles without it, which is right for a bare checkout and wrong
+when packaging: a submission whose central correctness claim was never
+exercised should not be shipped. `./script_<bench>.sh setup` installs it.
+
+Staleness is caught by those checks rather than by timestamps, which say nothing
+in a fresh clone: `check_txt_tables.py` reads the table rows out of the Typst
+sources and requires them in the shipped `.txt`, and `verify_examples.py` runs
+the reports' worked examples against the shipped functions.
 
 ## How to reproduce
 
