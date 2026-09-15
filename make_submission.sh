@@ -71,6 +71,16 @@ rtl_count=$(git ls-files 'hw/*/rtl/*.sv' | wc -l | tr -d ' ')
 printf '  ok       %-22s %s committed\n' "hw RTL" "$rtl_count .sv files"
 
 # --- 4. correctness ----------------------------------------------------------
+# check_all.sh skips the nbody oracles when pyperf is missing, which is the right
+# thing for a bare checkout but the wrong thing here: packaging a submission
+# whose central correctness claim was never exercised is worse than not
+# packaging one. Require the prerequisite up front, with the fix in the message.
+PY="${PYTHON:-python3}"
+"$PY" -c "import pyperf" 2>/dev/null || fail \
+    "pyperf is not importable by $PY, so the bit-exactness oracles would be skipped.
+                     $PY -m pip install 'pyperformance==1.14.0'
+                   or run ./script_nbody.sh setup, which installs it."
+
 echo
 echo "== running tools/check_all.sh"
 ./tools/check_all.sh || fail "correctness checks failed"
