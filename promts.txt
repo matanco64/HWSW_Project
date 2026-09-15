@@ -1,0 +1,224 @@
+HWSW report revision and defense preparation - 2026-09-15
+Tool: Codex (OpenAI)
+
+PURPOSE AND PROVENANCE
+This is the requested promts.txt, with the user's spelling preserved. prompt.txt is
+the existing historical AI log and remains intact. This file records the user's
+requests verbatim and the detailed task prompts expanded from the three accepted
+follow-ups. Expanded prompts below are Codex-authored work instructions derived
+from the user's request, not additional verbatim user messages or separate agent
+conversations. They were carried out locally in this task. No sub-agents were used.
+Commands and implementation details are represented by their task, evidence and
+validation rather than claiming that each tool invocation was a user prompt.
+
+USER REQUESTS (VERBATIM)
+1. this is a project in hwsw co-design course, the instruction are here project_instructions.pdf I want you to read the reports in this project and tell me what you think about them and if you can improve them and how
+2. I like all 3 follow up promts, run them and add them to promts.txt with more explanataion, maybe a seperate promt for each improvement, i.e. a promt for pyflate nbody before/after code, a promt for a worked example of the huffman lookup and so on, take notice I updated the flamegraphs a bit and the HW sections
+3. remember to save all promts to promts.txt
+
+THE THREE ACCEPTED FOLLOW-UP PROMPTS
+A. Revise all three reports using your review: reconcile the hardware evidence,
+correct technical claims, tighten the prose, and rebuild and visually check the
+PDFs and text companions.
+B. Add concise worked examples and diagrams explaining the key nbody and pyflate
+optimizations, using the actual implementation.
+C. Prepare likely course-staff questions and evidence-backed answers about our
+optimizations, measurements, correctness, and hardware trade-offs.
+
+EXPANDED PROMPTS - ONE PER IMPROVEMENT
+
+01 - Review the latest user edits and preserve them
+Prompt: Re-read the current report sources, figure generator and hardware evidence
+before editing. Preserve the user's revised flame-graph geometry, aggregate-share
+labels, caller context and new pyflate hardware section. Reconcile claims against
+current repository evidence rather than restoring the older draft. Treat source
+profiles and benchmark captures as immutable evidence.
+Why: The earlier review described a previous version; applying it blindly would
+remove newer work or perpetuate stale claims.
+Deliverable: Revised reports based on the current checkout; existing flame-graph
+assets preserved, with prose and page layout adapted around them.
+
+02 - Nbody before/after code
+Prompt: Show how the shipped _advance_source generator turns pair unpacking and
+list-based coordinates/velocities into local-variable arithmetic and mass literals.
+Use an abbreviated x-component pair update, explicitly identify omitted y/z and
+other-pair work, preserve the stock floating-point expression and update order,
+and explain entry/exit state copying. Explain which Python overhead remains.
+Validate a small example using the actual generator and an independent rolled loop.
+Why: This connects the measured speedup to a concrete transformation a student can
+explain, without pretending that the Python tier becomes native arithmetic.
+Deliverable: Nbody Section 2 example and executable example verification.
+
+03 - Pyflate before/after decoder code
+Prompt: Contrast the stock candidate scan and bit-reader calls with the shipped
+packed primary lookup and canonical fallback. Label explanatory helper functions
+as pseudocode, retain the packed symbol/length representation, and cite the actual
+implementation functions. Do not claim a 258-entry full scan when the observed
+average was about five entries.
+Why: Readers need to see how a hotspot becomes less interpreter work.
+Deliverable: Pyflate worked-example section.
+
+04 - Worked Huffman lookup including fallback
+Prompt: Use canonical codes a=00, b=01, c=10, d=110, e=111. Choose a two-bit primary
+table for illustration, clearly distinguishing it from the shipped eleven-bit
+default. Decode 01110 step by step, showing the primary hit, zero-entry fallback,
+limit/base/perm arithmetic, and exact consumed bits. Explain duplicate table slots
+with a three-bit primary. Execute the actual table builder to validate all entries.
+Why: The tree alone does not explain primary lookup or variable-length consumption.
+Deliverable: Worked lookup tied to the existing Huffman tree and verified example.
+
+05 - Counting-sort inverse-BWT table
+Prompt: Use L=banana to compute symbol counts, prefix-sum bucket starts and the
+stable pointer table T=[1,3,5,0,2,4]. Explain why counting replaces sorting and why
+stable order matters. Distinguish construction from dependent traversal. Check the
+example against the shipped bwt_transform function and a stable-sort oracle.
+Why: Readers should understand both the algorithmic saving and the work left over.
+Deliverable: Pyflate BWT example and validation.
+
+06 - Reversed move-to-front and final RLE4
+Prompt: Trace logical [a,b,c,d], rank 2, through both the stock slice reconstruction
+and reversed physical [d,c,b,a] with pop(-3)/append. Explain r=rank+1, two shifted
+entries, and why the front is now at the list end. Separately demonstrate that
+[A,A,A,A,2,B] expands to six A bytes and one B in final RLE4. Verify with the shipped
+functions and do not confuse final RLE4 with RUNA/RUNB expansion.
+Why: These changes remove overhead without changing decompression semantics.
+Deliverable: Two concise worked examples with correctness checks.
+
+07 - Nbody hardware dependencies and scheduling
+Prompt: Explain why pairs (0,1) and (0,2) can prepare force terms independently but
+must serialize updates to body 0's same velocity component. Draw the chain from
+old velocity through two separately rounded updates; explain lost updates and
+rounding changes if operations are incorrectly parallelized. Relate it to the
+ordered issue logic, per-component dependencies and position commit boundary.
+Why: This exposes the actual co-design problem behind the hardware block diagram.
+Deliverable: Scheduling explanation and a generated vector dependency diagram.
+
+08 - Reconcile nbody hardware status and cost
+Prompt: Update the early 123-127 cycle model with the recorded 124-cycle RTL result,
+full-benchmark verification, one-wide versus three-wide area/cycle study, and the
+September 14 parallel-prefix post-CTS timing result. Keep pre-prefix synthesis area
+separate from newer timing. Calculate 2.48 million cycles at 50 MHz and 19.46 MHz;
+separate compute-only ratios from total performance with residual software and
+interface overhead. Compare with the 9.53 ms native baseline and make no power or
+final routed sign-off claim.
+Why: A fast cycle schedule does not establish a fast or efficient physical system.
+Deliverable: Current nbody hardware section with explicit evidence levels.
+
+09 - Audit the newly added pyflate hardware section
+Prompt: Preserve the Huffman/MTF architecture and cost discussion, but distinguish
+RTL simulation, cycle models, synthesis area, pre-placement timing, post-CTS timing
+and default-activity power. Separate measured MTF 158441 cycles from modeled 157560
+cycles. Explain combined-chain backpressure, clock domains and DMA assumptions.
+Treat mixed-source Amdahl fractions as sensitivity assumptions, and SRAM area as
+remaining standard cells plus unmeasured macros. Do not claim a completed physical
+implementation, proven power savings or measured hardware-versus-native speedup.
+Why: Evidence from different stages and boundaries cannot be combined as if it
+were one end-to-end experiment.
+Deliverable: Corrected pyflate hardware section retaining the user's new work.
+
+10 - Correct phase timing and Amdahl consistency
+Prompt: Correct 137.7 ms to whole inverse BWT and 47.8 ms to traversal alone, with
+no double counting. Show why the sampled 32.79% decoder fraction predicts an ideal
+1.49x ceiling while the separate timing pair measures 1.67x. Explain that at least
+40.1% offloadable work is required under the unchanged-residual model, and that
+matched phase timing is needed to resolve the discrepancy quantitatively. Preserve
+validated end-to-end timings; do not invent new phase measurements.
+Why: The report must explain the limits of combining samples and elapsed timings.
+Deliverable: Corrected pyflate interpretation and defense answer.
+
+11 - Condense methodology without losing provenance
+Prompt: Keep the canonical timing protocol, correctness contracts, counter gating,
+worker clustering, source map and reproducible commands. Preserve superseded runs
+and exporter/debugging history in a separate historical source. Correct claims
+that mean/SD require symmetry or independence, identify dimensionless ICC/design
+effect, qualify clustered SE by its model assumptions, and avoid comparing speedup
+ratios directly with millisecond errors. Wrap shell commands at valid continuations.
+Why: Methodology should help reproduce and assess the results, while historical
+investigation remains available for audit.
+Deliverable: Shorter appendix and report/history/ documentation.
+
+12 - Rebuild and visually verify the submission
+Prompt: Rebalance report pages around the user's latest flame graphs and added
+examples; keep each plot beside its relevant discussion. Build all three PDFs and
+required text companions, run existing figure-geometry and table-export checks,
+and render every PDF page to inspect legibility, clipping, page breaks and tables.
+Verify the new examples and saved headline arithmetic without re-running expensive
+VM benchmarking or hardware synthesis. Fix defects before delivering the files.
+Why: A successful compiler run does not establish readable or accurate PDFs/text.
+Deliverable: Rebuilt PDFs/text, checked examples, and a validation summary.
+
+13 - Prepare the project defense
+Prompt: Write a practical guide for a 20-25 minute course presentation followed by
+5-10 minutes of questions. Include a timed walkthrough, likely questions with short
+spoken answers, deeper follow-up explanations, concrete evidence paths, correctness
+and measurement limits, and demo commands with prerequisite notes. Cover nbody
+specialization, scaling and floating point; Huffman/BWT/MTF/RLE; backend verification;
+IPC and counters; Amdahl; HDL interfaces, verification, timing, area and power.
+Include challenging questions about hardware losing to native software and the
+profile-versus-timing discrepancy. Do not invent measurements or claim new runs.
+Why: The student must explain decisions and limits, not merely recite speedups.
+Deliverable: report/defense_guide.md with evidence-backed rehearsal material.
+
+VALIDATION AND COMPLETION
+The final execution summary and any additional improvement prompts are appended
+below after the final build and visual inspection.
+
+14 - Make the new materials discoverable and preserve historical status
+Prompt: Add README links to the defense guide, example checker, requested promts.txt
+and historical appendix. Prepend a current checkpoint that distinguishes this
+editorial validation from older VM/hardware runs. Record the final page counts,
+checks, limitations and completed work without overwriting historical records.
+Why: A reviewer should find the new materials and know which evidence is current.
+Deliverable: README links and dated report/CHECKPOINT.md summary.
+
+EXECUTION SUMMARY
+All three accepted follow-ups and expanded improvements 01-14 are complete.
+- report_nbody.pdf and .txt: 6 PDF pages; before/after arithmetic, dependencies,
+  updated hardware evidence, baseline clarity and compact scaling discussion.
+- report_pyflate.pdf and .txt: 7 PDF pages; decoder/Huffman/BWT/MTF/RLE examples,
+  corrected phase/Amdahl explanation, preserved and qualified new hardware section.
+- report_appendix.pdf and .txt: 5 PDF pages; current protocol and evidence map,
+  statistical corrections, valid command wrapping and separated historical notes.
+- report/defense_guide.md: 23-minute walkthrough, 26 defense questions with short
+  answers, deeper explanations, evidence links and prerequisite-aware demo commands.
+- report/history/appendix_before_20260915.typ: full prior appendix preserved.
+- report/verify_examples.py: checks actual shipped functions without benchmark imports.
+- report/fig/pair_dependency.svg: generated ordered-accumulation illustration.
+- Existing updated flame-graph SVGs remain byte-identical to the starting checkout.
+
+Checks completed:
+1. All three reports compiled with Typst; corresponding text editions regenerated.
+2. Existing table checks passed on 77 rows (17 appendix, 23 nbody, 37 pyflate).
+3. All four source flame-graph geometries and separated annotation badges passed.
+4. Huffman primary/fallback/bit consumption, stable BWT construction, reversed MTF,
+   final RLE4 and actual nbody generator versus stock example all passed.
+5. Eight canonical JSON means and 120-value sample counts agree with headlines.
+6. Defense guide local links resolve; hardware projection arithmetic checked.
+7. All 18 final PDF pages rendered and visually inspected; orphaned continuation
+   pages removed, example code readable, tables intact.
+8. Source whitespace checks passed; binary PDFs are excluded from that check.
+
+Scope: No new benchmark timing, Rust build, full software regression, RTL simulation,
+synthesis, STA or power measurement was claimed or run. Hardware results retain
+the recorded documents' scope. Referenced physical-run files are absent locally;
+preliminary timing and default-activity power are not silicon measurements.
+
+FOLLOW-UP USER REQUESTS (VERBATIM)
+4. Do you think the project is complete now?
+5. create detailed and clean commits and push
+
+15 - Review submission readiness and publish focused commits
+Prompt: Compare the current repository with the course deliverables, distinguish
+completed technical work from presentation/submission preparation, then review the
+working tree and create focused commits with concrete descriptions and validation.
+Preserve existing user edits and prompt entries. Fetch the remote, check divergence,
+push to the existing GitHub branch without force, and verify the published commit.
+Why: The completed work needs a reviewable history and a verified remote copy.
+Deliverable: Separate commits for teaching tools, revised reports, and defense/prompt
+documentation, published on the existing main branch.
+
+6. I don't want a /tmp/ folder to be commited, maybe you should move it to a correct location?
+
+Commit scope clarification: /tmp/hwsw-commit-*.txt contains temporary commit-message
+input outside the repository, not staged deliverables. The staged example files are
+under report/. No temporary files or /tmp directory are included in the commits.

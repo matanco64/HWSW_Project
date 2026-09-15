@@ -191,6 +191,16 @@ root; the text files fulfill the named course deliverables, while PDFs include
 figures and diagrams. The appendix records timing provenance, phase-counter
 scope, profile transformations, correctness checks and reproduction commands.
 
+The reports include checked before/after examples, a Huffman lookup walkthrough,
+BWT/MTF/RLE examples and an nbody dependency diagram. Run
+`python3 report/verify_examples.py` to check those examples against the shipped
+functions without installing benchmark dependencies.
+[Defense guide](report/defense_guide.md) provides a 23-minute presentation route,
+26 questions with answers, evidence links and demonstration commands.
+[Detailed revision prompts](promts.txt) records the user requests and separate
+per-improvement instructions; `prompt.txt` remains the historical prompt log.
+[Measurement history](report/history/README.md) preserves the superseded appendix.
+
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
 
 ```powershell
