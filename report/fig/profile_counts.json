@@ -13,7 +13,9 @@
         "w": 40.2,
         "h": 15.0,
         "weight": 207207207,
-        "share": 3.4
+        "share": 3.4,
+        "aggregate_share": 3.4,
+        "boxes": 1
       },
       {
         "name": "PyNumber_AsSsize_t",
@@ -23,7 +25,9 @@
         "w": 32.2,
         "h": 15.0,
         "weight": 166166166,
-        "share": 2.73
+        "share": 2.73,
+        "aggregate_share": 4.87,
+        "boxes": 2
       },
       {
         "name": "binary_op1",
@@ -33,7 +37,9 @@
         "w": 124.5,
         "h": 15.0,
         "weight": 642642642,
-        "share": 10.55
+        "share": 10.55,
+        "aggregate_share": 20.09,
+        "boxes": 12
       }
     ]
   },
@@ -51,7 +57,9 @@
         "w": 56.2,
         "h": 15.0,
         "weight": 10,
-        "share": 4.76
+        "share": 4.76,
+        "aggregate_share": 91.57,
+        "boxes": 95
       }
     ]
   },
@@ -69,7 +77,9 @@
         "w": 222.0,
         "h": 15.0,
         "weight": 70,
-        "share": 18.82
+        "share": 18.82,
+        "aggregate_share": 40.87,
+        "boxes": 7
       },
       {
         "name": "move_to_front",
@@ -79,7 +89,9 @@
         "w": 158.6,
         "h": 15.0,
         "weight": 50,
-        "share": 13.44
+        "share": 13.44,
+        "aggregate_share": 13.44,
+        "boxes": 1
       },
       {
         "name": "bwt_reverse",
@@ -89,7 +101,9 @@
         "w": 73.0,
         "h": 15.0,
         "weight": 23,
-        "share": 6.18
+        "share": 6.18,
+        "aggregate_share": 14.52,
+        "boxes": 5
       }
     ]
   },
@@ -107,7 +121,9 @@
         "w": 299.9,
         "h": 15.0,
         "weight": 31,
-        "share": 25.41
+        "share": 25.41,
+        "aggregate_share": 38.53,
+        "boxes": 4
       },
       {
         "name": "bwt_transform",
@@ -117,7 +133,9 @@
         "w": 87.1,
         "h": 15.0,
         "weight": 9,
-        "share": 7.38
+        "share": 7.38,
+        "aggregate_share": 25.42,
+        "boxes": 6
       }
     ]
   }

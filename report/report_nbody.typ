@@ -74,18 +74,20 @@ The two grouped rows sum self time over `^(float_|PyFloat_)` and over
 `^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)` respectively.
 
 The named rows are the symbols that carry the self time, which perf records under their
-`.lto_priv` names. perf also emits a companion `(inlined)` entry per symbol holding the
-inclusive share and no self time -- that is the number the figure below quotes for a
-highlighted frame, so 3.40% there and 1.78% here describe the same function under two
-different measures. Both the table and the groups are regenerated from
+`.lto_priv` names. The figure below quotes each function's *total* inclusive share, summed
+over the per-line frames the profiler splits it into, so its labels match this table's
+inclusive column: 20.09% against 20.07% for generic arithmetic dispatch.
+`list_ass_item` is the one exception, 3.40% against 1.78%, because perf also emits a
+companion `(inlined)` entry holding an inclusive share with no self time and the flame graph
+carries that one. Both the table and the groups are regenerated from
 `results/perf_report_nbody_stock.txt` by `report/summarize_profiles.py`, which prints every
-contributing symbol; an earlier draft quoted 14.4% for the list group, which the profile it
-then cited did not support.
+contributing symbol.
 
 #figure(flamefig("fig/print_nbody_stock.svg", width: 100%),
   caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
-  and enlarged. All original frames, widths and startup context are retained. Percentages
-  describe the selected inclusive call path, not a function's total self time.])
+  and enlarged. All original frames, widths and startup context are retained. Each label
+  gives the function's total inclusive share; the outlined box is the widest of the per-line
+  frames the profiler splits it into, and callers sit below it.])
 
 == Specialize the fixed schedule
 

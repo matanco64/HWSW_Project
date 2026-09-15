@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="310" viewBox="0 0 760 310">
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="222" viewBox="0 0 760 222">
 <rect width="100%" height="100%" fill="white"/>
 <text x="8" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Full recorded flame graph</text>
 <text x="240" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Highlighted regions - enlarged with surrounding frames</text>
@@ -1512,10 +1512,10 @@
 <rect x="107.58666666666666" y="133.52083333333331" width="11.600833333333334" height="4.5625" fill="none" stroke="#00779d" stroke-width="2"/>
 <path d="M113.38708333333332 124.52083333333331L113.38708333333332 134.52083333333331" fill="none" stroke="#00779d" stroke-width="1"/>
 <circle cx="113.38708333333332" cy="116.52083333333331" r="8" fill="#00779d"/><text x="113.38708333333332" y="120.52083333333331" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">1</text>
-<text x="240" y="45.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. Generated integration loop</text>
-<text x="240" y="63.0" font-family="sans-serif" font-size="12" fill="#465969">advance | this frame: 4.76% inclusive</text>
-<rect x="240" y="72.0" width="510" height="221.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="72.0" width="510" height="221.0" viewBox="553.8 525.0 300 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<text x="240" y="45" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. Generated integration loop</text>
+<text x="240" y="63" font-family="sans-serif" font-size="12" fill="#465969">advance | 91.57% inclusive, across 95 per-line frames; widest 4.76% outlined</text>
+<rect x="240" y="72.0" width="510" height="136.0" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="72" width="510" height="136.0" viewBox="466.9 549.0 300 80.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>advance (&lt;nbody-advance&gt;:34) (10 samples, 4.76%)</ns0:title><ns0:rect x="588.8" y="565" width="56.2" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
 <ns0:text x="591.76" y="575.5">advan..</ns0:text>
@@ -1532,8 +1532,13 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:58) (7 samples, 3.33%)</ns0:title><ns0:rect x="836.0" y="565" width="39.3" height="15.0" fill="rgb(209,20,5)" rx="2" ry="2" />
-<ns0:text x="839.00" y="575.5">adv..</ns0:text>
+<ns0:title>compute_warmups_values (pyperf/_worker.py:271) (192 samples, 91.43%)</ns0:title><ns0:rect x="105.5" y="629" width="1078.9" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<ns0:text x="108.52" y="639.5">compute_warmups_values (pyperf/_worker.py:271)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:153) (1 samples, 0.48%)</ns0:title><ns0:rect x="510.1" y="565" width="5.6" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<ns0:text x="513.10" y="575.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1547,8 +1552,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:51) (3 samples, 1.43%)</ns0:title><ns0:rect x="774.2" y="565" width="16.8" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
-<ns0:text x="777.19" y="575.5" />
+<ns0:title>_compute_values (pyperf/_worker.py:79) (192 samples, 91.43%)</ns0:title><ns0:rect x="105.5" y="613" width="1078.9" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<ns0:text x="108.52" y="623.5">_compute_values (pyperf/_worker.py:79)</ns0:text>
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1572,6 +1577,11 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:22) (2 samples, 0.95%)</ns0:title><ns0:rect x="527.0" y="565" width="11.2" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<ns0:text x="529.95" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>advance (&lt;nbody-advance&gt;:30) (1 samples, 0.48%)</ns0:title><ns0:rect x="577.5" y="565" width="5.6" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
 <ns0:text x="580.52" y="575.5" />
 </ns0:g>
@@ -1587,8 +1597,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:52) (3 samples, 1.43%)</ns0:title><ns0:rect x="791.0" y="565" width="16.9" height="15.0" fill="rgb(248,199,47)" rx="2" ry="2" />
-<ns0:text x="794.05" y="575.5" />
+<ns0:title>advance (&lt;nbody-advance&gt;:144) (2 samples, 0.95%)</ns0:title><ns0:rect x="459.5" y="565" width="11.3" height="15.0" fill="rgb(225,93,22)" rx="2" ry="2" />
+<ns0:text x="462.52" y="575.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1607,13 +1617,13 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:31) (1 samples, 0.48%)</ns0:title><ns0:rect x="583.1" y="565" width="5.7" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
-<ns0:text x="586.14" y="575.5" />
+<ns0:title>advance (&lt;nbody-advance&gt;:146) (2 samples, 0.95%)</ns0:title><ns0:rect x="470.8" y="565" width="11.2" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<ns0:text x="473.76" y="575.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:57) (3 samples, 1.43%)</ns0:title><ns0:rect x="819.1" y="565" width="16.9" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
-<ns0:text x="822.14" y="575.5" />
+<ns0:title>advance (&lt;nbody-advance&gt;:31) (1 samples, 0.48%)</ns0:title><ns0:rect x="583.1" y="565" width="5.7" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<ns0:text x="586.14" y="575.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1627,6 +1637,16 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:23) (2 samples, 0.95%)</ns0:title><ns0:rect x="538.2" y="565" width="11.2" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<ns0:text x="541.19" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:18) (2 samples, 0.95%)</ns0:title><ns0:rect x="515.7" y="565" width="11.3" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<ns0:text x="518.71" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>advance (&lt;nbody-advance&gt;:40) (5 samples, 2.38%)</ns0:title><ns0:rect x="678.7" y="565" width="28.1" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
 <ns0:text x="681.67" y="575.5">a..</ns0:text>
 </ns0:g>
@@ -1637,8 +1657,13 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>advance (&lt;nbody-advance&gt;:56) (2 samples, 0.95%)</ns0:title><ns0:rect x="807.9" y="565" width="11.2" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
-<ns0:text x="810.90" y="575.5" />
+<ns0:title>advance (&lt;nbody-advance&gt;:151) (1 samples, 0.48%)</ns0:title><ns0:rect x="498.9" y="565" width="5.6" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<ns0:text x="501.86" y="575.5" />
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:148) (3 samples, 1.43%)</ns0:title><ns0:rect x="482.0" y="565" width="16.9" height="15.0" fill="rgb(249,204,48)" rx="2" ry="2" />
+<ns0:text x="485.00" y="575.5" />
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1646,6 +1671,11 @@
 <ns0:text x="749.10" y="575.5" />
 </ns0:g>
 
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>advance (&lt;nbody-advance&gt;:152) (1 samples, 0.48%)</ns0:title><ns0:rect x="504.5" y="565" width="5.6" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<ns0:text x="507.48" y="575.5" />
+</ns0:g>
+
 </g></svg>
-<rect x="299.5" y="182.5" width="95.54" height="25.5" fill="none" stroke="#00779d" stroke-width="2"/>
+<rect x="447.2" y="99.2" width="95.5" height="25.5" fill="none" stroke="#00779d" stroke-width="2"/>
 </svg>

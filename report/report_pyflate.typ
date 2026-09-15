@@ -85,9 +85,10 @@ back end the Rust kernel replaces -- and inlined its move-to-front as `l.append(
 The few `readbits` and `move_to_front` samples left in the optimized profile come from
 block-header selector parsing in `compute_selectors_list`.
 
-The table aggregates every call site of a function; the figure's highlight percentages
-describe *one* outlined frame, which is why `find_next_symbol` reads 18.82% there and 40.86%
-here. Regenerate both from the same recorded SVGs the figures use with
+py-spy emits one frame per source line, so a function appears as several boxes side by side.
+The figure sums them, which is why its `find_next_symbol` label agrees with this table's
+40.86% inclusive rather than reporting the 18.82% of the single widest box it outlines.
+Regenerate both from the same recorded SVGs the figures use with
 `report/summarize_profiles.py`.
 
 *The table is the argument for what shipped.* In the stock profile the symbol loop and its
