@@ -108,4 +108,5 @@ elif command -v sha256sum >/dev/null 2>&1; then
 fi
 echo
 echo "The repository itself is the primary deliverable; this archive is for"
-echo "wherever a git URL is not accepted."
+echo "wherever a git URL is not accepted. git archive is deterministic, so"
+echo "rebuilding $REV gives this same digest."
