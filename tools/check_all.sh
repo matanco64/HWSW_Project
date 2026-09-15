@@ -71,6 +71,13 @@ else
     skip report-text-export "no report_*.txt in this checkout"
 fi
 
+# The reports teach with worked examples -- a Huffman lookup, a counting-sort BWT,
+# a move-to-front update, an RLE4 expansion, and an nbody pair update. This runs
+# them against the shipped functions, so an example cannot quietly drift away from
+# the code it claims to describe. Standard library only: it loads the functions
+# from their AST rather than importing the benchmarks.
+check report-examples "$PY" report/verify_examples.py
+
 echo
 echo "================ summary ================"
 # bash 3.2 treats an empty declared array as unset under `set -u`, so a run in
