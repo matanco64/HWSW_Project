@@ -39,15 +39,9 @@ affinity (Appendix A7). SD denotes sample standard deviation,
 not a confidence interval. Profiling is separate from timing; the shared appendix records
 methods and provenance.]
 
-The distributions behind those means are right-skewed and strongly grouped by worker
-process. Medians are 228.84 ms and 142.64 ms, with interquartile ranges of 3.09 ms and
-0.52 ms, so half of all values sit in a band under 1.4% wide, while a few slow workers push
-the stock maximum to 266.97 ms and its SD to 7.85 ms. Almost all of the variance is *between*
-workers rather than within them (ICC 0.99 and 0.93) even though every run was pinned to the
-same CPU, so the 120 values are effectively about 40 and 42 independent observations;
-Appendix A5 gives the full decomposition. The 1.62× ratio is far larger than that
-uncertainty, so the conclusion is unaffected -- but the naive standard error would overstate
-how much a small difference could be trusted.
+Worker processes account for much of the timing variation. Appendix A5 reports medians,
+interquartile ranges and uncertainty adjusted for worker clustering; the measured runtime
+reduction is much larger than the estimated uncertainty in either mean.
 #pagebreak()
 = 2. Profiling and optimization
 
@@ -73,21 +67,10 @@ establishes the optimization's benefit.
 The two grouped rows sum self time over `^(float_|PyFloat_)` and over
 `^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)` respectively.
 
-The named rows are the symbols that carry the self time, which perf records under their
-`.lto_priv` names. The figure below quotes each function's *total* inclusive share, summed
-over the per-line frames the profiler splits it into, so its labels match this table's
-inclusive column: 20.09% against 20.07% for generic arithmetic dispatch.
-`list_ass_item` is the one exception, 3.40% against 1.78%, because perf also emits a
-companion `(inlined)` entry holding an inclusive share with no self time and the flame graph
-carries that one. Both the table and the groups are regenerated from
-`results/perf_report_nbody_stock.txt` by `report/summarize_profiles.py`, which prints every
-contributing symbol.
-
-#figure(flamefig("fig/print_nbody_stock.svg", width: 100%),
-  caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
-  and enlarged. All original frames, widths and startup context are retained. Each label
-  gives the function's total inclusive share; the outlined box is the widest of the per-line
-  frames the profiler splits it into, and callers sit below it.])
+The figure labels give total inclusive shares across a function's recorded frames; the
+outline identifies one representative frame. The flat perf table and the SVG may differ
+slightly through rounding and inline attribution (`list_ass_item`: 1.78% self here,
+3.40% inclusive in the graph). Appendix A4/A6 records the extraction method.
 
 == Specialize the fixed schedule
 
@@ -99,19 +82,66 @@ afterwards, so energy reporting still observes the original body objects.
 This removes list subscripting from the generated step loop and avoids repeated pair
 unpacking. List operations remain at function entry and exit, amortized over 20,000 steps.
 
+== Before and after: the x update of one pair
+
+The following excerpts abbreviate the shipped transformation. The y/z operations and other
+pairs are omitted only from the illustration. `M0` and `M1` denote the numeric mass literals
+that the generator inserts; they are not new runtime lookups.
+
+#grid(columns: (1fr, 1fr), gutter: 12pt,
+  [*Stock: inside the pair loop*
+```python
+for (([x1, y1, z1], v1, m1),
+     ([x2, y2, z2], v2, m2)) in pairs:
+    dx = x1 - x2
+    # dy, dz and mag as below
+    b1m = m1 * mag
+    b2m = m2 * mag
+    v1[0] -= dx * b2m
+    v2[0] += dx * b1m
+```],
+  [*Generated: pair (0, 1)*
+```python
+dx = x0 - x1
+# dy, dz and mag as below
+b1m = M0 * mag
+b2m = M1 * mag
+ux0 -= dx * b2m
+ux1 += dx * b1m
+```])
+
+Both compute `mag = dt * ((dx*dx + dy*dy + dz*dz) ** (-1.5))` in the same order.
+The optimization removes repeated pair unpacking and list reads/writes, not the force
+calculation. Coordinates and velocities enter locals once per invocation; after all steps,
+the generator writes them back to the original lists. These are still Python float objects,
+so removing indexing does not remove all interpreter arithmetic or allocation costs.
+Source: `benchmarks/bm_nbody/run_benchmark.py`, `_advance_source`.
+
 *Correctness constrains the arithmetic.* The kernel retains `dt * (dsq ** -1.5)` and the
 stock pair-update order. A square-root/division replacement changes rounding and is not used
 in the exact software tier. The emitter accepts a body list and pair schedule, so the same
 transformation extends to larger systems.
 
 #pagebreak()
+== Reading the profiles
+
+#figure(flamefig("fig/print_nbody_stock.svg", width: 100%),
+  caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
+  and enlarged. All original frames, widths and startup context are retained. Each label
+  gives the function's total inclusive share; the outlined box is the widest of the per-line
+  frames the profiler splits it into, and callers sit below it.])
+
+#figure(flamefig("fig/print_nbody_opt.svg", width: 100%),
+  caption: [Full optimized Python-frame profile with the integration call path enlarged.
+  Integration remains the hotspot. Independent normalization does not display the absolute
+  runtime reduction from 231 to 143 ms.])
+
+#pagebreak()
 = 3. Native execution: less work, not higher IPC
 
-The Rust/PyO3 kernel stores state in a `System` object and executes all 20,000 steps through
-one `advance(dt, n)` call; both energy evaluations also run in Rust. On the tested VM build,
-state and energy also compare exactly equal
-to stock. This is evidence for the tested compiler, library and workload, not a portability
-guarantee for every floating-point build.
+The Rust/PyO3 `System` executes all 20,000 steps in one call, with both energy evaluations
+also native. State and energy match stock exactly on the tested VM build; this does not
+guarantee equality across all compilers and math libraries.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
@@ -119,22 +149,15 @@ guarantee for every floating-point build.
   [Native backend], [9.530 ± 0.050 ms], [*15.25×*],
 )
 
-Both rows come from the same pinned canonical run as the table in Section 1, preserved as
-`vm_canonical_20260910_2c8c754/suite/{fallback,native}_nbody.json` under `results/`.
-The separate kernel experiment (228.49 → 9.48 ms, 24.1×) compares native execution with
-*stock* Python. The table compares it with the already optimized Python implementation.
-Both the baseline and timing protocol must be specified when comparing these ratios.
-
-Backend selection is explicit: `HWSW_BACKEND=python|native|auto`. Native mode fails if the
-wheel is unavailable; auto mode falls back to Python. The benchmark appends the variable to
-pyperf's inherited environment itself, so the workers receive it even when the caller omits
-`--inherit-environ`; result metadata identifies what actually ran.
+Source: canonical `suite/{fallback,native}_nbody.json` (Appendix A7). Both use direct
+pyperf; Section 1 uses pyperformance. Against canonical stock, native is 24.26× faster.
+Different Python denominators prevent multiplying the two reported ratios. Explicit backend
+selection and worker metadata establish what ran; native mode fails if unavailable.
 
 == Matched-work CPU counters
 
-A separate warm-loop experiment repeats the same timed work 64 times per run on a fixed
-guest CPU. The table reports medians of three runs, normalized to one 20,000-step iteration.
-Counters exclude initialization and warmup; Appendix A2 documents gating and event validation.
+A separate pinned warm-loop experiment repeats the work 64 times per run. Medians of three
+runs are normalized per iteration, excluding setup/warmup (Appendix A2).
 
 #result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Metric per iteration*], [*Python*], [*Native*]),
@@ -148,34 +171,20 @@ Counters exclude initialization and warmup; Appendix A2 documents gating and eve
   [Generic cache misses (rate)], [59.6 (2.245%)], [2.5 (1.134%)],
 )
 
-*The main gain is 26.7× fewer instructions and 14.9× fewer cycles.* Compiled arithmetic
-avoids Python object handling and dispatch, removing most branches too. IPC actually falls:
-native execution retires fewer instructions per cycle, but needs far fewer instructions to
-finish. Higher IPC is not synonymous with a faster program.
+*Native needs 26.7× fewer instructions and 14.9× fewer cycles.* Removing Python dispatch
+and object handling reduces work. Lower IPC still yields faster execution because so many
+fewer instructions remain; IPC alone does not measure useful work.
 
-Generic cache misses are sparse in both runs, with fewer references and misses in native
-execution. Counts vary: Python records 59–94 misses per iteration and native 2–10 across
-the three runs. These small counts do not establish cache latency as the bottleneck.
-L1 events are omitted because an earlier capture returned invalid load counts.
+Cache misses are sparse and variable (Python 59–94, native 2–10 per iteration across three
+runs); they do not establish a cache bottleneck. Invalid L1 load counts are omitted.
 
-#pagebreak()
 = 4. What changes when N grows?
 
-#figure(flamefig("fig/print_nbody_opt.svg", width: 100%),
-  caption: [Full optimized Python-frame profile with the integration call path enlarged.
-  Integration remains the hotspot. Independent normalization does not display the absolute
-  runtime reduction from 231 to 143 ms.])
-
-At five bodies, Barnes-Hut is *3.92× slower* than direct force evaluation on the VM.
-Tree construction and traversal do not pay off for ten pairs. Development experiments also
-found that struct-of-arrays and NumPy lose at this size (`dev/nbody/FINDINGS.md`). FMM was
-not benchmarked, so no measured FMM speedup or lower bound is claimed.
-
-The `--bodies N` extension adds deterministic outer orbits while preserving the five-body
-default. Source generation grows as O(N²), increasing compilation time and memory use.
-The shipped implementation falls back to a rolled loop above 20,000 pairs.
-Detailed unrolling and local-slot experiments used *WSL2 / CPython 3.10.21*; their timings
-and memory limits are development observations, not VM results.
+At five bodies, Barnes-Hut is *3.92× slower*: tree setup/traversal does not pay off for ten
+pairs. Development NumPy and struct-of-arrays variants also lose at this size; FMM was not
+measured. Unrolled source grows as O(N²), so the shipped generator falls back to a rolled
+loop above 20,000 pairs. Detailed code-size experiments are WSL2/CPython 3.10.21 development
+evidence, distinct from the VM sweep below (`dev/nbody/FINDINGS.md`).
 
 The VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each evaluation
 (θ = 0.5, best of seven). It evaluates an extended workload, not the required N = 5 benchmark.
@@ -189,10 +198,9 @@ The VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each e
   [1,600], [1,254.660 ms], [382.471 ms], [0.30×], [1.8e-4],
 )
 
-The crossover is near N = 300 for this distribution. Median relative acceleration error is
-not a worst-case or trajectory-error bound. The separate VM native sweep gives 21–22× over
-rolled Python from N = 100 to 3,200. Step counts approximately equalize pair-updates, with
-integer rounding increasing work at the final row. Both sweeps are in `results/bigN_sweep.txt`.
+The crossover is near N = 300 for this distribution; median acceleration error is not a
+worst-case or trajectory bound. A separate VM native sweep gives 21–22× over rolled Python
+at N = 100–3,200, using approximately equal pair-update counts (`results/bigN_sweep.txt`).
 
 #pagebreak()
 = 5. Hardware acceleration: current design
@@ -213,20 +221,67 @@ sequencer resolves body-component dependencies before positions are updated and 
 *Interface.* A 32-bit AXI4-Lite slave exposes FP64 body state and `DT`, 32-bit `NSTEPS`,
 pair configuration, control/status, counters and IRQ. Software loads state and parameters,
 starts one request, waits, then reads state. There is no per-step DMA or Python call.
-The Rust object demonstrates this boundary; it is not a completed hardware driver.
+A register-level driver model implements this protocol and is checked against the register
+map. It is not a deployed device driver or evidence of a physical CPU/accelerator run.
+
+== Dependencies determine the schedule
+
+Pairs (0, 1) and (0, 2) can form their distance terms from the same step's positions, but
+both update body 0's velocity. Its x lane must compute
+`u0a = u0 - dx01*b1m`, then `u0b = u0a - dx02*b2m`; issuing both against the old `u0`
+would lose an update. Regrouping them into one subtraction may also change FP64 rounding.
+Different body-component lanes can progress independently; a scoreboard and ordered issue
+logic wait for each lane's preceding result. Positions update only after their required
+velocity contributions, and the next step uses the committed positions.
+
+#figure(image("fig/pair_dependency.svg", width: 100%),
+  caption: [Illustrative dependency chain for body 0's x velocity. Force terms may be
+  prepared independently, while the two rounded velocity updates remain ordered.])
+
+#pagebreak()
+== Verification and physical cost
 
 #result-table(columns: (1fr, 2fr),
-  table.header([*Evidence / target*], [*Current status*]),
-  [Step schedule model], [123 cycles nominal; 127 at modeled latency corners],
-  [Clock target], [50 MHz minimum; final timing/PPA not yet established],
-  [Conditional execution time], [49.2–50.8 ms for 20,000 steps at 50 MHz, before interface overhead],
-  [RTL and verification], [Synthesis and directed bring-up recorded; full coverage, sign-off and integration remain open],
+  table.header([*Evidence*], [*Result and scope*]),
+  [Full-benchmark RTL simulation], [124 cycles/step; 2,480,000 cycles over 20,000 steps;
+    zero mismatches against the hardware arithmetic model],
+  [Recorded regression], [9/9 tests on Verilator and Icarus after the prefix rewrite;
+    numerical checks against stock use tolerances],
+  [Architectural clock target], [50 MHz; 49.6 ms compute time if achieved],
+  [Latest post-CTS timing], [≈ 19.46 MHz, typical corner, `grape_prefix2` (2026-09-14);
+    ≈ 127.4 ms computed execution time],
+  [Physical completion / power], [No completed routed sign-off or GDS; no workload power result],
 )
 
-At that design point, modeled execution is about 4.6× faster than stock Python and 2.9×
-faster than optimized Python, but *slower than the 9.53 ms native implementation*.
-More units, a higher achieved clock, or reduced precision require measured area/timing
-trade-offs. No measured power advantage is claimed.
+The schedule predicted 123–127 cycles/step; RTL measured 124. Clock-tree synthesis (CTS)
+adds the clock distribution network, so post-CTS static timing includes a placed clock tree,
+but is still a preliminary timing estimate rather than measured silicon performance.
+The 19.46 MHz estimate derives from a 150 ns constraint and +98.6212 ns setup slack.
+The design has not demonstrated the 50 MHz target.
+
+#result-table(columns: (1.6fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*Recorded architecture*], [*Mapped cell area*], [*Cycles/step*]),
+  [One-wide accumulation, one-port RF], [2.938 mm²], [162],
+  [Three-wide accumulation, three-port RF], [4.075 mm²], [124],
+)
+
+The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%.
+These sky130 synthesis areas describe the recorded pre-prefix design points; they are not a
+new area measurement for `grape_prefix2`. The subsequent prefix rewrite replaces a roughly
+60-deep issue-selection scan with balanced trees, preserving 124 cycles/step while improving
+the post-CTS frequency estimate from 11.15 to 19.46 MHz. The critical path moved from the
+accumulate-adder selection to the integrate-multiplier operand path. More parallelism can
+reduce cycles while adding selection, forwarding and wiring cost that limits the clock.
+
+*End-to-end estimate.* Use `Tnew = Tremaining + cycles / frequency + Tinterface`.
+At 19.46 MHz, compute alone is 127.4 ms: its ratios against 231.20 ms stock and 143.13 ms
+optimized Python are upper bounds of about 1.81× and 1.12× before residual work and overhead.
+For illustration, retaining 1–5% of stock runtime gives about 1.65–1.78× before interface
+cost. That residual range is a sensitivity assumption, not a matched phase measurement.
+The register protocol estimates roughly 150 AXI-Lite transactions per invocation; real host
+software and interconnect latency remain unmeasured. Even the 50 MHz target's 49.6 ms is
+slower than the 9.53 ms native software. No energy-efficiency advantage follows without
+workload power and complete system measurements.
 
 The hardware's square-root/reciprocal expression differs from stock `pow`. RTL is checked
 against its own arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12
@@ -238,9 +293,10 @@ are distinct from the software tier's observed exact equality.
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state
 and energy exactly. Native execution removes more interpreter work through the same coarse
 interface. The hardware design implements that boundary, but its benefit over native software
-depends on achieving a better latency/area point than the current model.
+requires substantially better clock/latency results than demonstrated so far. The measured
+cycle/area trade-off and preliminary physical timing explain why a fast schedule alone is insufficient.
 
 #text(size: 9pt)[*Evidence:* `hw/grape_pipeline/docs/uarch.md`, `prd.md`,
-`testplan.md`, and `hw/PROGRESS.md` (status recorded 2026-09-05).
+`testplan.md`, `ppa.md` (including the 2026-09-14 addendum), and `integration.md`.
 Reproduction and supporting profiles: *report_appendix.pdf*.
 Repository: #link("https://github.com/matanco64/HWSW_Project")[HWSW_Project].]

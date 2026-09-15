@@ -17,94 +17,49 @@ to calculate ratios, rather than rounded display values.
   [Pyflate all tiers], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_pyflate.json`],
 )
 
-Both benchmarks' configurations come from one canonical run of revision 2c8c754 through the
-documented runner scripts, every timed run pinned to guest CPU 0; each JSON records its back
-end, the request its workers saw and its CPU affinity (A7). Stock/optimized and Python/native
-remain separate pairs within that run, so their ratios do not multiply exactly into the
-stock/native ratio. Earlier captures are kept for comparison: nbody's `baseline_nbody.json`
-and `optimized_nbody.json`, which lack backend metadata, `vm_rerun_20260907/`, and pyflate's
-pinned three-tier `vm_release_20260907/`, whose extension and counter evidence A2 still uses.
-
-*Development evidence is labeled separately.* Pyflate's cProfile figures and the ablation's
-development column come from Windows / CPython 3.12.6; the ablation's two VM trials are
-course-VM measurements (A7). Nbody's detailed unrolling sweep and pyflate's older 25× native
-kernel example come from WSL2 / CPython 3.10.21. Different machines, interpreters and
-estimators prevent using these absolute timings as VM results. Likewise, a paired median
-speedup need not equal the ratio of two independently reported minimum times. Bytecode counts
-collected with `sys.monitoring` also depend on the CPython version and counting workload;
-they are not portable instruction counts for the VM's interpreter.
+Stock/optimized use pyperformance; fallback/native use direct pyperf on the optimized
+benchmark. These are different pairs, so their ratios must not be multiplied as one paired
+experiment. A7 maps backend, affinity and binary metadata to the canonical run. Development
+hosts, older captures and revision history are documented in `report/history/`.
 
 == Reproducing the comparisons
 
-From the repository root, compare saved data without changing it:
+From the repository root, compare the preserved data:
 ```sh
-python3 -m pyperf compare_to results/vm_canonical_20260910_2c8c754/suite/baseline_nbody.json \
-    results/vm_canonical_20260910_2c8c754/suite/optimized_nbody.json
-python3 -m pyperf compare_to results/vm_canonical_20260910_2c8c754/suite/fallback_pyflate.json \
-    results/vm_canonical_20260910_2c8c754/suite/native_pyflate.json
+suite=results/vm_canonical_20260910_2c8c754/suite
+python3 -m pyperf compare_to "$suite/baseline_nbody.json" \
+    "$suite/optimized_nbody.json"
+python3 -m pyperf compare_to "$suite/fallback_pyflate.json" \
+    "$suite/native_pyflate.json"
 ```
 
-For fresh native/Python comparisons, build and install the extension first, then run both
-back ends against it:
+The root benchmark scripts provide the complete workflow (`README.md`). For a fresh
+pinned native comparison on the prepared course VM:
 ```sh
 ./tools/build_wheel.sh nbody --record /tmp/nbody-wheel.json
-HWSW_BACKEND=python python3 benchmarks/bm_nbody/run_benchmark.py \
-    --rigorous --inherit-environ HWSW_BACKEND -o /tmp/nbody-python.json
-HWSW_BACKEND=native python3 benchmarks/bm_nbody/run_benchmark.py \
+HWSW_BACKEND=native taskset -c 0 \
+    python3 benchmarks/bm_nbody/run_benchmark.py \
     --rigorous --inherit-environ HWSW_BACKEND -o /tmp/nbody-native.json
 ```
+Repeat with `HWSW_BACKEND=python` and a fresh filename; use `pyflate` / `bm_pyflate`
+for decompression. `build_wheel.sh` installs the exact newly built wheel and records source,
+module and wheel hashes. Direct pyperf uses the interpreter containing that extension;
+pyperformance manages a separate environment. Native mode fails if the extension is missing.
+The runner validates worker backend requests, actual backend and CPU affinity in each JSON.
 
-*Build and install must name the same file.* `maturin build --release` writes to
-`target/wheels/`, while `rust/<crate>/wheels/` holds the prebuilt wheel committed for the
-course VM; both are version `0.1.0`, so `pip install wheels/*.whl` after a fresh build
-silently installs the saved binary instead of what was just compiled, and every number
-downstream then describes the saved binary. `tools/build_wheel.sh` builds into an empty
-directory, requires exactly one wheel to appear there, installs that path, and records what
-Python subsequently imported -- module path, module SHA-256, wheel SHA-256, crate source
-hashes and toolchain versions.
+== Correctness contracts
 
-Use new output names for each experiment. Repeat with `bm_pyflate` for decompression.
-`pyperformance run` creates its own environment; direct benchmark execution avoids assuming
-that environment contains the extension wheels. Native mode fails when a wheel is unavailable.
-The runner scripts at the repository root provide the full stock/optimized workflow; they
-write to a fresh `results/runs/<UTC stamp>_<bench>/` directory so a rerun cannot overwrite
-the preserved captures this appendix cites.
+- *Nbody shipped Python and native:* compare all state components and energy against stock
+  after identical initial conditions and 20,000 steps. `dev/nbody/verify.py` gates the landed
+  kernel on exact equality; its development tiers use tolerances.
+  `dev/nbody/rs_check.py` defaults to the exact contract.
+- *Nbody hardware:* compare RTL with its own arithmetic model, then compare stock using the
+  declared energy and position/velocity tolerances. Exact and tolerance verdicts are separate.
+- *Pyflate:* `dev/pyflate/rs_check.py` checks output bytes against `bz2.decompress`, MD5,
+  intermediate L-vector and ending bit position. Output validation is outside headline timing.
 
-*Back-end selection is enforced in three places, not requested in one.* Each
-`run_benchmark.py` appends `HWSW_BACKEND` to pyperf's inherited environment after parsing
-its arguments, so worker processes receive it even when the caller omits
-`--inherit-environ` -- which `pyperformance run` gives no way to supply. Every measured and
-profiled invocation in the runners is pinned, including `perf record`, `py-spy` and
-`perf stat` on both the stock and optimized sides. Finally the `native` stage asserts, on
-each JSON it produced, both the back end that ran (`hwsw_backend`) and the request the
-workers actually saw (`hwsw_backend_requested`), so a run whose environment never reached
-the workers fails even if the fallback happened to choose the right path. Result metadata
-also records the loaded extension's path and SHA-256, because a crate version alone does
-not distinguish two builds.
-
-== Correctness
-
-Nbody comparisons check all state components and energy after the same initial conditions and
-20,000 steps. Exact `==` is the observed result for the shipped Python and native kernels;
-a tolerance pass alone does not establish equality, and numerical equality is not a general
-byte-representation test (for example, signed zeros). Pyflate checks the decoded bytes against
-`bz2.decompress`, the original MD5, the intermediate L-vector and the ending bit position.
-
-*Exact and tolerance results are separate verdicts, and the declared contract decides the
-exit status.* The two claims are different, so collapsing them would let a rounding-changing
-edit pass a checker while the reports still claimed equality.
-
-#result-table(columns: (1.3fr, 1fr, 1.6fr),
-  table.header([*Checker*], [*Contract*], [*Failure behaviour*]),
-  [`dev/nbody/verify.py` tiers], [Tolerance], [T3's sqrt variants reorder arithmetic
-    deliberately; scored against the stated thresholds.],
-  [`dev/nbody/verify.py` landed benchmark], [Exact], [Nonzero exit unless bit-identical to
-    stock; the tolerance verdict is still printed.],
-  [`dev/nbody/rs_check.py`], [Exact (default)], [Nonzero exit unless bit-identical.
-    `--tolerance` moves the gate and says so in the output.],
-  [`dev/pyflate/rs_check.py`], [Byte-exact], [Nonzero exit unless the L-vector, ending bit
-    position, output bytes and MD5 all match.],
-)
+Equality is specific to the tested inputs and build. Numerical equality differs from byte
+identity for signed zeros; consult each checker’s selected contract and output log.
 
 #pagebreak()
 = A2. Matched Python/native CPU counters
@@ -191,100 +146,44 @@ The L-vector contains 336,184 bytes; `T` is a Python list of indices, whose list
 integer objects add memory. The final 399,360-byte output size is not the traversal table size.
 Whole BWT includes substantial table-construction work as well as the dependent traversal.
 
-== PMU and profiling configuration
+*PMU configuration.* Event passes use at most four counters and validate counts and
+running time. On the tested VM, fixed-period cycle sampling and software cpu-clock sampling
+worked where frequency-mode cycle sampling returned zero samples. Debug-build C stacks use
+DWARF unwinding; py-spy separately provides Python frames. These are observed configuration
+limits, not universal KVM properties. Recheck the sample-rate setting after tuning/reboot.
+To test a native BWT memory bottleneck, isolate its measured region and sweep working-set
+size; the present whole-process counters do not establish one.
 
-- *Counting:* the VM experiments observed usable cycle/instruction counts and zeros when
-  too many hardware events were requested together. Scripts split events into passes of
-  at most four. Check actual counts and enabled/running time rather than assuming multiplexing.
-- *Sampling:* tested `cycles -F` invocations produced zero samples, whereas fixed-period
-  `cycles -c` and software `cpu-clock` sampling worked. The experiment demonstrates a
-  working configuration; it does not establish the kernel's internal cause or a universal
-  KVM limitation. Core and reference cycles are distinct events even when counts are close.
-- *Call chains:* `--call-graph dwarf,16384` produced usable debug-build stacks where
-  frame-pointer unwinding failed. Debug-build profiles describe that build's costs and are
-  not used as release timings. Python-frame sampling uses py-spy separately.
-- *Sample rate:* check `perf_event_max_sample_rate` after system tuning. A rate of 1 Hz
-  was observed in the tuned setup and suppresses useful profiles. Do not assume it persists
-  after a reboot or is the default on another machine.
+= A4. Full profiles and attribution
 
-#text(size: 9.5pt)[Example counter command (whole-process scope):]
-```sh
-HWSW_BACKEND=native perf stat \
-    -e cycles:u,instructions:u,cache-references,cache-misses -- \
-    python3 dev/pyflate/phase_cpi.py --phase chase --repeat 30
-```
+The recorded profiles are from revision 08da63e on 10 September; its benchmark sources
+match timing revision 2c8c754 (`results/profiles_20260910_08da63e/provenance.json`).
+`report/make_figures.py` preserves all recorded frame geometry, startup and harness context
+in each overview. The updated detail panels retain row-aligned crops with callers below the
+selected frame. Labels aggregate a function's inclusive share across its frames; outlines
+mark the widest individual occurrence. `report/fig/profile_counts.json` preserves both.
 
-To establish a native BWT memory bottleneck, measure a native implementation, isolate or
-subtract setup with a justified method, and sweep working-set size. The current counters
-are insufficient for a measured SRAM-versus-DRAM accelerator comparison.
-
-#pagebreak()
-= A4. Full profiles and release verification
-
-The reports show full original flame graphs beside enlarged context crops. Every cited profile was recorded on 10 September through the documented `profile` stage from revision 08da63e, whose benchmark sources are byte-identical to the timing revision 2c8c754 (`profiles_20260910_08da63e/provenance.json`).
-`report/make_figures.py` copies every recorded frame rectangle at its original coordinates;
-it does not merge functions, filter startup, cap stack depth or renormalize widths. Numbered
-outlines mark the same frame in the overview and its detail crop. Selected-frame titles,
-coordinates, sample weights and source filenames are recorded in `report/fig/profile_counts.json`.
-
-Stock nbody uses the C-frame debug profile to expose interpreter operations. Optimized nbody
-and both pyflate figures use Python-frame py-spy profiles. The tall C graph needs a small
-overview to retain its complete context; the enlarged regions carry readable local detail.
-Original SVGs in `results/` remain available for arbitrary zoom and inspection.
-
-Widths show *inclusive* samples for a call path, relative to the original whole profile.
-The C graph's weights sum sampled event periods, not a count of individual interrupts.
-A function may appear at several locations; the highlighted occurrence is not its aggregate
-self time. Children overlap their parents, so widths on different rows must not be added.
-Independent graphs are independently normalized: a narrower-looking stack is not evidence
-of an absolute speedup. Python-frame views have only a few hundred samples and are used to
-locate work, not resolve small percentage differences.
-
-Older trimmed views in `results/` remove startup or cap stack depth. The reports use the
-`*_full.svg` originals, including the four C-level `flame_{nbody,pyflate}_{stock,opt}_full.svg`
-profiles. Flat self-time evidence is in `perf_report_*.txt`; headline timings come from JSON.
-
-== VM correctness checks, 2026-09-07
-
-Nbody's shipped Python kernel and its Rust kernel matched stock state and energy exactly
-after 20,000 steps. Pyflate's Python and hybrid outputs matched `bz2`; the L-vector and
-ending bit position matched too. Benchmark and checker source hashes matched the local copies.
-
-== Fresh VM rerun
-
-The four earlier rerun JSONs are preserved in `results/vm_rerun_20260907/`. Each contains
-*120 measured values from 40 workers*, with the expected backend metadata. A rigorous job
-already contains multiple workers and values; these runs have the same sample count as the
-older headline files. Benchmark source hashes match this checkout. These pyflate measurements
-used the previously installed extension, before the refactored source was rebuilt.
-
-#result-table(columns: (1fr, 1.5fr, 1.5fr, 0.7fr), align: (left, right, right, right),
-  table.header([*Earlier VM rerun*], [*Python mean ± SD*], [*Native mean ± SD*], [*Ratio*]),
-  [Nbody], [142.19 ± 4.48 ms], [9.477 ± 0.030 ms], [15.00×],
-  [Pyflate], [285.64 ± 3.04 ms], [171.89 ± 2.20 ms], [1.66×],
-)
-
-The nbody headline has since moved to the pinned canonical run in A7; this rerun remains
-a cross-check. Pyflate's headline was then taken from the three-tier experiment in
-`vm_release_20260907/`, and has since moved to the canonical run too; that experiment builds
-the crate with
-`cargo build --locked --release` for CPython 3.10.12. Ten Rust tests and seven blocks
-across five fixtures pass; both decode APIs, traces and exact ending offsets are checked.
-The isolated build is selected through inherited `PYTHONPATH`; installed wheels and the
-existing VM checkout remain intact. `report/summarize_refresh.py` validates source hashes,
-backend metadata and sample counts. Independent captures are retained separately.
+Stock nbody uses debug-CPython C frames; optimized nbody and both pyflate figures use
+Python-frame py-spy sampling. The original SVGs remain in `results/` for zooming.
+Widths represent inclusive samples on a call path; parents include children and must not
+be added to them. Each graph has its own denominator, so widths cannot show absolute
+before/after speedup. C-profile weights sum event periods; Python-frame graphs contain only
+a few hundred samples. Both locate work rather than resolve small percentage differences.
+The sampled pyflate offload fraction is not precise enough to explain its native speedup
+through Amdahl's law without matched phase timing.
 
 #pagebreak()
 = A5. Timing distributions and worker clustering
 
-`mean ± SD` describes a symmetric spread of independent observations. Neither assumption
-holds exactly here, and the table below says by how much. It is produced from the same
-result JSONs, without re-timing anything:
+`mean ± SD` describes the observed mean and spread; it does not require symmetry or
+independence and is not a confidence interval. Skew affects how representative that summary
+is, while worker correlation affects uncertainty in the mean. The same result JSONs give:
 
 ```sh
+suite=results/vm_canonical_20260910_2c8c754/suite
 python3 report/summarize_distribution.py \
-    results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_nbody.json \
-    results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_pyflate.json
+    "$suite"/{baseline,optimized,fallback,native}_nbody.json \
+    "$suite"/{baseline,optimized,fallback,native}_pyflate.json
 ```
 
 *Shape.* Every distribution except nbody's native run and pyflate's Python back end is
@@ -325,8 +224,8 @@ fallback_pyflate      0.000     3.368   0.000    1.00    0.3053    0.3053
 native_pyflate        1.011     2.065   0.193    1.39    0.2095    0.2468
 ```
 
-All figures in ms. `SE naive` treats the 120 values as independent; `SE clust` is the honest
-standard error. Effective sample size is 120 / deff: 40.2 and 41.8 for nbody's stock and
+SD and SE columns are in ms; ICC and deff are dimensionless. `SE naive` treats the
+120 values as independent; `SE clust` adjusts for worker clustering under this model. Effective sample size is 120 / deff: 40.2 and 41.8 for nbody's stock and
 optimized runs, 55.1 and 120.0 for its Python and native runs, and 61.0, 78.4, 120.0 and
 86.5 for pyflate's stock, optimized, Python and native runs.
 
@@ -338,103 +237,37 @@ placement is not what separates workers; these data do not identify what does. N
 pyflate's Python back end show no detectable worker effect, and pyflate's other runs are
 milder than nbody's (ICC 0.19 to 0.48).
 
-*What this does and does not change.* Every reported speedup is one to two orders of
-magnitude larger than the corrected standard errors, so no headline conclusion moves. What
-it does change is the reading of small differences: a gap of a few tenths of a millisecond
-between two nbody configurations is not resolvable at this sample size, whatever the naive
-SD suggests. An ICC of zero means no detectable worker effect, not identical workers. Three
-values per worker is a small basis for an ICC estimate; these figures describe these
-runs and are not offered as properties of the guest.
+*Interpretation.* The runtime reductions are much larger than the estimated standard errors
+of the corresponding means. Small differences need a comparison-specific uncertainty
+estimate, ideally resampling worker groups; a dimensionless speedup cannot be compared
+directly with an SE in milliseconds. An ICC estimate of zero means no detected worker
+effect. The design-effect calculation assumes independent workers and a shared within-worker
+correlation; it does not account for all possible VM drift or provide a universal effective
+sample size.
 
 #pagebreak()
 = A6. Flat function tables
 
-Flame graphs show where time goes but are a poor place to read a number off: every width is
-inclusive of children, one function may appear on several call paths, and print crops can
-clip labels. `report/summarize_profiles.py` produces the companion table, with both
-percentages named, from the same recorded files the figures use:
-
+`report/summarize_profiles.py` aggregates functions across recorded call sites and prints
+self and inclusive shares separately. For perf it reads the Children/Self columns; for
+py-spy it subtracts child samples from each frame to obtain self samples, then aggregates
+by function/file. The nbody grouped self shares are 11.26% for list/index access and 16.25%
+for float handling, using the patterns printed in the report. Inline attribution and
+rounding can make SVG totals differ slightly from flat perf values.
 ```sh
 python3 report/summarize_profiles.py --top 10
-python3 report/summarize_profiles.py --only perf_report_nbody_stock.txt \
-    --group 'list access=^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)'
 ```
+Outputs: `results/profile_functions.txt`, `results/timing_distributions.txt` and their
+JSON companions in `report/fig/`.
 
-The two profile kinds are read differently because they record different things. For
-`perf report --stdio` the *Children* and *Self* columns are read directly. For a py-spy
-flame graph, inclusive time is a frame's own sample count and self time is that count minus
-the counts of the frames stacked directly on it; frames are aggregated per function and
-file, since py-spy labels each frame with whichever line was executing.
+== Text companions
 
-Prose that adds up a family of symbols must quote a number this prints, together with the
-pattern it came from. An earlier draft of the nbody report gave 14.4% for list access; the
-recorded profile yields *11.26%* over
-`^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)`, and float object handling is the
-larger group at 16.25% over `^(float_|PyFloat_)`. The tool lists every contributing symbol
-so the sum can be checked. Summing self time across perf rows is correct even though perf
-emits some symbols twice -- an `(inlined)` entry carries inclusive time and zero self, and
-separate entries for one symbol are separate contributions; the self column over a whole
-report sums to within half a percent of 100%, which is the check.
+The build compiles the same prose and tables into a text edition with flame graphs replaced
+by pointers to the PDF. It selects the installed extractor's table-preserving mode, then
+`report/check_txt_tables.py` verifies UTF-8 and that each checked row retains its values.
+The historical exporter issues are documented in `report/history/`.
 
-Saved outputs: `results/timing_distributions.txt`, `results/profile_functions.txt`, and the
-machine-readable `report/fig/timing_distributions.json` and
-`report/fig/profile_functions.json`.
-
-== A note on the text companions
-
-The `.txt` files beside each PDF are produced by `pdftotext`, which reconstructs rows from
-glyph positions, and the result depends on the implementation. Companions built with
-poppler's `-layout` were intact. Rebuilding with xpdf's `pdftotext` 4.00 `-layout` shifted
-values by one row in several tables -- an ablation table's costs, a headline table, two
-counter tables -- while the PDF stayed correct. The same rebuild exported Typst's italic math
-letters as bytes that are not valid UTF-8 and dropped a display fraction's denominator, so
-formulas are set as code instead.
-
-The builds now use `-table` where the installed `pdftotext` provides it (xpdf) and `-layout`
-otherwise, and `report/check_txt_tables.py` gates the result. For every table row in every
-`report_*.typ`, the label must be followed by that row's own values, in order, before the
-next row's label appears; a companion that is not valid UTF-8 is rejected.
-
-#pagebreak()
 = A7. VM verification of the delivered route
-
-== Full route, unpinned (revision 3697a63)
-
-An isolated `git archive` copy of revision 3697a63 ran on the course VM through
-`tools/vm_run_all.sh nbody pyflate`: setup, then baseline, profile, optimized, compare, wheel
-and native for each benchmark. All 13 stages succeeded. The installed extensions (SHA-256
-`a0a259f8...` for nbody, `da10776d...` for pyflate) were copied aside first. The wheel stage
-then built both crates from the uploaded source, installed them with `sudo` rather than
-through pip's silent user-site fallback, and confirmed that the imported extension is the one
-inside each new wheel (`820d20ec...` and `be6a477a...`). Every fallback and native JSON records
-the requested back end, the back end that ran, and that extension hash.
-
-#result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr, 0.9fr),
-  align: (left, right, right, right, right),
-  table.header([*Comparison*], [*Before (ms)*], [*After (ms)*], [*Rerun*], [*Earlier*]),
-  [Nbody stock / optimized], [229.95], [144.60], [1.59×], [1.64×],
-  [Nbody Python / native], [143.53], [9.467], [15.16×], [15.00×],
-  [Pyflate stock / optimized], [1,128.76], [279.11], [4.04×], [3.92×],
-  [Pyflate Python / native], [283.02], [168.92], [1.68×], [1.66×],
-  [Pyflate stock / native], [1,128.76], [168.92], [6.68×], [6.51×],
-)
-
-These timings were not pinned to a CPU -- pinning was added to the scripts after this run --
-and the earlier column is the headline before the canonical run below, taken in separate
-experiments, so the table shows
-reproduction rather than a matched comparison. Both nbody ratios reproduce within 3%.
-Pyflate's optimized Python tier ran 3% faster than its preserved pinned measurement, which
-raises the pyflate ratios slightly; no conclusion changes.
-
-*Correctness on the same host.* `dev/nbody/rs_check.py` held the exact contract against the
-new nbody wheel, and `dev/pyflate/rs_check.py` the byte-exact one against the new pyflate
-wheel. `verify.py --bodies 5,10,20` failed: with `nbody_rs` installed, the landed benchmark
-imported in native mode and left its five-body `advance()` bound, and the oracle called that
-kernel on ten bodies. Revision 79a0d12 pins the Python back end while loading, and on the same
-host and wheel it is bit-exact at every N. Revision 2c8c754 also rebinds `advance()` in native
-mode, so no caller can reach the stale kernel. The two VM ablation trials in the pyflate
-report were taken in the same session. Raw output, without profiles or perf captures:
-`results/vm_rerun_20260910_3697a63/`.
 
 == Canonical pinned run (revision 2c8c754)
 
@@ -448,23 +281,32 @@ optimized, Python and native JSONs also record the requested and actual back end
 native JSONs the extension hash, which matches the wheel built in the same run.
 `tools/check_all.sh --require-native` then passed all six checks, none skipped.
 
-#result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr, 0.9fr),
-  align: (left, right, right, right, right),
-  table.header([*Comparison*], [*Before (ms)*], [*After (ms)*], [*Canonical*], [*Earlier*]),
-  [Nbody stock / optimized], [231.20], [143.13], [1.62×], [1.64×],
-  [Nbody Python / native], [145.30], [9.530], [15.25×], [15.00×],
-  [Pyflate stock / optimized], [1,123.49], [281.16], [4.00×], [3.92×],
-  [Pyflate Python / native], [283.88], [170.01], [1.67×], [1.66×],
-  [Pyflate stock / native], [1,123.49], [170.01], [6.61×], [6.51×],
+#result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr),
+  align: (left, right, right, right),
+  table.header([*Comparison*], [*Before (ms)*], [*After (ms)*], [*Speedup*]),
+  [Nbody stock / optimized], [231.20], [143.13], [1.62×],
+  [Nbody Python / native], [145.30], [9.530], [15.25×],
+  [Pyflate stock / optimized], [1,123.49], [281.16], [4.00×],
+  [Pyflate Python / native], [283.88], [170.01], [1.67×],
+  [Pyflate stock / native], [1,123.49], [170.01], [6.61×],
 )
 
-The earlier column is the headline before this run: the 30 August nbody stock/optimized pair,
-the 7 September nbody rerun and pyflate's `vm_release_20260907/` capture. The reports now quote this run for both benchmarks: the nbody pair it replaces
-lacked back-end, request and affinity metadata, and moving pyflate too puts every quoted ratio
-on one revision and one route. Pyflate's earlier pinned capture agrees within 2% on every
-ratio. The wheels measured here replace the committed ones under
-`rust/<crate>/wheels/`, each with a `PROVENANCE.json`. Evidence:
-`results/vm_canonical_20260910_2c8c754/`.
+Every native JSON identifies the binary installed from the wheel built in that run;
+`rust/<crate>/wheels/PROVENANCE.json` accompanies each preserved wheel. Earlier captures
+remain as cross-checks in their original directories, with history in `report/history/`.
+This report revision reuses those measurements and introduces no new benchmark timing.
+
+== Hardware evidence map
+
+`hw/grape_pipeline/docs/ppa.md` contains the September 14 prefix-rewrite timing addendum;
+its older synthesis-area table describes the earlier architecture. The nbody report keeps
+these revisions separate. `hw/huffman_engine/docs/ppa.md` records pre-placement timing,
+while `hw/mtf_cam/docs/ppa.md` records post-CTS timing and default-activity power. None is a
+completed routed sign-off or a physical system benchmark. MTF integration records 158,441
+RTL cycles; the W-sweep's 157,560-cycle default is a model result. The reports label both.
+Platform DMA and host overhead, combined-chain throughput, and energy savings remain
+unmeasured. The worked software examples are checked by `report/verify_examples.py`;
+defense questions and an evidence map are in `report/defense_guide.md`.
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
