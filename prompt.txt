@@ -1836,3 +1836,6 @@ remote: error: GH001: Large files detected. You may want to try Git Large File S
 To https://github.com/matanco64/HWSW_Project.git
  ! [remote rejected] main -> main (pre-receive hook declined)
 error: failed to push some refs to 'https://github.com/matanco64/HWSW_Project.git'"
+
+2026-09-15T14:42:25Z — Claude Code session (auto-logged)
+Prompt: "lets first fix the flame graphs, after that restore the hardware section for pyflate, but try to save your context in some way first so you won't forget important stuff about pyflate when returning to it"

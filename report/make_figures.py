@@ -33,19 +33,59 @@ def flame(source, target, highlights):
                            w=float(rect.get('width')), h=float(rect.get('height')),
                            weight=int(match[2].replace(',', '')), share=float(match[3]),
                            element=ET.tostring(group, encoding='unicode')))
+    # A function is one box per *source line* in py-spy's output, so the widest
+    # box is not the function's share: optimised nbody's generated advance() is
+    # 95 boxes totalling 91.6%, of which the widest is 4.76%. Quote the total and
+    # outline the widest box for orientation. `topmost` drops boxes nested inside
+    # another box of the same name, so recursion is not counted twice; the result
+    # matches summarize_profiles.py's inclusive column.
+    ROW = 16.0          # flame-graph row pitch in these profiles (frames are 15 tall)
+    CROP_ROWS = 5
+    PANEL_X, PANEL_W = 240, 510
+
+    def topmost(group):
+        return [f for f in group
+                if not any(o is not f and o['y'] < f['y'] and o['x'] <= f['x']
+                           and o['x'] + o['w'] >= f['x'] + f['w'] for o in group)]
+
     selected = []
     for name, label in highlights:
         candidates = [f for f in frames if f['name'] == name]
         if not candidates:
             raise ValueError(f'Missing {name} in {source}')
-        selected.append((max(candidates, key=lambda f: f['w']), label))
+        widest = max(candidates, key=lambda f: f['w'])
+        outer = topmost(candidates)
+        selected.append((widest, label, sum(f['share'] for f in outer), len(candidates)))
+
+    # Crop windows are snapped to the row grid: a window CROP_ROWS tall starting
+    # mid-row cut the top and bottom rows through their text.
+    crops = []
+    for f, _, _, _ in selected:
+        cw = min(540, max(300, f['w'] + 90))
+        ch = CROP_ROWS * ROW
+        cx = max(0.0, min(sw - cw, f['x'] + f['w'] / 2 - cw / 2))
+        # Offset by whole rows from the frame itself: rows sit on a grid whose
+        # origin is not 0, so rounding to a multiple of ROW would re-introduce
+        # the half-row cut this is meant to remove. These are bottom-rooted
+        # flame graphs -- callers are BELOW a frame, callees above -- so the
+        # window sits one row above the frame and three below it, where the
+        # call path is. Two rows above left the panel half empty for a leaf.
+        cy = max(0.0, min(max(0.0, sh - ch), f['y'] - ROW))
+        s = PANEL_W / cw                      # panel is sized to the crop, not padded
+        crops.append((cx, cy, cw, ch, s, ch * s))
+
     colors = ['#00779d', '#7c4285', '#bd512e']
-    height = 580 if sh > 2000 else (310 if len(selected) == 1 else 480)
-    overview_w = 205
-    overview_h = min(height - 65, sh / sw * overview_w)
-    overview_y = 38
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height}" '
-             f'viewBox="0 0 760 {height}">',
+    label_h, gap = 37, 14
+    overview_w, overview_y = 205, 38
+    natural_ov_h = sh / sw * overview_w
+    foot_lines = 6 if (sh < 2000 and len(selected) > 1) else 0
+    foot_h = 24 + foot_lines * 19 + 8 if foot_lines else 0
+    # The figure is as tall as whichever column needs it, not a fixed guess.
+    height = max(35 + sum(label_h + bh + gap for *_, bh in crops),
+                 overview_y + min(natural_ov_h, 520) + foot_h)
+    overview_h = min(height - 65 - foot_h, natural_ov_h)
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height:.0f}" '
+             f'viewBox="0 0 760 {height:.0f}">',
              '<rect width="100%" height="100%" fill="white"/>',
              '<text x="8" y="18" font-family="sans-serif" font-size="14" fill="#18344a">'
              'Full recorded flame graph</text>',
@@ -64,12 +104,12 @@ def flame(source, target, highlights):
 
     embed(8, overview_y, overview_w, overview_h, (0, 0, sw, sh))
     summary = []
-    row_h = (height - 40) / len(selected)
     scale = overview_w / sw
-    centers = [f['x'] + f['w']/2 for f, _ in selected]
+    centers = [f['x'] + f['w']/2 for f, *_ in selected]
     badge_order = sorted(range(len(selected)), key=centers.__getitem__)
-    badge_top = overview_y + min(f['y'] for f, _ in selected)*scale - 18
-    for index, (f, label) in enumerate(selected):
+    badge_top = overview_y + min(f['y'] for f, *_ in selected)*scale - 18
+    top = 35
+    for index, ((f, label, agg, boxes), (cx, cy, cw, ch, s, bh)) in enumerate(zip(selected, crops)):
         color = colors[index % len(colors)]
         # The exact same frame is outlined in full view and detail view.
         ox, oy = 8 + f['x']*scale, overview_y + f['y']*scale
@@ -84,32 +124,30 @@ def flame(source, target, highlights):
         parts.append(f'<circle cx="{badge_x}" cy="{badge_y}" r="8" fill="{color}"/>'
                      f'<text x="{badge_x}" y="{badge_y+4}" text-anchor="middle" '
                      f'font-family="sans-serif" font-size="11" fill="white">{index+1}</text>')
-        top = 35 + index * row_h
-        parts.append(f'<text x="240" y="{top+10}" font-family="sans-serif" font-size="14" '
+        parts.append(f'<text x="240" y="{top+10:.0f}" font-family="sans-serif" font-size="14" '
                      f'font-weight="bold" fill="{color}">{index+1}. {html.escape(label)}</text>')
-        parts.append(f'<text x="240" y="{top+28}" font-family="sans-serif" font-size="12" '
-                     f'fill="#465969">{html.escape(f["name"])} | this frame: {f["share"]:.2f}% inclusive</text>')
-        cw = min(540, max(300, f['w']+90))
-        ch = 80
-        cx = max(0, min(sw-cw, f['x']-35))
-        cy = max(0, f['y']-40)
-        px, py, pw, ph = 240, top+37, 510, row_h-49
-        # Fit without stretching; duplicate transform for the overlay rectangle.
-        s = min(pw/cw, ph/ch)
-        dx, dy = px+(pw-cw*s)/2, py+(ph-ch*s)/2
-        parts.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" '
+        detail = (f'{html.escape(f["name"])} | {agg:.2f}% inclusive'
+                  + (f', across {boxes} per-line frames; widest {f["share"]:.2f}% outlined'
+                     if boxes > 1 else ''))
+        parts.append(f'<text x="240" y="{top+28:.0f}" font-family="sans-serif" font-size="12" '
+                     f'fill="#465969">{detail}</text>')
+        px, py = PANEL_X, top + label_h
+        parts.append(f'<rect x="{px}" y="{py:.1f}" width="{PANEL_W}" height="{bh:.1f}" '
                      'fill="#fafbfc" stroke="#d3dce4"/>')
-        embed(px, py, pw, ph, (cx, cy, cw, ch))
-        parts.append(f'<rect x="{dx+(f["x"]-cx)*s}" y="{dy+(f["y"]-cy)*s}" '
-                     f'width="{f["w"]*s}" height="{f["h"]*s}" fill="none" '
+        embed(px, py, PANEL_W, bh, (cx, cy, cw, ch))
+        parts.append(f'<rect x="{px+(f["x"]-cx)*s:.1f}" y="{py+(f["y"]-cy)*s:.1f}" '
+                     f'width="{f["w"]*s:.1f}" height="{f["h"]*s:.1f}" fill="none" '
                      f'stroke="{color}" stroke-width="2"/>')
-        summary.append({k: v for k, v in f.items() if k != 'element'})
+        top += label_h + bh + gap
+        summary.append(dict({k: v for k, v in f.items() if k != 'element'},
+                            aggregate_share=round(agg, 2), boxes=boxes))
     if sh < 2000 and len(selected) > 1:
         y = overview_y+overview_h+24
         for line in ['Original widths and stack depth.', 'Imports and harness retained.',
-                     'Each outline marks one call path.', 'The same function may recur.',
-                     'Percentages are inclusive,',
-                     'not flat self-time totals.']:
+                     'Each outline marks one call path.',
+                     'py-spy emits one frame per',
+                     'source line, so a function is',
+                     'many boxes; shares are totals.']:
             parts.append(f'<text x="8" y="{y}" font-family="sans-serif" font-size="12" '
                          f'fill="#465969">{line}</text>')
             y += 19

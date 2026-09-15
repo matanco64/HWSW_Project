@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="480" viewBox="0 0 760 480">
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="378" viewBox="0 0 760 378">
 <rect width="100%" height="100%" fill="white"/>
 <text x="8" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Full recorded flame graph</text>
 <text x="240" y="18" font-family="sans-serif" font-size="14" fill="#18344a">Highlighted regions - enlarged with surrounding frames</text>
-<svg x="8" y="38" width="205" height="192.35833333333335" viewBox="0 0 1200.0 1126.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<svg x="8" y="38" width="205" height="166.64221595280844" viewBox="0 0 1200.0 1126.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>_compile_bytecode (&lt;frozen importlib._bootstrap_external&gt;:672) (2 samples, 1.64%)</ns0:title><ns0:rect x="1035.2" y="725" width="19.4" height="15.0" fill="rgb(223,85,20)" rx="2" ry="2" />
 <ns0:text x="1038.25" y="735.5" />
@@ -1437,10 +1437,10 @@
 <rect x="89.66624999999999" y="182.72083333333333" width="53.23291666666666" height="4.5625" fill="none" stroke="#00779d" stroke-width="2"/>
 <path d="M28.0 170.9875L116.28270833333332 183.72083333333333" fill="none" stroke="#00779d" stroke-width="1"/>
 <circle cx="28.0" cy="162.9875" r="8" fill="#00779d"/><text x="28.0" y="166.9875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">1</text>
-<text x="240" y="45.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. Inverse BWT</text>
-<text x="240" y="63.0" font-family="sans-serif" font-size="12" fill="#465969">bwt_reverse | this frame: 25.41% inclusive</text>
-<rect x="240" y="72.0" width="510" height="171.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="72.0" width="510" height="171.0" viewBox="448.9 813.0 389.9 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<text x="240" y="45" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00779d">1. Inverse BWT</text>
+<text x="240" y="63" font-family="sans-serif" font-size="12" fill="#465969">bwt_reverse | 38.53% inclusive, across 4 per-line frames; widest 25.41% outlined</text>
+<rect x="240" y="72.0" width="510" height="104.6" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="72" width="510" height="104.64221595280841" viewBox="438.8999999999999 837.0 389.9 80.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>bwt_transform (run_benchmark.py:528) (3 samples, 2.46%)</ns0:title><ns0:rect x="629.0" y="837" width="29.0" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
 <ns0:text x="632.02" y="847.5">bw..</ns0:text>
@@ -1449,6 +1449,11 @@
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>bwt_transform (run_benchmark.py:527) (4 samples, 3.28%)</ns0:title><ns0:rect x="590.3" y="837" width="38.7" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
 <ns0:text x="593.33" y="847.5">bwt..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>task_func (pyperf/_runner.py:497) (102 samples, 83.61%)</ns0:title><ns0:rect x="29.3" y="917" width="986.6" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<ns0:text x="32.34" y="927.5">task_func (pyperf/_runner.py:497)</ns0:text>
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1497,6 +1502,11 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bench_pyflake (run_benchmark.py:1021) (101 samples, 82.79%)</ns0:title><ns0:rect x="29.3" y="901" width="976.9" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<ns0:text x="32.34" y="911.5">bench_pyflake (run_benchmark.py:1021)</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>decode_huffman_block (run_benchmark.py:829) (49 samples, 40.16%)</ns0:title><ns0:rect x="464.6" y="869" width="473.9" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
 <ns0:text x="467.59" y="879.5">decode_huffman_block (run_benchmark.py:829)</ns0:text>
 </ns0:g>
@@ -1512,14 +1522,24 @@
 </ns0:g>
 
 </g></svg>
-<rect x="285.7809694793537" y="157.5" width="392.2775070530905" height="19.62041549115158" fill="none" stroke="#00779d" stroke-width="2"/>
+<rect x="298.9" y="92.9" width="392.3" height="19.6" fill="none" stroke="#00779d" stroke-width="2"/>
 <rect x="126.01958333333334" y="179.9875" width="16.879583333333333" height="4.5625" fill="none" stroke="#7c4285" stroke-width="2"/>
 <path d="M193.0 170.9875L134.45937500000002 180.9875" fill="none" stroke="#7c4285" stroke-width="1"/>
 <circle cx="193.0" cy="162.9875" r="8" fill="#7c4285"/><text x="193.0" y="166.9875" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">2</text>
-<text x="240" y="265.0" font-family="sans-serif" font-size="14" font-weight="bold" fill="#7c4285">2. Index-table construction</text>
-<text x="240" y="283.0" font-family="sans-serif" font-size="12" fill="#465969">bwt_transform | this frame: 7.38% inclusive</text>
-<rect x="240" y="292.0" width="510" height="171.0" fill="#fafbfc" stroke="#d3dce4"/>
-<svg x="240" y="292.0" width="510" height="171.0" viewBox="661.7 797.0 300 80" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<text x="240" y="201" font-family="sans-serif" font-size="14" font-weight="bold" fill="#7c4285">2. Index-table construction</text>
+<text x="240" y="219" font-family="sans-serif" font-size="12" fill="#465969">bwt_transform | 25.42% inclusive, across 6 per-line frames; widest 7.38% outlined</text>
+<rect x="240" y="227.6" width="510" height="136.0" fill="#fafbfc" stroke="#d3dce4"/>
+<svg x="240" y="227.6422159528084" width="510" height="136.0" viewBox="590.25 821.0 300 80.0" preserveAspectRatio="xMidYMid meet"><g font-family="Verdana" font-size="12">
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:528) (3 samples, 2.46%)</ns0:title><ns0:rect x="629.0" y="837" width="29.0" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<ns0:text x="632.02" y="847.5">bw..</ns0:text>
+</ns0:g>
+
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bwt_transform (run_benchmark.py:527) (4 samples, 3.28%)</ns0:title><ns0:rect x="590.3" y="837" width="38.7" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<ns0:text x="593.33" y="847.5">bwt..</ns0:text>
+</ns0:g>
+
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
 <ns0:title>bwt_transform (run_benchmark.py:529) (4 samples, 3.28%)</ns0:title><ns0:rect x="658.0" y="837" width="38.7" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
 <ns0:text x="661.03" y="847.5">bwt..</ns0:text>
@@ -1531,8 +1551,8 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>rle4_expand (run_benchmark.py:581) (5 samples, 4.10%)</ns0:title><ns0:rect x="938.5" y="853" width="48.4" height="15.0" fill="rgb(233,129,30)" rx="2" ry="2" />
-<ns0:text x="941.52" y="863.5">rle4..</ns0:text>
+<ns0:title>bwt_transform (run_benchmark.py:518) (9 samples, 7.38%)</ns0:title><ns0:rect x="503.3" y="837" width="87.0" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<ns0:text x="506.28" y="847.5">bwt_transf..</ns0:text>
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1546,13 +1566,13 @@
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>decode_huffman_block (run_benchmark.py:831) (7 samples, 5.74%)</ns0:title><ns0:rect x="938.5" y="869" width="67.7" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
-<ns0:text x="941.52" y="879.5">decode_..</ns0:text>
+<ns0:title>bwt_transform (run_benchmark.py:530) (9 samples, 7.38%)</ns0:title><ns0:rect x="696.7" y="837" width="87.1" height="15.0" fill="rgb(245,184,44)" rx="2" ry="2" />
+<ns0:text x="699.72" y="847.5">bwt_transf..</ns0:text>
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
-<ns0:title>bwt_transform (run_benchmark.py:530) (9 samples, 7.38%)</ns0:title><ns0:rect x="696.7" y="837" width="87.1" height="15.0" fill="rgb(245,184,44)" rx="2" ry="2" />
-<ns0:text x="699.72" y="847.5">bwt_transf..</ns0:text>
+<ns0:title>bench_pyflake (run_benchmark.py:1021) (101 samples, 82.79%)</ns0:title><ns0:rect x="29.3" y="901" width="976.9" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<ns0:text x="32.34" y="911.5">bench_pyflake (run_benchmark.py:1021)</ns0:text>
 </ns0:g>
 
 <ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
@@ -1565,12 +1585,17 @@
 <ns0:text x="873.82" y="863.5">bwt_rev..</ns0:text>
 </ns0:g>
 
+<ns0:g xmlns:ns0="http://www.w3.org/2000/svg">
+<ns0:title>bzip2_main (run_benchmark.py:854) (101 samples, 82.79%)</ns0:title><ns0:rect x="29.3" y="885" width="976.9" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<ns0:text x="32.34" y="895.5">bzip2_main (run_benchmark.py:854)</ns0:text>
+</ns0:g>
+
 </g></svg>
-<rect x="299.5" y="377.5" width="148.07" height="25.5" fill="none" stroke="#7c4285" stroke-width="2"/>
-<text x="8" y="254.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">Original widths and stack depth.</text>
-<text x="8" y="273.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">Imports and harness retained.</text>
-<text x="8" y="292.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">Each outline marks one call path.</text>
-<text x="8" y="311.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">The same function may recur.</text>
-<text x="8" y="330.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">Percentages are inclusive,</text>
-<text x="8" y="349.35833333333335" font-family="sans-serif" font-size="12" fill="#465969">not flat self-time totals.</text>
+<rect x="421.0" y="254.8" width="148.1" height="25.5" fill="none" stroke="#7c4285" stroke-width="2"/>
+<text x="8" y="228.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">Original widths and stack depth.</text>
+<text x="8" y="247.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">Imports and harness retained.</text>
+<text x="8" y="266.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">Each outline marks one call path.</text>
+<text x="8" y="285.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">py-spy emits one frame per</text>
+<text x="8" y="304.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">source line, so a function is</text>
+<text x="8" y="323.64221595280844" font-family="sans-serif" font-size="12" fill="#465969">many boxes; shares are totals.</text>
 </svg>
