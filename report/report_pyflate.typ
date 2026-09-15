@@ -22,8 +22,9 @@ a move-to-front (MTF) alphabet, Burrows-Wheeler transform (BWT) index vectors an
 L-vector. Inverse BWT and final RLE4 expansion produce the 399,360-byte output.]
 
 #figure(image("fig/pyflate_stages.svg", width: 100%),
-  caption: [The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop,
-  which is the boundary the Rust kernel replaces in one call per block.])
+  caption: [The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop.
+  The Rust kernel replaces that boundary in one call per block, and it is the same boundary the
+  two accelerators implement.])
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Configuration*], [*Mean ± SD*], [*vs stock*]),
@@ -212,14 +213,78 @@ construction, not just its dependent traversal. Earlier VM phase timings put the
 137.7 ms and 47.8 ms respectively (Appendix A3). A native port and working-set sweep would
 test whether memory latency then becomes limiting; the present data do not establish that.
 
-= 5. Conclusion
+#pagebreak()
+= 5. Hardware acceleration: measured
+
+`huffman_engine` followed by `mtf_cam` produces the same L-vector as the Rust kernel, over the
+same boundary. Software keeps block headers, inverse BWT, RLE4 and MD5. Both modules are
+implemented in SystemVerilog, verified, and taken through synthesis and place-and-route; the
+numbers below are measured, not targets.
+
+#figure(image("fig/decode_report.svg", width: 100%),
+  caption: [AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays
+  on chip. Platform DMA returns the L-vector to software.])
+
+== Huffman engine
+
+A bit aligner feeds a canonical-code comparator/lookup datapath; a selector controller changes
+the active table every 50 symbols. Inputs are a 32-bit compressed stream and an 8-bit selector
+stream; outputs are 32-bit beats carrying a 9-bit symbol plus type fields. A 32-bit AXI4-Lite
+window holds controls, `START_BIT`, lengths and counters, for six tables and bzip2's 20-bit
+maximum code length. It decodes the benchmark block in *149,276 cycles* for 148,271 symbols,
+so *K1 = 1.0068 cycles per symbol* including table construction and switches, and is
+trace-exact against the golden model over every beat.
+
+== MTF and run expansion
+
+The input is a *rank*, so the decoder indexes the alphabet, shifts the preceding entries and
+expands RUNA/RUNB groups through a buffered output packer at eight bytes wide. It sustains
+*K3 = 1.0686 cycles per symbol*, and the CAM is 68% of its area.
+
+== Measured cost and what it buys
+
+#result-table(columns: (1.5fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*sky130, Yosys + OpenLane*], [`huffman_engine`], [`mtf_cam`]),
+  [Cells], [151,058], [18,814],
+  [Area], [1.634 mm²], [0.187 mm²],
+  [Fmax], [≈ 8.9 MHz], [≈ 37.6 MHz],
+  [Power], [not reported], [≈ 13.7 mW],
+  [Cycles per symbol], [1.0068], [1.0686],
+  [Directed + random tests], [17 / 17], [16 / 16],
+  [Line / toggle coverage], [90.4% / 90.3%], [92.0% / 93.8%],
+)
+
+The two clocks are not measured the same way and must not be compared. `mtf_cam` closed
+post-CTS static timing at 37.6 MHz; `huffman_engine` is a pre-place-and-route estimate,
+because its placement did not converge, and its real figure is likely lower. Neither module
+reaches the 50 MHz design target, and for this workload that barely matters: the software
+residual dominates.
+
+Amdahl decides the end-to-end gain, not the clock. Huffman decoding is 49.6% of the stock
+benchmark and move-to-front a further 13.4%. Offloading Huffman alone gives *1.97×* at
+50 MHz and *1.93×* at the measured 8.9 MHz — a 5.6× clock difference worth 0.04× end to end,
+because 3 ms of hardware is negligible against 570 ms of surviving software. `mtf_cam` alone
+gives *1.15×*, which is a *25× speedup of its own stage* seen through a 13.4% slice. Chained
+on chip the two remove `f ≈ 0.63` of the benchmark, an ideal ceiling of *≈ 2.7×*.
+
+#note[*Trade-offs.* `huffman_engine` is storage-dominated: a 17.3 kbit symbol table and an
+8.6 kbit length window are flip-flops, because the open sky130 flow has no SRAM compiler.
+Mapping both to SRAM macros is the one change that would bring it under 1 mm², and it would
+cost nothing in cycles per symbol. `mtf_cam`'s output width was swept at W = 4, 8 and 16:
+W = 16 buys 0.040 cycles per symbol for 11% more area and is not worth it, so W = 8 ships.
+Formal proofs bound the MTF invariants to depth 24 on the 256-entry list rather than
+exhaustively; that limit is recorded, not papered over.]
+
+= 6. Conclusion
 
 The delivered Python-plus-Rust path decompresses the input in *170.01 ms*, achieving
 *6.61× over stock* with byte-exact output. Python improvements provide 4.00× and the native
 decoder adds 1.67×, leaving BWT and RLE4 as the next software targets.
 
-The course requires one hardware accelerator, and it is proposed for nbody; *report_nbody.pdf*
-§5 carries its block diagram, interface and trade-offs.
+Both accelerators are implemented and measured rather than proposed. The gain they buy is
+bounded by what stays in software: the inverse BWT and RLE4, which is the same ceiling the
+native decoder ran into.
 
-#text(size: 9pt)[*Evidence:* methods and profiles: *report_appendix.pdf*.
+#text(size: 9pt)[*Evidence:* `hw/huffman_engine/docs/{ppa,integration}.md`,
+`hw/mtf_cam/docs/{ppa,integration}.md`. Methods and profiles: *report_appendix.pdf*.
 Repository: #link("https://github.com/matanco64/HWSW_Project")[HWSW_Project].]
