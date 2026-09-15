@@ -28,11 +28,21 @@ has the larger speedup, but pyflate and nbody both map onto accelerator modules
 scoped in `hw/`, and pyflate's decode engine has shipping-silicon precedent in
 Intel IAA.
 
-The course requires **one** hardware accelerator, and it is nbody's
-`grape_pipeline`: the only module taken past architecture into RTL and
-verification. `hw/huffman_engine` and `hw/mtf_cam` were scoped for pyflate
-before that was settled and stop at PRD/MAS; the pyflate report is a pure
-software study and says where the accelerator lives.
+All three accelerators are implemented, verified and measured through the
+stage-gated flow in `hw/FLOW.md` — RTL, constrained-random verification,
+synthesis and place-and-route — so both reports quote measured silicon rather
+than targets:
+
+| module | benchmark | cells | area | Fmax | tests |
+|---|---|---|---:|---:|---:|
+| `grape_pipeline` | nbody | 584,454 | 4.08 mm² | 19.5 MHz | 9/9 |
+| `huffman_engine` | pyflate | 151,058 | 1.63 mm² | ~8.9 MHz | 17/17 |
+| `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.6 MHz | 16/16 |
+
+The two Fmax methods differ: `mtf_cam` and `grape_pipeline` closed post-CTS
+static timing, `huffman_engine` is a pre-place-and-route estimate whose
+placement did not converge. Per-module detail is in `hw/<module>/docs/ppa.md`
+and `integration.md`.
 
 ## Repository structure
 

@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-12 19:42 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-12 19:42 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-15 15:00 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-15 15:00 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -71,9 +71,7 @@ flowchart LR
     classDef review fill:#ffe0b2,stroke:#f57c00,color:#e65100
     classDef done fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
     classDef blocked fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c
-    class rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration todo
-    class uarch review
-    class prd,mas done
+    class prd,mas,uarch,rtl,dv_testplan,dv_bringup,dv_coverage,dv_signoff,ppa,integration done
 ```
 
 Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, orange review, green done, red blocked.
@@ -84,7 +82,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 |---|---|---|---|---|---|---|---|---|---|---|
 | `grape_pipeline` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `huffman_engine` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `mtf_cam` | ✅ | ✅ | 🟠 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| `mtf_cam` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ⬜ todo · 🔵 in_progress · 🟠 review · ✅ done · ⛔ blocked
 
@@ -92,7 +90,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 - `grape_pipeline`: all stages done
 - `huffman_engine`: all stages done
-- `mtf_cam`: **uArch** — review (checkpoint — needs human approval)
+- `mtf_cam`: all stages done
 
 ## Gates
 
@@ -270,7 +268,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] block diagram — docs/block_diagram.svg via tools/hw/blockdiag.py, well-formed XML
 - [x] hw-review resolved — docs/review_mas.md: 24 findings (2 passes), 0 must open
 
-#### uArch — 🟠 review (started 2026-09-12T19:01:12Z)
+#### uArch — ✅ done (started 2026-09-12T19:01:12Z, finished 2026-09-12T20:14:50Z)
 
 - [x] pipeline/FSM diagrams — docs/uarch.md §2 dataflow flowchart + §3 invocation/expander stateDiagrams + §3.2 list-CAM datapath
 - [x] number formats fixed — docs/uarch.md §4: UQ8.0 rank/byte, UQ22.0 run sum (21b stored), UQ31.0 in-flight bytes, counters per MAS §4
@@ -279,10 +277,59 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 - [x] latency/throughput derived and matches PRD KPI — docs/uarch.md §7 + docs/schedule_model.py: golden list_model.cycles reproduces K3=1.063 @ W8/D8 <=1.10, D-sweep + W-table match PRD; K1 latency <=8
 - [x] hw-review resolved — docs/review_uarch.md: 12 findings, 3 must (M1 run-adder width, M2 FIFO 2W port for K3, M3 enqueue-after-check) all fixed, 0 must open
 
+#### RTL — ✅ done
+
+- [x] make lint clean (verilator --lint-only -Wall) — make -C hw/mtf_cam lint: clean, 9 files incl axi_lite_if
+- [x] Yosys synth succeeds (synthesizable subset) — yosys read_verilog -sv + synth -top mtf_cam: 0 errors, no latches, ~30k generic cells
+- [x] agent code review resolved — docs/review_rtl.md: R1-R5, 1 must (MAX_RUN per-invocation reset) FIXED (inv_clr wired to doorbell), 0 must open; R2 -> dv_bringup
+
+#### DV testplan — ✅ done (started 2026-09-12T20:48:21Z, finished 2026-09-12T20:54:17Z)
+
+- [ ] features ↔ tests ↔ covergroups ↔ checkers matrix
+- [x] golden-model interface defined — docs/testplan.md §2: mtf_ref golden (==libbzip2) + list_model.expand predictor + list_model.cycles K3 model; DUT-vs-predictor per beat, predictor-vs-golden per block; numbers reproduced (145/147, 148271 syms, 336184 B, 42023 beats, K3 1.063)
+- [x] formal properties listed — docs/testplan.md §3: 3 mtf_list invariants (permutation/lookup/shift) N_LIST=16 induction + 256 bounded, + handshake props (formal/*.sby)
+- [x] features <-> tests <-> covergroups <-> checkers matrix — docs/testplan.md §1: 29 rows (F1-F16 + K1-K8 + F-20..24), no empty cell
+- [x] hw-review resolved — spot-review: matrix complete/no empty cells, golden reproduced-by-execution, R2 (K3 model-vs-DUT) -> F-21 bring-up task, R1 MAX_RUN -> F-22 multiblock, W=4 K3>1.10 correctly PPA-only per F8
+
+#### DV bring-up — ✅ done (started 2026-09-12T21:17:23Z, finished 2026-09-12T21:22:18Z)
+
+- [x] pyuvm env instantiates — make sim: MtfEnv (AxiLiteAgent + s_sym source + m_l sink + 2 AXIS monitors + MtfScoreboard) build/connect complete; 6 tests run under it on Verilator + Icarus
+- [x] first directed test passes on Verilator — make sim TESTCASE=smoke PASS (used {65,66,67,68}, L=AAABCB); TESTS=6 PASS=6 FAIL=0 (smoke, smoke_backpressure, backpressure, multiblock, k1, full_benchmark)
+- [x] scoreboard compares against golden — scoreboard PASS: compared 336184 items over 1 block, 0 mismatches (golden=list_model.expand, cross-checked == mtf_ref.l_vector); docs/review_bringup.md 1 finding 0 must open
+
+#### DV coverage — ✅ done (started 2026-09-12T22:22:27Z, finished 2026-09-13T06:13:57Z)
+
+- [x] constrained-random sequences — tb/sequences/random_streams.py (seeded, SEED= logged, golden-round-tripped); make sim TESTCASE=test_random PASS; full suite 16/16 PASS (10 new: random, corner, driver, err_underrun/rank/eob/limit, run_max, reset, xinv)
+- [ ] line/toggle ≥ 90 %
+- [x] all functional covergroups hit — tb/cov/func_cov.txt: 129 bins across 21 testplan covergroups, every bin >= 1; waived cg_caps.w_4/w_16/n_list_16, cg_k2/k3.w_4/w_16, cg_k3.gt_1p10 (separate param builds / failure-only bin, testplan F-08/K2/K3); cg_fml deferred to formal at dv_signoff
+- [x] line/toggle >= 90 % — make cov (COVERAGE_MAX_WIDTH=4) firsthand: line 92.0% (104/113), toggle 93.8% control-subset (720/768), branch 96.8% (184/190); wide-datapath toggle waived (mtf_list 256x8 CAM, 256-bit used_map, lifetime counters) per docs/coverage_waivers.md — huffman precedent; 9 uncovered lines are unreachable defensive RTL (FSM default, fill else-arm, abort+doorbell corner, SVA decls)
+
+#### DV sign-off — ✅ done (started 2026-09-13T06:15:12Z, finished 2026-09-13T15:10:24Z)
+
+- [x] golden equivalence on the full benchmark input — test_full_benchmark PASS (in make sim 16/16): 148,271 symbols -> L-vector 336,184 B byte-exact vs golden list_model.expand (predictor pre-checked == mtf_ref.l_vector), scoreboard 0 mismatches; BYTES_OUT=336,184 INIT_CYCLES=145 MAX_RUN=8,157
+- [x] directed + random suites pass — make sim firsthand: TESTS=16 PASS=16 FAIL=0 (smoke, backpressure x2, multiblock, k1, full_benchmark, random, corner, err_underrun/rank/eob/limit, run_max, reset, xinv, driver)
+- [x] coverage goals — dv_coverage gate: line 92.0% toggle 93.8% (control-subset) branch 96.8%; func_cov 129 bins across 21 testplan covergroups all >=1 (docs/coverage_waivers.md)
+- [x] lint clean — make lint firsthand: all rtl + axi_lite_if, -Wall, lint: clean, 0 warnings
+- [x] Icarus 4-state run X-free after reset — make sim-icarus firsthand: TESTS=16 PASS=16; monitor is_resolvable asserts on every AXIS/AXI handshake, none fired -> no X after reset
+- [x] formal (sby) where listed — make formal firsthand: 7/7 tasks PASS. K8: (a) 3 list invariants proven UNBOUNDED k-induction @ N_LIST=16; (b) N_LIST=256 permutation preservation across 24 move cycles (bmc256moves, MEETS PRD-K8 depth>=20) via fill-abstraction (valid post-fill start collapses the 256-deep encoder; concrete 8-entry canonical occupancy, moves free -- sound because move logic is value-agnostic, non-vacuity via famoves_cover + mutation test); (c) general permutation depth 6 (bmc). Unbounded-at-256 honestly not achievable (SAT-hard), not faked. Details docs/review_signoff.md + synth/formal.sby
+- [x] hw-review findings resolved — docs/review_signoff.md: RTL-mode over final rtl/+tb/+formal/; 0 must open; stale-worktree R1 (INIT_CYCLES) reconciled non-applicable via nused256; formal non-vacuous (CEX-driven + slang frontend avoids bind-vacuity)
+
+#### PPA — ✅ done (started 2026-09-13T15:11:59Z, finished 2026-09-13T15:35:00Z)
+
+- [x] Yosys+Liberty area + cell counts — synth/area.txt (reproduced firsthand via make area): 18,814 sky130_fd_sc_hd cells, 187,389.72 um^2 (0.187 mm^2) @ W=8; mtf_list CAM = 68% (W-invariant); per-module in area_permodule.txt
+- [x] OpenLane 2 run: Fmax, area µm², power — OpenLane converged through post-CTS STA (no GRT-0607, deepest run in project): synth/runs/signoff/31-openroad-stamidpnr-1/ws.max.rpt worst setup slack -6.5964 ns @ 20ns tt -> 26.596 ns -> Fmax ~37.6 MHz; critical path = mtf_list CAM read-mux (confirms uArch §6); power ~13.7 mW post-CTS indicative; closed before GDS (resizer non-convergent, time-boxed per §7)
+- [x] trade-off table (≥2 design points) — docs/ppa.md §2: 3 design points W=4/8/16 (18,321/18,814/22,250 cells; 181,832/187,390/207,827 um^2; K3 1.175/1.063/1.023) -> W=8 chosen (smallest meeting K3<=1.10); 5.3x under 1.0mm^2 soft ceiling
+
+#### Integration — ✅ done (started 2026-09-13T15:35:33Z, finished 2026-09-13T15:51:57Z)
+
+- [x] register map ↔ driver model consistent — driver/check_regmap.py firsthand: 0 differences (18 rows, driver == mas.md §4 == rtl/mtf_regs.sv, ID 'MTF1'); driver/test_driver.py: ALL 5 driver-model tests PASS (regmap, id/caps, full_expand, err_param, err_busy); tb/test_driver_model.py RTL-cosim 0 mismatches; make sim still 16/16
+- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=1.12s (baseline_pyflate_stats.txt), f=0.1344 (move_to_front share), t_hw=158,441 cyc / 37.6 MHz = 4.214 ms -> Amdahl S~1.15x, ideal 1/(1-f)=1.155x; reconciles with PRD K5 stage-level ~25x (25x on a 13.4% slice = 1.148x end-to-end)
+- [x] report §7 bullets mapped — docs/integration.md §4 rubric map: all 7 project_instructions.md §7 bullets each mapped to file+section; §5 has report_pyflate.txt paste text
+
 ## Metrics
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 11.15 | 0 |
+| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 19.46 | 0 |
 | `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 8.9 | 0 |
-| `mtf_cam` | 0 | 0 | 0 | 0/0 | n/a | 0 | 0 | 0 | 0 |
+| `mtf_cam` | 92 | 93.8 | 129 | 16/16 | pass | 18814 | 187390 | 37.6 | 13.7 |
