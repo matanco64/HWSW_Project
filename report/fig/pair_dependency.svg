@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 152">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526b7e"/></marker></defs>
+<path d="M130 96H188" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M393 96H462" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M290 46V64" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M564 46V64" fill="none" stroke="#526b7e" stroke-width="1.6" marker-end="url(#a)"/>
+<rect x="8" y="64" width="122" height="64" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="69.0" y="101.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Old u0</text>
+<rect x="188" y="64" width="205" height="64" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="290.5" y="91.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Subtract dx01 * b1m</text>
+<text x="290.5" y="111.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">rounded result u0a</text>
+<rect x="462" y="64" width="205" height="64" rx="5" fill="#e7f0f6" stroke="#8298a9"/>
+<text x="564.5" y="91.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Subtract dx02 * b2m</text>
+<text x="564.5" y="111.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">rounded result u0b</text>
+<rect x="188" y="4" width="205" height="42" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="290.5" y="30.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Pair (0, 1) force term</text>
+<rect x="462" y="4" width="205" height="42" rx="5" fill="#f6f4ee" stroke="#8298a9"/>
+<text x="564.5" y="30.0" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18344a">Pair (0, 2) force term</text>
+</svg>

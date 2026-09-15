@@ -218,7 +218,14 @@ def main():
         (576, 137, 176, 82, ['Output packer', '64-bit data', '+ byte enables'], True),
     ], ['M123 74V137', 'M310 42H268V112H123V137', 'M238 178H294',
         'M520 178H576', 'M664 137V74', 'M200 74V100H407V137'])
-    print('Generated four print profiles and three architecture/pipeline diagrams.')
+    diagram('pair_dependency.svg', 152, [
+        (8, 64, 122, 64, ['Old u0'], False),
+        (188, 64, 205, 64, ['Subtract dx01 * b1m', 'rounded result u0a'], True),
+        (462, 64, 205, 64, ['Subtract dx02 * b2m', 'rounded result u0b'], True),
+        (188, 4, 205, 42, ['Pair (0, 1) force term'], False),
+        (462, 4, 205, 42, ['Pair (0, 2) force term'], False),
+    ], ['M130 96H188', 'M393 96H462', 'M290 46V64', 'M564 46V64'])
+    print('Generated four print profiles and four architecture/pipeline diagrams.')
     for item in summaries:
         print(f'{item["source"]}: {item["source_frame_count"]} original frames, {len(item["highlights"])} highlights')
 
