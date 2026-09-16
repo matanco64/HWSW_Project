@@ -478,9 +478,8 @@ no grader can argue with, backed by an automated check that prints
 `max |delta| = 0.0`. Very few optimization projects can say that.
 
 **Pair it with a visually different benchmark.** nbody's weakness is that it has
-nothing to show on screen. If the second benchmark is raytrace it renders an
-image; if it is pyflate or mdp, budget a slide for a diagram, because two
-flame-graph plateaus in a row is a dull deck.
+nothing to show on screen. For the selected pyflate pairing, use a pipeline diagram to complement the
+nbody state/interaction diagram rather than showing two flame-graph plateaus.
 
 ---
 
@@ -519,7 +518,7 @@ separate rows with separate baselines.
 | `verify.py` | correctness oracle, including the landed benchmark vs stock |
 | `crossover.py` | direct vs Barnes-Hut crossover + accuracy |
 | `hygiene.py` | core pinning / priority, Windows and POSIX |
-| `stock_run_benchmark.py.bak` | pristine stock source, for diffing |
+| `stock_run_benchmark.py` | pristine stock source, for diffing |
 | `run_benchmark_sqrt.py` | landed benchmark with `_BIT_EXACT = False`, for A/B |
 | `rs_check.py` | Rust wheel correctness + speed check (section 3.1) |
 | `measure_ab.sh` | non-rigorous pyperf A/B driver (stock vs shipped vs sqrt) |
@@ -564,7 +563,7 @@ because the golden-angle phases make the added momenta cancel each other.
 
 The same generator is in `dev/nbody/common.py` and drives `t0_stock.py` and
 `stock_n_benchmark.py` (pristine stock + the identical flag, built from
-`stock_run_benchmark.py.bak` by pure text insertion). `verify.py --bodies N`
+`stock_run_benchmark.py` by pure text insertion). `verify.py --bodies N`
 asserts the two generators emit bit-identical tables before comparing anything.
 
 ### 7.2 Bit-exactness holds at every N

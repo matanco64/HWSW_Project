@@ -112,9 +112,8 @@ def compare(label, ref_state, ref_e, got_state, got_e):
 
 
 def _load(path, name):
-    # An explicit SourceFileLoader is required because the pristine stock copy
-    # is kept as ".py.bak", and spec_from_file_location returns None for a
-    # suffix it does not recognise as importable.
+    # Load the pristine stock reference under an isolated module name.
+    # An explicit loader keeps this independent of normal import resolution.
     loader = importlib.machinery.SourceFileLoader(name, path)
     spec = importlib.util.spec_from_file_location(name, path, loader=loader)
     mod = importlib.util.module_from_spec(spec)
@@ -155,7 +154,7 @@ def _paths():
                                        *rel))
     except ImportError:
         pass
-    candidates.append(os.path.join(here, "stock_run_benchmark.py.bak"))
+    candidates.append(os.path.join(here, "stock_run_benchmark.py"))
     stock = next((c for c in candidates if os.path.exists(c)), candidates[0])
     opt = os.path.join(repo, "benchmarks", "bm_nbody", "run_benchmark.py")
     return stock, opt
