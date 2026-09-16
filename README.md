@@ -1,18 +1,15 @@
-# HWSW Final Project — pyflate, mdp & nbody
+# HWSW Final Project — pyflate & nbody
 
 Benchmark optimization, analysis, and hardware acceleration proposal for
 pyperformance benchmarks. Course: Hardware/Software Integration, Technion.
 
-**The submission is pyflate + nbody.** A third benchmark, mdp, was optimized and
-fully measured before the choice was made; it stays in the repo as evidence of
-the selection process, but it has no report and is not part of the submission.
+**The project and submission cover pyflate and nbody.**
 
 | Benchmark | What it is | Baseline | Optimized | Speedup | |
 |---|---|---|---|---|---|
 | **pyflate** | bzip2, optimized Python + Rust decoder | 1.12 s | 170.01 ms | **6.61x** | submitted |
 | pyflate (Python tier) | optimized Python decoder | 1.12 s | 281.16 ms | 4.00x | supporting comparison |
 | **nbody**   | N-body gravity simulation | 231 ms | 143 ms | **1.62x** | submitted |
-| mdp         | exact-arithmetic Markov decision process solver | 4.98 s | 914 ms | 5.44x | candidate only |
 
 Course VM (Ubuntu 22.04, CPython 3.10.12), rigorous pyperf measurements, every timed
 run pinned to one guest CPU. Both benchmarks' figures come from one canonical run of
@@ -23,15 +20,13 @@ comparison. The combined Python/Rust pyflate path cuts runtime **84.9%**; Rust a
 changes cut 38.1%, both exceeding the course's 7% requirement. Earlier captures,
 including pyflate's `vm_release_20260907/`, remain in `results/`.
 
-The pair was chosen on the hardware story rather than the software margin — mdp
-has the larger speedup, but pyflate and nbody both map onto accelerator modules
-scoped in `hw/`, and pyflate's decode engine has shipping-silicon precedent in
-Intel IAA.
+The benchmarks offer complementary hardware boundaries: pyflate's streaming symbol
+pipeline and nbody's stateful force/integration loop. Their accelerator designs live in `hw/`.
 
-All three accelerators are implemented, verified and measured through the
-stage-gated flow in `hw/FLOW.md` — RTL, constrained-random verification,
-synthesis and place-and-route — so both reports quote measured silicon rather
-than targets:
+All three accelerators have SystemVerilog implementations, recorded verification
+and synthesis results. Physical-design runs stopped before routed sign-off; the
+frequencies below are preliminary timing estimates, not measured silicon. The reports
+separate simulation cycles, mapped area and timing evidence from design targets:
 
 | module | benchmark | cells | area | Fmax | tests |
 |---|---|---|---:|---:|---:|
@@ -39,9 +34,11 @@ than targets:
 | `huffman_engine` | pyflate | 151,058 | 1.63 mm² | ~8.9 MHz | 17/17 |
 | `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.6 MHz | 16/16 |
 
-The two Fmax methods differ: `mtf_cam` and `grape_pipeline` closed post-CTS
-static timing, `huffman_engine` is a pre-place-and-route estimate whose
-placement did not converge. Per-module detail is in `hw/<module>/docs/ppa.md`
+The timing stages differ: `mtf_cam` and `grape_pipeline` reached post-CTS
+static timing; `huffman_engine` has a pre-placement estimate and its placement
+did not converge. None has completed 50 MHz routed sign-off. The grape area
+above describes the earlier three-wide design; its newer prefix timing comes
+from a separate netlist revision. Per-module detail is in `hw/<module>/docs/ppa.md`
 and `integration.md`.
 
 ## Repository structure
@@ -51,7 +48,6 @@ report_pyflate.pdf / report_nbody.pdf   Per-benchmark reports (course deliverabl
                                         selected benchmark; built from report/)
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable); thin
                                         wrappers over tools/runner_common.sh
-script_mdp.sh                           Same runner for mdp (candidate, not submitted)
 make_submission.sh                      Verify the deliverables and package them (see below)
 prompt.txt                              AI-tool prompt log (course deliverable)
 project_instructions.pdf / .md          Course assignment handout (+ text transcription)
@@ -59,8 +55,8 @@ skills-lock.json                        Pinned sources/hashes of the imported sk
 .claude/                                Claude Code project config: hook wiring + skills (log-prompt,
                                         and a subset of mattpocock/skills: grilling, teach, research, ...)
 benchmarks/
-  MANIFEST                              pyperformance custom-benchmark manifest (pyflate, nbody, mdp)
-  bm_pyflate/ bm_nbody/ bm_mdp/         Benchmark copies — optimizations land here
+  MANIFEST                              pyperformance custom-benchmark manifest (pyflate, nbody)
+  bm_pyflate/ bm_nbody/         Benchmark copies — optimizations land here
 dev/
   ENVIRONMENT.md                        The local WSL2 measurement environment (interpreters, perf, Rust)
   <bench>/                              Optimization ladder T0..T3, verification + analysis scripts,
@@ -319,7 +315,6 @@ python3-dbg, perf, pyperformance 1.14.0):
 ```bash
 ./script_pyflate.sh all     # setup -> baseline -> profile -> optimized -> compare -> native
 ./script_nbody.sh all
-./script_mdp.sh all         # candidate; no Rust crate, so no wheel/native stage
 ```
 
 Stages can be run individually:
@@ -406,8 +401,7 @@ Course-VM measurements, and the only numbers to quote:
   promoted out of `vm_canonical_20260910_2c8c754/suite/` by a deliberate copy.
   They used to be an older capture, so the first table a reader opened
   (1.64x nbody, 3.93x pyflate) disagreed with the reports (1.62x, 4.00x). The
-  superseded capture is in git history; `mdp` is a candidate, not a submission,
-  and keeps its own earlier numbers.
+  superseded capture is in git history.
 - **before/after profiling pairs**, same flags on both sides so they are directly
   comparable: `flame_<bench>_{stock,opt}.svg`,
   `perf_report_<bench>_{stock,opt}.txt`, `perf_stat_<bench>_{stock,opt}.txt`

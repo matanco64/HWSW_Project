@@ -222,3 +222,55 @@ documentation, published on the existing main branch.
 Commit scope clarification: /tmp/hwsw-commit-*.txt contains temporary commit-message
 input outside the repository, not staged deliverables. The staged example files are
 under report/. No temporary files or /tmp directory are included in the commits.
+
+FOLLOW-UP USER REQUESTS (VERBATIM), 2026-09-16
+7. I added some new stuf, tell me what you think
+8. continue you were stopped because of rate limit
+9. I want you to remove all mdp related code/work since we are not using this benchmark anymore
+10. also other stale files you think we need to consollidate
+
+16 - Remove the abandoned benchmark and consolidate stale material
+Prompt: Remove MDP source, experiments, results, profiles, runner and manifest entry.
+Update VM defaults and active documentation to cover pyflate and nbody only. Preserve
+the original course instructions and verbatim AI prompt history. Consolidate old
+status notes under report/history, rename the used nbody stock oracle from a backup
+filename to a normal Python source and update its callers, remove confirmed empty
+duplicate folders and obsolete generated submission archives, and correct stale
+README hardware-status language. Keep report evidence, golden models, historical
+measurements referenced by current reports, and private notes intact. Validate the
+remaining benchmarks and default VM runner without new performance measurements.
+
+Cleanup outcome: removed 32 tracked abandoned-benchmark files and its local cache
+directories; updated manifest/VM defaults and active references. Archived the old
+checkpoint, renamed the still-used stock oracle with its bytes unchanged, removed
+the obsolete generated ZIP, and retained all report evidence. Canonical figures
+were verified against Git and consolidated back into report/fig after a duplicate
+folder appeared. Software/example/table checks pass; native checks skip locally.
+
+Final cleanup limitation: the report figure folder repeatedly moved back to
+report/fig 2 after multiple verified restorations, including copies with new file
+identities. This external interference is unresolved. The user was asked to pause
+other editing/cleanup or syncing. Figures match committed contents, but canonical
+paths must be stabilized and rechecked before committing the final working tree.
+
+11. I stopped the sync for 2 hours, not running anything else at the moment, can you check again?
+
+17 - Finish figure cleanup with syncing paused
+Prompt: Recheck the canonical and duplicate figure folders, verify each file
+against the committed originals, restore report/fig and remove only verified
+duplicates. Repeat stability and figure checks, rerun the remaining software
+checks, and update the checkpoint to reflect the resolved cleanup limitation.
+Outcome: all 14 original files restored byte-for-byte; report/fig 2 removed.
+Three stability checks passed. Software, worked-example, 77 table-row and four
+figure-geometry checks passed; native extensions were unavailable and skipped.
+Changes remain uncommitted; no performance or hardware runs were performed.
+
+12. Let's commit and push after the cleanup
+
+18 - Publish the completed cleanup
+Prompt: Review the final cleanup diff and remote branch, confirm the canonical
+figures remain unchanged and temporary artifacts are excluded, create focused
+commits for removing MDP, clarifying the nbody oracle, and consolidating current
+documentation/history, then push main without force and verify synchronization.
+Validation: retain the completed software/example/table checks and their native
+skip disclosure; verify source whitespace and the renamed oracle's byte identity.

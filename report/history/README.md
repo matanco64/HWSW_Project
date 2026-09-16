@@ -11,3 +11,7 @@ useful provenance, but their older numbers must not replace the canonical headli
 
 Raw data remain in `results/vm_rerun_20260907/`, `results/vm_release_20260907/`,
 `results/vm_rerun_20260910_3697a63/` and `results/vm_canonical_20260910_2c8c754/`.
+
+`checkpoint_20260907.md` preserves the older report status and reproduction notes.
+Current report status is maintained in `../CHECKPOINT.md`; the older timing headlines
+in the archived checkpoint are superseded by the canonical run.
