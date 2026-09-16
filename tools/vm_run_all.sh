@@ -5,7 +5,7 @@
 # (or by hand under tmux/setsid) and it keeps running with nobody attached.
 #
 #   ./tools/vm_run_all.sh              # all benchmarks, all stages
-#   ./tools/vm_run_all.sh nbody mdp    # only these
+#   ./tools/vm_run_all.sh nbody        # only this benchmark
 #   FORCE=1 ./tools/vm_run_all.sh      # re-run stages already marked done
 #   HWSW_RESULTS=<dir> ./tools/vm_run_all.sh   # somewhere other than results/runs/vm
 #   STAGES="baseline optimized compare wheel native" ./tools/vm_run_all.sh
@@ -36,7 +36,7 @@ mkdir -p "$RES" "$STAMPS"
 rm -f "$RES/.RUN_DONE" "$RES/stages_failed.txt"
 
 BENCHES=("$@")
-[ ${#BENCHES[@]} -eq 0 ] && BENCHES=(nbody pyflate mdp)
+[ ${#BENCHES[@]} -eq 0 ] && BENCHES=(nbody pyflate)
 
 log() { printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$*"; }
 

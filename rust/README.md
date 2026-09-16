@@ -86,9 +86,3 @@ essentially free now, and everything left is the serial tail.
 92 ms in another on the same machine, so `rs_check.py` interleaves the variants
 round-robin rather than timing them sequentially. An early sequential version
 produced an impossible "1.84x against a 1.61x cap".
-
-## Not built
-
-There is **no mdp crate**. mdp is a measured candidate, not a submitted
-benchmark; if it were revived, the natural boundary is the CSR value-iteration
-sweep, whose export format is already the accelerator's DMA layout.

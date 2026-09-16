@@ -602,7 +602,7 @@ it, and the payoff is that the same diagram carries the hardware section.
 
 ### Verdict
 
-**Keep pyflate.** Pair it with whichever of nbody/mdp gives the cleaner *short*
+**Keep pyflate.** Pair it with nbody for the complementary *short*
 story and let pyflate carry the depth: largest margin, the only "we measured the
 obvious answer and it was wrong" moment, and by far the best hardware narrative,
 with shipping silicon (Intel IAA) to point at.

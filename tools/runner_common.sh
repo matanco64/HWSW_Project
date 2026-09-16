@@ -283,7 +283,7 @@ optimized() {
     pinned python python3 -m pyperformance run --rigorous "${CPU_ARGS[@]}" \
         --manifest "$ROOT/benchmarks/MANIFEST" -b "$BENCH" \
         -o "$RES/optimized_$BENCH.json"
-    # A benchmark with a native tier records its backend; mdp records none.
+    # Benchmarks with a native tier must record the selected backend.
     if [ "$HAS_NATIVE" = 1 ]; then
         assert_backend "$RES/optimized_$BENCH.json" python
     else

@@ -47,7 +47,7 @@ STAMP="$(date -u +%Y%m%d)"
 # --- 2. the named deliverables must exist ------------------------------------
 # project_instructions.md "What You Need to Submit": a report and a run script
 # per selected benchmark, a README, and the AI prompt log. pyflate and nbody are
-# the two submitted benchmarks; mdp is a candidate and is not required here.
+# the two submitted benchmarks.
 missing=0
 for f in report_pyflate.txt report_nbody.txt \
          script_pyflate.sh script_nbody.sh \
