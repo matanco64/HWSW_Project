@@ -53,36 +53,56 @@ Inputs, all cited:
 
 | Symbol | Value | Source |
 |---|---|---|
-| Baseline `T` (stock Python) | **231 ms** (mean ± 3 ms) | `results/baseline_nbody_stats.txt` |
+| Baseline `T` (stock Python) | **231.20 ms** (mean ± 8 ms; median 229 ms) | `results/baseline_nbody_stats.txt` (canonical VM run `vm_canonical_20260910_2c8c754`) |
 | Accelerated fraction `f` | **0.95** (doubly-nested advance loop) | `benchmarks/bm_nbody/run_benchmark.py:71` header comment; PRD §4 (advance = HW) |
 | HW cycles / invocation | **2,480,000** (124 cyc/step × 20 000) | `driver/test_driver.py` (K1 = docs/ppa.md point 2; `test_full_benchmark`) |
 | PRD-target clock | 50 MHz | prd.md K-table; mas.md §3 |
-| **Achievable clock** | **11.15 MHz** (post-CTS STA) | `docs/ppa.md`; `synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt` |
+| **Achievable clock** | **19.46 MHz** (post-CTS STA, parallel-prefix netlist) | `docs/ppa.md` Addendum (2026-09-14); `synth/runs/grape_prefix2/35-openroad-stamidpnr-1/ws.max.rpt` |
 | Driver/bus overhead | ≈ 600 bus cyc/invocation (< 0.03 %) | mas.md §5 |
+
+> **Baseline note.** `T` is the pyperf **mean** (231.20 ms), matching `report_nbody` §1 and
+> the canonical VM suite. The **median** is 229 ms (what `prd.md`/`STATUS.json` quote for the
+> KPI check); the two differ only by mean-vs-median on a right-skewed distribution
+> (`baseline_nbody_stats.txt:16-19`). Speedups here use the mean; using the median moves every
+> `S` below by ≈ 0.8 %.
+
+> **Clock note.** The achievable clock is **19.46 MHz**, measured post-CTS on the
+> **parallel-prefix** accumulate netlist (`grape_prefix2`, docs/ppa.md Addendum 2026-09-14).
+> The earlier **11.15 MHz** figure was the *pre-rewrite* linear-scan netlist (`grape_relaxed`)
+> whose critical path was the accumulate issue picker; the prefix rewrite dropped that path out
+> of the critical path (bit-exact, K1 = 124 unchanged) and is superseded here. 11.15 MHz is kept
+> only as history in `docs/ppa.md`.
 
 HW compute time `t_hw = 2.48e6 / f_clk`; new total `= (1−f)·T + t_hw`; Amdahl `S = T / new_total`.
 
 | Clock | `t_hw` | Non-accel (5 % of T) | New total | **Speedup S** | KPI K3 (≥ 4×) |
 |---|---|---|---|---|---|
-| 50 MHz (PRD target) | 49.6 ms | 11.55 ms | 61.15 ms | **3.78×** | ~ meets (4.45× at f = 0.99) |
-| **11.15 MHz (achievable)** | **222.4 ms** | 11.55 ms | 233.9 ms | **≈ 1.0× (0.99×)** | **misses** |
+| 50 MHz (PRD target) | 49.6 ms | 11.56 ms | 61.16 ms | **3.78×** | ~ meets (4.45× at f = 0.99) |
+| **19.46 MHz (achievable)** | **127.4 ms** | 11.56 ms | 139.0 ms | **≈ 1.66×** | **misses** |
 
+- **Compute-only upper bounds** (residual → 0, the headline the report quotes): `t_hw` alone
+  is 127.4 ms, so **231.20 / 127.4 = 1.81× vs stock** and **143.13 / 127.4 = 1.12× vs the
+  143.13 ms optimized-Python tier** (`report_nbody` §1/§3). These bound `S` from above; the
+  Amdahl rows include the 5 % residual.
 - **Ideal bound** `1/(1−f) = 20×` (infinite-speed accelerator; the 5 % residual caps it).
-- **Sensitivity — `f`:** at f = 0.99 the residual is 2.3 ms → 50 MHz gives **4.45×** (clears
-  K3), 11.15 MHz gives **1.03×**. At f = 0.90, 50 MHz gives 3.3×. The conclusion is
-  clock-driven, not f-driven.
+- **Sensitivity — residual:** retaining 1–5 % of stock runtime gives **1.66–1.78×** at
+  19.46 MHz (f = 0.99 → residual 2.3 ms → 1.78×; f = 0.95 → 1.66×). The conclusion is
+  clock-driven, not residual-driven.
+- **Sensitivity — `f` at target clock:** at 50 MHz, f = 0.99 gives **4.45×** (clears K3),
+  f = 0.90 gives 3.3×.
 - **Sensitivity — bus latency:** doubling the per-transaction cost (4 → 8 cycles ⇒ ~1,200
-  bus cyc/invocation) adds ~110 µs at 11 MHz — negligible vs a 222 ms compute; the estimate
+  bus cyc/invocation) adds ~60 µs at 19.46 MHz — negligible vs a 127 ms compute; the estimate
   is insensitive to the bus-latency assumption.
 
 **Finding.** At the **PRD-target 50 MHz** the accelerator meets its intent (~3.8–4.5×,
-clearing K3 ≥ 4× near the top of the `f` range). At the **achievable 11.15 MHz** — set by
-the accumulate-picker critical path (`u_fsm → g_add[*]`, docs/ppa.md) — the accelerator
-delivers **essentially no end-to-end speedup** (it is compute-bound at ~4.5× below target).
-The documented, gating RTL follow-up is therefore to **pipeline the accumulate issue picker**
-so the clock recovers toward ~45–50 MHz; K3 is not achievable on the current netlist. This is
-the same critical path the PPA STA flagged — the speedup story and the timing story point to
-one fix.
+clearing K3 ≥ 4× near the top of the `f` range). At the **achievable 19.46 MHz** — set now by
+the **integrate-multiplier operand path** (`u_fsm → g_add[2].u_mul`, docs/ppa.md Addendum), the
+new critical path after the prefix rewrite moved the old accumulate-picker path off-critical —
+the accelerator is still **compute-bound (~1.66×, ~2.6× short of the target clock)** and does
+not beat the 9.53 ms native-software tier. The documented, gating RTL follow-up is therefore to
+**pipeline the integrate-multiply path** (the current limiter) to recover the clock toward
+~45–50 MHz; K3 remains gated on timing closure, not on the interface. This is the same critical
+path the latest PPA STA flags — the speedup story and the timing story point to one fix.
 
 ## 4. Rubric map (project_instructions.md §7)
 
@@ -94,7 +114,7 @@ one fix.
 | HW/SW interface (APIs, drivers, MMIO, DMA) | `docs/mas.md` §6 + `driver/grape_pipeline_driver.py` (this stage) |
 | Acceleration justification + estimate | `docs/prd.md` §KPI + `docs/integration.md` §3 (Speedup) |
 | Block diagram | `docs/mas.md` §7 / `docs/block_diagram.svg` |
-| Performance / area / power trade-offs | `docs/ppa.md` (Yosys 4.075 mm²; K1 trade-off table; post-CTS STA Fmax 11.15 MHz) |
+| Performance / area / power trade-offs | `docs/ppa.md` (Yosys 4.075 mm², 584,454 cells; K1 trade-off table; post-CTS STA Fmax **19.46 MHz** parallel-prefix netlist, was 11.15 MHz linear-scan) |
 
 ## 5. Text for `report_nbody` §5
 
@@ -104,11 +124,12 @@ one fix.
 > doorbell once per 20,000-step invocation; the driver model is
 > `hw/grape_pipeline/driver/grape_pipeline_driver.py`, verified register-for-register
 > against the architecture spec (0 differences) and against a full-invocation cycle model
-> (2,480,000 cycles = 124 cyc/step × 20,000). Against the 231 ms stock-Python baseline
-> (95 % of it in advance), Amdahl gives **~3.8–4.5× at the 50 MHz design target**. However,
-> post-CTS static timing (the furthest the OpenLane 2 flow reached before the OpenROAD
-> GRT-0607 router bug) puts the achievable clock at only **11.15 MHz**, set by the 3-wide
-> accumulate issue picker on the critical path — at which the end-to-end speedup collapses
-> to ~1×. The concrete next step is to pipeline that picker to recover the clock; the
-> architecture, driver and area are in place, and the speedup is gated on timing closure,
-> not on the interface.
+> (2,480,000 cycles = 124 cyc/step × 20,000). Against the 231.20 ms stock-Python baseline
+> (mean; 95 % of it in advance), Amdahl gives **~3.8–4.5× at the 50 MHz design target**. The
+> achievable clock from post-CTS static timing (the furthest the OpenLane 2 flow reached before
+> the OpenROAD GRT-0607 router bug) is **19.46 MHz** on the parallel-prefix netlist
+> (`grape_prefix2`; the earlier 11.15 MHz was the pre-rewrite linear-scan netlist), set now by
+> the integrate-multiplier operand path — at which the end-to-end speedup is **~1.66×** and does
+> not beat the 9.53 ms native-software tier. The concrete next step is to pipeline that
+> integrate-multiply path to recover the clock toward the target; the architecture, driver and
+> area are in place, and the speedup is gated on timing closure, not on the interface.

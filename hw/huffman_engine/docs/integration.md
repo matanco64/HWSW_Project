@@ -61,7 +61,7 @@ Inputs, all cited:
 
 | Symbol | Value | Source |
 |---|---|---|
-| Baseline `T` (stock Python) | **1.13 s** (mean, ± 0.02 s) | `results/baseline_pyflate_stats.txt:19` |
+| Baseline `T` (stock Python) | **1,123.49 ms** (mean ± 0.01 s ≈ 1.12 s; median 1.12 s) | `results/baseline_pyflate_stats.txt:18` ("Mean +- std dev: 1.12 sec"), precise mean from `report_pyflate` §1 canonical run |
 | Accelerated fraction `f` | **0.496** (Huffman decode 12.0 % + bit reader 37.6 %) | `docs/prd.md §1` ("this module's slice = 49.6 %", cProfile self-time table) |
 | HW decode cycles (full benchmark) | **149,276** (148,271 symbols, K1 = 1.0068) | `docs/decode_model.py`; `docs/uarch.md §7` |
 | PRD-target clock | 50 MHz (20 ns) | `docs/prd.md` K3; `docs/mas.md §6` |
@@ -72,9 +72,9 @@ Amdahl `S = T / new_total`.
 
 | Clock | `t_hw` | Non-accel (50.4 % of T) | New total | **Speedup S** | Ideal 1/(1−f) |
 |---|---:|---:|---:|:--:|:--:|
-| **50 MHz (PRD target)** | **2.99 ms** | 569.5 ms | 572.5 ms | **≈ 1.97×** | 1.98× |
-| ≈ 8.9 MHz (pre-PnR STA, `docs/ppa.md §3.1`) | 16.8 ms | 569.5 ms | 586.3 ms | **≈ 1.93×** | 1.98× |
-| 5 MHz (pessimistic) | 29.9 ms | 569.5 ms | 599.4 ms | **≈ 1.89×** | 1.98× |
+| **50 MHz (PRD target)** | **2.99 ms** | 566.2 ms | 569.2 ms | **≈ 1.97×** | 1.98× |
+| **≈ 25.1 MHz (post-CTS STA, `docs/ppa.md §3.1`)** | 5.95 ms | 566.2 ms | 572.2 ms | **≈ 1.96×** | 1.98× |
+| 5 MHz (pessimistic) | 29.9 ms | 566.2 ms | 596.1 ms | **≈ 1.89×** | 1.98× |
 
 - **Ideal bound** `1/(1 − f) = 1.98×` (infinite-speed accelerator; the 50.4 % software
   residual — MTF/BWT/RLE/CRC — caps it). At the target clock the accelerator sits **right
@@ -91,7 +91,7 @@ Amdahl `S = T / new_total`.
   S ≈ 1.66×. The result is fraction-driven; the honest range is **~1.9–2.2×**.
 - **Sensitivity — bus latency:** doubling the per-transaction cost (4 → 8 cyc,
   ~1,256 bus cyc/block) adds well under 1 ms across all blocks at any of the clocks above
-  — negligible against the 633 ms software residual.
+  — negligible against the ~566 ms software residual.
 - **Bigger picture:** chaining `mtf_cam` on chip (MAS §1, `m_sym → s_sym`) would move the
   ~11 % move-to-front out of software too, lifting `f` and the ceiling further — the
   intended `pyflate_accel` two-block pipeline.
@@ -119,7 +119,7 @@ Amdahl `S = T / new_total`.
 > against the architecture spec (0 differences) and against the signed-off cycle model
 > (149,276 cycles for the 148,271-symbol benchmark, K1 = 1.0068 cyc/sym). The engine
 > decodes 1 symbol/cycle via a 20-wide comparator cascade with a 0-cycle selector switch.
-> Against the 1.13 s stock-Python baseline, of which **49.6 %** is the Huffman decode plus
+> Against the 1,123.49 ms (≈ 1.12 s) stock-Python baseline, of which **49.6 %** is the Huffman decode plus
 > bit reader (prd.md §1), Amdahl gives **~1.97× at the 50 MHz design target** — essentially
 > the ideal 1.98× bound, because the 3 ms of hardware decode is negligible against the
 > ~560 ms of software Huffman work it removes. Notably the speedup is **clock-insensitive**

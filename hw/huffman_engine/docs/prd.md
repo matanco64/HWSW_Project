@@ -37,7 +37,7 @@ Self-time (tottime) shares, stock pyflate, cProfile of one decode (calibration a
 | RLE4, join, MD5, headers | rest | ~4 % | software |
 
 So **this module's slice = 49.6 %** (decode + bit reader) and the **Huffman+MTF loop = 79.9 %** of
-stock (0.372 s local; VM 3.10: 1.13 s, `results/baseline_pyflate_stats.txt:19`). In Matan's T3
+stock (0.372 s local; VM 3.10: 1.12 s mean, `results/baseline_pyflate_stats.txt:18`). In Matan's T3
 (landed `run_benchmark.py`, 0.119 s local, VM pending) the loop is fused: `decode_huffman_block`
 ≈ 39 % (Huffman + MTF + runs, not separable), inverse BWT ≈ 37 %, RLE4 + rest ≈ 12 %. The inverse
 BWT is a deliberate non-target (ADR-0003, §6); the Amdahl chain stock → T3 → T3 + HW is K4.

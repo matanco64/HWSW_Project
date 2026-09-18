@@ -13,8 +13,10 @@ grape), and the design-point trade-off study. Every number cites its file.
 - **Per-module attribution:** a second, non-flattened `synth -top huffman_engine`
   + `stat -liberty` per submodule → `synth/area_permodule.txt` (each block is
   instantiated once under the top, so local areas sum to the design).
-- **Sign-off (bonus):** OpenLane 2.3.10 via Nix, `synth/config.json`, CLOCK_PERIOD
-  20.0 ns (MAS K3 = 50 MHz), SYNTH_HIERARCHY_MODE deferred_flatten (grape OOM lesson).
+- **Sign-off (bonus):** OpenLane 2.3.10 via Nix, SYNTH_HIERARCHY_MODE deferred_flatten (grape
+  OOM lesson). Two configs: `synth/config.json` (CLOCK_PERIOD 20.0 ns = MAS K3 50 MHz — placement
+  non-convergent) and **`synth/config_confirm.json` (40 ns, FP_CORE_UTIL 35)** which converged
+  through post-CTS STA (the reported operating point, §3 — relaxing the clock is grape's lesson).
 - **Clock target:** MAS §6 timing budget, K3 ≥ 50 MHz (20 ns period).
 - Requirement source (project_instructions.md §7 / hw-ppa): a trade-off **discussion
   with a defined operating frequency**; OpenLane GDS sign-off is bonus, not a gate.
@@ -100,58 +102,71 @@ The PRD carries a **soft** K5 area target of 1.0 mm²; the design lands at **1.6
 
 ## 3. OpenLane 2 — sign-off attempt (bonus)
 
-OpenLane 2.3.10 (`synth/config.json`, CLOCK_PERIOD 20.0 ns, deferred_flatten) was given
-**one time-boxed attempt** on this 24 GB WSL host. Unlike grape (which OOM'd in synthesis
-until `deferred_flatten` and then hit OpenROAD **GRT-0607** three times), huffman at 151 k
-cells is ~4× smaller: **synthesis completed cleanly**, all yosys/netlist checkers passed,
-and the flow reached **OpenROAD pre-PnR STA** and **global placement** before it was killed.
-The one config adjustment was `RUN_LINTER: false` — OpenLane's bundled Verilator 5.018
-rejects a `BLKLOOPINIT` construct (delayed array write in a for-loop) that the project's
-pinned Verilator ≥ 5.036 accepts (the RTL-stage `make lint` is clean); the design RTL was
-unchanged.
+OpenLane 2.3.10 (deferred_flatten) was run on this 24 GB WSL host. Unlike grape (which OOM'd
+in synthesis until `deferred_flatten` and then hit OpenROAD **GRT-0607** three times), huffman
+at 151 k cells is ~4× smaller: **synthesis completed cleanly**, all yosys/netlist checkers
+passed. The one config adjustment was `RUN_LINTER: false` — OpenLane's bundled Verilator 5.018
+rejects a `BLKLOOPINIT` construct (delayed array write in a for-loop) that the project's pinned
+Verilator ≥ 5.036 accepts (the RTL-stage `make lint` is clean); the design RTL was unchanged.
 
-**Why it was closed before GDS.** The **pre-PnR STA is already decisive**: the design misses
-20 ns by a wide margin, and global placement was **non-convergent** — 2,200+ Nesterov
-iterations with the overflow stuck at ~0.29 (needs < 0.1) while the timing-driven resizer
-bloated HPWL from 5→8.8×10⁹ upsizing cells to chase the critical path. That is exactly the
-repair-bloat → congestion trajectory that drove grape into GRT-0607; pushing routing would
-sink hours for a near-certain router failure. Per project_instructions.md §7 (OpenLane
-sign-off is **not** required — a trade-off discussion with a defined operating frequency
-suffices), the run is closed on the real STA below.
+**Two runs, and the key lesson.** The first run (`signoff2`, `synth/config.json`, **20 ns**
+clock) reached only **pre-PnR STA** before global placement went **non-convergent** — 2,200+
+Nesterov iterations, overflow stuck at ~0.29, the timing-driven resizer bloating HPWL 5→8.8×10⁹
+chasing an impossible 20 ns target. That is the same repair-bloat trajectory that drove grape
+into GRT-0607. **The fix (grape's lesson) is to relax the clock so the resizer is not chasing an
+unachievable target:** a second run (`signoff_confirm`, `synth/config_confirm.json`, **40 ns**
+clock, FP_CORE_UTIL 35) **converged cleanly through floorplan, placement, CTS and post-CTS STA**
+— the same depth mtf_cam reached — with **0 setup violations**. The number below is that
+**post-CTS STA**, which *supersedes* the earlier pre-PnR estimate.
 
-### 3.1 Operating frequency — OpenROAD pre-PnR STA
+> **The pre-PnR 8.9 MHz was a high-fanout-net wireload artifact, not the real timing.** At
+> pre-PnR the worst path's ~111 ns arrival was dominated by a single high-fanout net
+> (`u_regs._86086_/Q` driving thousands of `u_build` pins) with no clock tree and unbuffered
+> net RC — the OpenLane `violator_list` at global placement shows this net as the top offender.
+> This is the **same class of artifact as grape's pre-PnR fanout-2253 broadcast net (~221 ns)**.
+> Once CTS buffers that net into a tree (post-CTS), the real timing emerges — and it is
+> **faster**, not slower, than the pre-PnR estimate. So huffman moves from *pre-placement* to
+> *post-CTS* evidence, matching grape and mtf_cam.
 
-Worst setup slack at the 20 ns target, `Fmax = 1/(period − ws)`. Source:
-`synth/runs/signoff2/08-openroad-staprepnr/<corner>/max.rpt`.
+Per project_instructions.md §7 (OpenLane GDS sign-off is **not** required — a trade-off
+discussion with a defined operating frequency suffices), the run is closed on the post-CTS STA
+below (it went one step further, into the post-CTS resizer + global routing, then stopped —
+same as grape/mtf; no GDS).
 
-| Corner | Worst setup slack | Achievable period | **Fmax** |
-|---|---:|---:|:--:|
-| **nom_tt_025C_1v80** (sign-off) | **−91.886 ns** | 111.886 ns | **≈ 8.9 MHz** |
-| nom_ss_100C_1v60 (slow) | −172.237 ns | 192.237 ns | ≈ 5.2 MHz |
-| nom_ff_n40C_1v95 (fast) | −53.062 ns | 73.062 ns | ≈ 13.7 MHz |
+### 3.1 Operating frequency — OpenROAD post-CTS STA (measured near-critical)
 
-- **Caveat:** these are **pre-placement** STA (ideal clock network, estimated/unbuffered
-  net RC), so they are *optimistic on the clock tree* and would drop after CTS + routing —
-  ~8.9 MHz (tt) is an upper bound on this netlist, not a signed-off number.
-- **Critical path:** startpoint `u_regs._86212_` (a `huff_regs` count/length register) →
-  endpoint `u_tab._163476_` (a `huff_tables` set flop), data arrival **111.5 ns** through a
-  `sky130_fd_sc_hd__mux2` chain in `u_tab` — i.e. the **canonical-table build recurrence +
-  the wide symtab/table-set write mux**, *not* the decode comparator cascade. This matches
-  §1.1: the area *and* the timing are dominated by `huff_tables`/`huff_regs` storage.
-- **Fmax vs K3 (≥ 50 MHz).** The netlist misses 50 MHz by ~5.6× (tt). The documented RTL
-  follow-up is to **pipeline the table build** (the first_code/base recurrence over lengths
-  1..20) and **register the symtab read-mux path** into stages — a datapath change deferred
-  to a future RTL iteration, not a PPA-stage fix. This is the same block (`huff_tables`) that
-  dominates area, so the area and timing follow-ups coincide.
+Worst setup slack at the **40 ns** constraint (near-critical, so the tool actually optimizes the
+critical path — not a loose over-relaxed read), propagated post-CTS clock, `Fmax = 1/(period −
+ws)`. Source: `synth/runs/signoff_confirm/31-openroad-stamidpnr-1/` (`max.rpt`,
+`openroad-stamidpnr-1.log`).
+
+| Stage | Worst setup slack (tt) | Achievable period | **Fmax** | Note |
+|---|---:|---:|:--:|---|
+| **post-CTS STA** (`31-openroad-stamidpnr-1`, 40 ns) | **+0.156 ns** (reg→reg) | **39.84 ns** | **≈ 25.1 MHz** | **the operating point** — 0 setup violations, real clock tree, near-critical |
+| pre-PnR STA (`signoff2/08-staprepnr`, 20 ns) | −91.886 ns | 111.886 ns | ≈ 8.9 MHz | **superseded** — high-fanout wireload artifact (see box above) |
+
+- **Defined operating frequency: ≈ 25.1 MHz (tt, post-CTS).** The 20 ns / 50 MHz K3 target is
+  **missed by ~2.0×** (not the ~5.6× the pre-PnR artifact suggested). This is a *real* post-CTS
+  number (propagated clock, placed cells, 0 setup violations across 269,517 reported paths); it
+  is an upper bound only in that detailed routing would add net RC.
+- **Critical path** (post-CTS, near-critical): startpoint `u_regs._86125_` (a `huff_regs`
+  length/counter register) → endpoint `u_axi._262_` (an AXI-Lite readback register). Once CTS
+  buffered the `huff_tables` build net, the near-critical path is a `huff_regs → AXI` status/
+  counter path. The documented RTL follow-up to reach 50 MHz remains to **pipeline the table
+  build** and **register the wide readback mux** — the same storage blocks (`huff_tables`/
+  `huff_regs`) that dominate area, so area and timing follow-ups coincide.
 
 ### 3.2 Power
 
-- **Not a signoff figure.** OpenROAD `report_power` at pre-PnR (tt) reports ≈ **0.90 W**
-  (`08-openroad-staprepnr/nom_tt_025C_1v80/power.rpt`: 92 % combinational), but with **no
-  clock tree and default switching activity** this is indicative only — a real power number
-  needs post-CTS/GDS, which the time-boxed run did not reach. Per the task, **no power number
-  is invented**; `ppa.power_mw` is left unrecorded (0).
-- **Die shot:** not obtained — no GDS was produced (run closed before detailed routing).
+- **Post-CTS indicative.** OpenROAD `report_power` at post-CTS (tt, 40 ns run) reports
+  **≈ 283 mW** (`signoff_confirm/31-openroad-stamidpnr-1/power.rpt`, `power__total: 0.28315`):
+  51 % internal + 49 % switching. With a placed clock tree this is far more meaningful than the
+  pre-PnR estimate, but it uses **default switching activity** (no real VCD) at the run's 40 ns
+  (25 MHz) constraint, so it is indicative only and scales with clock (the looser 120 ns
+  `signoff_relaxed` run reported ≈ 98 mW at its 8.3 MHz constraint — consistent, power ∝ freq).
+  `ppa.power_mw ≈ 283` (post-CTS, default activity, 40 ns).
+- **Die shot:** **not obtained** — no GDS was produced (run closed after post-CTS, before
+  detailed routing), same as grape/mtf.
 
 ### 3.3 Honest status summary
 
@@ -159,9 +174,11 @@ Worst setup slack at the 20 ns target, `Fmax = 1/(period − ws)`. Source:
 |---|---|
 | Yosys+Liberty area + cell counts | **done** (§1: 151,058 cells, 1.634 mm²) |
 | OpenLane synthesis | **done** (clean; passed all checkers) |
-| Fmax | **pre-PnR STA only** — ≈ 8.9 MHz tt (§3.1); post-CTS not reached (placement non-convergent) |
+| OpenLane placement + CTS | **done** (`signoff_confirm`, 40 ns; converged, 0 setup violations) |
+| Fmax | **post-CTS STA** — ≈ 25.1 MHz tt (§3.1), near-critical; supersedes the pre-PnR 8.9 MHz artifact |
 | Area (OpenLane placed) | not reported — use Yosys 1.634 mm² (§1) |
-| Power / die shot | **not obtained** (no GDS; not §7-required, not invented) |
+| Power | **post-CTS indicative** ≈ 283 mW (§3.2, default activity, 40 ns) |
+| Die shot | **not obtained** (no GDS; not §7-required, not invented) |
 
 ## 4. Report §7 mapping
 

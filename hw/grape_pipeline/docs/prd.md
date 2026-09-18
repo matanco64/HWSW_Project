@@ -14,7 +14,7 @@ update of every pair in FP64, then advance every position by `dt·v`. Software l
 once, rings one doorbell, and reads the state back.
 
 **Workload slice** (`results/`): one benchmark loop = `report_energy(); advance(0.01, 20000);
-report_energy()`. Baseline 229 ms median per loop (`results/baseline_nbody_stats.txt:19`) ⇒
+report_energy()`. Baseline 229 ms median per loop (`results/baseline_nbody_stats.txt:17`; mean 231 ms `:18`) ⇒
 **11.45 µs = ~45,000 CPU cycles per step**. The profile is interpreter-bound: `_PyEval_EvalFrameDefault`
 44.49 % self (`results/perf_report_nbody.txt:12`), `binary_op1` 5.75 % (l.123), `PyFloat_FromDouble`
 3.78 % (l.142), `float_mul` 3.66 % (l.149), `list_ass_item` 2.83 % (l.154), `float_dealloc` 2.76 %

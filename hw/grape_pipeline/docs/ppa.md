@@ -53,6 +53,12 @@ Secondary observations for the report:
 
 ## OpenLane 2 (sign-off) — outcome
 
+> **⚠️ Superseded number below.** The 11.15 MHz Fmax in this section is the **pre-rewrite,
+> linear-scan** netlist (`grape_relaxed`). It is kept for the record and as the "before" of the
+> before/after comparison. The **current achievable Fmax is 19.46 MHz** on the parallel-prefix
+> netlist — see the **Addendum (2026-09-13/14)** below, which is the number all other docs and
+> the report quote.
+
 OpenLane 2 signoff was attempted **eight times** on this 24 GB WSL host and never reached GDS.
 The saga, for the record:
 
@@ -128,15 +134,18 @@ apples-to-apples numbers above are both post-CTS.)
 **§7 framing.** Per project_instructions.md §7 ("You are not expected to synthesize"), the
 requirement is a trade-off **discussion with a defined operating frequency**. That is satisfied
 here: the Yosys area/cell counts, the measured 2-point K1 trade-off table, and this post-CTS STA
-together define the operating point (~11.15 MHz achievable on this netlist) and its cost. Full
+together define the operating point (**~19.46 MHz** achievable on the parallel-prefix netlist;
+the 11.15 MHz figure above is the pre-rewrite linear-scan point) and its cost. Full
 OpenLane signoff (power, die shot) was **bonus**, not a §7 requirement, and did not converge
 because of the OpenROAD GRT-0607 router bug — an environment/tool limitation, not a design gap.
 
 ## Report §7 mapping
 
 Performance: K1 124 cycles/step measured on the full benchmark (2.48 M cycles / 20 k steps =
-49.6 ms at the 50 MHz PRD target; **but the achievable clock from post-CTS STA is ~11.15 MHz →
-~225 ms** — both quoted in `hw-integrate`). Area: 4.075 mm² sky130 HD, trade-off table above.
-Fmax: ~11.15 MHz from post-CTS STA (`synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt`),
-critical path the accumulate picker → 50 MHz missed ~4.5×, RTL fix = pipeline the picker.
+49.6 ms at the 50 MHz PRD target; **the achievable clock from post-CTS STA is ~19.46 MHz →
+~127.4 ms** on the parallel-prefix netlist — see the Addendum above and `hw-integrate`). Area:
+4.075 mm² sky130 HD (584,454 cells), trade-off table above. Fmax: **~19.46 MHz** from post-CTS
+STA (`synth/runs/grape_prefix2/35-openroad-stamidpnr-1/ws.max.rpt`; the earlier ~11.15 MHz was
+the pre-rewrite linear-scan netlist `grape_relaxed`), critical path now the integrate-multiplier
+operand path → 50 MHz missed ~2.6×, RTL fix = pipeline the integrate-multiply path.
 Power/die shot: not obtained (OpenLane GRT-0607, signoff not §7-required).

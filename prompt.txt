@@ -658,6 +658,48 @@ To https://github.com/matanco64/HWSW_Project.git
  ! [remote rejected] main -> main (pre-receive hook declined)
 error: failed to push some refs to 'https://github.com/matanco64/HWSW_Project.git'"
 
+2026-09-14T18:43:31Z — Claude Code session (auto-logged)
+Prompt: "stuck with no progress:"
+
+2026-09-14T18:43:33Z — Claude Code session (auto-logged)
+Prompt: "stuck with no progress:
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git push origin main"
+
+2026-09-14T18:45:48Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git config --global http.lowSpeedLimit 1000
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git config --global http.lowSpeedTime 20
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git push origin main
+^C
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ ssh-keygen -t ed25519 -C "uv.kogan@gmail.com"
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/yuvalk/.ssh/id_ed25519): ~/.ssh/id_ed25519.pub
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Saving key "~/.ssh/id_ed25519.pub" failed: No such file or directory"
+
+2026-09-14T18:49:09Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git push origin main
+Enumerating objects: 980, done.
+Counting objects: 100% (910/910), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (350/350), done.
+Writing objects: 100% (846/846), 1.89 MiB | 13.06 MiB/s, done.
+Total 846 (delta 515), reused 805 (delta 479), pack-reused 0
+remote: Resolving deltas: 100% (515/515), completed with 37 local objects.
+To github.com:matanco64/HWSW_Project.git
+   e6e1f35..afdb5f0  main -> main"
+
+2026-09-14T18:52:18Z — Claude Code session (auto-logged)
+Prompt: "what are the next steps? anything to do before we run on the qemu? is the hardware ready?"
+
+2026-09-15T19:45:23Z — Claude Code session (auto-logged)
+Prompt: "are the other sub-agents alive or can we close them?"
+
+2026-09-15T20:05:40Z — Claude Code session (auto-logged)
+Prompt: "what about:
+  ◯ general-purpose  Verifying committed formal/ files                                                                                 5h 27m 37s · ↓ 395.4k tokens
+❯ ◯ general-purpose  Diffing mtf_list_inv.sv and formal.sby"
+
 2026-09-15T14:42:25Z — Claude Code session (auto-logged)
 Prompt: "lets first fix the flame graphs, after that restore the hardware section for pyflate, but try to save your context in some way first so you won't forget important stuff about pyflate when returning to it"
 
@@ -670,3 +712,23 @@ Prompt: "I updated some of the project, tell me what you think"
 
 2026-09-15T15:33:29Z — Claude Code session (auto-logged)
 Prompt: "yes also ensure it works on the remote machine (which is connected) and try to test a clean enviroment, I also would like to add a make_submission script"
+
+2026-09-16T21:46:22Z — Claude Code session (auto-logged)
+Prompt: "continue"
+
+2026-09-17T20:51:29Z — Claude Code session (auto-logged)
+Prompt: "now we have new commits from Matan with updated reports. compare the changes in the files in the last pull and analyze if any change should be made in the hw reports."
+
+2026-09-17T20:59:23Z — Claude Code session (auto-logged)
+Prompt: "do both"
+
+2026-09-17T21:37:23Z — Claude Code session (auto-logged)
+Prompt: "now I want to review the reports and progress toward closing this project.
+  give me detailed baby steps for reviewing all the reports, understand where we stand and what we have and how we progress towards closing the project according
+  to the @project_instructions.md @project_instructions.pdf"
+
+2026-09-18T08:00:38Z — Claude Code session (auto-logged)
+Prompt: "I think the presentation is not mandatory for the submission"
+
+2026-09-18T09:39:39Z — Claude Code session (auto-logged)
+Prompt: "did A1. give me the commands for A2"
