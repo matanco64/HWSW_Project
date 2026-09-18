@@ -209,7 +209,7 @@ effective sample size.
 
 
                                                         4
-HWSW Final Project                                                                           Appendix: Measurement Methodology
+HWSW Final Project                                                                  Appendix: Measurement Methodology
 
 A6. Flat function tables
 report/summarize_profiles.py aggregates functions across recorded call sites and prints self and inclusive
@@ -238,29 +238,65 @@ workers and records CPU affinity 0; the optimized, Python and native JSONs also 
 actual back end, and the native JSONs the extension hash, which matches the wheel built in the same run.
 tools/check_all.sh --require-native then passed all six checks, none skipped.
 
- Comparison                                                      Before (ms)              After (ms)              Speedup
- Nbody stock / optimized                                                 231.20               143.13                   1.62×
- Nbody Python / native                                                   145.30                9.530                 15.25×
- Pyflate stock / optimized                                              1,123.49              281.16                   4.00×
- Pyflate Python / native                                                 283.88               170.01                   1.67×
- Pyflate stock / native                                                 1,123.49              170.01                   6.61×
+ Comparison                                           Before (ms)                After (ms)              Speedup
+ Nbody stock / optimized                                     231.20                   143.13                  1.62×
+ Nbody Python / native                                       145.30                    9.530                15.25×
+ Pyflate stock / optimized                                  1,123.49                  281.16                  4.00×
+ Pyflate Python / native                                     283.88                   170.01                  1.67×
+ Pyflate stock / native                                     1,123.49                  170.01                  6.61×
 Every native JSON identifies the binary installed from the wheel built in that run; rust/<crate>/wheels/
 PROVENANCE.json accompanies each preserved wheel. Earlier captures remain as cross-checks in their
 original directories, with history in report/history/. This report revision reuses those measurements and
 introduces no new benchmark timing.
-Hardware evidence map
-hw/grape_pipeline/docs/ppa.md contains the September 14 prefix-rewrite timing addendum; its older
-synthesis-area table describes the earlier architecture. The nbody report keeps these revisions separate. hw/
-huffman_engine/docs/ppa.md records pre-placement timing, while hw/mtf_cam/docs/ppa.md records post-
-CTS timing and default-activity power. None is a completed routed sign-off or a physical system benchmark.
-MTF integration records 158,441 RTL cycles; the W-sweep’s 157,560-cycle default is a model result. The
-reports label both. Platform DMA and host overhead, combined-chain throughput, and energy savings
-remain unmeasured. The worked software examples are checked by report/verify_examples.py; defense
-questions and an evidence map are in report/defense_guide.md.
+
+A8. Hardware evidence
+Software times in this report are measured on the course VM (A7). Hardware figures are not: cycle counts
+come from RTL simulation against golden models, area from synthesis, and clock and power estimates from
+place-and-route static timing, all on the development host. The hardware comparisons in the two reports
+divide the first kind of number by the second. The denominators are the A7 table above and A3′s 3.304 ms
+native decode phase.
+All three modules now record post-CTS static timing and a default-activity power estimate in hw/<module>/
+docs/ppa.md: grape_pipeline 19.46 MHz, huffman_engine 39.9 MHz, mtf_cam 37.6 MHz. The timing and
+power reports those numbers were read from are preserved in hw/<module>/synth/evidence/. None is a
+completed routed sign-off or a physical system benchmark. grape_pipeline’s synthesis-area table was
+measured before the final rewrite of its issue-selection logic. MTF integration records 158,441 RTL cycles; the
+W-sweep’s 157,560-cycle default is a model result. The reports label both. The two pyflate modules are also
+simulated together: make -C hw/pyflate_accel sim runs the chain on the benchmark block, byte-exact
+over 336,184 bytes in 159,303 cycles. Platform DMA and host overhead, and energy savings, remain
+unmeasured. hw/docs/hardware_report.md maps every required hardware item to its source file. The
+
+
+                                                        5
+HWSW Final Project                                                                                 Appendix: Measurement Methodology
+
+worked software examples are checked by report/verify_examples.py; defense questions and an evidence
+map are in report/defense_guide.md.
+ Step                        Tool (version)                             Why this tool
+ Design language             SystemVerilog, synthesizable               the same source passes Verilator and Yosys
+                             subset
+ Lint, main simulation       Verilator 5.051                            compiled simulation is fast enough to run the whole
+                                                                        benchmark input per test; line/toggle coverage
+ Cross-check                 Icarus Verilog 14.0                        4-state: shows X-propagation after reset, which 2-state
+ simulation                                                             Verilator cannot
+ Testbench                   cocotb 2.0.1, pyuvm 4.0.1,                 golden models are Python, so a Python testbench calls
+                             cocotbext-axi 0.1.28                       them directly as the scoreboard oracle; AXI bus models
+                                                                        with back-pressure
+ Driver and unit tests       pytest 9.1.1                               register-map checks and driver models without a
+                                                                        simulator
+ Formal                      SymbiYosys 0.68                            proves control properties simulation only samples: FSM
+                                                                        arcs, handshakes, list invariants
+ Synthesis, area             Yosys 0.68, sky130 high-density            open synthesis onto real standard cells gives cell count
+                             cells (tt, 25 °C, 1.8 V)                   and area
+ Process                     SkyWater sky130                            the fully open 130 nm PDK, reproducible without an
+                                                                        NDA; no SRAM macros, so all storage is flip-flops
+ Place, clock tree,          OpenLane 2.3.10 (OpenROAD)                 floorplan, placement, clock-tree synthesis, static timing
+ timing, power                                                          and power estimate; routing not reached
+ Tool bundle                 OSS CAD Suite 2026-08-26                   one pinned archive gives identical versions on any
+                                                                        machine
 References: Python profile semantics version-specific bytecode repository and raw data.
 
 
 
 
-                                                                    5
+                                                                    6
 

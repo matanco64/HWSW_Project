@@ -205,20 +205,26 @@ at N = 100–3,200, using approximately equal pair-update counts (`results/bigN_
 #pagebreak()
 = 5. Hardware acceleration: current design
 
-`grape_pipeline` retains state on the device and executes a complete `advance(dt, n)` request.
-Force computation suits a scheduled datapath, while velocity accumulation must respect
-dependencies between pairs sharing a body. Steps remain serial.
+`grape_pipeline` is our accelerator for the `advance()` kernel. The name follows GRAPE
+("GRAvity PipE"), the University of Tokyo family of special-purpose N-body machines, which
+hard-wire the pairwise-force formula as a pipeline and leave the rest to a host. Ours differs in
+two ways that the benchmark forces. It computes in full IEEE-754 FP64 in the benchmark's own
+operation order, because reduced-precision pair forces diverge from the Python energy trace.
+It also retains state on the device and executes a complete `advance(dt, n)` request, rather
+than returning forces to a host integrator. Force computation suits a scheduled datapath, while
+velocity accumulation must respect dependencies between pairs sharing a body. Steps remain serial.
 
 #figure(image("fig/grape_report.svg", width: 100%),
   caption: [Current datapath and software boundary, summarized from the approved architecture.
   Multiplication and accumulation round separately; there is no FMA unit.])
+#v(0.5em)
 
-*Datapath.* Three FP64 add/subtract units, three multipliers, one square-root unit and one
+*Datapath:* Three FP64 add/subtract units, three multipliers, one square-root unit and one
 reciprocal unit share a scheduled 290-operation step. The square root uses radix-4 iteration;
 the reciprocal uses a ROM seed and refined fixed-point arithmetic. An ordered accumulation
 sequencer resolves body-component dependencies before positions are updated and committed.
 
-*Interface.* A 32-bit AXI4-Lite slave exposes FP64 body state and `DT`, 32-bit `NSTEPS`,
+*Interface:* A 32-bit AXI4-Lite slave exposes FP64 body state and `DT`, 32-bit `NSTEPS`,
 pair configuration, control/status, counters and IRQ. Software loads state and parameters,
 starts one request, waits, then reads state. There is no per-step DMA or Python call.
 A register-level driver model implements this protocol and is checked against the register
@@ -237,27 +243,42 @@ velocity contributions, and the next step uses the committed positions.
 #figure(image("fig/pair_dependency.svg", width: 100%),
   caption: [Illustrative dependency chain for body 0's x velocity. Force terms may be
   prepared independently, while the two rounded velocity updates remain ordered.])
+#v(0.5em)
 
-#pagebreak()
 == Verification and physical cost
 
-#result-table(columns: (1fr, 2fr),
-  table.header([*Evidence*], [*Result and scope*]),
-  [Full-benchmark RTL simulation], [124 cycles/step; 2,480,000 cycles over 20,000 steps;
-    zero mismatches against the hardware arithmetic model],
-  [Recorded regression], [9/9 tests on Verilator and Icarus after the prefix rewrite;
-    numerical checks against stock use tolerances],
-  [Architectural clock target], [50 MHz; 49.6 ms compute time if achieved],
-  [Latest post-CTS timing], [≈ 19.46 MHz, typical corner, `grape_prefix2` (2026-09-14);
-    ≈ 127.4 ms computed execution time],
-  [Physical completion / power], [No completed routed sign-off or GDS; no workload power result],
+*How these numbers were produced:* the accelerator is written in SystemVerilog and simulated
+cycle by cycle (Verilator, cross-checked with Icarus) inside a Python testbench that runs the
+real 20,000-step benchmark and compares every result against a _golden model_, a Python
+reference of the same arithmetic. Cycle counts, test results and coverage come from these runs.
+The design is then _synthesized_: Yosys translates it into a netlist of standard logic cells
+from _sky130_, the open-source SkyWater 130 nm process, which gives cell count and area.
+Finally OpenLane _places_ the cells, builds the clock tree and runs _static timing analysis_,
+which sums gate and wire delays along every register-to-register path; the slowest path sets
+the maximum clock. We stop after clock-tree synthesis (post-CTS): cells and the clock network
+are placed but signal wires are not routed, so the frequency is an estimate, not silicon. The
+toolchain is entirely open source, so every number can be regenerated from the repository.
+
+#result-table(columns: (1.1fr, 1.1fr, 1.8fr), align: (left, right, left),
+  table.header([*Quantity*], [`grape_pipeline`], [*Produced by*]),
+  [Cycles per step], [124], [RTL simulation against the golden model],
+  [Full-benchmark cycles], [2,480,000; 0 mismatches], [same, 20,000 steps],
+  [Directed + random tests], [9 of 9], [same, Verilator and Icarus],
+  [Line / toggle coverage], [91.7% / 96.0%], [same],
+  [Cells], [584,454], [Yosys synthesis onto sky130 cells],
+  [Area], [4.075 mm²], [same],
+  [Timing-derived frequency], [≈ 19.46 MHz], [OpenLane: place, clock tree, static timing],
+  [Power estimate], [≈ 19 mW], [same, default switching activity],
 )
 
-The schedule predicted 123–127 cycles/step; RTL measured 124. Clock-tree synthesis (CTS)
-adds the clock distribution network, so post-CTS static timing includes a placed clock tree,
-but is still a preliminary timing estimate rather than measured silicon performance.
-The 19.46 MHz estimate derives from a 150 ns constraint and +98.6212 ns setup slack.
-The design has not demonstrated the 50 MHz target.
+*Evidence levels:* the schedule model predicted 123–127 cycles/step and RTL measured 124.
+The 19.46 MHz estimate derives from a 150 ns constraint and +98.6212 ns worst setup slack at
+the typical corner; the critical path is the integrate-multiplier operand path. It is a
+preliminary timing estimate rather than measured silicon performance: there is no routed
+sign-off or GDS, and the design has not demonstrated its 50 MHz target. The power figure is a
+tool estimate at the run's 150 ns clock constraint, not workload power. Cell count and area
+were synthesized before the final rewrite of the issue-selection logic into balanced trees,
+which changes selection logic only, not the arithmetic units that dominate the area.
 
 #result-table(columns: (1.6fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Recorded architecture*], [*Mapped cell area*], [*Cycles/step*]),
@@ -265,23 +286,38 @@ The design has not demonstrated the 50 MHz target.
   [Three-wide accumulation, three-port RF], [4.075 mm²], [124],
 )
 
-The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%.
-These sky130 synthesis areas describe the recorded pre-prefix design points; they are not a
-new area measurement for `grape_prefix2`. The subsequent prefix rewrite replaces a roughly
-60-deep issue-selection scan with balanced trees, preserving 124 cycles/step while improving
-the post-CTS frequency estimate from 11.15 to 19.46 MHz. The critical path moved from the
-accumulate-adder selection to the integrate-multiplier operand path. More parallelism can
-reduce cycles while adding selection, forwarding and wiring cost that limits the clock.
+The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%. More
+parallelism can reduce cycles while adding selection, forwarding and wiring cost that limits
+the clock.
 
-*End-to-end estimate.* Use `Tnew = Tremaining + cycles / frequency + Tinterface`.
-At 19.46 MHz, compute alone is 127.4 ms: its ratios against 231.20 ms stock and 143.13 ms
-optimized Python are upper bounds of about 1.81× and 1.12× before residual work and overhead.
-For illustration, retaining 1–5% of stock runtime gives about 1.65–1.78× before interface
-cost. That residual range is a sensitivity assumption, not a matched phase measurement.
-The register protocol estimates roughly 150 AXI-Lite transactions per invocation; real host
-software and interconnect latency remain unmeasured. Even the 50 MHz target's 49.6 ms is
-slower than the 9.53 ms native software. No energy-efficiency advantage follows without
-workload power and complete system measurements.
+== Does the hardware win?
+
+*How the end-to-end time is estimated:* offloading a stage removes its share of the software
+time and adds the hardware's time plus the cost of moving data,
+`T_new = (1 - f)*T_sw + T_hw + T_if`. `T_sw` is the measured software run time and `f` the
+fraction of it that moves to hardware. `T_hw` is RTL cycles divided by the clock frequency.
+`T_if` is the interface time, here about 150 AXI-Lite register transactions per run, which is
+not measured. We assume 5% of stock runtime (harness and energy evaluation) stays in Python;
+that residual is an assumption, not a matched phase measurement.
+
+#result-table(columns: (1.7fr, 0.8fr, 0.7fr, 1.5fr), align: (left, right, right, left),
+  table.header([*Tier*], [*Time / run*], [*vs stock*], [*Evidence*]),
+  [Stock Python], [231.20 ms], [1.00×], [measured],
+  [Optimized Python], [143.13 ms], [1.62×], [measured],
+  [Native Rust], [9.53 ms], [24.3×], [measured],
+  [Hardware at 19.46 MHz (achievable)], [≈ 139 ms], [≈ 1.66×], [projected: 127.4 ms compute + residual],
+  [Hardware at 50 MHz (design target)], [≈ 61 ms], [≈ 3.8×], [projected: 49.6 ms compute + residual],
+)
+
+*Verdict:* at the achievable clock the accelerator is a projected 1.66× over stock, level
+with the optimized Python tier (1.03×) and about 15× slower than the native Rust tier; it
+would still be about 6× slower at the 50 MHz target. One step costs 124 cycles, 6.4 µs at
+19.46 MHz, against 0.48 µs natively. The benchmark's cost was interpreter overhead rather
+than arithmetic, so removing the interpreter captures almost all of the gain, and at N = 5
+with ordered pair dependencies there is little parallelism for custom FP64 hardware to
+exploit. Matching Rust would need the datapath alone to run at about 260 MHz. These are
+projections: no run of Python attached to hardware exists, and no energy-efficiency
+advantage follows without workload power and complete system measurements.
 
 The hardware's square-root/reciprocal expression differs from stock `pow`. RTL is checked
 against its own arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12
@@ -291,12 +327,20 @@ are distinct from the software tier's observed exact equality.
 = 6. Conclusion
 
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state
-and energy exactly. Native execution removes more interpreter work through the same coarse
-interface. The hardware design implements that boundary, but its benefit over native software
-requires substantially better clock/latency results than demonstrated so far. The measured
-cycle/area trade-off and preliminary physical timing explain why a fast schedule alone is insufficient.
+and energy exactly. Native execution removes far more interpreter work through the same coarse
+`advance(dt, n)` interface and reaches 9.53 ms, 24.3× over stock.
+
+In hardware, `grape_pipeline` executes the whole `advance()` kernel over that same boundary,
+bit-exactly against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that
+static timing supports this projects to about 139 ms per run: 1.66× over stock, level with the
+optimized Python, and about 15× slower than the native tier (about 6× at the 50 MHz target),
+for 4.1 mm² of 130 nm standard cells. The benchmark's cost was interpreter overhead rather
+than arithmetic, so removing the interpreter captures nearly all of the gain. At five bodies
+with ordered pair dependencies there is too little parallelism for custom FP64 hardware to
+repay its area, and the measured cycle/area trade-off shows why a fast schedule alone is
+insufficient: the parallelism that saves cycles also lengthens the clock path.
 
 #text(size: 9pt)[*Evidence:* `hw/grape_pipeline/docs/uarch.md`, `prd.md`,
-`testplan.md`, `ppa.md` (including the 2026-09-14 addendum), and `integration.md`.
+`testplan.md`, `ppa.md` and `integration.md`; `hw/docs/hardware_report.md`.
 Reproduction and supporting profiles: *report_appendix.pdf*.
 Repository: #link("https://github.com/matanco64/HWSW_Project")[HWSW_Project].]

@@ -242,14 +242,22 @@ the present data do not establish that.
 HWSW Final Project                                                                                       Benchmark Report: pyflate
 
 5. Hardware acceleration: implementation and estimates
-huffman_engine followed by mtf_cam produces the same L-vector as the Rust kernel, over the same
-boundary. Software keeps block headers, inverse BWT, RLE4 and MD5. Both modules are implemented in
-SystemVerilog and have module-level verification and synthesis evidence. Physical-design attempts stopped
-before routed sign-off. The on-chip chain and platform DMA boundary are the integration design; standalone
-module results do not establish a measured end-to-end hardware speedup.
+bzip2′s symbol stage is two different jobs back to back. Huffman decoding: the compressed input is a stream of
+variable-length codes, each matched against the block’s code tables to recover a symbol. huffman_engine
+does this, comparing the next bits against every code length in parallel, one symbol per cycle. Move-to-front
+and run expansion: each symbol is either a rank into a list of recently used bytes (output that byte, move it to
+the front) or part of a run count to expand. mtf_cam does this with a 256-entry byte list held in a parallel shift
+register, read by rank and re-ordered in one cycle. Chained on chip they produce the same L-vector as the
+Rust kernel, over the same boundary. Software keeps block headers, inverse BWT, RLE4 and MD5.
+Why two modules: the two jobs want different hardware. Huffman decoding is table-driven and its cost is
+storage (table and register storage is 95% of huffman_engine); move-to-front is a wide list update whose risk
+is the output rate (73% of the output bytes come from runs). Separate modules are verified against separate
+golden models and sized by separate trade-offs, and the Huffman block stays reusable (it also implements
+DEFLATE). They are chained on chip so the 148,271 intermediate symbols never cross to software; leaving
+move-to-front in software would have kept its 13.44% share of stock runtime on the CPU.
 
-         CPU: parse block headers                                               Platform DMA
-          configure via AXI4-Lite                                32-bit bits + 8-bit selectors in; L-vector out
+        CPU: parse block headers                                                Platform DMA
+         configure via AXI4-Lite                                 32-bit bits + 8-bit selectors in; L-vector out
 
 
 
@@ -272,81 +280,125 @@ switches, and is trace-exact against the golden model over every beat.
 MTF and run expansion
 The input is a rank, so the decoder indexes the alphabet, shifts the preceding entries and expands RUNA/
 RUNB groups through a buffered output packer at eight bytes wide. It sustains K3 = 1.0686 cycles per
-symbol, and the CAM is 68% of its area.
+symbol, and the move-to-front list is 68% of its area.
 Measured cost and what it buys
- sky130, Yosys + OpenLane                                          huffman_engine                                    mtf_cam
- Cells                                                                           151,058                                  18,814
- Area                                                                          1.634 mm²                            0.187 mm²
- Timing-derived frequency                                                      ≈ 8.9 MHz                           ≈ 37.6 MHz
- Power estimate                                                           not reported                              ≈ 13.7 mW
- Cycles per symbol                                                                1.0068                                  1.0686
- Directed + random tests                                                          17 / 17                                 16 / 16
- Line / toggle coverage                                                  90.4% / 90.3%                            92.0% / 93.8%
-Evidence levels. Huffman’s 8.9 MHz comes from pre-placement static timing; MTF’s 37.6 MHz comes from
-post-CTS timing. These are different stages of physical estimation, not demonstrated silicon operating
-frequencies or directly comparable timing closure results. Placement, buffering and routing may change
-either estimate. Neither completed 50 MHz sign-off. MTF’s 13.7 mW is a tool estimate using default switching
-activity at the run’s clock constraint, not measured workload power at 37.6 MHz; it cannot support energy
-savings. Coverage percentages use the documented exclusions, and MTF invariant proofs are bounded to
-depth 24 rather than exhaustive. The regression counts are recorded results, not new runs performed for this
-report revision.
+How these numbers were produced: each accelerator is written in SystemVerilog and simulated cycle by
+cycle (Verilator, cross-checked with Icarus) inside a Python testbench that feeds it the real benchmark block
+and compares every output against a golden model, a Python reference of the same stage. Cycle counts, test
+results and coverage come from these runs. The design is then synthesized: Yosys translates it into a netlist of
+standard logic cells from sky130, the open-source SkyWater 130 nm process, which gives cell count and area.
+Finally OpenLane places the cells, builds the clock tree and runs static timing analysis, which sums gate and
+wire delays along every register-to-register path; the slowest path sets the maximum clock. We stop after
+clock-tree synthesis (post-CTS): cells and the clock network are placed but signal wires are not routed, so the
+frequency is an estimate, not silicon. The toolchain is entirely open source, so every number can be
+regenerated from the repository.
 
 
 
 
                                                             6
-HWSW Final Project                                                                       Benchmark Report: pyflate
+HWSW Final Project                                                                               Benchmark Report: pyflate
 
-Conditional benefit and integration cost
-Use Tnew = (1 - f)*Tstock + Thardware + Tinterface. The older integration model assumes f = 0.496
-for Huffman; using the canonical stock mean 1,123.49 ms gives about 1.97× at 50 MHz (149,276 cycles = 2.99
-ms), or 1.93× at 8.9 MHz (16.77 ms), before interface cost. The surviving software contributes about 566 ms.
-These are conditional projections, not measurements of the implemented hardware attached to Python.
-MTF’s recorded RTL block takes 158,441 cycles (1.0686 cycles/symbol), about 4.21 ms at 37.6 MHz. Its
-standalone model uses the sampled 13.44% stock MTF share and yields about 1.15× end to end. The older
-isolated 80.4 ms MTF microbenchmark would imply a stage-only 19.1× ratio at this clock, or 25.4× at the 50
-MHz target; it is a different experiment from the whole-decoder profile and must not be substituted for that
-profile’s runtime fraction.
-Adding the old Huffman assumption (49.6%) to the newer MTF profile share (13.44%) gives f ≈ 0.63 and an
-illustrative ideal ceiling near 2.7×. These fractions do not come from a single matched decomposition of the
-combined boundary, which also includes run expansion. That sum is therefore a sensitivity example, not a
-measured ceiling for the chained design. A chain comparison should time the exact replaced region and
-residual in the same optimized Python workload, then compare with the already delivered 170.01 ms hybrid
-path. A stock-based projection cannot demonstrate an improvement over that stronger baseline.
-The diagram’s chain uses on-chip symbol transfer. A shared clock would be constrained by both modules;
-separate clocks would require an explicit clock-domain crossing. In either case, use a combined backpressure
-simulation rather than adding standalone cycles/symbol. Input DMA supplies compressed bits and selectors,
-and output DMA drains 336,184 L-vector bytes. Configuration, DMA setup, copies and cache maintenance
-contribute to Tinterface; transfer time may overlap compute only if buffers and bandwidth sustain it. The
-recorded module and driver tests do not measure these platform costs.
+
+ sky130, Yosys + OpenLane                                     huffman_engine                                   mtf_cam
+ Cells (synthesis)                                                         151,058                               18,814
+ Area (synthesis)                                                       1.634 mm²                           0.187 mm²
+ Largest area share                                        tables + registers, 95%             move-to-front list, 68%
+ Timing-derived frequency (post-CTS)                                    ≈ 39.9 MHz                          ≈ 37.6 MHz
+ Power estimate (post-CTS)                                               ≈ 283 mW                           ≈ 13.7 mW
+ Cycles per symbol (simulation)                                             1.0068                               1.0686
+ Directed + random tests                                                    17 / 17                              16 / 16
+ Line / toggle coverage                                             90.4% / 90.3%                        92.0% / 93.8%
+Evidence levels: both frequencies come from post-CTS static timing at the typical corner: 39.9 MHz for
+Huffman (40 ns constraint, +14.94 ns worst setup slack) and 37.6 MHz for MTF. They are estimates, not
+demonstrated silicon operating frequencies; routing may change either, and neither completed 50 MHz sign-
+off or produced a GDS. The power figures are tool estimates using default switching activity at each run’s
+own clock constraint (40 ns for Huffman, 20 ns for MTF), so they are not comparable with each other, are not
+workload power, and cannot support energy savings. Huffman is 8.7× the area of MTF because its code tables
+are flops. Coverage percentages use the documented exclusions. Three MTF list invariants are proven
+unbounded by k-induction on a 16-entry list; the full 256-entry permutation proof is bounded to depth 24.
+The regression counts are recorded results.
+Does the hardware win?
+Clocking and the link between the modules: both modules are single-clock synchronous designs and the
+chain uses one shared clock; there is no clock-domain crossing. The link is an AXI4-Stream valid/ready
+handshake carrying one symbol per beat. A shared clock runs at the slower module’s frequency, 37.6 MHz,
+set by mtf_cam. We preferred this to two clocks joined by an asynchronous FIFO because the two estimates
+are 6% apart, so a crossing would add area, latency and verification burden for no benefit. The modules differ
+in cycles per symbol, not in clock: mtf_cam needs 1.0686 against the decoder’s 1.0068, so it back-pressures the
+decoder through tready and the chain advances at mtf_cam’s rate.
+How it was tested: each side of the link is verified against the same beat-format contract and the same
+golden symbol stream, with back-pressure injected, and both handshakes are also checked formally. The two
+modules were then simulated together under one top level (hw/pyflate_accel) on the real benchmark
+block. The output is byte-exact over all 336,184 bytes, with and without random back-pressure on the output,
+in 159,303 cycles, 0.5% above mtf_cam’s standalone 158,441; the difference is the decoder’s table-build start-
+up.
+How the end-to-end time is estimated: offloading a stage removes its software time and adds the
+hardware’s time plus the cost of moving data, T_new = T_sw - T_stage + T_hw + T_if. T_sw is the
+measured software run time and T_stage the measured time of the replaced stage. T_hw is the measured
+chain cycles divided by the clock frequency. T_if is the interface time: configuration, DMA setup and copies
+for the compressed input and the 336,184 L-vector bytes. It is not measured here, and transfers overlap
+compute only if buffers and bandwidth sustain it. The replaced stage is timed on its own in Appendix A3: the
+native decode phase takes 3.30 ms.
+ Replaced stage only                                           Time       Evidence
+ Optimized Python loop                                      ≈ 117 ms      derived: 283.88 − 170.01 + 3.30 ms
+ Rust kernel                                                  3.30 ms     measured, Appendix A3
+ Hardware chain at 37.6 MHz (achievable)                    ≈ 4.24 ms     159,303 measured cycles ÷ clock
+ Hardware chain at 50 MHz (design target)                   ≈ 3.19 ms     same cycles ÷ target clock
+
+
+
+
+                                                       7
+HWSW Final Project                                                                              Benchmark Report: pyflate
+
+
+ End to end                                                     Time     vs stock
+ Stock Python                                              1,123.49 ms   1.00×
+ Optimized Python                                           281.16 ms    4.00×
+ Python + Rust kernel                                       170.01 ms    6.61×
+ Python + hardware chain at 37.6 MHz                         ≈ 171 ms    ≈ 6.6× (projected, before T_if)
+ Python + hardware chain at 50 MHz                           ≈ 170 ms    ≈ 6.6× (projected, before T_if)
+Verdict: for the stage it replaces, the hardware chain is about 28× faster than the optimized Python loop and
+about 1.3× slower than the Rust kernel at the achievable clock, with parity at the 50 MHz target. End to end it
+ties the delivered 170 ms path, because once this stage is off the interpreter it is about 2% of what remains;
+inverse BWT (137.7 ms, about 80%) sets the floor for both the native and the hardware route. The cycle count
+is measured in simulation; the clock is a static-timing estimate and T_if is unmeasured, so these are
+projections, not a run of Python attached to hardware. The 117 ms figure combines separate experiments and
+is approximate.
 Area and throughput trade-offs
 Huffman storage includes a 17.3 kbit symbol table and an 8.6 kbit length window implemented as flops in this
 standard-cell flow. SRAM is a proposed alternative: the documented estimate is about 0.75 mm² of
 remaining standard cells plus two macros. Macro area, access latency, ports and integration must be
 established before claiming total area below 1 mm² or unchanged throughput. No SRAM version was
 synthesized here.
- MTF output bytes/cycle                                   Mapped area               Modeled cycles/symbol
- 4-byte output                                                0.182 mm²                                   1.175
- 8-byte output (selected)                                     0.187 mm²                                   1.063
- 16-byte output                                               0.208 mm²                                   1.023
+ MTF output bytes/cycle                                      Mapped area                  Modeled cycles/symbol
+ 4-byte output                                                   0.182 mm²                                       1.175
+ 8-byte output (selected)                                        0.187 mm²                                       1.063
+ 16-byte output                                                  0.208 mm²                                       1.023
 W = 8 is the smallest modeled width meeting the 1.10 cycles/symbol goal; W = 16 costs 10.9% more area for
 about 3.9% modeled throughput gain. The W-sweep uses the cycle model; the default RTL’s measured 1.0686
-includes additional implementation overhead. The CAM’s 68% area share explains why reducing packer
-width saves little total area. Timing must be checked for each implementation rather than assuming identical
+includes additional implementation overhead. The list’s 68% area share explains why reducing packer width
+saves little total area. Timing must be checked for each implementation rather than assuming identical
 frequency across widths.
 
 6. Conclusion
 The delivered Python-plus-Rust path decompresses the input in 170.01 ms, achieving 6.61× over stock with
 byte-exact output. Python improvements provide 4.00× and the native decoder adds 1.67×, leaving BWT and
 RLE4 as the next software targets.
-Both accelerators have RTL verification and synthesis evidence. Their end-to-end benefit remains conditional
-on the software fraction, platform interface and completed physical timing. Inverse BWT and RLE4 remain
-software work across both offload approaches.
-Evidence: hw/huffman_engine/docs/{ppa,integration}.md, hw/mtf_cam/docs/{ppa,integration}.md.
-Methods and profiles: report_appendix.pdf. Repository: HWSW_Project.
+In hardware, huffman_engine and mtf_cam implement the same symbol-decode boundary as the Rust kernel.
+Simulated together on the real benchmark block they are byte-exact over all 336,184 output bytes and need
+159,303 clock cycles, about 4.2 ms at the 37.6 MHz clock that static timing supports. That is about 28× faster
+than the optimized Python loop and about 1.3× slower than the Rust kernel (parity at the 50 MHz design
+target), for 1.8 mm² of 130 nm standard cells. End to end this ties the delivered 170 ms path: once the symbol
+stage leaves the interpreter it is about 2% of what remains, and inverse BWT, still in software, sets the floor
+for both routes. The hardware figures are projections from RTL simulation and static timing, not a run of
+Python attached to hardware.
+Evidence: hw/huffman_engine/docs/{ppa,integration}.md, hw/mtf_cam/docs/{ppa,integration}.md,
+hw/pyflate_accel/README.md, hw/docs/hardware_report.md. Methods and profiles: report_appendix.pdf.
+Repository: HWSW_Project.
 
 
 
 
-                                                     7
+                                                       8
 

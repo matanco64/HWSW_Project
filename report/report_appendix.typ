@@ -296,17 +296,40 @@ Every native JSON identifies the binary installed from the wheel built in that r
 remain as cross-checks in their original directories, with history in `report/history/`.
 This report revision reuses those measurements and introduces no new benchmark timing.
 
-== Hardware evidence map
+= A8. Hardware evidence
 
-`hw/grape_pipeline/docs/ppa.md` contains the September 14 prefix-rewrite timing addendum;
-its older synthesis-area table describes the earlier architecture. The nbody report keeps
-these revisions separate. `hw/huffman_engine/docs/ppa.md` records pre-placement timing,
-while `hw/mtf_cam/docs/ppa.md` records post-CTS timing and default-activity power. None is a
-completed routed sign-off or a physical system benchmark. MTF integration records 158,441
-RTL cycles; the W-sweep's 157,560-cycle default is a model result. The reports label both.
-Platform DMA and host overhead, combined-chain throughput, and energy savings remain
-unmeasured. The worked software examples are checked by `report/verify_examples.py`;
+Software times in this report are measured on the course VM (A7). Hardware figures are not:
+cycle counts come from RTL simulation against golden models, area from synthesis, and clock
+and power estimates from place-and-route static timing, all on the development host. The
+hardware comparisons in the two reports divide the first kind of number by the second. The
+denominators are the A7 table above and A3's 3.304 ms native decode phase.
+
+All three modules now record *post-CTS* static timing and a default-activity power estimate in
+`hw/<module>/docs/ppa.md`: `grape_pipeline` 19.46 MHz, `huffman_engine` 39.9 MHz, `mtf_cam`
+37.6 MHz. The timing and power reports those numbers were read from are preserved in
+`hw/<module>/synth/evidence/`. None is a completed routed sign-off or a physical system
+benchmark. `grape_pipeline`'s synthesis-area table was measured before the final rewrite of
+its issue-selection logic. MTF integration records 158,441 RTL cycles; the W-sweep's
+157,560-cycle default is a model result. The reports label both. The two pyflate modules are
+also simulated together: `make -C hw/pyflate_accel sim` runs the chain on the benchmark block,
+byte-exact over 336,184 bytes in 159,303 cycles. Platform DMA and host overhead, and energy
+savings, remain unmeasured. `hw/docs/hardware_report.md` maps every required hardware item to
+its source file. The worked software examples are checked by `report/verify_examples.py`;
 defense questions and an evidence map are in `report/defense_guide.md`.
+
+#result-table(columns: (1fr, 1.5fr, 2.4fr), align: (left, left, left),
+  table.header([*Step*], [*Tool (version)*], [*Why this tool*]),
+  [Design language], [SystemVerilog, synthesizable subset], [the same source passes Verilator and Yosys],
+  [Lint, main simulation], [Verilator 5.051], [compiled simulation is fast enough to run the whole benchmark input per test; line/toggle coverage],
+  [Cross-check simulation], [Icarus Verilog 14.0], [4-state: shows X-propagation after reset, which 2-state Verilator cannot],
+  [Testbench], [cocotb 2.0.1, pyuvm 4.0.1, cocotbext-axi 0.1.28], [golden models are Python, so a Python testbench calls them directly as the scoreboard oracle; AXI bus models with back-pressure],
+  [Driver and unit tests], [pytest 9.1.1], [register-map checks and driver models without a simulator],
+  [Formal], [SymbiYosys 0.68], [proves control properties simulation only samples: FSM arcs, handshakes, list invariants],
+  [Synthesis, area], [Yosys 0.68, sky130 high-density cells (tt, 25 °C, 1.8 V)], [open synthesis onto real standard cells gives cell count and area],
+  [Process], [SkyWater sky130], [the fully open 130 nm PDK, reproducible without an NDA; no SRAM macros, so all storage is flip-flops],
+  [Place, clock tree, timing, power], [OpenLane 2.3.10 (OpenROAD)], [floorplan, placement, clock-tree synthesis, static timing and power estimate; routing not reached],
+  [Tool bundle], [OSS CAD Suite 2026-08-26], [one pinned archive gives identical versions on any machine],
+)
 
 #text(size: 8.5pt)[*References:* Python
 #link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
