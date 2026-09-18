@@ -732,3 +732,54 @@ Prompt: "I think the presentation is not mandatory for the submission"
 
 2026-09-18T09:39:39Z — Claude Code session (auto-logged)
 Prompt: "did A1. give me the commands for A2"
+
+2026-09-18T20:53:45Z — Claude Code session (auto-logged)
+Prompt: "yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git commit -m "hw: reconcile docs, add standalone hardware report, huffman post-CTS 25.1 MHz
+
+- grape: integration.md/ppa.md/prd.md now carry the post-CTS 19.46 MHz
+  (parallel-prefix netlist); 11.15 MHz kept only as labeled history
+- huffman: relaxed-clock OpenLane run (40 ns, config_confirm.json) converged
+  through post-CTS STA, 0 setup violations -> Fmax 25.1 MHz, power ~283 mW;
+  the pre-placement 8.9 MHz was a high-fanout-net wireload artifact.
+  STATUS.json ppa.fmax_mhz 8.9 -> 25.1, power_mw 0 -> 283
+- baselines unified: nbody mean 231.20 ms (median 229), pyflate 1,123.49 ms
+- hw/docs/hardware_report.md: standalone HW writeup, 3 modules x 7 §7 bullets
+- report/REPORT_DELTAS.md: line-numbered handoff for report_*.typ (Matan)
+- README: huffman table/prose updated to post-CTS
+- report/CLOSEOUT.md: close-out tracker
+- prompt.txt: resolve stale merge conflict (both log blocks kept)"
+[main 0200406] hw: reconcile docs, add standalone hardware report, huffman post-CTS 25.1 MHz
+ 15 files changed, 764 insertions(+), 100 deletions(-)
+ create mode 100644 hw/docs/hardware_report.md
+ create mode 100644 hw/huffman_engine/synth/config_confirm.json
+ create mode 100644 hw/huffman_engine/synth/config_relaxed.json
+ create mode 100644 report/CLOSEOUT.md
+ create mode 100644 report/REPORT_DELTAS.md
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git log -1 --stat | tail -20
+    - README: huffman table/prose updated to post-CTS
+    - report/CLOSEOUT.md: close-out tracker
+    - prompt.txt: resolve stale merge conflict (both log blocks kept)
+
+ .gitignore                                  |   1 +
+ README.md                                   |  16 +-
+ hw/STATUS.json                              |   6 +-
+ hw/docs/hardware_report.md                  | 278 ++++++++++++++++++++++++++++
+ hw/grape_pipeline/docs/integration.md       |  69 ++++---
+ hw/grape_pipeline/docs/ppa.md               |  19 +-
+ hw/grape_pipeline/docs/prd.md               |   2 +-
+ hw/huffman_engine/docs/integration.md       |  12 +-
+ hw/huffman_engine/docs/ppa.md               | 123 ++++++------
+ hw/huffman_engine/docs/prd.md               |   2 +-
+ hw/huffman_engine/synth/config_confirm.json |  24 +++
+ hw/huffman_engine/synth/config_relaxed.json |  24 +++
+ prompt.txt                                  |  62 +++++++
+ report/CLOSEOUT.md                          | 117 ++++++++++++
+ report/REPORT_DELTAS.md                     | 109 +++++++++++
+ 15 files changed, 764 insertions(+), 100 deletions(-)
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git status --porcelain | grep -v synth/formal
+yuvalk@Kogan-Hard-Reset-Laptop:~/HWSW/HWSW_Proj$ git st
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean"

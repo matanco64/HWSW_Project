@@ -6,19 +6,19 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → A**
+**Current phase → B**
 
 ---
 
 ## Phase A — Save the work (Y, ~10 min)
 
-- [ ] A1 Review the diff: `git diff --stat` then `git diff hw/ README.md` — nothing unexpected.
-- [ ] A2 Commit the reconciliation + hardware report + README fix (branch or main, your call).
+- [x] A1 Review the diff: `git diff --stat` then `git diff hw/ README.md` — nothing unexpected.
+- [x] A2 Commit the reconciliation + hardware report + README fix (branch or main, your call).
       Proof: `git log -1 --stat` shows `hw/docs/hardware_report.md`, `report/REPORT_DELTAS.md`,
       the six `hw/*/docs/*.md`, `hw/STATUS.json`, `README.md`, `.gitignore`.
-- [ ] A3 Drop the redundant stash: `git stash drop` (its content is already in `prompt.txt`).
+- [x] A3 Drop the redundant stash: `git stash drop` (its content is already in `prompt.txt`).
       Proof: `git stash list` is empty.
-- [ ] A4 Push. Proof: `git status -sb` first line ends `main...origin/main` with no ahead/behind.
+- [x] A4 Push. Proof: `git status -sb` first line ends `main...origin/main` with no ahead/behind.
 
 **Gate A:** `git status --porcelain | grep -v synth/formal` is empty.
 
