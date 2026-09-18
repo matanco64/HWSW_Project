@@ -1,5 +1,5 @@
 {
-  "title": "huffman_engine \u2014 architecture (MAS)",
+  "title": "huffman_engine — architecture (as built)",
   "columns": [
     {
       "name": "Host / DMA",
@@ -27,17 +27,17 @@
         {
           "id": "regs",
           "label": "Register file",
-          "sub": "MODE, START_BIT, ALPHABET, N_TABLES, SYMBOL_LIMIT, DBG, STATUS/IRQ"
+          "sub": "MODE, START_BIT, N_TABLES, limits, IRQ"
         },
         {
           "id": "fsm",
           "label": "Block FSM",
-          "sub": "doorbell \u2192 build \u2192 decode \u2192 EOB"
+          "sub": "doorbell → build → decode → EOB"
         },
         {
           "id": "cnt",
           "label": "Counters",
-          "sub": "CYCLES, SYMBOLS, BITS, BUILD, OVERFETCH"
+          "sub": "CYCLES, SYMBOLS, BITS, BUILD"
         }
       ]
     },
@@ -47,12 +47,12 @@
         {
           "id": "lenwin",
           "label": "Length window",
-          "sub": "6 \u00d7 288 \u00d7 5 bit, pending/latched"
+          "sub": "6 × 288 × 5 bit, pending/latched"
         },
         {
           "id": "builder",
           "label": "Table builder",
-          "sub": "count \u2192 first_code \u2192 base \u2192 symtab"
+          "sub": "count → first_code → base → symtab"
         },
         {
           "id": "tabs",
@@ -61,8 +61,8 @@
         },
         {
           "id": "symtab",
-          "label": "Symbol table RAM",
-          "sub": "6 \u00d7 288 \u00d7 9 bit"
+          "label": "Symbol table (flops)",
+          "sub": "1,728 × 10 bit, registered read"
         }
       ]
     },
@@ -77,7 +77,7 @@
         {
           "id": "win",
           "label": "Bit window",
-          "sub": "64-bit, peek 20, consume \u2264 20, zero pad"
+          "sub": "64-bit, peek 20, consume ≤ 20, zero pad"
         },
         {
           "id": "rev",
@@ -102,7 +102,7 @@
         {
           "id": "lookup",
           "label": "Symbol lookup",
-          "sub": "base + code \u2212 first_code"
+          "sub": "base + code − first_code"
         },
         {
           "id": "extra",

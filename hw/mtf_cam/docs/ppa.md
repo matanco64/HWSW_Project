@@ -82,7 +82,7 @@ points are **fully measured** (area from `synth/area_w{4,8,16}.txt`; K3 from
 | 3 | 16 | 22,250 | 207,826.8 | 0.208 | **1.023** | ✓ | over-provisioned — +11 % area for −0.040 cyc/sym over W=8, not needed |
 
 Marginal cost W=8→W=16: **+3,436 cells (+20,437 µm², +10.9 %)** buys only **−0.040
-cyc/sym** (1.063→1.023, a 3.8 % throughput gain). W=8→W=4 saves just **−493 cells
+cyc/sym** (1.063→1.023: 3.8 % fewer cycles = a 3.9 % throughput gain). W=8→W=4 saves just **−493 cells
 (−5,558 µm², −3.0 %)** but breaks the KPI. **W=8 is the knee**: the CAM floor (0.131 mm²)
 dominates, so shrinking the datapath barely moves total area while it does cost the KPI.
 

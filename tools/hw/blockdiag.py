@@ -3,8 +3,9 @@
 
 Spec: {"title": str, "columns": [{"name": str, "blocks": [{"id": str, "label": str, "sub": str?}]}],
        "edges": [{"from": id, "to": id, "label": str?}]}
-Columns are laid out left to right, blocks top to bottom inside a column; edges are drawn as
-orthogonal-ish straight lines with the label at the midpoint. Deterministic, dependency-free.
+Columns are laid out left to right, blocks top to bottom inside a column; edges are straight
+lines drawn under the boxes, each label placed in the gutter beside its source box (never on a
+box) and nudged down until it clears earlier labels. Deterministic, dependency-free.
 
     python3 tools/hw/blockdiag.py hw/<module>/docs/block_diagram.json
 writes block_diagram.mmd and block_diagram.svg next to the spec.
@@ -14,7 +15,7 @@ import pathlib
 import sys
 from xml.sax.saxutils import escape
 
-BW, BH, GX, GY, PAD, HDR = 190, 64, 70, 26, 24, 34
+BW, BH, GX, GY, PAD, HDR = 190, 64, 120, 30, 24, 34
 
 
 def mermaid(spec):
@@ -43,6 +44,7 @@ def svg(spec):
              '<path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>',
              f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
              f'<text x="{PAD}" y="{PAD - 4}" font-size="15" font-weight="bold">{escape(spec["title"])}</text>']
+    boxes, labels, placed = [], [], []
     for ci, col in enumerate(cols):
         x = PAD + ci * (BW + GX)
         ch = len(col["blocks"]) * (BH + GY) + HDR
@@ -52,24 +54,41 @@ def svg(spec):
         for bi, b in enumerate(col["blocks"]):
             y = PAD + HDR + bi * (BH + GY)
             pos[b["id"]] = (x, y)
-            parts.append(f'<rect x="{x}" y="{y}" width="{BW}" height="{BH}" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>')
-            parts.append(f'<text x="{x + BW / 2}" y="{y + (26 if b.get("sub") else 37)}" text-anchor="middle" font-weight="bold">{escape(b["label"])}</text>')
+            boxes.append(f'<rect x="{x}" y="{y}" width="{BW}" height="{BH}" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>')
+            boxes.append(f'<text x="{x + BW / 2}" y="{y + (26 if b.get("sub") else 37)}" text-anchor="middle" font-weight="bold">{escape(b["label"])}</text>')
             if b.get("sub"):
-                parts.append(f'<text x="{x + BW / 2}" y="{y + 46}" text-anchor="middle" fill="#555" font-size="11">{escape(b["sub"])}</text>')
+                boxes.append(f'<text x="{x + BW / 2}" y="{y + 46}" text-anchor="middle" fill="#555" font-size="11">{escape(b["sub"])}</text>')
     for e in spec["edges"]:
         (x1, y1), (x2, y2) = pos[e["from"]], pos[e["to"]]
         if x2 > x1:            # left -> right
             sx, sy, tx, ty = x1 + BW, y1 + BH / 2, x2, y2 + BH / 2
+            lx = sx + GX / 2   # label sits in the gutter right of the source box
         elif x2 < x1:          # right -> left (return path), drawn below
             sx, sy, tx, ty = x1, y1 + BH / 2 + 12, x2 + BW, y2 + BH / 2 + 12
+            lx = sx - GX / 2
         else:                  # same column, top -> bottom
             sx, sy, tx, ty = x1 + BW / 2, y1 + BH, x2 + BW / 2, y2
+            lx = None
+        # edges are emitted before the boxes, so a long line passes *under* boxes it crosses
         parts.append(f'<line x1="{sx}" y1="{sy}" x2="{tx}" y2="{ty}" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>')
         if e.get("label"):
-            mx, my = (sx + tx) / 2, (sy + ty) / 2 - 5
-            parts.append(f'<text x="{mx}" y="{my}" text-anchor="middle" font-size="11" fill="#1f4e79">'
-                         f'<tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">{escape(e["label"])}</tspan>'
-                         f'{escape(e["label"])}</text>')
+            txt = escape(e["label"])
+            if lx is None:     # vertical edge: label beside the line, in the gap between boxes
+                mx, my, anchor = sx + 6, (sy + ty) / 2 + 4, "start"
+                if mx + 6.4 * len(e["label"]) > width - 4:     # would run off the canvas
+                    mx, anchor = sx - 6, "end"
+            else:              # y of the line where it crosses the gutter centre
+                mx, my, anchor = lx, sy + (ty - sy) * (lx - sx) / (tx - sx) - 5, "middle"
+            half = 3.2 * len(e["label"])          # ~6.4 px per char at 11 px
+            x0 = mx if anchor == "start" else (mx - 2 * half if anchor == "end" else mx - half)
+            while any(abs(my - py) < 13 and x0 < px1 and px0 < x0 + 2 * half for px0, px1, py in placed):
+                my += 13
+            placed.append((x0, x0 + 2 * half, my))
+            common = f'x="{mx}" y="{my}" text-anchor="{anchor}" font-size="11"'
+            # two separate <text> elements: a white halo, then the label (renderer-independent)
+            labels.append(f'<text {common} fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">{txt}</text>')
+            labels.append(f'<text {common} fill="#1f4e79">{txt}</text>')
+    parts += boxes + labels
     parts.append("</svg>")
     return "\n".join(parts) + "\n"
 

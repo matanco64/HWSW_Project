@@ -17,9 +17,9 @@ flowchart LR
     end
     subgraph C3["Datapath (FP64)"]
         direction TB
-        pipe["Pair pipeline<br/><i>sub → r² → sqrt → rcp → ×dt → ×m</i>"]
-        acc["Velocity accumulate<br/><i>6 FMA, ordered by pair</i>"]
-        integ["Position integrator<br/><i>r += dt·v, 5 bodies</i>"]
+        pipe["Force schedule<br/><i>static 290-op step, shared units</i>"]
+        acc["Shared FP64 units<br/><i>3 add/sub, 3 mul, sqrt, rcp (no FMA)</i>"]
+        integ["Ordered accumulate + integrate<br/><i>3-wide issue, per-lane order, commit</i>"]
     end
     cpu -->|MMIO| axi
     axi -->|wr/rd strobes| regs
@@ -28,9 +28,9 @@ flowchart LR
     axi -->|state load / read-back| body
     axi -->|pair list| pairs
     body -->|x_i x_j m_i m_j| pipe
-    pairs -->|(i, j) per cycle| pipe
-    pipe -->|dx·b1m, dx·b2m| acc
-    acc -->|v (5 bodies)| integ
+    pairs -->|pair order (i, j)| pipe
+    pipe -->|issued ops (operands, slot)| acc
+    acc -->|force terms dx·b1m, dx·b2m| integ
     integ -->|commit r, v| body
     fsm -->|start step| pipe
     regs -->|STATUS, irq| cpu

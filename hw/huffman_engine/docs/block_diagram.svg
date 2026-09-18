@@ -1,121 +1,142 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1538" height="442" viewBox="0 0 1538 442" font-family="Helvetica, Arial, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" width="1788" height="458" viewBox="0 0 1788 458" font-family="Helvetica, Arial, sans-serif" font-size="12">
 <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
-<rect width="1538" height="442" fill="#ffffff"/>
-<text x="24" y="20" font-size="15" font-weight="bold">huffman_engine — architecture (MAS)</text>
-<rect x="16" y="24" width="206" height="304" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<rect width="1788" height="458" fill="#ffffff"/>
+<text x="24" y="20" font-size="15" font-weight="bold">huffman_engine — architecture (as built)</text>
+<rect x="16" y="24" width="206" height="316" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
 <text x="24" y="44" font-weight="bold" fill="#3b4a5e">Host / DMA</text>
+<rect x="326" y="24" width="206" height="316" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="334" y="44" font-weight="bold" fill="#3b4a5e">Control</text>
+<rect x="636" y="24" width="206" height="410" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="644" y="44" font-weight="bold" fill="#3b4a5e">Tables</text>
+<rect x="946" y="24" width="206" height="316" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="954" y="44" font-weight="bold" fill="#3b4a5e">Aligner</text>
+<rect x="1256" y="24" width="206" height="410" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="1264" y="44" font-weight="bold" fill="#3b4a5e">Decoder</text>
+<rect x="1566" y="24" width="206" height="222" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
+<text x="1574" y="44" font-weight="bold" fill="#3b4a5e">Output</text>
+<line x1="119.0" y1="122" x2="119.0" y2="152" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="214" y1="184.0" x2="334" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="334" y1="102.0" x2="214" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="214" y1="184.0" x2="644" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="429.0" y1="122" x2="429.0" y2="152" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="429.0" y1="216" x2="429.0" y2="246" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="524" y1="184.0" x2="644" y2="184.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="739.0" y1="122" x2="739.0" y2="152" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="739.0" y1="216" x2="739.0" y2="246" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="739.0" y1="216" x2="739.0" y2="340" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="214" y1="278.0" x2="954" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1049.0" y1="122" x2="1049.0" y2="152" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1049.0" y1="216" x2="1049.0" y2="246" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1144" y1="278.0" x2="1264" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="834" y1="278.0" x2="1264" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1359.0" y1="122" x2="1359.0" y2="152" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1359.0" y1="216" x2="1359.0" y2="246" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="834" y1="372.0" x2="1264" y2="278.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1359.0" y1="310" x2="1359.0" y2="340" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1264" y1="196.0" x2="1144" y2="196.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="214" y1="278.0" x2="1574" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1574" y1="102.0" x2="1454" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1454" y1="372.0" x2="1574" y2="184.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1574" y1="196.0" x2="214" y2="290.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="1574" y1="102.0" x2="1454" y2="290.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="954" y1="196.0" x2="524" y2="290.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
 <rect x="24" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
 <text x="119.0" y="84" text-anchor="middle" font-weight="bold">CPU + driver</text>
 <text x="119.0" y="104" text-anchor="middle" fill="#555" font-size="11">HuffmanDriver.decode_block()</text>
-<rect x="24" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="119.0" y="174" text-anchor="middle" font-weight="bold">AXI4-Lite handshake</text>
-<text x="119.0" y="194" text-anchor="middle" fill="#555" font-size="11">axi_lite_if + decoder, 4 KB</text>
-<rect x="24" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="119.0" y="264" text-anchor="middle" font-weight="bold">Platform DMA</text>
-<text x="119.0" y="284" text-anchor="middle" fill="#555" font-size="11">s_bits / s_sel in, m_sym out</text>
-<rect x="276" y="24" width="206" height="304" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
-<text x="284" y="44" font-weight="bold" fill="#3b4a5e">Control</text>
-<rect x="284" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="379.0" y="84" text-anchor="middle" font-weight="bold">Register file</text>
-<text x="379.0" y="104" text-anchor="middle" fill="#555" font-size="11">MODE, START_BIT, ALPHABET, N_TABLES, SYMBOL_LIMIT, DBG, STATUS/IRQ</text>
-<rect x="284" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="379.0" y="174" text-anchor="middle" font-weight="bold">Block FSM</text>
-<text x="379.0" y="194" text-anchor="middle" fill="#555" font-size="11">doorbell → build → decode → EOB</text>
-<rect x="284" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="379.0" y="264" text-anchor="middle" font-weight="bold">Counters</text>
-<text x="379.0" y="284" text-anchor="middle" fill="#555" font-size="11">CYCLES, SYMBOLS, BITS, BUILD, OVERFETCH</text>
-<rect x="536" y="24" width="206" height="394" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
-<text x="544" y="44" font-weight="bold" fill="#3b4a5e">Tables</text>
-<rect x="544" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="639.0" y="84" text-anchor="middle" font-weight="bold">Length window</text>
-<text x="639.0" y="104" text-anchor="middle" fill="#555" font-size="11">6 × 288 × 5 bit, pending/latched</text>
-<rect x="544" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="639.0" y="174" text-anchor="middle" font-weight="bold">Table builder</text>
-<text x="639.0" y="194" text-anchor="middle" fill="#555" font-size="11">count → first_code → base → symtab</text>
-<rect x="544" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="639.0" y="264" text-anchor="middle" font-weight="bold">6 table register sets</text>
-<text x="639.0" y="284" text-anchor="middle" fill="#555" font-size="11">first_code/count/base per length</text>
-<rect x="544" y="328" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="639.0" y="354" text-anchor="middle" font-weight="bold">Symbol table RAM</text>
-<text x="639.0" y="374" text-anchor="middle" fill="#555" font-size="11">6 × 288 × 9 bit</text>
-<rect x="796" y="24" width="206" height="304" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
-<text x="804" y="44" font-weight="bold" fill="#3b4a5e">Aligner</text>
-<rect x="804" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="899.0" y="84" text-anchor="middle" font-weight="bold">Word FIFO</text>
-<text x="899.0" y="104" text-anchor="middle" fill="#555" font-size="11">s_bits 32-bit, TKEEP, TLAST</text>
-<rect x="804" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="899.0" y="174" text-anchor="middle" font-weight="bold">Bit window</text>
-<text x="899.0" y="194" text-anchor="middle" fill="#555" font-size="11">64-bit, peek 20, consume ≤ 20, zero pad</text>
-<rect x="804" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="899.0" y="264" text-anchor="middle" font-weight="bold">Mode reversal</text>
-<text x="899.0" y="284" text-anchor="middle" fill="#555" font-size="11">MSB-first bzip2 / LSB-first DEFLATE</text>
-<rect x="1056" y="24" width="206" height="394" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
-<text x="1064" y="44" font-weight="bold" fill="#3b4a5e">Decoder</text>
-<rect x="1064" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1159.0" y="84" text-anchor="middle" font-weight="bold">Comparator cascade</text>
-<text x="1159.0" y="104" text-anchor="middle" fill="#555" font-size="11">20 lengths in parallel</text>
-<rect x="1064" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1159.0" y="174" text-anchor="middle" font-weight="bold">Priority encode</text>
-<text x="1159.0" y="194" text-anchor="middle" fill="#555" font-size="11">shortest match, length</text>
-<rect x="1064" y="238" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1159.0" y="264" text-anchor="middle" font-weight="bold">Symbol lookup</text>
-<text x="1159.0" y="284" text-anchor="middle" fill="#555" font-size="11">base + code − first_code</text>
-<rect x="1064" y="328" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1159.0" y="354" text-anchor="middle" font-weight="bold">Extra bits (DEFLATE)</text>
-<text x="1159.0" y="374" text-anchor="middle" fill="#555" font-size="11">length/distance bases</text>
-<rect x="1316" y="24" width="206" height="214" rx="8" fill="#f4f6fa" stroke="#9aa5b5" stroke-dasharray="4 3"/>
-<text x="1324" y="44" font-weight="bold" fill="#3b4a5e">Output</text>
-<rect x="1324" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1419.0" y="84" text-anchor="middle" font-weight="bold">Selector FSM</text>
-<text x="1419.0" y="104" text-anchor="middle" fill="#555" font-size="11">s_sel, switch every 50 symbols</text>
-<rect x="1324" y="148" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
-<text x="1419.0" y="174" text-anchor="middle" font-weight="bold">Beat packer</text>
-<text x="1419.0" y="194" text-anchor="middle" fill="#555" font-size="11">ADR-0006 32-bit beats, TLAST on EOB</text>
-<line x1="119.0" y1="122" x2="119.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="119.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">MMIO</tspan>MMIO</text>
-<line x1="214" y1="180.0" x2="284" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="249.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">config / status</tspan>config / status</text>
-<line x1="284" y1="102.0" x2="214" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="249.0" y="97.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">STATUS, irq</tspan>STATUS, irq</text>
-<line x1="214" y1="180.0" x2="544" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="379.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">lengths (147 words)</tspan>lengths (147 words)</text>
-<line x1="379.0" y1="122" x2="379.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="379.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">doorbell / abort</tspan>doorbell / abort</text>
-<line x1="379.0" y1="212" x2="379.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<line x1="474" y1="180.0" x2="544" y2="180.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="509.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">start build</tspan>start build</text>
-<line x1="639.0" y1="122" x2="639.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="639.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">5-bit lengths</tspan>5-bit lengths</text>
-<line x1="639.0" y1="212" x2="639.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<line x1="639.0" y1="212" x2="639.0" y2="328" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<line x1="214" y1="270.0" x2="804" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="509.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">s_bits</tspan>s_bits</text>
-<line x1="899.0" y1="122" x2="899.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="899.0" y="130.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">32-bit words</tspan>32-bit words</text>
-<line x1="899.0" y1="212" x2="899.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="899.0" y="220.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">20-bit window</tspan>20-bit window</text>
-<line x1="994" y1="270.0" x2="1064" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1029.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">code window</tspan>code window</text>
-<line x1="734" y1="270.0" x2="1064" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="899.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">first_code, count</tspan>first_code, count</text>
-<line x1="1159.0" y1="122" x2="1159.0" y2="148" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<line x1="1159.0" y1="212" x2="1159.0" y2="238" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1159.0" y="220.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">length, code</tspan>length, code</text>
-<line x1="734" y1="360.0" x2="1064" y2="270.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<line x1="1159.0" y1="302" x2="1159.0" y2="328" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1159.0" y="310.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">symbol</tspan>symbol</text>
-<line x1="1064" y1="192.0" x2="994" y2="192.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1029.0" y="187.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">consume n</tspan>consume n</text>
-<line x1="214" y1="270.0" x2="1324" y2="90.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="769.0" y="175.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">s_sel</tspan>s_sel</text>
-<line x1="1324" y1="102.0" x2="1254" y2="102.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1289.0" y="97.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">table id</tspan>table id</text>
-<line x1="1254" y1="360.0" x2="1324" y2="180.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1289.0" y="265.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">symbol / event</tspan>symbol / event</text>
-<line x1="1324" y1="192.0" x2="214" y2="282.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="769.0" y="232.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">m_sym</tspan>m_sym</text>
-<line x1="1324" y1="102.0" x2="1254" y2="282.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="1289.0" y="187.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">table id</tspan>table id</text>
-<line x1="804" y1="192.0" x2="474" y2="282.0" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-<text x="639.0" y="232.0" text-anchor="middle" font-size="11" fill="#1f4e79"><tspan style="paint-order:stroke" stroke="#fff" stroke-width="4">BITS, OVERFETCH</tspan>BITS, OVERFETCH</text>
+<rect x="24" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="119.0" y="178" text-anchor="middle" font-weight="bold">AXI4-Lite handshake</text>
+<text x="119.0" y="198" text-anchor="middle" fill="#555" font-size="11">axi_lite_if + decoder, 4 KB</text>
+<rect x="24" y="246" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="119.0" y="272" text-anchor="middle" font-weight="bold">Platform DMA</text>
+<text x="119.0" y="292" text-anchor="middle" fill="#555" font-size="11">s_bits / s_sel in, m_sym out</text>
+<rect x="334" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="429.0" y="84" text-anchor="middle" font-weight="bold">Register file</text>
+<text x="429.0" y="104" text-anchor="middle" fill="#555" font-size="11">MODE, START_BIT, N_TABLES, limits, IRQ</text>
+<rect x="334" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="429.0" y="178" text-anchor="middle" font-weight="bold">Block FSM</text>
+<text x="429.0" y="198" text-anchor="middle" fill="#555" font-size="11">doorbell → build → decode → EOB</text>
+<rect x="334" y="246" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="429.0" y="272" text-anchor="middle" font-weight="bold">Counters</text>
+<text x="429.0" y="292" text-anchor="middle" fill="#555" font-size="11">CYCLES, SYMBOLS, BITS, BUILD</text>
+<rect x="644" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="739.0" y="84" text-anchor="middle" font-weight="bold">Length window</text>
+<text x="739.0" y="104" text-anchor="middle" fill="#555" font-size="11">6 × 288 × 5 bit, pending/latched</text>
+<rect x="644" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="739.0" y="178" text-anchor="middle" font-weight="bold">Table builder</text>
+<text x="739.0" y="198" text-anchor="middle" fill="#555" font-size="11">count → first_code → base → symtab</text>
+<rect x="644" y="246" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="739.0" y="272" text-anchor="middle" font-weight="bold">6 table register sets</text>
+<text x="739.0" y="292" text-anchor="middle" fill="#555" font-size="11">first_code/count/base per length</text>
+<rect x="644" y="340" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="739.0" y="366" text-anchor="middle" font-weight="bold">Symbol table (flops)</text>
+<text x="739.0" y="386" text-anchor="middle" fill="#555" font-size="11">1,728 × 10 bit, registered read</text>
+<rect x="954" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1049.0" y="84" text-anchor="middle" font-weight="bold">Word FIFO</text>
+<text x="1049.0" y="104" text-anchor="middle" fill="#555" font-size="11">s_bits 32-bit, TKEEP, TLAST</text>
+<rect x="954" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1049.0" y="178" text-anchor="middle" font-weight="bold">Bit window</text>
+<text x="1049.0" y="198" text-anchor="middle" fill="#555" font-size="11">64-bit, peek 20, consume ≤ 20, zero pad</text>
+<rect x="954" y="246" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1049.0" y="272" text-anchor="middle" font-weight="bold">Mode reversal</text>
+<text x="1049.0" y="292" text-anchor="middle" fill="#555" font-size="11">MSB-first bzip2 / LSB-first DEFLATE</text>
+<rect x="1264" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1359.0" y="84" text-anchor="middle" font-weight="bold">Comparator cascade</text>
+<text x="1359.0" y="104" text-anchor="middle" fill="#555" font-size="11">20 lengths in parallel</text>
+<rect x="1264" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1359.0" y="178" text-anchor="middle" font-weight="bold">Priority encode</text>
+<text x="1359.0" y="198" text-anchor="middle" fill="#555" font-size="11">shortest match, length</text>
+<rect x="1264" y="246" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1359.0" y="272" text-anchor="middle" font-weight="bold">Symbol lookup</text>
+<text x="1359.0" y="292" text-anchor="middle" fill="#555" font-size="11">base + code − first_code</text>
+<rect x="1264" y="340" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1359.0" y="366" text-anchor="middle" font-weight="bold">Extra bits (DEFLATE)</text>
+<text x="1359.0" y="386" text-anchor="middle" fill="#555" font-size="11">length/distance bases</text>
+<rect x="1574" y="58" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1669.0" y="84" text-anchor="middle" font-weight="bold">Selector FSM</text>
+<text x="1669.0" y="104" text-anchor="middle" fill="#555" font-size="11">s_sel, switch every 50 symbols</text>
+<rect x="1574" y="152" width="190" height="64" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
+<text x="1669.0" y="178" text-anchor="middle" font-weight="bold">Beat packer</text>
+<text x="1669.0" y="198" text-anchor="middle" fill="#555" font-size="11">ADR-0006 32-bit beats, TLAST on EOB</text>
+<text x="125.0" y="141.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">MMIO</text>
+<text x="125.0" y="141.0" text-anchor="start" font-size="11" fill="#1f4e79">MMIO</text>
+<text x="274.0" y="132.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">config / status</text>
+<text x="274.0" y="132.0" text-anchor="middle" font-size="11" fill="#1f4e79">config / status</text>
+<text x="274.0" y="97.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">STATUS, irq</text>
+<text x="274.0" y="97.0" text-anchor="middle" font-size="11" fill="#1f4e79">STATUS, irq</text>
+<text x="274.0" y="165.88372093023256" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">lengths (147 words)</text>
+<text x="274.0" y="165.88372093023256" text-anchor="middle" font-size="11" fill="#1f4e79">lengths (147 words)</text>
+<text x="435.0" y="141.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">doorbell / abort</text>
+<text x="435.0" y="141.0" text-anchor="start" font-size="11" fill="#1f4e79">doorbell / abort</text>
+<text x="584.0" y="179.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">start build</text>
+<text x="584.0" y="179.0" text-anchor="middle" font-size="11" fill="#1f4e79">start build</text>
+<text x="745.0" y="141.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">5-bit lengths</text>
+<text x="745.0" y="141.0" text-anchor="start" font-size="11" fill="#1f4e79">5-bit lengths</text>
+<text x="274.0" y="257.7567567567568" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">s_bits</text>
+<text x="274.0" y="257.7567567567568" text-anchor="middle" font-size="11" fill="#1f4e79">s_bits</text>
+<text x="1055.0" y="141.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">32-bit words</text>
+<text x="1055.0" y="141.0" text-anchor="start" font-size="11" fill="#1f4e79">32-bit words</text>
+<text x="1055.0" y="235.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">20-bit window</text>
+<text x="1055.0" y="235.0" text-anchor="start" font-size="11" fill="#1f4e79">20-bit window</text>
+<text x="1204.0" y="179.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">code window</text>
+<text x="1204.0" y="179.0" text-anchor="middle" font-size="11" fill="#1f4e79">code window</text>
+<text x="894.0" y="246.7674418604651" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">first_code, count</text>
+<text x="894.0" y="246.7674418604651" text-anchor="middle" font-size="11" fill="#1f4e79">first_code, count</text>
+<text x="1365.0" y="235.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">length, code</text>
+<text x="1365.0" y="235.0" text-anchor="start" font-size="11" fill="#1f4e79">length, code</text>
+<text x="1365.0" y="329.0" text-anchor="start" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">symbol</text>
+<text x="1365.0" y="329.0" text-anchor="start" font-size="11" fill="#1f4e79">symbol</text>
+<text x="1204.0" y="204.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">consume n</text>
+<text x="1204.0" y="204.0" text-anchor="middle" font-size="11" fill="#1f4e79">consume n</text>
+<text x="274.0" y="277.70588235294116" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">s_sel</text>
+<text x="274.0" y="277.70588235294116" text-anchor="middle" font-size="11" fill="#1f4e79">s_sel</text>
+<text x="1514.0" y="97.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">table id</text>
+<text x="1514.0" y="97.0" text-anchor="middle" font-size="11" fill="#1f4e79">table id</text>
+<text x="1514.0" y="273.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">symbol / event</text>
+<text x="1514.0" y="273.0" text-anchor="middle" font-size="11" fill="#1f4e79">symbol / event</text>
+<text x="1514.0" y="195.14705882352942" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">m_sym</text>
+<text x="1514.0" y="195.14705882352942" text-anchor="middle" font-size="11" fill="#1f4e79">m_sym</text>
+<text x="1514.0" y="217.0" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">table id</text>
+<text x="1514.0" y="217.0" text-anchor="middle" font-size="11" fill="#1f4e79">table id</text>
+<text x="894.0" y="204.11627906976744" text-anchor="middle" font-size="11" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round">BITS, OVERFETCH</text>
+<text x="894.0" y="204.11627906976744" text-anchor="middle" font-size="11" fill="#1f4e79">BITS, OVERFETCH</text>
 </svg>

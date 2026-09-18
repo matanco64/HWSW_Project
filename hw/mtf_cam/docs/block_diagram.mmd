@@ -7,14 +7,14 @@ flowchart LR
     end
     subgraph C1["Control"]
         direction TB
-        regs["Register file<br/><i>used map, SYMBOL/BYTES_LIMIT, CAPS, DBG, STATUS/IRQ</i>"]
+        regs["Register file<br/><i>used map, limits, CAPS, STATUS/IRQ</i>"]
         fsm["Block FSM<br/><i>doorbell → init → run → EOB / error</i>"]
-        cnt["Counters<br/><i>CYCLES, SYMBOLS_IN, BYTES_OUT, INIT, MAX_RUN</i>"]
+        cnt["Counters<br/><i>CYCLES, SYMBOLS, BYTES, MAX_RUN</i>"]
     end
     subgraph C2["List"]
         direction TB
-        init["List init<br/><i>used map → ascending bytes, ≤ 256 cycles</i>"]
-        cam["MTF list<br/><i>N_LIST × 8-bit shift-register CAM</i>"]
+        init["List init<br/><i>used map → ascending bytes</i>"]
+        cam["MTF list<br/><i>256 × 8-bit shift reg, read by rank</i>"]
         rank["Rank select<br/><i>symbol − 1 → byte, shift 0..r−1</i>"]
     end
     subgraph C3["Run"]

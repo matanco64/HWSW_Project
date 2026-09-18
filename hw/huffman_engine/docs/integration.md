@@ -73,7 +73,7 @@ Amdahl `S = T / new_total`.
 | Clock | `t_hw` | Non-accel (50.4 % of T) | New total | **Speedup S** | Ideal 1/(1−f) |
 |---|---:|---:|---:|:--:|:--:|
 | **50 MHz (PRD target)** | **2.99 ms** | 566.2 ms | 569.2 ms | **≈ 1.97×** | 1.98× |
-| **≈ 25.1 MHz (post-CTS STA, `docs/ppa.md §3.1`)** | 5.95 ms | 566.2 ms | 572.2 ms | **≈ 1.96×** | 1.98× |
+| **≈ 39.9 MHz (post-CTS STA, `docs/ppa.md §3.1`)** | 3.74 ms | 566.2 ms | 570.0 ms | **≈ 1.97×** | 1.98× |
 | 5 MHz (pessimistic) | 29.9 ms | 566.2 ms | 596.1 ms | **≈ 1.89×** | 1.98× |
 
 - **Ideal bound** `1/(1 − f) = 1.98×` (infinite-speed accelerator; the 50.4 % software

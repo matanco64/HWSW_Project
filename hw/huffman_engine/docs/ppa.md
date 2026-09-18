@@ -116,7 +116,7 @@ chasing an impossible 20 ns target. That is the same repair-bloat trajectory tha
 into GRT-0607. **The fix (grape's lesson) is to relax the clock so the resizer is not chasing an
 unachievable target:** a second run (`signoff_confirm`, `synth/config_confirm.json`, **40 ns**
 clock, FP_CORE_UTIL 35) **converged cleanly through floorplan, placement, CTS and post-CTS STA**
-— the same depth mtf_cam reached — with **0 setup violations**. The number below is that
+— the same depth mtf_cam reached — with **no setup or hold violations**. The number below is that
 **post-CTS STA**, which *supersedes* the earlier pre-PnR estimate.
 
 > **The pre-PnR 8.9 MHz was a high-fanout-net wireload artifact, not the real timing.** At
@@ -133,28 +133,39 @@ discussion with a defined operating frequency suffices), the run is closed on th
 below (it went one step further, into the post-CTS resizer + global routing, then stopped —
 same as grape/mtf; no GDS).
 
-### 3.1 Operating frequency — OpenROAD post-CTS STA (measured near-critical)
+### 3.1 Operating frequency — OpenROAD post-CTS STA
 
-Worst setup slack at the **40 ns** constraint (near-critical, so the tool actually optimizes the
-critical path — not a loose over-relaxed read), propagated post-CTS clock, `Fmax = 1/(period −
-ws)`. Source: `synth/runs/signoff_confirm/31-openroad-stamidpnr-1/` (`max.rpt`,
-`openroad-stamidpnr-1.log`).
+Worst **setup** slack at the **40 ns** constraint, propagated post-CTS clock,
+`Fmax = 1/(period − ws)`. Source: `synth/runs/signoff_confirm/31-openroad-stamidpnr-1/max.rpt`
+(setup) and `min.rpt` (hold); the worst path of each is preserved in the tracked folder
+`synth/evidence/` (`worst_setup_path.rpt`, `worst_hold_path.rpt`, `power.rpt`).
 
 | Stage | Worst setup slack (tt) | Achievable period | **Fmax** | Note |
 |---|---:|---:|:--:|---|
-| **post-CTS STA** (`31-openroad-stamidpnr-1`, 40 ns) | **+0.156 ns** (reg→reg) | **39.84 ns** | **≈ 25.1 MHz** | **the operating point** — 0 setup violations, real clock tree, near-critical |
+| **post-CTS STA** (`31-openroad-stamidpnr-1`, 40 ns) | **+14.941 ns** | **25.06 ns** | **≈ 39.9 MHz** | **the operating point** — all 1,000 reported worst setup paths MET; hold met (worst +0.156 ns) |
+| post-CTS STA, looser run (`signoff_relaxed`, 120 ns) | +88.43 ns | 31.57 ns | ≈ 31.7 MHz | same netlist source, looser constraint: the timing-driven resizer does less work, so the estimate is lower — brackets the result |
 | pre-PnR STA (`signoff2/08-staprepnr`, 20 ns) | −91.886 ns | 111.886 ns | ≈ 8.9 MHz | **superseded** — high-fanout wireload artifact (see box above) |
 
-- **Defined operating frequency: ≈ 25.1 MHz (tt, post-CTS).** The 20 ns / 50 MHz K3 target is
-  **missed by ~2.0×** (not the ~5.6× the pre-PnR artifact suggested). This is a *real* post-CTS
-  number (propagated clock, placed cells, 0 setup violations across 269,517 reported paths); it
-  is an upper bound only in that detailed routing would add net RC.
-- **Critical path** (post-CTS, near-critical): startpoint `u_regs._86125_` (a `huff_regs`
-  length/counter register) → endpoint `u_axi._262_` (an AXI-Lite readback register). Once CTS
-  buffered the `huff_tables` build net, the near-critical path is a `huff_regs → AXI` status/
-  counter path. The documented RTL follow-up to reach 50 MHz remains to **pipeline the table
-  build** and **register the wide readback mux** — the same storage blocks (`huff_tables`/
-  `huff_regs`) that dominate area, so area and timing follow-ups coincide.
+> **Correction (2026-09-19).** An earlier revision of this section reported **25.1 MHz**, derived
+> from "+0.156 ns worst register-to-register slack". That +0.156 ns is the worst **hold** slack
+> (`min.rpt`), misread as a setup slack; the worst **setup** slack is +14.941 ns (`max.rpt`). The
+> critical path and the "269,517 paths" count quoted there were wrong for the same reason. The
+> figures in this section are re-derived from `max.rpt` directly and the evidence is preserved in
+> `synth/evidence/`. (Coincidence to beware: the achievable *period* is 25.06 ns.)
+
+- **Defined operating frequency: ≈ 39.9 MHz (tt, post-CTS, 40 ns constraint).** The 20 ns /
+  50 MHz K3 target is **missed by ~1.25×** (not the ~5.6× the pre-PnR artifact suggested). This
+  is a post-CTS number (propagated clock, placed cells, no setup or hold violations); it is an
+  estimate in that the constraint (40 ns) is looser than the result (25 ns) — a tighter
+  constraint changes how hard the resizer works (a 27 ns confirmation run, `signoff_tight`, is
+  recorded below when complete) — and detailed routing would add net RC.
+- **Critical path** (post-CTS setup): startpoint `u_regs._86212_` (a `huff_regs` length/count
+  register) → endpoint `u_align._3147_` (a `huff_aligner` window register), slack +14.941 ns.
+  The same `huff_regs` start register led the pre-PnR critical path; once CTS buffered the
+  `huff_tables` build net the limiter is the `huff_regs → huff_aligner` control path. The
+  documented RTL follow-up to reach 50 MHz remains to **pipeline the table build** and
+  **register the wide control fan-out from `huff_regs`** — the same storage blocks that dominate
+  area, so area and timing follow-ups coincide.
 
 ### 3.2 Power
 
@@ -162,7 +173,7 @@ ws)`. Source: `synth/runs/signoff_confirm/31-openroad-stamidpnr-1/` (`max.rpt`,
   **≈ 283 mW** (`signoff_confirm/31-openroad-stamidpnr-1/power.rpt`, `power__total: 0.28315`):
   51 % internal + 49 % switching. With a placed clock tree this is far more meaningful than the
   pre-PnR estimate, but it uses **default switching activity** (no real VCD) at the run's 40 ns
-  (25 MHz) constraint, so it is indicative only and scales with clock (the looser 120 ns
+  (40 ns = 25 MHz) run constraint, so it is indicative only and scales with clock (the looser 120 ns
   `signoff_relaxed` run reported ≈ 98 mW at its 8.3 MHz constraint — consistent, power ∝ freq).
   `ppa.power_mw ≈ 283` (post-CTS, default activity, 40 ns).
 - **Die shot:** **not obtained** — no GDS was produced (run closed after post-CTS, before
@@ -175,7 +186,7 @@ ws)`. Source: `synth/runs/signoff_confirm/31-openroad-stamidpnr-1/` (`max.rpt`,
 | Yosys+Liberty area + cell counts | **done** (§1: 151,058 cells, 1.634 mm²) |
 | OpenLane synthesis | **done** (clean; passed all checkers) |
 | OpenLane placement + CTS | **done** (`signoff_confirm`, 40 ns; converged, 0 setup violations) |
-| Fmax | **post-CTS STA** — ≈ 25.1 MHz tt (§3.1), near-critical; supersedes the pre-PnR 8.9 MHz artifact |
+| Fmax | **post-CTS STA** — ≈ 39.9 MHz tt (§3.1, 40 ns constraint); supersedes the pre-PnR 8.9 MHz artifact |
 | Area (OpenLane placed) | not reported — use Yosys 1.634 mm² (§1) |
 | Power | **post-CTS indicative** ≈ 283 mW (§3.2, default activity, 40 ns) |
 | Die shot | **not obtained** (no GDS; not §7-required, not invented) |

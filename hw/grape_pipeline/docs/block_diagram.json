@@ -1,5 +1,5 @@
 {
-  "title": "grape_pipeline \u2014 architecture (MAS)",
+  "title": "grape_pipeline — architecture (as built)",
   "columns": [
     {
       "name": "Host / bus",
@@ -42,12 +42,12 @@
         {
           "id": "body",
           "label": "Body register file",
-          "sub": "working + committed, 5 \u00d7 7 FP64"
+          "sub": "working + committed, 5 × 7 FP64"
         },
         {
           "id": "pairs",
           "label": "Pair list",
-          "sub": "\u226410 \u00d7 (i, j)"
+          "sub": "≤10 × (i, j)"
         }
       ]
     },
@@ -56,18 +56,18 @@
       "blocks": [
         {
           "id": "pipe",
-          "label": "Pair pipeline",
-          "sub": "sub \u2192 r\u00b2 \u2192 sqrt \u2192 rcp \u2192 \u00d7dt \u2192 \u00d7m"
+          "label": "Force schedule",
+          "sub": "static 290-op step, shared units"
         },
         {
           "id": "acc",
-          "label": "Velocity accumulate",
-          "sub": "6 FMA, ordered by pair"
+          "label": "Shared FP64 units",
+          "sub": "3 add/sub, 3 mul, sqrt, rcp (no FMA)"
         },
         {
           "id": "integ",
-          "label": "Position integrator",
-          "sub": "r += dt\u00b7v, 5 bodies"
+          "label": "Ordered accumulate + integrate",
+          "sub": "3-wide issue, per-lane order, commit"
         }
       ]
     }
@@ -110,17 +110,17 @@
     {
       "from": "pairs",
       "to": "pipe",
-      "label": "(i, j) per cycle"
+      "label": "pair order (i, j)"
     },
     {
       "from": "pipe",
       "to": "acc",
-      "label": "dx\u00b7b1m, dx\u00b7b2m"
+      "label": "issued ops (operands, slot)"
     },
     {
       "from": "acc",
       "to": "integ",
-      "label": "v (5 bodies)"
+      "label": "force terms dx·b1m, dx·b2m"
     },
     {
       "from": "integ",

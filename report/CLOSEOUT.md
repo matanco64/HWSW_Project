@@ -6,7 +6,7 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → B**
+**Current phase → B4** (Yuval reads the hardware report) · Phase C can start in parallel (Matan)
 
 ---
 
@@ -28,29 +28,58 @@ Check every section against the required contents in `project_instructions.md` "
 to Submit → 1. Benchmark Reports": Overview · Initial Analysis · Optimizations · Performance
 Comparison · Hardware Proposal · Conclusion. Note anything you could not explain aloud.
 
-- [ ] B1 `report_nbody.pdf` — all six sections present and explainable. (M reads SW, Y reads §5)
-- [ ] B2 `report_pyflate.pdf` — all six sections present and explainable. (M reads SW, Y reads §5)
-- [ ] B3 `report_appendix.pdf` — know what A1–A7 hold so you can point to them in Q&A.
+- [x] B1 `report_nbody.pdf` — Y read §5 (2026-09-19): findings R1–R8, R13 in REPORT_DELTAS.
+- [ ] B1m Matan reads the nbody software sections the same way.
+- [x] B2 `report_pyflate.pdf` — Y read §5 + Conclusion: findings R9–R12, R15–R18; math audit R17 all correct.
+- [ ] B2m Matan reads the pyflate software sections the same way.
+- [x] B3 `report_appendix.pdf` — optional deliverable (R19); A1–A7 map known; findings R14, R20, R21.
 - [ ] B4 `hw/docs/hardware_report.md` — Y re-reads; §6 table maps every §7 bullet × module.
-- [ ] B5 Walk `report/REPORT_DELTAS.md`; mark each item **apply** / **skip** in the file.
-      Must-apply: **C4** (huffman 8.9 → 25.1 MHz post-CTS). Optional: B1–B3.
+- [x] B5 REPORT_DELTAS triaged: MUST / SHOULD / NICE / no-action table at the top of the file
+      (21 reading-pass items R1–R21 + C4).
 
-**Gate B:** a list of "could not explain" items exists (empty is fine) and C4 is marked apply.
+**Gate B:** B4 read, and the triage table in REPORT_DELTAS is agreed with Matan.
 
-## Phase C — Close the one inconsistency (M, ~30 min)
+## Phase C — Apply the reading-pass deltas (M, ~2–3 h)
 
-The submitted `report_pyflate.txt` still says huffman ≈ 8.9 MHz pre-placement (3 places);
-measured post-CTS is 25.1 MHz. Only Matan edits `report/*.typ`.
+Only Matan edits `report/*.typ`. Work top-down through the triage table in
+`report/REPORT_DELTAS.md`: every MUST, then SHOULD as time allows, NICE last.
 
-- [ ] C1 Apply REPORT_DELTAS **C4** to `report/report_pyflate.typ` lines ~303, 304, 310–312.
-- [ ] C2 Apply any B1–B3 items marked "apply" in Phase B.
+- [ ] C1 Apply all **MUST** items (C4+R14, R5, R8, R11, R15, R18, R1, R9, R12).
+- [ ] C2 Apply **SHOULD** items (R10, R13, R16, R4, R7, R21), then **NICE** (R2, R3, R20, B1, B3).
+      Check page counts after R2 (nbody prototyped: stays 6 pages).
 - [ ] C3 Rebuild: `cd report && ./build.sh` (needs `typst` + `pdftotext`/poppler on the build
       machine; Yuval's WSL has typst but not pdftotext).
 - [ ] C4 Verify: `grep -c "8.9 MHz" report_pyflate.txt` → 0 (or 1 if kept as labeled history)
-      and `grep -c "25.1" report_pyflate.txt` ≥ 1. Root `.txt`/`.pdf` newer than `.typ`.
+      and `grep -c "39.9" report_pyflate.txt` ≥ 1. Root `.txt`/`.pdf` newer than `.typ`.
 - [ ] C5 Commit + push the rebuilt reports.
 
-**Gate C:** README, `hw/` docs, `STATUS.json` and `report_pyflate.txt` all say 25.1 MHz.
+**Gate C:** README, `hw/` docs, `STATUS.json` and `report_pyflate.txt` all say 39.9 MHz; both
+Conclusions state a hardware bottom line; every MUST row is applied or explicitly declined.
+
+## Phase H — Hardware follow-ups from the reading pass (Y)
+
+- [x] H0 **Correction:** huffman Fmax is **39.9 MHz**, not 25.1 (hold slack misread as setup
+      slack; found while preserving evidence). Fixed in ppa.md, integration.md, STATUS.json,
+      hardware_report.md, README, REPORT_DELTAS, this file. Chain clock is now mtf-limited (37.6).
+- [ ] H0b `signoff_tight` (27 ns) confirmation run → record in ppa.md §3.1 when it lands; read
+      **`max.rpt` only** for setup slack.
+- [x] H0c Evidence preserved in tracked `hw/<module>/synth/evidence/` (timing + power reports);
+      `synth/runs/` is gitignored so graders could not see the sources before.
+- [x] H0d Block diagrams regenerated (generator bug + stale grape/huffman content); toolchain
+      table added to hardware_report §0.1; citation audit: 63 paths checked.
+
+- [x] H1 Chain co-simulation: `hw/pyflate_accel/` wrapper + test — byte-exact 336,184 B,
+      159,303 cycles, also under back-pressure (reproduced firsthand 2026-09-19).
+- [x] H2 grape power statement corrected (≈ 19.2 mW indicative; was "not obtained").
+- [ ] H3 grape area re-measured on the final netlist (`make -C hw/grape_pipeline area`, running).
+      Then: update `ppa.md`, `hardware_report.md`, `STATUS.json`; send the two numbers to Matan
+      (R13) so the "pre-prefix area" hedge (R7) can be deleted.
+- [ ] H4 Before committing: `git checkout hw/grape_pipeline/synth/yosys.log` (the re-run is
+      overwriting this tracked log — 47 MB, must NOT be committed) and delete `area_rerun.log`.
+- [ ] H5 Commit + push the reading-pass work: REPORT_DELTAS (R1–R21 + triage), hw docs,
+      `hw/pyflate_accel/`, this tracker. Send Matan the link.
+
+**Gate H:** `git status --porcelain | grep -v synth/formal` empty; no file > 5 MB in the commit.
 
 ## Phase D — Reproducibility (B, ~30 min, mostly waiting)
 
@@ -58,7 +87,8 @@ measured post-CTS is 25.1 MHz. Only Matan edits `report/*.typ`.
 - [ ] D2 `bash -n script_nbody.sh script_pyflate.sh` — both parse.
 - [ ] D3 Optional real run on the VM: `tools/vm_launch.sh start nbody`, then `status` / `fetch`.
 - [ ] D4 Hardware sanity (doubles as the §9 live-demo candidate later):
-      `make -C hw/mtf_cam sim` → 16/16 PASS.
+      `make -C hw/mtf_cam sim` → 16/16 PASS, and `make -C hw/pyflate_accel sim` → 2/2 PASS
+      (the whole pyflate chain, byte-exact, 30 s — the best live demo).
 - [ ] D5 `./make_submission.sh`; open the archive: reports, scripts, `hw/`, README,
       `prompt.txt` all inside.
 
@@ -103,13 +133,25 @@ then do this; the repo is frozen so nothing here changes the submission.
   integrate-multiply path; huffman: pipeline the table build / register the readback mux;
   mtf: register the CAM read-mux.
 - Why did huffman's 8.9 MHz disappear? [Y] — pre-placement wireload artifact on one very
-  high-fanout net; post-CTS buffering gives the real 25.1 MHz (same class as grape's pre-PnR net).
+  high-fanout net; post-CTS buffering gives the real 39.9 MHz (same class as grape's pre-PnR net).
+  (An interim 25.1 MHz was MY error: a hold slack misread as setup — corrected, evidence in
+  `hw/huffman_engine/synth/evidence/`.)
 - Why does the nbody accelerator lose to the 9.53 ms native software? [Y+M] — compute-bound at
   19.46 MHz (127 ms); the win is gated on timing closure, not the interface.
 - Why is the Huffman speedup ~2× at any clock? [Y] — Amdahl-fraction-bound (f ≈ 0.50), not
   clock-bound.
 - What does "post-CTS" mean and why isn't it silicon? [Y] — placed cells + real clock tree, but
   no detailed routing / GDS; net RC would still move it.
+- Why is it called `mtf_cam` if nothing is content-addressed? [Y] — the decode path reads the
+  list by rank; the name follows the MTF list structure (the encoder searches by content).
+- Did the hardware beat the software? [Y] — nbody: ties optimized Python, ≈15× slower than Rust.
+  pyflate: ≈28× over the Python symbol loop, ≈1.3× slower than the Rust kernel (parity at 50 MHz),
+  end-to-end tie — the stage is ≈2 % of what remains; BWT sets the floor.
+- Same clock or CDC between huffman and mtf? How tested? [Y] — one shared clock, no CDC
+  (37.6 MHz, mtf-limited); rate difference is cycles/symbol, absorbed by `tready`
+  back-pressure. Each side verified standalone vs the same beat contract + golden stream, AND
+  the chain is co-simulated (`make -C hw/pyflate_accel sim`): byte-exact 336,184 B, 159,303
+  cycles, also under 50 % output back-pressure. Live-demo candidate: runs in 30 s.
 - Why these two benchmarks? [M] — complementary hardware boundaries (streaming symbol pipeline
   vs stateful force loop).
 - How were the 7% / 4.00× / 6.61× numbers measured? [M] — course VM, pyperf, 120 values,

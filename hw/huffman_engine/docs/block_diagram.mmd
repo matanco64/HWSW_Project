@@ -7,16 +7,16 @@ flowchart LR
     end
     subgraph C1["Control"]
         direction TB
-        regs["Register file<br/><i>MODE, START_BIT, ALPHABET, N_TABLES, SYMBOL_LIMIT, DBG, STATUS/IRQ</i>"]
+        regs["Register file<br/><i>MODE, START_BIT, N_TABLES, limits, IRQ</i>"]
         fsm["Block FSM<br/><i>doorbell → build → decode → EOB</i>"]
-        cnt["Counters<br/><i>CYCLES, SYMBOLS, BITS, BUILD, OVERFETCH</i>"]
+        cnt["Counters<br/><i>CYCLES, SYMBOLS, BITS, BUILD</i>"]
     end
     subgraph C2["Tables"]
         direction TB
         lenwin["Length window<br/><i>6 × 288 × 5 bit, pending/latched</i>"]
         builder["Table builder<br/><i>count → first_code → base → symtab</i>"]
         tabs["6 table register sets<br/><i>first_code/count/base per length</i>"]
-        symtab["Symbol table RAM<br/><i>6 × 288 × 9 bit</i>"]
+        symtab["Symbol table (flops)<br/><i>1,728 × 10 bit, registered read</i>"]
     end
     subgraph C3["Aligner"]
         direction TB

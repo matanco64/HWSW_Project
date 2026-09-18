@@ -581,3 +581,20 @@ Appended by `hw-advisor` after each gate; one entry per lesson (date, module/sta
   count), reach for parallel-prefix (flatten) before pipelining (stage). Confirm bit-exactness with
   the full regression, then merge — the win is real and free. The next limiter simply moves to the
   next-deepest path (here FSM->integrate-multiply), which becomes the follow-on target.
+
+## 2026-09-19 — huffman_engine/ppa (correction)
+
+- **A hold slack was reported as a setup slack (25.1 MHz published, real value 39.9 MHz).**
+  Observable: a monitor script ran `awk '/Startpoint.*flip-flop/…/slack/'` over the whole
+  `openroad-stamidpnr-1.log`; in that log the **Hold** section (`report_checks -path_delay min`)
+  comes first (line 16) and Setup starts ~90 k lines later, so the "worst reg→reg slack"
+  (+0.156 ns) was the worst *hold* slack. Root cause: parsing a mixed log instead of the
+  per-analysis report. Caught only when the evidence was copied into a tracked folder and the
+  extracted path showed +14.94 ns. Rule for `hw-ppa`: **read setup slack from `max.rpt` /
+  `ws.max.rpt` (or the `timing__setup__ws` metric) only; hold from `min.rpt`; never grep
+  "slack" across the step log.** Sanity check that would have caught it: Fmax must be
+  consistent with the looser run (120 ns run gave 31.7 MHz; 25.1 MHz from a *tighter* run was
+  the wrong direction).
+- **Evidence under `synth/runs/` is gitignored** — every Fmax/power citation pointed at files a
+  grader cannot see. Rule: when a PPA number is recorded, copy the few small report files it is
+  read from into tracked `synth/evidence/` with a README naming run tag, step and constraint.

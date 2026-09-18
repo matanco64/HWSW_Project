@@ -31,14 +31,14 @@ separate simulation cycles, mapped area and timing evidence from design targets:
 | module | benchmark | cells | area | Fmax | tests |
 |---|---|---|---:|---:|---:|
 | `grape_pipeline` | nbody | 584,454 | 4.08 mm² | 19.5 MHz | 9/9 |
-| `huffman_engine` | pyflate | 151,058 | 1.63 mm² | 25.1 MHz | 17/17 |
+| `huffman_engine` | pyflate | 151,058 | 1.63 mm² | 39.9 MHz | 17/17 |
 | `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.6 MHz | 16/16 |
 
 All three now report **post-CTS** static timing (real placed clock tree).
 `huffman_engine`'s initial 20 ns run was placement-non-convergent, and its earlier
 ~8.9 MHz pre-placement estimate turned out to be a high-fanout-net wireload artifact
 (the same class as grape's pre-PnR net); relaxing the clock let placement converge
-through post-CTS, where the real timing (25.1 MHz) is *faster*, not slower. None has
+through post-CTS, where the real timing (39.9 MHz) is *faster*, not slower. None has
 completed 50 MHz routed sign-off. The grape area above describes the earlier
 three-wide design; its newer prefix timing comes from a separate netlist revision.
 Per-module detail is in `hw/<module>/docs/ppa.md` and `integration.md`.

@@ -79,7 +79,7 @@ routing. That STA is what we report:
 | **Fmax** | **≈ 11.15 MHz** (1 / 89.68 ns) | derived from the slack above |
 | Worst path | `u_fsm._948_` (state FF) → `g_add[1].u_add._6265_` (accumulate-picker adder) | `synth/runs/grape_relaxed/35-openroad-stamidpnr-1/checks.rpt` Startpoint/Endpoint |
 | Area (post-place, µm²) | not reported — OpenLane never reached signoff; use Yosys 4.075 mm² (§ Yosys) | — |
-| Power (mW) | **not obtained** — needs signoff/GDS, never reached | — |
+| Power (mW) | **≈ 19.2 mW — indicative only** (post-CTS `report_power`, **default switching activity**, at the 150 ns run constraint ≈ 6.7 MHz; `grape_prefix2`; `grape_relaxed` gave 20.2 mW). Not workload power; no signoff/GDS figure exists | `synth/runs/grape_prefix2/35-openroad-stamidpnr-1/power.rpt` (`power__total: 0.019231`) |
 | Die shot | **not obtained** — no GDS produced | — |
 
 **Fmax vs KPI.** The critical path is the **3-wide accumulate issue picker** (`g_add[*]` —
@@ -148,4 +148,4 @@ Performance: K1 124 cycles/step measured on the full benchmark (2.48 M cycles / 
 STA (`synth/runs/grape_prefix2/35-openroad-stamidpnr-1/ws.max.rpt`; the earlier ~11.15 MHz was
 the pre-rewrite linear-scan netlist `grape_relaxed`), critical path now the integrate-multiplier
 operand path → 50 MHz missed ~2.6×, RTL fix = pipeline the integrate-multiply path.
-Power/die shot: not obtained (OpenLane GRT-0607, signoff not §7-required).
+Power: ≈ 19.2 mW post-CTS tool estimate (default activity, 150 ns constraint — indicative, not workload power). Die shot: not obtained (OpenLane GRT-0607, signoff not §7-required).
