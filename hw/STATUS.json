@@ -258,8 +258,8 @@
             },
             "OpenLane 2 run: Fmax, area µm², power": {
               "result": "pass",
-              "evidence": "post-CTS STA Fmax 11.15 MHz (synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt WS +60.32ns @150ns; worst path u_fsm->g_add accumulate picker); area 4.075 mm² (Yosys synth/area.txt); power/GDS n/a — OpenLane GRT-0607 congestion bug x3, §7 signoff not required",
-              "at": "2026-09-12T18:13:59Z"
+              "evidence": "post-CTS STA Fmax 19.46 MHz (synth/evidence/ws.max.rpt: WS +98.6212ns @150ns, run grape_prefix2; critical path integrate-multiplier operand) — supersedes 11.15 MHz of the earlier linear-scan netlist (grape_relaxed, WS +60.32ns); area 4.075 mm² (Yosys synth/area.txt, pre-prefix netlist); power ~19.2 mW post-CTS default activity (synth/evidence/power.rpt); routing/GDS not reached (GRT-0607 congestion)",
+              "at": "2026-09-19T04:13:37Z"
             },
             "trade-off table (≥2 design points)": {
               "result": "pass",
@@ -285,8 +285,8 @@
             },
             "cycle-accurate speedup estimate vs results/baseline_*": {
               "result": "pass",
-              "evidence": "docs/integration.md §3: T=231ms (results/baseline_nbody_stats.txt), f=0.95, cycles=2.48M (124 cyc/step), Fmax — Amdahl 3.78-4.45x @50MHz PRD target, ~1.0x @ achievable 11.15 MHz (accumulate-picker path); ideal 20x, sensitivity rows",
-              "at": "2026-09-12T18:19:16Z"
+              "evidence": "docs/integration.md §3: T=231.20ms (results/baseline_nbody_stats.txt mean), f=0.95, cycles=2.48M (124 cyc/step) — ~1.66x @ achievable 19.46 MHz post-CTS (supersedes ~1.0x @ 11.15 MHz), 3.78-4.45x @50MHz PRD target; ideal 20x, sensitivity row",
+              "at": "2026-09-19T04:13:37Z"
             },
             "report §7 bullets mapped": {
               "result": "pass",
@@ -332,8 +332,8 @@
             },
             "workload slice quantified from results/ profile": {
               "result": "pass",
-              "evidence": "docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:19 (1.13 s), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)",
-              "at": "2026-08-28T20:08:10Z"
+              "evidence": "docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:18 (mean 1.12 s; canonical 1,123.49 ms), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)",
+              "at": "2026-09-19T04:13:37Z"
             },
             "hw-review findings resolved": {
               "result": "pass",
@@ -576,8 +576,8 @@
             },
             "OpenLane 2 run: Fmax, area µm², power": {
               "result": "pass",
-              "evidence": "OpenLane 2.3.10 one attempt: synthesis clean, reached pre-PnR STA + global placement. Fmax pre-PnR tt ~8.9 MHz (ws -91.886ns @ 20ns, synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt); crit path table-build/symtab (u_regs->u_tab). Area Yosys 1.634 mm2; power/die shot not obtained (no GDS, non-convergent placement, §7-optional, not invented). docs/ppa.md §3",
-              "at": "2026-09-12T19:41:44Z"
+              "evidence": "OpenLane 2.3.10 post-CTS STA: Fmax 39.9 MHz (run signoff_confirm, 40ns, worst SETUP slack +14.941ns from max.rpt) confirmed by signoff_tight (27ns, +1.685ns -> 39.5 MHz, timing met); hold met; power ~283 mW default activity @40ns; evidence synth/evidence/. Supersedes the ~8.9 MHz pre-PnR estimate (signoff2, a high-fanout wireload artifact). Area 1.634 mm² / 151,058 cells (Yosys). Routing/GDS not reached",
+              "at": "2026-09-19T04:13:37Z"
             },
             "trade-off table (≥2 design points)": {
               "result": "pass",
@@ -591,8 +591,8 @@
             },
             "OpenLane 2 run: Fmax, area um2, power": {
               "result": "pass",
-              "evidence": "OpenLane 2.3.10 one time-boxed attempt: synthesis clean + all checkers passed (better than grape OOM); reached OpenROAD pre-PnR STA + global placement. Fmax from pre-PnR STA synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt: ws -91.886ns @ 20ns -> ~8.9 MHz tt (pre-placement, upper bound); crit path u_regs->u_tab (table-build/symtab mux, not decode cascade). Area = Yosys 1.634 mm2 (OpenLane not placed). Power/die shot not obtained (no GDS; placement non-convergent, closed per proj_instructions.md §7); power not invented. docs/ppa.md §3",
-              "at": "2026-09-12T19:41:16Z"
+              "evidence": "OpenLane 2.3.10 post-CTS STA: Fmax 39.9 MHz (run signoff_confirm, 40ns, worst SETUP slack +14.941ns from max.rpt) confirmed by signoff_tight (27ns, +1.685ns -> 39.5 MHz, timing met); hold met; power ~283 mW default activity @40ns; evidence synth/evidence/. Supersedes the ~8.9 MHz pre-PnR estimate (signoff2, a high-fanout wireload artifact). Area 1.634 mm² / 151,058 cells (Yosys). Routing/GDS not reached",
+              "at": "2026-09-19T04:13:37Z"
             }
           }
         },
@@ -608,8 +608,8 @@
             },
             "cycle-accurate speedup estimate vs results/baseline_*": {
               "result": "pass",
-              "evidence": "docs/integration.md §3: T=1.13s (baseline_pyflate_stats.txt:19), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x @50MHz (ideal 1.98x); clock-insensitive 1.89-1.97x across 5-50 MHz",
-              "at": "2026-09-12T19:42:07Z"
+              "evidence": "docs/integration.md §3: T=1,123.49ms (baseline_pyflate_stats.txt:18 mean 1.12 s), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x vs stock @50MHz and @39.9MHz post-CTS (ideal 1.98x); clock-insensitive 1.89-1.97x down to 5 MHz. vs the delivered Rust path the chain only ties (hardware_report §3.8)",
+              "at": "2026-09-19T04:13:37Z"
             },
             "report §7 bullets mapped": {
               "result": "pass",
@@ -963,5 +963,5 @@
     "ppa",
     "integration"
   ],
-  "updated": "2026-09-18T22:21:29Z"
+  "updated": "2026-09-19T04:13:37Z"
 }

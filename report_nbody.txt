@@ -211,9 +211,9 @@ Dependencies determine the schedule
 Pairs (0, 1) and (0, 2) can form their distance terms from the same step’s positions, but both update body 0′s
 velocity. Its x lane must compute u0a = u0 - dx01*b1m, then u0b = u0a - dx02*b2m; issuing both against
 the old u0 would lose an update. Regrouping them into one subtraction may also change FP64 rounding.
-Different body-component lanes can progress independently; a scoreboard and ordered issue logic wait for
-each lane’s preceding result. Positions update only after their required velocity contributions, and the next
-step uses the committed positions.
+Different body-component lanes can progress independently; a dependency tracker and ordered issue logic
+wait for each lane’s preceding result. Positions update only after their required velocity contributions, and
+the next step uses the committed positions.
 
                                      Pair (0, 1) force term                           Pair (0, 2) force term
 
@@ -236,32 +236,32 @@ Cycle counts, test results and coverage come from these runs. The design is then
 it into a netlist of standard logic cells from sky130, the open-source SkyWater 130 nm process, which gives
 
                                                                5
-HWSW Final Project                                                                                  Benchmark Report: nbody
+HWSW Final Project                                                                                       Benchmark Report: nbody
 
 cell count and area. Finally OpenLane places the cells, builds the clock tree and runs static timing analysis,
 which sums gate and wire delays along every register-to-register path; the slowest path sets the maximum
 clock. We stop after clock-tree synthesis (post-CTS): cells and the clock network are placed but signal wires
 are not routed, so the frequency is an estimate, not silicon. The toolchain is entirely open source, so every
 number can be regenerated from the repository.
- Quantity                                  grape_pipeline        Produced by
- Cycles per step                                           124   RTL simulation against the golden model
- Full-benchmark cycles                2,480,000; 0 mismatches    same, 20,000 steps
- Directed + random tests                               9 of 9 same, Verilator and Icarus
- Line / toggle coverage                         91.7% / 96.0%    same
- Cells                                               584,454     Yosys synthesis onto sky130 cells
- Area                                              4.075 mm²     same
- Timing-derived frequency                        ≈ 19.46 MHz     OpenLane: place, clock tree, static timing
- Power estimate                                     ≈ 19 mW      same, default switching activity
+ Quantity                                     grape_pipeline          Produced by
+ Cycles per step                                                124   RTL simulation against the golden model
+ Full-benchmark cycles                   2,480,000; 0 mismatches      same, 20,000 steps
+ Directed + random tests                                    9 of 9 same, Verilator and Icarus
+ Line / toggle coverage                              91.7% / 96.0%    same
+ Cells                                                    584,454     Yosys synthesis onto sky130 cells
+ Area                                                   4.075 mm²     same
+ Timing-derived frequency                             ≈ 19.46 MHz     OpenLane: place, clock tree, static timing
+ Power estimate                                          ≈ 19 mW      same, default switching activity
 Evidence levels: the schedule model predicted 123–127 cycles/step and RTL measured 124. The 19.46 MHz
 estimate derives from a 150 ns constraint and +98.6212 ns worst setup slack at the typical corner; the critical
 path is the integrate-multiplier operand path. It is a preliminary timing estimate rather than measured silicon
-performance: there is no routed sign-off or GDS, and the design has not demonstrated its 50 MHz target. The
-power figure is a tool estimate at the run’s 150 ns clock constraint, not workload power. Cell count and area
-were synthesized before the final rewrite of the issue-selection logic into balanced trees, which changes
-selection logic only, not the arithmetic units that dominate the area.
- Recorded architecture                                           Mapped cell area                          Cycles/step
- One-wide accumulation, one-port RF                                      2.938 mm²                                   162
- Three-wide accumulation, three-port RF                                  4.075 mm²                                   124
+performance: there is no routed sign-off or final layout (GDS), and the design has not demonstrated its 50
+MHz target. The power figure is a tool estimate at the run’s 150 ns clock constraint, not workload power. Cell
+count and area were synthesized before the final rewrite of the issue-selection logic into balanced trees,
+which changes selection logic only, not the arithmetic units that dominate the area.
+ Recorded architecture                                                Mapped cell area                          Cycles/step
+ One-wide accumulation, one-port register file                                2.938 mm²                                   162
+ Three-wide accumulation, three-port register file                            4.075 mm²                                   124
 The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%. More parallelism can
 reduce cycles while adding selection, forwarding and wiring cost that limits the clock.
 Does the hardware win?
@@ -271,30 +271,34 @@ measured software run time and f the fraction of it that moves to hardware. T_hw
 the clock frequency. T_if is the interface time, here about 150 AXI-Lite register transactions per run, which
 is not measured. We assume 5% of stock runtime (harness and energy evaluation) stays in Python; that
 residual is an assumption, not a matched phase measurement.
- Tier                                          Time / run            vs stock Evidence
- Stock Python                                    231.20 ms               1.00× measured
- Optimized Python                                143.13 ms               1.62× measured
- Native Rust                                       9.53 ms               24.3× measured
- Hardware at 19.46 MHz (achievable)               ≈ 139 ms              ≈ 1.66× projected: 127.4 ms compute +
-                                                                                residual
- Hardware at 50 MHz (design target)                ≈ 61 ms               ≈ 3.8× projected: 49.6 ms compute +
-                                                                                residual
+ Tier                                                Time / run           vs stock Evidence
+ Stock Python                                         231.20 ms               1.00× measured
+ Optimized Python                                     143.13 ms               1.62× measured
+ Native Rust                                            9.53 ms               24.3× measured
+ Hardware at 19.46 MHz (achievable)                    ≈ 139 ms              ≈ 1.66× projected: 127.4 ms compute +
+                                                                                     residual
+ Hardware at 50 MHz (design target)                     ≈ 61 ms               ≈ 3.8× projected: 49.6 ms compute +
+                                                                                     residual
 Verdict: at the achievable clock the accelerator is a projected 1.66× over stock, level with the optimized
 Python tier (1.03×) and about 15× slower than the native Rust tier; it would still be about 6× slower at the 50
 MHz target. One step costs 124 cycles, 6.4 µs at 19.46 MHz, against 0.48 µs natively. The benchmark’s cost
 was interpreter overhead rather than arithmetic, so removing the interpreter captures almost all of the gain,
 and at N = 5 with ordered pair dependencies there is little parallelism for custom FP64 hardware to exploit.
-Matching Rust would need the datapath alone to run at about 260 MHz. These are projections: no run of
-Python attached to hardware exists, and no energy-efficiency advantage follows without workload power and
-complete system measurements.
+Matching Rust would need the datapath alone to run at about 260 MHz, and the assumed 11.6 ms Python
+residual already exceeds Rust’s 9.53 ms on its own. These are projections: no run of Python attached to
 
-                                                       6
+
+
+                                                            6
 HWSW Final Project                                                                         Benchmark Report: nbody
 
+hardware exists, and no energy-efficiency advantage follows without workload power and complete system
+measurements.
 The hardware’s square-root/reciprocal expression differs from stock pow. RTL is checked against its own
 arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12 and per-body position/velocity
-errors ≤ 2e-9 / 5e-11 at completion. These tolerance targets are distinct from the software tier’s observed
-exact equality.
+errors ≤ 2e-9 / 5e-11 at completion. The full 20,000-step RTL run meets them: relative energy error 1.7e-14
+and position/velocity errors 2.1e-12. These tolerances are distinct from the software tier’s observed exact
+equality.
 
 6. Conclusion
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state and energy

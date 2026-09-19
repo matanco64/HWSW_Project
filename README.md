@@ -50,8 +50,9 @@ Per-module detail is in `hw/<module>/docs/ppa.md` and `integration.md`.
 ## Repository structure
 
 ```
-report_pyflate.pdf / report_nbody.pdf   Per-benchmark reports (course deliverable, one per
-                                        selected benchmark; built from report/)
+report_pyflate.txt / report_nbody.txt   Per-benchmark reports (course deliverable, one per
+report_pyflate.pdf / report_nbody.pdf   selected benchmark; .txt is the named deliverable, .pdf
+                                        carries the figures; both built from report/)
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable); thin
                                         wrappers over tools/runner_common.sh
 make_submission.sh                      Verify the deliverables and package them (see below)

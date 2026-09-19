@@ -275,7 +275,10 @@ either a rank into a list of recently used bytes (output that byte, move it to t
 part of a run count to expand. `mtf_cam` does this with a 256-entry byte list held in a
 parallel shift register, read by rank and re-ordered in one cycle. Chained on chip they produce
 the same L-vector as the Rust kernel, over the same boundary. Software keeps block headers,
-inverse BWT, RLE4 and MD5.
+inverse BWT, RLE4 and MD5: per block it parses the header, writes the code lengths and
+parameters through the register window, starts both modules and collects the L-vector, the
+same single call per block that the Rust kernel replaces. A register-level driver model
+implements this protocol; it is not a deployed device driver.
 
 *Why two modules:* the two jobs want different hardware. Huffman decoding is table-driven and
 its cost is storage (table and register storage is 95% of `huffman_engine`); move-to-front is a
@@ -297,16 +300,18 @@ the active table every 50 symbols. Inputs are a 32-bit compressed stream and an 
 stream; outputs are 32-bit beats carrying a 9-bit symbol plus type fields. A 32-bit AXI4-Lite
 window holds controls, `START_BIT`, lengths and counters, for six tables and bzip2's 20-bit
 maximum code length. It decodes the benchmark block in *149,276 cycles* for 148,271 symbols,
-so *K1 = 1.0068 cycles per symbol* including table construction and switches, and is
+so *1.0068 cycles per symbol* including table construction and switches, and is
 trace-exact against the golden model over every beat.
 
 == MTF and run expansion
 
 The input is a *rank*, so the decoder indexes the alphabet, shifts the preceding entries and
-expands RUNA/RUNB groups through a buffered output packer at eight bytes wide. It sustains
-*K3 = 1.0686 cycles per symbol*, and the move-to-front list is 68% of its area.
+expands RUNA/RUNB groups through a buffered output packer at eight bytes wide. Inputs are the
+decoder's 32-bit symbol beats; outputs are 64-bit beats of L-vector bytes with an 8-bit
+byte-valid mask, and a 32-bit AXI4-Lite window holds control, status and counters. It sustains
+*1.0686 cycles per symbol*, and the move-to-front list is 68% of its area.
 
-== Measured cost and what it buys
+== Simulated and synthesized cost
 
 *How these numbers were produced:* each accelerator is written in SystemVerilog and simulated
 cycle by cycle (Verilator, cross-checked with Icarus) inside a Python testbench that feeds it
@@ -336,12 +341,12 @@ toolchain is entirely open source, so every number can be regenerated from the r
 39.9 MHz for Huffman (40 ns constraint, +14.94 ns worst setup slack; a tighter 27 ns run also
 meets timing and gives 39.5 MHz) and 37.6 MHz for MTF.
 They are estimates, not demonstrated silicon operating frequencies; routing may change either,
-and neither completed 50 MHz sign-off or produced a GDS. The power figures are tool estimates
+and neither completed 50 MHz sign-off or produced a final layout (GDS). The power figures are tool estimates
 using default switching activity at each run's own clock constraint (40 ns for Huffman, 20 ns
 for MTF), so they are not comparable with each other, are not workload power, and cannot
 support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops.
 Coverage percentages use the documented exclusions. Three MTF list invariants are proven
-unbounded by k-induction on a 16-entry list; the full 256-entry permutation proof is bounded
+for unbounded time by induction on a 16-entry list; the full 256-entry permutation proof is bounded
 to depth 24. The regression counts are recorded results.
 
 == Does the hardware win?
@@ -365,7 +370,7 @@ bytes, with and without random back-pressure on the output, in *159,303 cycles*,
 *How the end-to-end time is estimated:* offloading a stage removes its software time and adds
 the hardware's time plus the cost of moving data, `T_new = T_sw - T_stage + T_hw + T_if`.
 `T_sw` is the measured software run time and `T_stage` the measured time of the replaced
-stage. `T_hw` is the measured chain cycles divided by the clock frequency. `T_if` is the
+stage. `T_hw` is the simulated chain cycle count divided by the clock frequency. `T_if` is the
 interface time: configuration, DMA setup and copies for the compressed input and the 336,184
 L-vector bytes. It is not measured here, and transfers overlap compute only if buffers and
 bandwidth sustain it. The replaced stage is timed on its own in Appendix A3: the native decode
@@ -375,7 +380,7 @@ phase takes 3.30 ms.
   table.header([*Replaced stage only*], [*Time*], [*Evidence*]),
   [Optimized Python loop], [≈ 117 ms], [derived: 283.88 − 170.01 + 3.30 ms],
   [Rust kernel], [3.30 ms], [measured, Appendix A3],
-  [Hardware chain at 37.6 MHz (achievable)], [≈ 4.24 ms], [159,303 measured cycles ÷ clock],
+  [Hardware chain at 37.6 MHz (achievable)], [≈ 4.24 ms], [159,303 simulated cycles ÷ clock],
   [Hardware chain at 50 MHz (design target)], [≈ 3.19 ms], [same cycles ÷ target clock],
 )
 

@@ -96,6 +96,12 @@ Amdahl `S = T / new_total`.
   ~11 % move-to-front out of software too, lifting `f` and the ceiling further — the
   intended `pyflate_accel` two-block pipeline.
 
+> **How this relates to the delivered software (added 2026-09-19).** The speedups in this section
+> are projections against *stock* Python. Against the delivered Python + Rust path (170.01 ms) the
+> comparison is made at the matched boundary instead: the `huffman_engine → mtf_cam` chain,
+> co-simulated in 159,303 cycles (≈ 4.24 ms at the shared 37.6 MHz clock), against the Rust
+> kernel's 3.30 ms — end to end a tie (≈ 171 ms). See `hw/docs/hardware_report.md §3.8`.
+
 ## 4. Rubric map (project_instructions.md §7)
 
 | §7 bullet | File / section |

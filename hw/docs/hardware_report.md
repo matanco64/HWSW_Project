@@ -14,11 +14,22 @@ tracked, so the small report files each number is read from are preserved in
 `hw/<module>/synth/evidence/`.
 
 Author: Yuval Kogan (hardware). Software benchmarks & report prose: Matan Cohen.
-Date: 2026-09-19 (revised after the joint reading pass).
+Date: 2026-09-19.
 
 ---
 
 ## 0. Scope and evidence discipline
+
+*Terms used below.* **PRD / MAS / uArch**: the three specification documents each module has
+under `docs/` — product requirements (KPIs), architecture specification (the external view: interfaces,
+register map, driver API) and micro-architecture (the internal view: pipeline, FSMs, timing budget). **ADR**: architecture
+decision record (`hw/docs/adr/`). **K1, K2, …**: a module's own numbered KPIs from its PRD — the
+numbers are per module, so the text names the quantity each time. **STA**: static timing
+analysis. **CTS**: clock-tree synthesis. **GDS**: the final routed layout file. **RF**: register
+file. **L-vector**: the byte sequence the bzip2 symbol stage hands to inverse BWT.
+**RUNA/RUNB**: bzip2's two run-length symbols. **Doorbell**: the control-register write that
+starts a run. **W**: `mtf_cam`'s output width in bytes per beat. **symtab**: `huffman_engine`'s
+symbol table.
 
 Three accelerators were designed, verified and synthesized, each targeting the measured
 hot boundary of one benchmark:
@@ -60,7 +71,7 @@ it), so every hardware number in this project can be regenerated from the reposi
 | Driver / unit tests | **pytest 9.1.1** | runs the register-map checks and the Python driver models without a simulator |
 | Formal | **SymbiYosys v0.68** (SMT bounded model checking + k-induction) | proves control properties simulation can only sample: FSM arcs, stream handshakes, the move-to-front list invariants |
 | Synthesis, area | **Yosys 0.68** + `sky130_fd_sc_hd` Liberty (tt, 25 °C, 1.8 V) | open synthesis; maps RTL to real standard cells → cell count and area |
-| Process (PDK) | **SkyWater sky130**, high-density cell library | the only fully open 130 nm PDK with a complete tool flow — no NDA, so graders can reproduce; consequence: no SRAM/BRAM macros, all storage is flip-flops (this drives huffman's area) |
+| Process (PDK) | **SkyWater sky130**, high-density cell library | the only fully open 130 nm PDK with a complete tool flow — no NDA, so graders can reproduce; consequence: no SRAM macro was integrated in our flow (OpenRAM sky130 macros exist but were not evaluated), so all storage is flip-flops (this drives huffman's area) |
 | Place, clock tree, timing, power | **OpenLane 2.3.10** (OpenROAD), via Nix | open RTL-to-layout flow; we use floorplan → placement → clock-tree synthesis → static timing + power estimate (post-CTS); routing/GDS not reached |
 | Tool bundle | **OSS CAD Suite nightly 2026-08-26** | one pinned archive for Verilator, Icarus, Yosys, SymbiYosys, GTKWave → identical versions on any machine |
 | Waveform debug | GTKWave / Surfer, `hw/common/tb/vcd2csv.py` | FST waves; CSV export so failures can be analysed in Python |
@@ -107,7 +118,7 @@ FP64 pairwise-gravity accelerator executing a full `advance(dt, n)` on-device. S
 ### 1.2 Inputs / outputs, widths, frequency
 - **I/O** (`docs/mas.md §2`): 32-bit AXI4-Lite slave exposing FP64 (binary64) body state,
   `DT` (FP64), `NSTEPS` (32-bit), pair configuration, control/status, counters, IRQ.
-- **Operating frequency:** design target **50 MHz** (`docs/mas.md §3`, `docs/prd.md` K-table).
+- **Operating frequency:** design target **50 MHz** (`docs/mas.md §2` clk row, `docs/prd.md` K-table).
   Achievable **≈ 19.46 MHz** — *post-CTS STA* on the parallel-prefix netlist
   (`docs/ppa.md` Addendum 2026-09-14; evidence `synth/evidence/ws.max.rpt`: +98.6212 ns setup
   slack @ 150 ns period → 51.38 ns).
@@ -118,7 +129,7 @@ reciprocal (2¹⁰×20b ROM seed + Newton refinement in Q1.57), sharing a schedu
 **290-operation step**. An ordered accumulation sequencer resolves body-component
 dependencies (pairs sharing a body serialize their velocity updates) before positions
 commit; steps stay serial. There is no FMA — multiply and accumulate round separately
-(matches stock `pow`-free arithmetic contract, `docs/testplan.md §4`).
+(matches the benchmark's `pow`-free arithmetic contract, `docs/testplan.md §4`).
 
 ### 1.4 HW/SW interface
 - MMIO only, no DMA (`docs/mas.md §5`, ADR-0001). ≈ 150 AXI-Lite transactions per
@@ -130,12 +141,12 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
   124 × 20,000).
 
 ### 1.5 Acceleration justification + estimate
-- **Baseline** `T` = **231.20 ms** (pyperf mean; median 229 ms), `results/baseline_nbody_stats.txt`.
-- **Fraction** `f` = 0.95 (`advance` doubly-nested loop, `docs/prd.md §4`).
+- **Baseline** `T` = **231.20 ms** (pyperf mean; median 229 ms), `results/timing_distributions.txt:2` (231.204), rounded in `results/baseline_nbody_stats.txt`.
+- **Fraction** `f` = 0.95 (`advance` doubly-nested loop, `docs/integration.md §3`).
 - **HW cost** 2,480,000 cycles/invocation (K1 = **124** cyc/step, `docs/ppa.md`, measured
   bit-exact on the full 20,000-step benchmark).
 - Amdahl `S = T / ((1−f)·T + t_hw)`:
-  - **50 MHz** (target): t_hw = 49.6 ms → **~3.8–4.5×** (clears K3 ≥ 4× near the top of `f`).
+  - **50 MHz** (target): t_hw = 49.6 ms → **3.78×** at f = 0.95 (4.45× at f = 0.99); the speedup KPI (≥ 4×) is not met at the stated `f`.
   - **19.46 MHz** (achievable): t_hw = 127.4 ms → **≈ 1.66×** (compute-only upper bound
     1.81× vs stock / 1.12× vs the 143.13 ms optimized-Python tier). Does **not** beat the
     9.53 ms native-software tier. (`docs/integration.md §3`.)
@@ -156,9 +167,8 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
   The benchmark's cost was interpreter overhead, so removing the interpreter captures nearly all
   of the gain; at N = 5 with ordered pair dependencies there is little parallelism to exploit.
 - **Honest conclusion:** compute-bound; the end-to-end win is gated on timing closure, not
-  the interface. The parallel-prefix rewrite already moved the accumulate-picker path
-  off-critical (11.15 → 19.46 MHz, 1.75×, bit-exact K1 = 124); the current limiter is the
-  integrate-multiplier operand path, whose pipelining is the documented next step.
+  the interface. The limiter is the integrate-multiplier operand path, whose pipelining is the
+  documented next step.
 
 ### 1.6 Block diagram
 ![grape_pipeline block diagram](../grape_pipeline/docs/block_diagram.svg)
@@ -168,7 +178,7 @@ scheduled FP64 units, no FMA). The report shows a condensed version (`report_nbo
 `report/fig/grape_report.svg`) and the ordering constraint (`report/fig/pair_dependency.svg`).
 
 ### 1.7 Performance / area / power trade-offs
-`docs/ppa.md`. Yosys+sky130 area **4.075 mm² / 584,454 cells**. Measured 2-point trade-off:
+`docs/ppa.md`. Yosys+sky130 area **4.075 mm² / 584,454 cells** (synthesized before the final issue-selection rewrite that produced the 19.46 MHz netlist; that rewrite changes selection logic only, not the arithmetic units that dominate area). Measured 2-point trade-off:
 
 | Design point | Area | K1 cyc/step | Verdict |
 |---|---:|---:|---|
@@ -195,15 +205,11 @@ build), `huff_decoder` (20-wide comparator cascade + priority encode), `huff_tab
 - **I/O:** 32-bit compressed stream + 8-bit selector stream in; 32-bit beats out carrying a
   9-bit symbol + type fields (`docs/mas.md §2`). 32-bit AXI4-Lite window holds `START_BIT`,
   lengths, counters for six tables and bzip2's 20-bit max code length.
-- **Operating frequency:** target **50 MHz** (K3, `docs/mas.md §6`). Achievable
+- **Operating frequency:** target **50 MHz** (clock KPI, `docs/prd.md` K-table). Achievable
   **≈ 39.9 MHz** — *post-CTS STA* at a 40 ns constraint: worst setup slack +14.941 ns →
   25.06 ns achievable; no setup or hold violations (evidence preserved in
-  `hw/huffman_engine/synth/evidence/`; a tighter 27 ns run also meets timing and gives 39.5 MHz, a looser 120 ns run 31.7 MHz). The initial 20 ns run was placement-non-convergent and gave only a pre-placement
-  **8.9 MHz** — but that was a **high-fanout-net wireload artifact** (one register Q fanning out
-  to thousands of pins, unbuffered pre-CTS; same class as grape's pre-PnR fanout net). Relaxing
-  the clock to 40 ns (grape's lesson) let placement converge through CTS, and post-CTS the real
-  timing is **faster** (39.9 MHz), not slower. huffman is therefore now **post-CTS** evidence,
-  matching grape and mtf (`docs/ppa.md §3`).
+  `hw/huffman_engine/synth/evidence/`; a tighter 27 ns run also meets timing and gives 39.5 MHz, a looser 120 ns run 31.7 MHz).
+  The pre-placement estimate of the first 20 ns run is superseded (`docs/ppa.md §3`).
 
 ### 2.3 Architecture
 `docs/uarch.md`: a bit aligner feeds a canonical-code comparator/lookup datapath; a selector
@@ -217,7 +223,7 @@ register sets pre-loaded). Decodes 1 symbol/cycle.
   signed-off cycle model (`docs/integration.md §1`).
 
 ### 2.5 Acceleration justification + estimate
-- **Baseline** `T` = **1,123.49 ms** (≈ 1.12 s mean; median 1.12 s), `results/baseline_pyflate_stats.txt:18`.
+- **Baseline** `T` = **1,123.49 ms** (≈ 1.12 s mean; median 1.12 s), `results/timing_distributions.txt:6` (1123.488), rounded in `results/baseline_pyflate_stats.txt:18`.
 - **Fraction** `f` = **0.496** (Huffman decode 12.0 % + bit reader 37.6 %, `docs/prd.md §1`).
 - **HW cost** 149,276 cycles for 148,271 symbols → **K1 = 1.0068** cyc/sym, trace-exact vs
   golden over every beat (`docs/ppa.md`, `docs/uarch.md §7`).
@@ -238,8 +244,8 @@ view of the chain: `report_pyflate` fig `report/fig/decode_report.svg`.
 ### 2.7 Performance / area / power trade-offs
 `docs/ppa.md`. Yosys+sky130 **1.634 mm² / 151,058 cells**, **54.44 % sequential** — the
 design is a *memory*, not a datapath (`huff_tables` + `huff_regs` = 95 % of area, the
-decode comparator cascade only 1.3 %). Soft K5 ceiling 1.0 mm² **missed 1.63×**, a storage
-miss: ~34 kbit of flops (no SRAM macro in the sky130 HD open flow). Documented area path:
+decode comparator cascade only 1.3 %). Soft K5 ceiling 1.0 mm² **missed by 1.63×**, a storage
+miss: ~34 kbit of flops (no SRAM macro was integrated in our flow; OpenRAM sky130 macros exist but were not evaluated). Documented area path:
 move the 17.3 kbit symtab + 8.6 kbit length window into SRAM macros → projected ~0.75 mm²
 std cells + 2 macros (**not synthesized**). Fmax **39.9 MHz** (post-CTS, 40 ns constraint).
 Power **≈ 283 mW** post-CTS (default switching activity at the 40 ns constraint — indicative,
@@ -257,12 +263,14 @@ Single clock, `rst_n`.
 
 ### 3.2 Inputs / outputs, widths, frequency
 - **I/O:** input is a *rank*; the decoder indexes the alphabet, shifts preceding entries, and
-  expands RUNA/RUNB groups through a buffered output packer **8 bytes wide** (`docs/mas.md §2`).
+  expands RUNA/RUNB groups through a buffered output packer **8 bytes wide**. Interfaces
+  (`docs/mas.md §2`): 32-bit AXI4-Lite control/status window; 32-bit AXI4-Stream symbol beats in
+  (`s_axis_sym`, TLAST on the end-of-block beat); 64-bit (8·W, W = 8) AXI4-Stream out
+  (`m_axis_l`) with 8-bit TKEEP and TLAST; 1-bit interrupt.
 - **Operating frequency:** target **50 MHz** (uArch §6). Achievable **≈ 37.6 MHz** —
   *post-CTS STA* (tt, evidence `synth/evidence/ws.max.rpt`: −6.5964 ns setup slack @ 20 ns →
   26.60 ns). This is the **tightest-constrained** measurement of the three (the constraint is
-  within 1.33× of the result, so the tool optimised the critical path hard); it was also the
-  first module to reach post-CTS STA (no GRT-0607). Missed 50 MHz by
+  within 1.33× of the result, so the tool optimised the critical path hard). Missed 50 MHz by
   ~1.33×.
 
 ### 3.3 Architecture
@@ -276,8 +284,8 @@ feeds a W=8-lane packer. K3 = **1.063** cyc/sym (model) / **1.0686** measured on
   RTL-cosim 16/16 pass.
 
 ### 3.5 Acceleration justification + estimate
-- **Baseline** `T` = **1.12 s** (mean), `results/baseline_pyflate_stats.txt`.
-- **Fraction** `f` = **0.1344** (`move_to_front` self-time share, `docs/prd.md`, `report_pyflate` §2).
+- **Baseline** `T` = **1,123.49 ms** (mean ≈ 1.12 s), `results/timing_distributions.txt:6`.
+- **Fraction** `f` = **0.1344** (`move_to_front` self-time share, `results/profile_functions.txt:60`, `report_pyflate` §2).
 - **HW cost:** DUT-measured **158,441 cycles** (K3 = 1.0686) → **≈ 4.21 ms** @ 37.6 MHz;
   model 157,560 cycles (K3 = 1.063) at W=8 (`docs/ppa.md §3.1`, `docs/integration.md`). Both
   cycle figures are disclosed; the DUT number carries implementation overhead over the model.
@@ -301,7 +309,7 @@ and is **W-invariant**. Measured W-sweep:
 | **8** | **0.187** | **1.063** | **chosen** (knee) |
 | 16 | 0.208 | 1.023 | +10.9 % area for 3.9 % throughput (3.8 % fewer cycles) — not needed |
 
-Soft K5/K6 1.0 mm² ceiling **met 5.3×**. Fmax **37.6 MHz** (post-CTS, W-independent). Power
+Soft 1.0 mm² area ceiling (K6) **met with 5.3× headroom**. Fmax **37.6 MHz** (post-CTS, W-independent). Power
 **≈ 13.7 mW** post-CTS (default switching activity — indicative, not workload power). Die
 shot: not obtained.
 
@@ -312,7 +320,7 @@ decoding is table-driven and storage-bound; move-to-front + run expansion is a w
 whose risk is the output rate (73 % of output bytes come from runs). Separate modules are
 verified against separate golden models, sized by separate trade-offs, and keep `huffman_engine`
 reusable (DEFLATE mode). They chain on chip so 148 k intermediate symbols never cross to
-software; MTF left in software would keep ≈ 11 % of stock runtime on the CPU. *Naming:* the
+software; MTF left in software would keep its 13.44 % share of stock runtime on the CPU. *Naming:* the
 "CAM" in `mtf_cam` is the MTF list; the decode path reads it **by rank** (`docs/uarch.md §3.2`),
 there is no content search.
 
@@ -351,7 +359,7 @@ cycle count is measured, the clock is a static-timing estimate; the Rust figure 
 | Optimized Python loop | ≈ 117 ms | | Stock Python | 1,123.49 ms | 1.00× |
 | Rust kernel | 3.30 ms | | Optimized Python | 281.16 ms | 4.00× |
 | HW chain @ 37.6 MHz (159,303 cyc, measured) | ≈ 4.24 ms | | Python + Rust kernel | 170.01 ms | 6.61× |
-| HW chain @ 50 MHz | ≈ 3.2 ms | | Python + HW chain @ 37.6 / 50 MHz | ≈ 171 / 170 ms | ≈ 6.6× / 6.6× |
+| HW chain @ 50 MHz | ≈ 3.19 ms | | Python + HW chain @ 37.6 / 50 MHz | ≈ 171 / 170 ms | ≈ 6.6× / 6.6× |
 
 **Verdict.** ≈ 28× over the Python loop, ≈ 1.3× slower than the Rust kernel at the achievable
 clock (parity at target). End to end a tie with the delivered 170 ms path: off the interpreter
@@ -373,7 +381,7 @@ this matched comparison.
 | Power | ≈ 19.2 mW (indic., 150 ns) | ≈ 283 mW (indic., 40 ns) | ≈ 13.7 mW (indic., 20 ns) |
 | Directed + random tests | 9/9 | 17/17 | 16/16 |
 | Line / toggle coverage | 91.7 % / 96.0 % | 90.4 % / 90.3 %† | 92.0 % / 93.8 %† |
-| End-to-end estimate | ~1.66× (19.46 MHz) / ~3.8–4.5× (50 MHz) | ~1.9–2.0× (clock-insensitive) | ~1.15× |
+| End-to-end estimate | ~1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ~1.97× vs stock (clock-insensitive) | ~1.15× vs stock |
 
 † huffman and mtf toggle coverage is measured over the **control-signal subset** (signals ≤ 4 bits
 wide); wide data buses whose upper bits the benchmark cannot toggle are waived, with the width
@@ -381,7 +389,7 @@ sweep as evidence (`hw/<module>/docs/coverage_waivers.md`). grape's is over all 
 coverage: 94.8 % / 91.7 % / 96.8 %. Sources: `hw/<module>/tb/cov/coverage.txt` and `hw/<module>/tb/cov/func_cov.txt`
 (59 / 34 / 129 functional bins, all hit).
 
-**All three Fmax numbers are now post-CTS STA** (real placed clock tree) — the same evidence
+**All three Fmax numbers are post-CTS STA** (real placed clock tree) — the same evidence
 stage — so they are comparable on that axis. None completed routed GDS sign-off (no die shot).
 Power figures use **default switching activity** at each run's own clock constraint (19.2 mW @
 150 ns, 283 mW @ 40 ns, 13.7 mW @ 20 ns), so they are indicative and **not** comparable to each other or usable
@@ -393,8 +401,8 @@ as workload-energy numbers.
   huffman 283 mW, mtf 13.7 mW) use default activity at three different run clocks — they
   cannot support an energy-savings claim or a cross-module power comparison.
 - Every end-to-end speedup is a **conditional projection** using a profiled fraction and a
-  single benchmark input; the on-chip chain throughput and platform DMA/host-interface cost
-  are **not measured** (module + driver tests do not exercise them).
+  single benchmark input; the on-chip chain is co-simulated (§3.8), but the platform
+  DMA/host-interface cost is **not measured** (module + driver tests do not exercise it).
 - huffman's SRAM-macro sub-1 mm² path is **projected, not synthesized**.
 - mtf_cam's formal move-to-front invariants are proven **unbounded @ N_LIST=16** and
   **bounded depth-24 @ N_LIST=256** (general unbounded-256 is SAT-intractable — honestly a

@@ -14,3 +14,7 @@ Measured 2026-09-19: PASS, 336,184 / 336,184 bytes exact, 0 mismatches, both alw
 random 50% `m_l` back-pressure. Chain cycles (huffman doorbell accepted -> mtf DONE): **159,303**
 (huffman CYCLES 159,294, mtf CYCLES 159,314; standalone 149,276 / 158,441); 189,448 under
 back-pressure. ~ mtf standalone + huffman's 1,008-cycle start-up (mtf's 145-cycle INIT overlaps it).
+
+Link statistics, always-ready run (logged by `tb/test_chain.py`): 148,271 symbol beats on the
+internal link, 0 malformed; the decoder is stalled by `mtf_cam` (`tready` low) on 10,013 cycles and
+`mtf_cam` starves (no valid beat) on 873 — the chain runs at `mtf_cam`'s rate.

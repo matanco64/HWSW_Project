@@ -236,8 +236,8 @@ Pairs (0, 1) and (0, 2) can form their distance terms from the same step's posit
 both update body 0's velocity. Its x lane must compute
 `u0a = u0 - dx01*b1m`, then `u0b = u0a - dx02*b2m`; issuing both against the old `u0`
 would lose an update. Regrouping them into one subtraction may also change FP64 rounding.
-Different body-component lanes can progress independently; a scoreboard and ordered issue
-logic wait for each lane's preceding result. Positions update only after their required
+Different body-component lanes can progress independently; a dependency tracker and ordered
+issue logic wait for each lane's preceding result. Positions update only after their required
 velocity contributions, and the next step uses the committed positions.
 
 #figure(image("fig/pair_dependency.svg", width: 100%),
@@ -275,15 +275,15 @@ toolchain is entirely open source, so every number can be regenerated from the r
 The 19.46 MHz estimate derives from a 150 ns constraint and +98.6212 ns worst setup slack at
 the typical corner; the critical path is the integrate-multiplier operand path. It is a
 preliminary timing estimate rather than measured silicon performance: there is no routed
-sign-off or GDS, and the design has not demonstrated its 50 MHz target. The power figure is a
+sign-off or final layout (GDS), and the design has not demonstrated its 50 MHz target. The power figure is a
 tool estimate at the run's 150 ns clock constraint, not workload power. Cell count and area
 were synthesized before the final rewrite of the issue-selection logic into balanced trees,
 which changes selection logic only, not the arithmetic units that dominate the area.
 
 #result-table(columns: (1.6fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Recorded architecture*], [*Mapped cell area*], [*Cycles/step*]),
-  [One-wide accumulation, one-port RF], [2.938 mm²], [162],
-  [Three-wide accumulation, three-port RF], [4.075 mm²], [124],
+  [One-wide accumulation, one-port register file], [2.938 mm²], [162],
+  [Three-wide accumulation, three-port register file], [4.075 mm²], [124],
 )
 
 The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%. More
@@ -315,14 +315,16 @@ would still be about 6× slower at the 50 MHz target. One step costs 124 cycles,
 19.46 MHz, against 0.48 µs natively. The benchmark's cost was interpreter overhead rather
 than arithmetic, so removing the interpreter captures almost all of the gain, and at N = 5
 with ordered pair dependencies there is little parallelism for custom FP64 hardware to
-exploit. Matching Rust would need the datapath alone to run at about 260 MHz. These are
+exploit. Matching Rust would need the datapath alone to run at about 260 MHz, and the assumed
+11.6 ms Python residual already exceeds Rust's 9.53 ms on its own. These are
 projections: no run of Python attached to hardware exists, and no energy-efficiency
 advantage follows without workload power and complete system measurements.
 
 The hardware's square-root/reciprocal expression differs from stock `pow`. RTL is checked
 against its own arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12
-and per-body position/velocity errors ≤ 2e-9 / 5e-11 at completion. These tolerance targets
-are distinct from the software tier's observed exact equality.
+and per-body position/velocity errors ≤ 2e-9 / 5e-11 at completion. The full 20,000-step RTL
+run meets them: relative energy error 1.7e-14 and position/velocity errors 2.1e-12. These
+tolerances are distinct from the software tier's observed exact equality.
 
 = 6. Conclusion
 

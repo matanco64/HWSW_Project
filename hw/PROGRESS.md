@@ -1,7 +1,7 @@
 # Hardware-flow progress
 
-<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-15 15:00 UTC. Do not edit; update via tools/hw/status.py. -->
-_Generated 2026-09-15 15:00 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
+<!-- GENERATED from hw/STATUS.json by tools/hw/render_progress.py at 2026-09-19 04:13 UTC. Do not edit; update via tools/hw/status.py. -->
+_Generated 2026-09-19 04:13 UTC from `hw/STATUS.json` — **do not edit**; see `hw/FLOW.md`._
 
 ## Stage flow
 
@@ -161,14 +161,14 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 #### PPA — ✅ done (started 2026-09-08T07:37:27Z, finished 2026-09-12T18:14:30Z)
 
 - [x] Yosys+Liberty area + cell counts — synth/area.txt: 584454 cells, 4075030.8 um^2 (sky130_fd_sc_hd tt); docs/ppa.md tables
-- [x] OpenLane 2 run: Fmax, area µm², power — post-CTS STA Fmax 11.15 MHz (synth/runs/grape_relaxed/35-openroad-stamidpnr-1/ws.max.rpt WS +60.32ns @150ns; worst path u_fsm->g_add accumulate picker); area 4.075 mm² (Yosys synth/area.txt); power/GDS n/a — OpenLane GRT-0607 congestion bug x3, §7 signoff not required
+- [x] OpenLane 2 run: Fmax, area µm², power — post-CTS STA Fmax 19.46 MHz (synth/evidence/ws.max.rpt: WS +98.6212ns @150ns, run grape_prefix2; critical path integrate-multiplier operand) — supersedes 11.15 MHz of the earlier linear-scan netlist (grape_relaxed, WS +60.32ns); area 4.075 mm² (Yosys synth/area.txt, pre-prefix netlist); power ~19.2 mW post-CTS default activity (synth/evidence/power.rpt); routing/GDS not reached (GRT-0607 congestion)
 - [x] trade-off table (≥2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff K1 knob
 - [x] trade-off table (>= 2 design points) — docs/ppa.md: 2 fully-MEASURED points (1-wide 393k/2.94mm^2/K1=162 fail vs 3-wide 584k/4.08mm^2/K1=124 pass) — the dv_signoff fix as the design knob
 
 #### Integration — ✅ done (started 2026-09-12T18:19:16Z, finished 2026-09-12T18:19:22Z)
 
 - [x] register map ↔ driver model consistent — driver/check_regmap.py -> 0 differences (15 rows vs docs/mas.md §4, ID_VALUE 0x47525031); driver/test_driver.py -> ALL 4 PASS (full advance = 2,480,000 cycles)
-- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=231ms (results/baseline_nbody_stats.txt), f=0.95, cycles=2.48M (124 cyc/step), Fmax — Amdahl 3.78-4.45x @50MHz PRD target, ~1.0x @ achievable 11.15 MHz (accumulate-picker path); ideal 20x, sensitivity rows
+- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=231.20ms (results/baseline_nbody_stats.txt mean), f=0.95, cycles=2.48M (124 cyc/step) — ~1.66x @ achievable 19.46 MHz post-CTS (supersedes ~1.0x @ 11.15 MHz), 3.78-4.45x @50MHz PRD target; ideal 20x, sensitivity row
 - [x] report §7 bullets mapped — docs/integration.md §4: 7 §7 bullets each mapped to a file/section (rtl/, mas §2/§3/§6/§7, uarch, prd+integration §3, ppa)
 
 ### `huffman_engine`
@@ -177,7 +177,7 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 - [x] every requirement has a measurable KPI + acceptance test — docs/prd.md §3: 15 PRD-F rows (grep -c '^| PRD-' = 15), every KPI/test cell filled
 - [x] HW/SW split table — docs/prd.md §4: pyflate function → HW/SW → bytes per block; 444 config words, 67,562 B stream in, 148,271 symbols out
-- [x] workload slice quantified from results/ profile — docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:19 (1.13 s), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)
+- [x] workload slice quantified from results/ profile — docs/prd.md §1: perf_report_pyflate.txt:12 (23.29 % eval loop), baseline_pyflate_stats.txt:18 (mean 1.12 s; canonical 1,123.49 ms), cProfile splits from dev/pyflate/FINDINGS.md §3 + calibration agent (stock 75 % / T3 39 %)
 - [x] hw-review findings resolved — docs/review_prd.md: 25 findings (2 passes), 0 must open
 
 #### MAS — ✅ done (started 2026-08-30T11:22:57Z, finished 2026-08-30T12:18:39Z)
@@ -239,15 +239,15 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 #### PPA — ✅ done (started 2026-09-12T19:01:55Z, finished 2026-09-12T19:41:16Z)
 
 - [x] Yosys+Liberty area + cell counts — synth/area.txt: 151,058 cells; Chip area 1,634,516 um2 (1.634 mm2); 54.44% sequential
-- [x] OpenLane 2 run: Fmax, area µm², power — OpenLane 2.3.10 one attempt: synthesis clean, reached pre-PnR STA + global placement. Fmax pre-PnR tt ~8.9 MHz (ws -91.886ns @ 20ns, synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt); crit path table-build/symtab (u_regs->u_tab). Area Yosys 1.634 mm2; power/die shot not obtained (no GDS, non-convergent placement, §7-optional, not invented). docs/ppa.md §3
+- [x] OpenLane 2 run: Fmax, area µm², power — OpenLane 2.3.10 post-CTS STA: Fmax 39.9 MHz (run signoff_confirm, 40ns, worst SETUP slack +14.941ns from max.rpt) confirmed by signoff_tight (27ns, +1.685ns -> 39.5 MHz, timing met); hold met; power ~283 mW default activity @40ns; evidence synth/evidence/. Supersedes the ~8.9 MHz pre-PnR estimate (signoff2, a high-fanout wireload artifact). Area 1.634 mm² / 151,058 cells (Yosys). Routing/GDS not reached
 - [x] trade-off table (≥2 design points) — docs/ppa.md §2: 3 design points (flop symtab as-built 1.634 mm2 / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt (huff_tables 67% + huff_regs 28%)
 - [x] trade-off table (>= 2 design points) — docs/ppa.md 2 Trade-off: 3 design points (flop symtab as-built / SRAM-macro symtab / 2-vs-6 table sets) + per-module area breakdown synth/area_permodule.txt
-- [x] OpenLane 2 run: Fmax, area um2, power — OpenLane 2.3.10 one time-boxed attempt: synthesis clean + all checkers passed (better than grape OOM); reached OpenROAD pre-PnR STA + global placement. Fmax from pre-PnR STA synth/runs/signoff2/08-openroad-staprepnr/nom_tt_025C_1v80/max.rpt: ws -91.886ns @ 20ns -> ~8.9 MHz tt (pre-placement, upper bound); crit path u_regs->u_tab (table-build/symtab mux, not decode cascade). Area = Yosys 1.634 mm2 (OpenLane not placed). Power/die shot not obtained (no GDS; placement non-convergent, closed per proj_instructions.md §7); power not invented. docs/ppa.md §3
+- [x] OpenLane 2 run: Fmax, area um2, power — OpenLane 2.3.10 post-CTS STA: Fmax 39.9 MHz (run signoff_confirm, 40ns, worst SETUP slack +14.941ns from max.rpt) confirmed by signoff_tight (27ns, +1.685ns -> 39.5 MHz, timing met); hold met; power ~283 mW default activity @40ns; evidence synth/evidence/. Supersedes the ~8.9 MHz pre-PnR estimate (signoff2, a high-fanout wireload artifact). Area 1.634 mm² / 151,058 cells (Yosys). Routing/GDS not reached
 
 #### Integration — ✅ done (started 2026-09-12T19:41:55Z, finished 2026-09-12T19:42:07Z)
 
 - [x] register map ↔ driver model consistent — driver/check_regmap.py -> 0 differences (20 rows vs docs/mas.md §4, ID 0x48554631); driver/test_driver.py -> ALL 5 DRIVER TESTS PASS (regmap, ID, cycle-model==decode_model.py, decode_block golden sink, ERR_PARAM)
-- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=1.13s (baseline_pyflate_stats.txt:19), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x @50MHz (ideal 1.98x); clock-insensitive 1.89-1.97x across 5-50 MHz
+- [x] cycle-accurate speedup estimate vs results/baseline_* — docs/integration.md §3: T=1,123.49ms (baseline_pyflate_stats.txt:18 mean 1.12 s), f=0.496 (prd.md §1 Huffman+bit-reader slice), HW 149,276 cyc (decode_model.py, K1=1.0068), Amdahl S≈1.97x vs stock @50MHz and @39.9MHz post-CTS (ideal 1.98x); clock-insensitive 1.89-1.97x down to 5 MHz. vs the delivered Rust path the chain only ties (hardware_report §3.8)
 - [x] report §7 bullets mapped — docs/integration.md §4: 7 project_instructions.md §7 bullets each mapped to a path (RTL/MAS/uArch/driver/PRD+integration/block_diagram/ppa)
 
 ### `mtf_cam`
@@ -330,6 +330,6 @@ Hexagon = checkpoint (human approval). Colours: grey todo, blue in progress, ora
 
 | Module | Line cov % | Toggle cov % | Func cov % | Tests (pass/run) | Formal | Cells | Area µm² | Fmax MHz | Power mW |
 |---|---|---|---|---|---|---|---|---|---|
-| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 19.46 | 0 |
-| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 8.9 | 0 |
+| `grape_pipeline` | 91.7 | 96 | 100 | 9/9 | pass | 584454 | 4075031 | 19.46 | 19.2 |
+| `huffman_engine` | 90.4 | 90.3 | 34 | 17/17 | 4 | 151058 | 1634516 | 39.9 | 283 |
 | `mtf_cam` | 92 | 93.8 | 129 | 16/16 | pass | 18814 | 187390 | 37.6 | 13.7 |

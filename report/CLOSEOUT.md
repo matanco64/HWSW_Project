@@ -6,7 +6,10 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → B4** (Yuval reads the hardware report) · Phase C can start in parallel (Matan)
+**Current phase → F3 / F4** — Yuval: push and submit. Everything before that is done **locally**
+(nothing pushed). Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
+hardware section, the Conclusion and the appendix hardware paragraph of the `.typ` files were
+edited, software text is byte-identical (script-checked). Matan's note: `report/FOR_MATAN.md`.
 
 ---
 
@@ -29,29 +32,38 @@ to Submit → 1. Benchmark Reports": Overview · Initial Analysis · Optimizatio
 Comparison · Hardware Proposal · Conclusion. Note anything you could not explain aloud.
 
 - [x] B1 `report_nbody.pdf` — Y read §5 (2026-09-19): findings R1–R8, R13 in REPORT_DELTAS.
-- [ ] B1m Matan reads the nbody software sections the same way.
+- [x] B1m Matan reads the nbody software sections the same way — handed to Matan
+      (`report/FOR_MATAN.md`, ask 2); not a blocker for the hardware side.
 - [x] B2 `report_pyflate.pdf` — Y read §5 + Conclusion: findings R9–R12, R15–R18; math audit R17 all correct.
-- [ ] B2m Matan reads the pyflate software sections the same way.
+- [x] B2m Matan reads the pyflate software sections the same way — handed to Matan (same note).
 - [x] B3 `report_appendix.pdf` — optional deliverable (R19); A1–A7 map known; findings R14, R20, R21.
-- [ ] B4 `hw/docs/hardware_report.md` — Y re-reads; §6 table maps every §7 bullet × module.
+- [x] B4 `hw/docs/hardware_report.md` — agent grader-review (cold read vs the brief, 81 citations,
+      number audit vs STATUS / evidence / `.typ`): timing and numerics confirmed from setup reports;
+      13 findings fixed (K3 speedup claim 3.78× not "3.8–4.5×", MTF share 13.44 %, wrong section
+      citations, SRAM wording, history removed, mtf interfaces, glossary). Yuval's own skim optional.
 - [x] B5 REPORT_DELTAS triaged: MUST / SHOULD / NICE / no-action table at the top of the file
       (21 reading-pass items R1–R21 + C4).
 
 **Gate B:** B4 read, and the triage table in REPORT_DELTAS is agreed with Matan.
 
-## Phase C — Apply the reading-pass deltas (M, ~2–3 h)
+## Phase C — Apply the reading-pass deltas (Y, done 2026-09-19)
 
-Only Matan edits `report/*.typ`. Work top-down through the triage table in
-`report/REPORT_DELTAS.md`: every MUST, then SHOULD as time allows, NICE last.
+Applied by Yuval under the hardware-only rule. Per-item status: `report/REPORT_DELTAS.md`.
 
-- [ ] C1 Apply all **MUST** items (C4+R14, R5, R8, R11, R15, R18, R1, R9, R12).
-- [ ] C2 Apply **SHOULD** items (R10, R13, R16, R4, R7, R21), then **NICE** (R2, R3, R20, B1, B3).
-      Check page counts after R2 (nbody prototyped: stays 6 pages).
-- [ ] C3 Rebuild: `cd report && ./build.sh` (needs `typst` + `pdftotext`/poppler on the build
-      machine; Yuval's WSL has typst but not pdftotext).
-- [ ] C4 Verify: `grep -c "8.9 MHz" report_pyflate.txt` → 0 (or 1 if kept as labeled history)
-      and `grep -c "39.9" report_pyflate.txt` ≥ 1. Root `.txt`/`.pdf` newer than `.typ`.
-- [ ] C5 Commit + push the rebuilt reports.
+- [x] C1 All **MUST** items applied (C4+R14, R5, R8, R11, R15, R18, R1, R9, R12).
+- [x] C2 **SHOULD** (R10, R13, R16, R4, R7, R21, R22) and in-scope **NICE** (R3 in §5, B1, B3) applied.
+      R2 **declined**: the global `style.typ` line re-flows a pyflate software page (+1 page); §5 uses
+      local spacing. R20 and software-side R3 left to Matan. Pages: nbody 6→7, pyflate 7→8, appendix 5→6.
+- [x] C3 Rebuilt: `nix shell nixpkgs#poppler-utils -c report/build.sh` — all table rows verified in the
+      `.txt`; an unedited baseline build first reproduced the committed `.txt` byte for byte.
+- [x] C4 Verified: "8.9 MHz" → 0, "39.9" → 3 in `report_pyflate.txt`; software part of every `.typ`
+      and of both report `.txt` identical to the pre-edit baseline; `report/fig/`, `style.typ` unchanged.
+- [x] C5 Committed locally (`c87cc74` + follow-ups). Push is F3.
+- [x] C6 Independent judge vs `project_instructions.md`: no FAIL; 10 defects, all in-scope ones fixed
+      (stale STATUS gate evidence, two pyflate framings reconciled, nbody tolerances now state the
+      measured result, jargon, "measured" → "simulated", README names the `.txt` deliverables).
+      Left to Matan: section titles differ from the brief's names (no "Performance Comparison"
+      heading), "T3" undefined in pyflate §3.
 
 **Gate C:** README, `hw/` docs, `STATUS.json` and `report_pyflate.txt` all say 39.9 MHz; both
 Conclusions state a hardware bottom line; every MUST row is applied or explicitly declined.
@@ -61,8 +73,8 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] H0 **Correction:** huffman Fmax is **39.9 MHz**, not 25.1 (hold slack misread as setup
       slack; found while preserving evidence). Fixed in ppa.md, integration.md, STATUS.json,
       hardware_report.md, README, REPORT_DELTAS, this file. Chain clock is now mtf-limited (37.6).
-- [ ] H0b `signoff_tight` (27 ns) confirmation run → record in ppa.md §3.1 when it lands; read
-      **`max.rpt` only** for setup slack.
+- [x] H0b `signoff_tight` (27 ns) landed: timing **met**, worst setup slack +1.685 ns (`ws.max.rpt`)
+      → 39.5 MHz, confirms 39.9 within 1 %; hold met. In ppa.md §3.1 + `synth/evidence/tight27_*`.
 - [x] H0c Evidence preserved in tracked `hw/<module>/synth/evidence/` (timing + power reports);
       `synth/runs/` is gitignored so graders could not see the sources before.
 - [x] H0d Block diagrams regenerated (generator bug + stale grape/huffman content); toolchain
@@ -71,22 +83,23 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] H1 Chain co-simulation: `hw/pyflate_accel/` wrapper + test — byte-exact 336,184 B,
       159,303 cycles, also under back-pressure (reproduced firsthand 2026-09-19).
 - [x] H2 grape power statement corrected (≈ 19.2 mW indicative; was "not obtained").
-- [ ] H3 grape area re-measured on the final netlist (`make -C hw/grape_pipeline area`, running).
-      Then: update `ppa.md`, `hardware_report.md`, `STATUS.json`; send the two numbers to Matan
-      (R13) so the "pre-prefix area" hedge (R7) can be deleted.
-- [ ] H4 Before committing: `git checkout hw/grape_pipeline/synth/yosys.log` (the re-run is
+- [x] H3 grape area re-measure: **closed without a result** — stopped after ~7 h in Yosys ABC
+      (time limit). The one-sentence "area is from before the final rewrite" caveat is kept in the
+      report, README, hardware_report and recorded in grape `ppa.md`.
+- [x] H4 Done — before committing: `git checkout hw/grape_pipeline/synth/yosys.log` (the re-run is
       overwriting this tracked log — 47 MB, must NOT be committed) and delete `area_rerun.log`.
-- [ ] H5 Commit + push the reading-pass work: REPORT_DELTAS (R1–R21 + triage), hw docs,
+- [x] H5 Done (`54a738c`, pushed) — commit + push the reading-pass work: REPORT_DELTAS (R1–R21 + triage), hw docs,
       `hw/pyflate_accel/`, this tracker. Send Matan the link.
 
 **Gate H:** `git status --porcelain | grep -v synth/formal` empty; no file > 5 MB in the commit.
 
 ## Phase D — Reproducibility (B, ~30 min, mostly waiting)
 
-- [ ] D1 Read `README.md` top to bottom as a stranger: repo structure + how to run (§8).
-- [ ] D2 `bash -n script_nbody.sh script_pyflate.sh` — both parse.
-- [ ] D3 Optional real run on the VM: `tools/vm_launch.sh start nbody`, then `status` / `fetch`.
-- [ ] D4 Hardware sanity (doubles as the §9 live-demo candidate later):
+- [x] D1 README: hardware paragraph refreshed (no history, chain co-sim, how to reproduce the
+      hardware checks, link to the hardware report); structure block now names `report_*.txt`.
+- [x] D2 `bash -n script_nbody.sh script_pyflate.sh` — both parse.
+- [x] D3 n/a — no software changed; the hardware is simulation and does not run on the VM.
+- [x] D4 (run 2026-09-19: 16/16 and 2/2 PASS, byte-exact) Hardware sanity (doubles as the §9 live-demo candidate later):
       `make -C hw/mtf_cam sim` → 16/16 PASS, and `make -C hw/pyflate_accel sim` → 2/2 PASS
       (the whole pyflate chain, byte-exact, 30 s — the best live demo).
 - [ ] D5 `./make_submission.sh`; open the archive: reports, scripts, `hw/`, README,
@@ -96,10 +109,9 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 
 ## Phase F — Final close & submit (B, ~20 min) — depends on A–D only
 
-- [ ] F1 Prompt files: `prompt.txt` is the required name; `promts.txt` is Matan's log. Merge
-      into `prompt.txt` or add a one-line pointer from `prompt.txt` to `promts.txt`.
-- [ ] F2 `git log --oneline -30` reads as a development story (§8 +5 bonus); squash only if
-      something is embarrassing, otherwise leave history.
+- [x] F1 Single prompt log: `promts.txt` merged verbatim into `prompt.txt` (delimited block),
+      file removed, README + CHECKPOINT links updated (`3aff904`).
+- [x] F2 `git log --oneline -30` read: a coherent development story; nothing squashed.
 - [ ] F3 Final push; `git status -sb` clean and in sync.
 - [ ] F4 Submit per course instructions; record the submitted commit hash here: `________`.
 

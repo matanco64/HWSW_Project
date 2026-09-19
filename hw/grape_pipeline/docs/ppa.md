@@ -139,6 +139,16 @@ the 11.15 MHz figure above is the pre-rewrite linear-scan point) and its cost. F
 OpenLane signoff (power, die shot) was **bonus**, not a §7 requirement, and did not converge
 because of the OpenROAD GRT-0607 router bug — an environment/tool limitation, not a design gap.
 
+## Note (2026-09-19) — which netlist the area describes
+
+The Yosys area above (584,454 cells, 4.075 mm², `synth/area.txt`, identical copy kept as
+`synth/area_preprefix.txt`) was measured on the three-wide design **before** the parallel-prefix
+rewrite of the accumulate picker; the 19.46 MHz timing is from the netlist **after** it. The
+rewrite changes issue-selection logic only, not the FP64 arithmetic units that dominate the area.
+A re-measurement on the final RTL (`make area`) was attempted on 2026-09-19 and stopped after
+about 7 hours in Yosys ABC technology mapping without a result (close-out time limit), so the
+area is reported with this caveat wherever it appears.
+
 ## Report §7 mapping
 
 Performance: K1 124 cycles/step measured on the full benchmark (2.48 M cycles / 20 k steps =
