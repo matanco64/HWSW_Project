@@ -333,7 +333,8 @@ toolchain is entirely open source, so every number can be regenerated from the r
 )
 
 *Evidence levels:* both frequencies come from post-CTS static timing at the typical corner:
-39.9 MHz for Huffman (40 ns constraint, +14.94 ns worst setup slack) and 37.6 MHz for MTF.
+39.9 MHz for Huffman (40 ns constraint, +14.94 ns worst setup slack; a tighter 27 ns run also
+meets timing and gives 39.5 MHz) and 37.6 MHz for MTF.
 They are estimates, not demonstrated silicon operating frequencies; routing may change either,
 and neither completed 50 MHz sign-off or produced a GDS. The power figures are tool estimates
 using default switching activity at each run's own clock constraint (40 ns for Huffman, 20 ns

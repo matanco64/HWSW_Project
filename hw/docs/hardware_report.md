@@ -198,7 +198,7 @@ build), `huff_decoder` (20-wide comparator cascade + priority encode), `huff_tab
 - **Operating frequency:** target **50 MHz** (K3, `docs/mas.md §6`). Achievable
   **≈ 39.9 MHz** — *post-CTS STA* at a 40 ns constraint: worst setup slack +14.941 ns →
   25.06 ns achievable; no setup or hold violations (evidence preserved in
-  `hw/huffman_engine/synth/evidence/`; a looser 120 ns run gives 31.7 MHz, bracketing it). The initial 20 ns run was placement-non-convergent and gave only a pre-placement
+  `hw/huffman_engine/synth/evidence/`; a tighter 27 ns run also meets timing and gives 39.5 MHz, a looser 120 ns run 31.7 MHz). The initial 20 ns run was placement-non-convergent and gave only a pre-placement
   **8.9 MHz** — but that was a **high-fanout-net wireload artifact** (one register Q fanning out
   to thousands of pins, unbuffered pre-CTS; same class as grape's pre-PnR fanout net). Relaxing
   the clock to 40 ns (grape's lesson) let placement converge through CTS, and post-CTS the real

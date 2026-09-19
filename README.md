@@ -34,13 +34,17 @@ separate simulation cycles, mapped area and timing evidence from design targets:
 | `huffman_engine` | pyflate | 151,058 | 1.63 mm² | 39.9 MHz | 17/17 |
 | `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.6 MHz | 16/16 |
 
-All three now report **post-CTS** static timing (real placed clock tree).
-`huffman_engine`'s initial 20 ns run was placement-non-convergent, and its earlier
-~8.9 MHz pre-placement estimate turned out to be a high-fanout-net wireload artifact
-(the same class as grape's pre-PnR net); relaxing the clock let placement converge
-through post-CTS, where the real timing (39.9 MHz) is *faster*, not slower. None has
-completed 50 MHz routed sign-off. The grape area above describes the earlier
-three-wide design; its newer prefix timing comes from a separate netlist revision.
+All three frequencies are **post-CTS** static-timing estimates (cells and the clock tree
+placed, signal wires not routed); none has completed 50 MHz routed sign-off. The grape area
+was synthesized before the final rewrite of its issue-selection logic. The two pyflate
+modules are also simulated together as one chain (`hw/pyflate_accel/`): byte-exact over the
+benchmark block's 336,184 output bytes in 159,303 cycles.
+
+Reproduce the hardware checks (after `source hw/env.sh`; tools are installed by
+`hw/setup.sh`): `make -C hw/pyflate_accel sim` runs the whole pyflate chain in about 30 s;
+`make -C hw/<module> sim` runs a module's regression; `make -C hw/<module> area` re-runs
+synthesis. [The hardware report](hw/docs/hardware_report.md) covers all three modules
+against the brief's hardware items, with the toolchain and a source for every number.
 Per-module detail is in `hw/<module>/docs/ppa.md` and `integration.md`.
 
 ## Repository structure

@@ -310,14 +310,14 @@ regenerated from the repository.
  Directed + random tests                                                    17 / 17                              16 / 16
  Line / toggle coverage                                             90.4% / 90.3%                        92.0% / 93.8%
 Evidence levels: both frequencies come from post-CTS static timing at the typical corner: 39.9 MHz for
-Huffman (40 ns constraint, +14.94 ns worst setup slack) and 37.6 MHz for MTF. They are estimates, not
-demonstrated silicon operating frequencies; routing may change either, and neither completed 50 MHz sign-
-off or produced a GDS. The power figures are tool estimates using default switching activity at each run’s
-own clock constraint (40 ns for Huffman, 20 ns for MTF), so they are not comparable with each other, are not
-workload power, and cannot support energy savings. Huffman is 8.7× the area of MTF because its code tables
-are flops. Coverage percentages use the documented exclusions. Three MTF list invariants are proven
-unbounded by k-induction on a 16-entry list; the full 256-entry permutation proof is bounded to depth 24.
-The regression counts are recorded results.
+Huffman (40 ns constraint, +14.94 ns worst setup slack; a tighter 27 ns run also meets timing and gives 39.5
+MHz) and 37.6 MHz for MTF. They are estimates, not demonstrated silicon operating frequencies; routing
+may change either, and neither completed 50 MHz sign-off or produced a GDS. The power figures are tool
+estimates using default switching activity at each run’s own clock constraint (40 ns for Huffman, 20 ns for
+MTF), so they are not comparable with each other, are not workload power, and cannot support energy
+savings. Huffman is 8.7× the area of MTF because its code tables are flops. Coverage percentages use the
+documented exclusions. Three MTF list invariants are proven unbounded by k-induction on a 16-entry list;
+the full 256-entry permutation proof is bounded to depth 24. The regression counts are recorded results.
 Does the hardware win?
 Clocking and the link between the modules: both modules are single-clock synchronous designs and the
 chain uses one shared clock; there is no clock-domain crossing. The link is an AXI4-Stream valid/ready

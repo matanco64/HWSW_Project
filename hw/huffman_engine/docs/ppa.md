@@ -157,8 +157,12 @@ Worst **setup** slack at the **40 ns** constraint, propagated post-CTS clock,
   50 MHz K3 target is **missed by ~1.25×** (not the ~5.6× the pre-PnR artifact suggested). This
   is a post-CTS number (propagated clock, placed cells, no setup or hold violations); it is an
   estimate in that the constraint (40 ns) is looser than the result (25 ns) — a tighter
-  constraint changes how hard the resizer works (a 27 ns confirmation run, `signoff_tight`, is
-  recorded below when complete) — and detailed routing would add net RC.
+  constraint changes how hard the resizer works — and detailed routing would add net RC.
+- **Confirmation at a tight constraint (2026-09-19, run `signoff_tight`, 27 ns):** timing is
+  **met** post-CTS with worst *setup* slack **+1.685 ns** (`ws.max.rpt`; TNS 0) → 25.32 ns →
+  **39.5 MHz**, same critical path; hold met (+0.096 ns, `ws.min.rpt`). So a 37.0 MHz constraint
+  is demonstrated met, and the two estimates (39.9 @ 40 ns, 39.5 @ 27 ns) agree within 1 %.
+  Evidence: `synth/evidence/tight27_*.rpt`; config `synth/config_tight.json`.
 - **Critical path** (post-CTS setup): startpoint `u_regs._86212_` (a `huff_regs` length/count
   register) → endpoint `u_align._3147_` (a `huff_aligner` window register), slack +14.941 ns.
   The same `huff_regs` start register led the pre-PnR critical path; once CTS buffered the
