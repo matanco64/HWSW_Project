@@ -102,7 +102,10 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] D4 (run 2026-09-19: 16/16 and 2/2 PASS, byte-exact) Hardware sanity (doubles as the §9 live-demo candidate later):
       `make -C hw/mtf_cam sim` → 16/16 PASS, and `make -C hw/pyflate_accel sim` → 2/2 PASS
       (the whole pyflate chain, byte-exact, 30 s — the best live demo).
-- [ ] D5 `./make_submission.sh`; open the archive: reports, scripts, `hw/`, README,
+- [x] D5 (2026-09-19: all gates pass — unit tests, nbody bit-exactness oracles, text export,
+      worked examples; native checks SKIP here because the Rust wheels are not installed on this
+      host; archive lists reports `.txt`+`.pdf`, scripts, README, `prompt.txt`, `hw/`; needs
+      `pyperf` importable — here `PYTHONPATH=<scratch> ./make_submission.sh`) `./make_submission.sh`; open the archive: reports, scripts, `hw/`, README,
       `prompt.txt` all inside.
 
 **Gate D:** D2, D4, D5 pass on a fresh shell.
@@ -112,8 +115,11 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] F1 Single prompt log: `promts.txt` merged verbatim into `prompt.txt` (delimited block),
       file removed, README + CHECKPOINT links updated (`3aff904`).
 - [x] F2 `git log --oneline -30` read: a coherent development story; nothing squashed.
-- [ ] F3 Final push; `git status -sb` clean and in sync.
-- [ ] F4 Submit per course instructions; record the submitted commit hash here: `________`.
+- [ ] F3 **Yuval:** final push — `git pull --rebase --autostash origin main && git push origin main`;
+      then `git status -sb` shows `main...origin/main` with no ahead/behind. (Local work is committed
+      and the tree is clean; nothing has been pushed since `54a738c`.)
+- [ ] F4 **Yuval:** submit per course instructions (repo URL; or the zip from `./make_submission.sh`
+      if a URL is not accepted). Record `git rev-parse --short HEAD` here: `________`.
 
 **Gate F:** submitted hash recorded above.
 

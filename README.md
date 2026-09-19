@@ -43,7 +43,7 @@ benchmark block's 336,184 output bytes in 159,303 cycles.
 Reproduce the hardware checks (after `source hw/env.sh`; tools are installed by
 `hw/setup.sh`): `make -C hw/pyflate_accel sim` runs the whole pyflate chain in about 30 s;
 `make -C hw/<module> sim` runs a module's regression; `make -C hw/<module> area` re-runs
-synthesis. [The hardware report](hw/docs/hardware_report.md) covers all three modules
+synthesis. [The hardware report](hw/docs/hardware_report.md) ([PDF](hw/docs/hardware_report.pdf)) covers all three modules
 against the brief's hardware items, with the toolchain and a source for every number.
 Per-module detail is in `hw/<module>/docs/ppa.md` and `integration.md`.
 
