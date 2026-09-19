@@ -6,7 +6,8 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → F4** — Yuval: submit commit `20e8080` (pushed 2026-09-19). Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
+**Current phase → F3b / F4** — a second local round (2026-09-20: software-side fixes, larger-N
+projection) sits on top of pushed `20e8080`; Yuval: push again, then submit the new HEAD. Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
 hardware section, the Conclusion and the appendix hardware paragraph of the `.typ` files were
 edited, software text is byte-identical (script-checked). Matan's note: `report/FOR_MATAN.md`.
 
@@ -31,10 +32,11 @@ to Submit → 1. Benchmark Reports": Overview · Initial Analysis · Optimizatio
 Comparison · Hardware Proposal · Conclusion. Note anything you could not explain aloud.
 
 - [x] B1 `report_nbody.pdf` — Y read §5 (2026-09-19): findings R1–R8, R13 in REPORT_DELTAS.
-- [x] B1m Matan reads the nbody software sections the same way — handed to Matan
-      (`report/FOR_MATAN.md`, ask 2); not a blocker for the hardware side.
+- [x] B1m nbody software sections read as a grader (agent, 2026-09-20): every number re-derived
+      from `results/`, no mismatch; 11 coverage/wording fixes applied (`report/FOR_MATAN.md`).
 - [x] B2 `report_pyflate.pdf` — Y read §5 + Conclusion: findings R9–R12, R15–R18; math audit R17 all correct.
-- [x] B2m Matan reads the pyflate software sections the same way — handed to Matan (same note).
+- [x] B2m pyflate software sections read the same way: no numeric mismatch; fixes applied incl. two
+      provenance corrections (10 not 11 Rust tests on the VM; later commits not re-timed).
 - [x] B3 `report_appendix.pdf` — optional deliverable (R19); A1–A7 map known; findings R14, R20, R21.
 - [x] B4 `hw/docs/hardware_report.md` — agent grader-review (cold read vs the brief, 81 citations,
       number audit vs STATUS / evidence / `.typ`): timing and numerics confirmed from setup reports;
@@ -118,7 +120,8 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
       then `git status -sb` shows `main...origin/main` with no ahead/behind. (Local work is committed
       and the tree is clean; nothing has been pushed since `54a738c`.)
 - [ ] F4 **Yuval:** submit per course instructions (repo URL; or the zip from `./make_submission.sh`
-      if a URL is not accepted). Record `git rev-parse --short HEAD` here: `20e8080`.
+      if a URL is not accepted). First push (`20e8080`) done 2026-09-19; after the 2026-09-20 round push again and record the
+      submitted `git rev-parse --short HEAD` here: `________`.
 
 **Gate F:** submitted hash recorded above.
 

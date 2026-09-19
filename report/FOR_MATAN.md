@@ -16,6 +16,35 @@ See it: `git diff 54a738c -- report/*.typ` · built with `report/build.sh` (all 
 | Page counts | nbody 6 → 7, pyflate 7 → 8, appendix 5 → 6 (two forced page breaks inside §5 removed) |
 | Elsewhere | `promts.txt` merged verbatim into `prompt.txt` (the brief names one file); README link updated; README hardware paragraph refreshed |
 
+## Update 2026-09-20 — software-side items also applied (Yuval asked for them to be closed)
+
+Two independent grader-style reads of §1–§4 (one per report) re-derived every number from
+`results/` — **no arithmetic or transcription error was found** — and listed coverage / wording
+gaps against the brief. Applied, all small and factual (`git diff 20e8080 -- report/*.typ`):
+
+- **Headings carry the brief's section names** (Overview / Initial analysis / Optimizations /
+  Performance comparison / Hardware acceleration proposal / Conclusion); numbering unchanged.
+- **Brief coverage:** profilers named (py-spy; `perf record -F 999` on `python3-dbg` + FlameGraph);
+  libraries and concrete data structures stated in both §1; a "Reading the flame graphs" paragraph in
+  nbody (the `.txt` has no figures); "T3" defined in the pyflate ablation.
+- **Provenance (please double-check these two):** pyflate §4 said *eleven* Rust crate tests passed on
+  the VM — the canonical VM log (`results/vm_canonical_20260910_2c8c754/rust_tests.log`) shows **10**;
+  the 11th (property test, `536ee64`) was added after the timed revision. And the "Measurement scope"
+  note now says the later commits (comment trim, `collections.Counter` histogram, Rust code-length cap
+  23 → 20) were **not re-timed**.
+- **Wording:** "VM" spelled out; run-in labels end with ":"; IPC, BH, FMM, pyperf vs pyperformance
+  glossed; cache-miss rates explained as medians of per-run rates; nbody table columns say
+  "Optimized Python"; the pyflate 23.8 % cache-miss drop is flagged as capture-dependent (an earlier
+  capture shows ≈ 2 %); "1.67× baseline is 283.88 ms, so 4.00 × 1.67 ≠ 6.61" stated.
+- **Layout:** the forced `#pagebreak()`s that stranded a few lines on a new page were removed
+  (pyflate: all five; nbody: one). Pages: nbody 7, pyflate 9, appendix 6. The brief sets no limit.
+- **New in nbody §5:** "Would a larger N change the verdict?" — the hardware schedule model run for
+  N bodies (`hw/grape_pipeline/docs/schedule_model_n.py`), compared with your §4 sweep.
+
+Not applied (your call): unify the three names of one configuration ("Python + Rust extension" /
+"Native decode backend" / "Hybrid native"); an extra ablation row "T1 only" (+393.6 / +397.2 /
++200.6 ms); 24.26× (§3) vs 24.3× (§5–6) precision.
+
 ## Asks
 
 1. **Skim §5 and §6 of both reports** (10 min) and tell Yuval anything you disagree with.

@@ -9,13 +9,17 @@ recover symbols, and undo several transformations. Its Huffman matcher looks lik
 place to start. Measuring it led us to improvements across the whole decoding pipeline,
 then a Rust extension that executes the symbol decoder through one call per block.
 
-= 1. Workload and result
+= 1. Overview: workload and result
 
 Despite its name, the measured `pyflate` workload is *bzip2*, not DEFLATE.
 Each iteration decompresses `interpreter.tar.bz2` from *67,562 bytes to 399,360 bytes*;
-the harness checks the original MD5 outside the timer. The Python tier uses the standard library rather than calling
-a native decompression library. Its main structures are an integer bit buffer, Huffman tables,
-a move-to-front (MTF) alphabet, Burrows-Wheeler transform (BWT) index vectors and output buffers.
+the harness checks the original MD5 outside the timer. The Python tier uses only the standard library (`re` for RLE4 runs, `collections.Counter`
+for the BWT histogram, `hashlib` for MD5) plus `pyperf` for timing; the native tier adds our Rust
+crate bound through PyO3. No native decompression library is called. Its main structures are an
+integer bit buffer, Huffman tables, a move-to-front (MTF) alphabet, Burrows-Wheeler transform
+(BWT) index vectors and output buffers: concretely a Python `int` bit window, `list` lookup
+tables packing `(symbol, length)` into one integer, a `list` MTF alphabet and traversal
+vector, and `bytearray` outputs.
 
 #note[*One block, six Huffman tables, 148,271 symbols.* The decoder switches tables every
 50 symbols. Huffman decoding, move-to-front and RUNA/RUNB expansion produce a 336,184-byte
@@ -35,22 +39,27 @@ L-vector. Inverse BWT and final RLE4 expansion produce the 399,360-byte output.]
 
 *Our final software path is 6.61× faster than stock: an 84.9% runtime reduction.*
 Python improvements provide 4.00×; over the same benchmark's Python back end, the Rust symbol
-decoder adds *1.67×* (Section 4). Both tiers exceed the course's 7% improvement requirement and match
-`bz2.decompress` byte for byte, passing the unchanged MD5 check. Rust handles the blue
-stage above; block headers, inverse BWT and RLE4 remain in Python.
+decoder adds *1.67×* (Section 4; its baseline is 283.88 ms, not 281.16 ms, so the two ratios do
+not multiply exactly). Both tiers exceed the course's 7% improvement requirement and match
+`bz2.decompress` byte for byte, passing the unchanged MD5 check. Rust handles the stage
+labeled Rust extension above; block headers, inverse BWT and RLE4 remain in Python.
 
-#note[*Measurement scope.* Course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12; 120
+#note[*Measurement scope:* Course QEMU/KVM virtual machine (VM), Ubuntu 22.04, release CPython 3.10.12; 120
 values per configuration, pinned to guest CPU 0, from revision 2c8c754 through the documented
 scripts and its own Rust build. Source: `results/vm_canonical_20260910_2c8c754/suite/`
-(Appendix A7). Development profiles and ablations are labeled separately.]
+(Appendix A7). Development profiles and ablations are labeled separately. Later commits
+trimmed comments, moved the BWT histogram to `collections.Counter` and lowered the Rust
+code-length cap from 23 to 20; they pass the same byte-exact checks but were not re-timed.]
 
 Appendix A5 gives the timing distributions and worker-clustering analysis. The repeated
 measurements support a large improvement on this input; one bzip2 fixture does not establish
 the same speedup for every file, compression setting or interpreter.
-#pagebreak()
-= 2. Profiling: the whole decoding pipeline
+= 2. Initial analysis: profiling the whole decoding pipeline
 
-The stock Python-frame profile highlights Huffman decoding and bit-buffer work, with
+Profiles were recorded on the VM with py-spy on release CPython (Python frames), rendered with
+FlameGraph. The brief's `perf record -F 999` on `python3-dbg` shows only interpreter C frames
+(`_PyEval_EvalFrameDefault` 99.50% inclusive; `results/perf_report_pyflate_stock.txt`), so it
+locates no Python-level hotspot. The stock Python-frame profile highlights Huffman decoding and bit-buffer work, with
 move-to-front and inverse BWT alongside them. Development instrumentation found a mean of
 about five entries visited by the symbol matcher, despite its table capacity of 258.
 A lookup table can remove this scan, but the measured scan is short; per-symbol interpreter
@@ -88,8 +97,7 @@ accounts for 38.52% inclusive. Both matter for the next offload decision. These 
 profiles identify candidates; Section 4 explains why they cannot supply a precise Amdahl
 fraction for the separately measured native timing pair.
 
-#pagebreak()
-= 3. Changes that shipped
+= 3. Optimizations: changes that shipped
 
 - *Reduce per-byte overhead:* read the compressed input once, refill the bit window in
   chunks, bind hot values to locals and accumulate bytes without allocating an object per byte.
@@ -107,7 +115,9 @@ fraction for the separately measured native timing pair.
   [Counting-sort BWT], [+20.8 ms], [+17.2 ms], [+38.6 ms],
 )
 
-*Ablation scope.* Each row puts one stock component back into the optimized Python decoder
+*Ablation scope:* T3 is the last tier of our development ladder (T0 stock, T1 per-byte fixes,
+T2 canonical decode, T3 the shipped decoder). Each row reverts one optimization in the optimized
+Python decoder (the lookup row falls back to canonical length-stepping, not the stock scan)
 (`dev/pyflate/ablate.py`, which drives the T3 module directly rather than the pyperf harness)
 and reports the added time, best of seven interleaved decompressions. Costs need not add.
 The two VM trials are separate runs on the course VM, release CPython 3.10.12, pinned to one
@@ -117,8 +127,8 @@ guest CPU; the last column is the earlier development run on Windows / CPython 3
 *The measured platform reverses part of the development ranking.* On the VM, regex-assisted
 RLE4 is worth about 100 ms and the primary Huffman lookup about 50 ms -- both more than
 counting-sort BWT at about 20 ms -- and the two trials agree within 4 ms on every row. The
-development run on 3.12 had ranked BWT first and the Huffman table last, so the ordering is
-a property of the interpreter and platform, not of the algorithms. What survives on both is
+development run on 3.12 had ranked BWT first and the Huffman table last, so the ordering
+depends on the interpreter and platform, not only on the algorithms. What survives on both is
 that no single change dominates: the pipeline, not the matcher alone, had to be optimized.
 Raw output: `results/vm_rerun_20260910_3697a63/`.
 
@@ -127,10 +137,9 @@ Raw output: `results/vm_rerun_20260910_3697a63/`.
   index-table construction remain visible beside `_decode_symbols_python`, the single
   symbol-decode loop that replaced the stock matcher and bit-reader frames.])
 
-#pagebreak()
 == Worked examples of the shipped transformations
 
-*Before/after: removing the per-symbol search.* The stock matcher visits Huffman entries
+*Before/after, removing the per-symbol search:* The stock matcher visits Huffman entries
 and calls the bit reader for candidate lengths. The optimized loop peeks once into a flat
 table; a nonzero entry packs the symbol and consumed length. These excerpts summarize the
 control flow, omitting refill, table switches and output handling.
@@ -164,7 +173,7 @@ these operations on local integers. Source: `build_huffman_table` and
   length-indexed ranges identify the symbol without scanning individual candidates.
   The optimized implementation adds a primary lookup for short codes.])
 
-*A four-entry lookup, step by step.* Use the illustrated code lengths `[2,2,2,3,3]`
+*A four-entry lookup, step by step:* Use the illustrated code lengths `[2,2,2,3,3]`
 and temporarily choose `pb = 2` (the shipped default is 11, capped by the longest code).
 The primary entries for `00`, `01`, `10`, `11` are `(a,2)`, `(b,2)`, `(c,2)`, and
 fallback. On input `01110`, peek `01`, output b and consume two bits; `110` remains.
@@ -174,14 +183,14 @@ Thus the stream decodes to b,d without searching individual symbols. With a thre
 primary table, `00x`, `01x` and `10x` each duplicate a two-bit code into two slots; the
 stored length still consumes only two bits, preserving the next symbol's first bit.
 
-*Counting-sort BWT construction.* For L = `banana`, counts are a:3, b:1, n:2.
+*Counting-sort BWT construction:* For L = `banana`, counts are a:3, b:1, n:2.
 Prefix sums place their buckets at offsets 0, 3 and 4. Scanning L left to right stores each
 original index in the next slot of its bucket, giving `T = [1,3,5,0,2,4]`. Equal symbols keep
 their original order. The stock path sorts L and searches for bucket starts; the optimized
 path counts 256 possible byte values and fills T in O(n + 256) work. This constructs the
 traversal table; inverse BWT still follows `end = T[end]` once per output byte.
 
-*Reversed move-to-front.* Start with logical order `[a,b,c,d]`, rank 2 selecting c.
+*Reversed move-to-front:* Start with logical order `[a,b,c,d]`, rank 2 selecting c.
 The stock slicing update produces `[c,a,b,d]` by rebuilding the list. The optimized physical
 list is reversed, `[d,c,b,a]`. The non-run symbol is `r = rank + 1 = 3`; `pop(-3)` returns c,
 then `append(c)` leaves `[d,b,a,c]`, the reverse of the same logical answer. The pop shifts
@@ -193,8 +202,7 @@ operation while moving O(rank) entries instead of rebuilding the whole alphabet.
 regex locates runs in C and bulk byte operations construct the repeated span; it does not
 change the bzip2 representation or the linear size of the output.
 
-#pagebreak()
-= 4. Native execution: what improves, what remains
+= 4. Performance comparison: native execution, what improves and what remains
 
 Our Rust/PyO3 `BlockDecoder` handles the bit reader, Huffman decode, MTF and RUNA/RUNB
 expansion. Header parsing, inverse BWT, RLE4 and MD5 remain in Python. One block-level call
@@ -208,31 +216,33 @@ stream desynchronization.
 )
 
 The native row is the same measurement as the Python + Rust row on page 1. The Python row
-runs the same benchmark file with its Python back end directly under pyperf, not through
-pyperformance, so it differs slightly from page 1's optimized Python; both cover the complete
+runs the same benchmark file with its Python back end directly under pyperf (the timing
+library), not through pyperformance (the suite runner that wraps it), so it differs slightly
+from the optimized Python row on page 1; both cover the complete
 benchmark.
 `HWSW_BACKEND=python|native|auto` selects the implementation; native mode requires the extension,
 while auto mode falls back. The benchmark forwards the variable to pyperf's workers itself, so a
 scrubbed worker environment cannot quietly change which back end is measured.
 
-*The submitted Rust source was rebuilt on the VM.* Eleven crate tests and seven blocks across
-five Python/`bz2` fixtures passed, including exact ending bit positions; the eleventh is a
-property test that decodes random Kraft-complete Huffman tables against an independently
-written canonical encoder. A dispatch check confirmed that `native` and `auto` load the new
+*The submitted Rust source was rebuilt on the VM.* On the VM, ten crate tests and seven blocks
+across five Python/`bz2` fixtures passed, including exact ending bit positions. An eleventh
+test, added after the timed revision, is a property test that decodes random Kraft-complete
+(no unused code space) Huffman tables against an independently written canonical encoder; it
+passes on the development host. A dispatch check confirmed that `native` and `auto` load the new
 extension and call it once per block.
 
 == Matched-work CPU counters
 
 These are medians of three warm-loop VM runs, each decoding the input 16 times, divided by
 16. Both backends produced the same output digest. They are a separate experiment from the
-rigorous timing table above, with acknowledged counter gating after setup (Appendix A2).
+rigorous timing table above, with counters enabled only around the timed loop (Appendix A2).
 
 #result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Metric per complete decode*], [*Python*], [*Hybrid native*]),
   [Elapsed time], [288.68 ms], [174.44 ms],
   [Instructions], [1,947.94 M], [1,171.65 M],
   [Cycles], [675.92 M], [404.24 M],
-  [IPC], [2.88], [2.90],
+  [IPC (instructions per cycle)], [2.88], [2.90],
   [Branches], [349.43 M], [207.30 M],
   [Branch misses (rate)], [544,260 (0.156%)], [301,458 (0.145%)],
   [Generic cache references], [1.749 M], [1.686 M],
@@ -241,8 +251,8 @@ rigorous timing table above, with acknowledged counter gating after setup (Appen
 
 Native decoding reduces instructions by *39.9%*, cycles by *40.2%* and branch misses by
 *44.6%*, while IPC changes little. The approximately 1.65× speedup in this experiment
-comes mainly from removing interpreter work. Generic cache misses fall *23.8%*, a smaller
-reduction than instructions: the remaining Python BWT/RLE4 pipeline still processes the
+comes mainly from removing interpreter work. Generic cache misses fall *23.8%* in this capture (an earlier
+capture showed about 2%, so we draw no conclusion from the size of that reduction): the remaining Python BWT/RLE4 pipeline still processes the
 whole block. Aggregate counters cannot attribute misses to a particular stage. L1 events
 are omitted because an earlier capture returned invalid load counts.
 
@@ -254,8 +264,9 @@ The sampled 32.79% decoder share is a hotspot locator, not a calibrated value of
 native timing pair: it would imply a maximum 1.49× gain, below the measured 1.67×.
 Under the simple unchanged-residual model, 1.67× requires at least 40.1% offloadable work.
 Separate sampling, setup inside the decoder, and differences between measured runs prevent
-identifying f from this profile alone. Matched phase timing is needed to explain the ratio
-quantitatively; the end-to-end measurement itself remains the evidence for the speedup.
+identifying f from this profile alone. Section 5's derived 117 ms
+Python symbol stage, about 41% of 283.88 ms, is consistent with that bound. Matched phase
+timing is needed to explain the ratio quantitatively; the end-to-end measurement itself remains the evidence for the speedup.
 
 Unlike nbody's native integration loop, this offload leaves over a billion instructions
 per decode in a largely Python pipeline. The next target is the *whole inverse BWT*, including table
@@ -264,8 +275,7 @@ for whole inverse BWT* and *47.8 ms for traversal alone* (Appendix A3). The firs
 construction and traversal; the two numbers must not be added. A native port and working-set sweep would
 test whether memory latency then becomes limiting; the present data do not establish that.
 
-#pagebreak()
-= 5. Hardware acceleration: implementation and estimates
+= 5. Hardware acceleration proposal: implementation and estimates
 
 bzip2's symbol stage is two different jobs back to back. _Huffman decoding_: the compressed
 input is a stream of variable-length codes, each matched against the block's code tables to

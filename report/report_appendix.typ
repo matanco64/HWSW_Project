@@ -4,7 +4,7 @@
 
 = A1. Timing and provenance
 
-The headline results use the course QEMU/KVM VM, Ubuntu 22.04, release CPython 3.10.12
+The headline results use the course QEMU/KVM virtual machine (VM), Ubuntu 22.04, release CPython 3.10.12
 and pyperformance 1.14.0 with pyperf 2.10.0. Each JSON contains 120 measured values (40 value-bearing worker
 runs, three values each); calibration is separate. Reported uncertainty is sample standard
 deviation across those values, not a confidence interval. Use the full-precision JSON means
@@ -71,7 +71,7 @@ three runs per event pass; backend order alternates between rounds. Every run wa
 measurement. Nbody resets state afterwards and executes 64 iterations of energy, 20,000
 steps and energy; pyflate executes 16 complete decompressions. Output checks follow the timer.
 
-*Counter scope.* `perf stat --delay=-1 --control fifo:...` starts with counters disabled.
+*Counter scope:* `perf stat --delay=-1 --control fifo:...` starts with counters disabled.
 The worker enables counting after imports, setup, warmup and garbage collection, waits for
 acknowledgement, then times the loop. It disables counting afterwards and waits for a second
 acknowledgement. Counts include the small control-boundary overhead but exclude setup and
@@ -99,7 +99,7 @@ also retains the individual values and minimum/maximum. Three runs support a des
 comparison, not a formal significance claim; the rigorous 120-value timing experiments remain
 the headline evidence.
 
-*Interpretation.* IPC is retired instructions per counted cycle, not work completed per
+*Interpretation:* IPC is retired instructions per counted cycle, not work completed per
 cycle. Removing interpreter instructions can lower IPC while improving runtime substantially.
 Generic cache events do not represent all memory accesses or identify stall cycles, a specific
 cache level, or DRAM latency. Nbody's very small miss counts are particularly sensitive to
@@ -146,7 +146,7 @@ The L-vector contains 336,184 bytes; `T` is a Python list of indices, whose list
 integer objects add memory. The final 399,360-byte output size is not the traversal table size.
 Whole BWT includes substantial table-construction work as well as the dependent traversal.
 
-*PMU configuration.* Event passes use at most four counters and validate counts and
+*PMU configuration:* Event passes use at most four counters and validate counts and
 running time. On the tested VM, fixed-period cycle sampling and software cpu-clock sampling
 worked where frequency-mode cycle sampling returned zero samples. Debug-build C stacks use
 DWARF unwinding; py-spy separately provides Python frames. These are observed configuration
@@ -186,7 +186,7 @@ python3 report/summarize_distribution.py \
     "$suite"/{baseline,optimized,fallback,native}_pyflate.json
 ```
 
-*Shape.* Every distribution except nbody's native run and pyflate's Python back end is
+*Shape:* Every distribution except nbody's native run and pyflate's Python back end is
 right-skewed: the median sits below the mean and the maximum is far from both, which is the
 usual signature of occasional interference rather than a symmetric measurement error. In
 those two the median lies slightly above the mean, by 0.014 ms and 0.06 ms. The interquartile range is therefore the more informative spread,
@@ -205,7 +205,7 @@ and it is between 0.4% and 2.0% of the median in every configuration.
   [Pyflate native], [169.67], [2.06], [173.39], [186.74], [170.01],
 )
 
-*Grouping.* The 120 values are not 120 independent observations. They come from 40 worker
+*Grouping:* The 120 values are not 120 independent observations. They come from 40 worker
 processes, three values each, and values from one worker share that process's memory layout,
 CPU placement and page-cache state. A one-way variance decomposition splits the total into a
 between-worker and a within-worker component; the between share is the intraclass correlation
@@ -237,7 +237,7 @@ placement is not what separates workers; these data do not identify what does. N
 pyflate's Python back end show no detectable worker effect, and pyflate's other runs are
 milder than nbody's (ICC 0.19 to 0.48).
 
-*Interpretation.* The runtime reductions are much larger than the estimated standard errors
+*Interpretation:* The runtime reductions are much larger than the estimated standard errors
 of the corresponding means. Small differences need a comparison-specific uncertainty
 estimate, ideally resampling worker groups; a dimensionless speedup cannot be compared
 directly with an SE in milliseconds. An ICC estimate of zero means no detected worker
@@ -267,7 +267,7 @@ by pointers to the PDF. It selects the installed extractor's table-preserving mo
 `report/check_txt_tables.py` verifies UTF-8 and that each checked row retains its values.
 The historical exporter issues are documented in `report/history/`.
 
-= A7. VM verification of the delivered route
+= A7. Verification of the final code path on the course VM
 
 == Canonical pinned run (revision 2c8c754)
 

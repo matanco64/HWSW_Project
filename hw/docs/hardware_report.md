@@ -166,6 +166,15 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
   Rust needs ≈ 260 MHz, and the 11.6 ms Python residual alone already exceeds Rust's 9.53 ms.
   The benchmark's cost was interpreter overhead, so removing the interpreter captures nearly all
   of the gain; at N = 5 with ordered pair dependencies there is little parallelism to exploit.
+- **Larger N (model projection, not RTL):** `docs/schedule_model_n.py` runs the same schedule model
+  (123 modeled vs 124 measured cycles/step at N = 5) for N bodies. N = 5 is latency-bound at
+  12.3 cycles/pair (one pair's chain is ≈ 80 cycles and ten pairs cannot fill it); at N = 100 the
+  as-built units reach the unit-bound 4.36 cycles/pair = 0.224 µs/pair at 19.46 MHz — ≈ 4.4× faster
+  than rolled Python (0.98 µs/pair) but 5.0× slower than native (0.045 µs/pair,
+  `results/bigN_sweep.txt`). 12 add + 12 mul → 1.10 cycles/pair (1.25× slower than native);
+  24 add + 24 mul + 2 sqrt + 2 rcp → 0.56 (1.6× faster). Upper bounds: they assume the clock
+  survives wider issue selection (our 1-wide vs 3-wide data says it degrades), SRAM body state,
+  and direct summation remaining the software competitor (Barnes-Hut wins above N ≈ 300).
 - **Honest conclusion:** compute-bound; the end-to-end win is gated on timing closure, not
   the interface. The limiter is the integrate-multiplier operand path, whose pipelining is the
   documented next step.
