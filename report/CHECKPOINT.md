@@ -43,7 +43,8 @@ and appendix 5 pages. The September 7 notes are preserved in `history/checkpoint
 - Condensed methodology, corrected statistical wording, and preserved the old
   appendix under `report/history/`.
 - Added `defense_guide.md` (23-minute route, 26 questions/answers, evidence links,
-  demos) and detailed per-improvement prompts in root `promts.txt`.
+  demos) and detailed per-improvement prompts (originally root `promts.txt`, merged into
+  `prompt.txt` on 2026-09-19).
 
 Validation: report build successful; 77 checked table rows survive text export;
 all four source-frame geometries and badge separation checks pass; worked examples

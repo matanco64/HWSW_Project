@@ -196,8 +196,8 @@ BWT/MTF/RLE examples and an nbody dependency diagram. Run
 functions without installing benchmark dependencies.
 [Defense guide](report/defense_guide.md) provides a 23-minute presentation route,
 26 questions with answers, evidence links and demonstration commands.
-[Detailed revision prompts](promts.txt) records the user requests and separate
-per-improvement instructions; `prompt.txt` remains the historical prompt log.
+[AI prompt log](prompt.txt) is the single prompt log for the project; its "merged log"
+block holds the detailed report-revision requests and per-improvement instructions.
 [Measurement history](report/history/README.md) preserves the superseded appendix.
 
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
