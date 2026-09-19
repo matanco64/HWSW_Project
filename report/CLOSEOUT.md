@@ -6,8 +6,7 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → F3 / F4** — Yuval: push and submit. Everything before that is done **locally**
-(nothing pushed). Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
+**Current phase → F4** — Yuval: submit commit `20e8080` (pushed 2026-09-19). Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
 hardware section, the Conclusion and the appendix hardware paragraph of the `.typ` files were
 edited, software text is byte-identical (script-checked). Matan's note: `report/FOR_MATAN.md`.
 
@@ -115,11 +114,11 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] F1 Single prompt log: `promts.txt` merged verbatim into `prompt.txt` (delimited block),
       file removed, README + CHECKPOINT links updated (`3aff904`).
 - [x] F2 `git log --oneline -30` read: a coherent development story; nothing squashed.
-- [ ] F3 **Yuval:** final push — `git pull --rebase --autostash origin main && git push origin main`;
+- [x] F3 (done 2026-09-19: `origin/main` = `20e8080`, no ahead/behind) **Yuval:** final push — `git pull --rebase --autostash origin main && git push origin main`;
       then `git status -sb` shows `main...origin/main` with no ahead/behind. (Local work is committed
       and the tree is clean; nothing has been pushed since `54a738c`.)
 - [ ] F4 **Yuval:** submit per course instructions (repo URL; or the zip from `./make_submission.sh`
-      if a URL is not accepted). Record `git rev-parse --short HEAD` here: `________`.
+      if a URL is not accepted). Record `git rev-parse --short HEAD` here: `20e8080`.
 
 **Gate F:** submitted hash recorded above.
 
