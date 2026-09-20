@@ -12,9 +12,10 @@ calculation is not. Our optimization asks how much of that machinery we can remo
 
 The Computer Language Benchmarks Game's `nbody` uses symplectic Euler integration under
 Newtonian gravity. Each timed iteration evaluates energy, calls `advance(0.01, 20000)`, then
-evaluates energy again. The stock kernel imports only `pyperf` (the timing harness) and the standard library, with no
+evaluates energy again. The original kernel (the benchmark exactly as shipped in pyperformance, unmodified) imports only `pyperf` (the timing harness) and the standard library, with no
 I/O in the timed region; our Python optimization adds no library (built-in `compile`/`exec`),
-and Section 3 adds a Rust extension bound through PyO3. State is a dict of five
+and Section 3 adds _native Rust_: a compiled Rust extension bound through PyO3, as opposed to
+Python run by the interpreter. State is a dict of five
 `([x, y, z], [vx, vy, vz], mass)` tuples (35 Python floats in nested lists); `pairs` is a list
 of ten tuples aliasing those same lists, built once, so velocity updates are in-place list writes.
 
@@ -23,14 +24,14 @@ of ten tuples aliasing those same lists, built once, so velocity updates are in-
 #v(0.5em)
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
-  table.header([*Configuration*], [*Mean ± SD*], [*vs stock*]),
-  [Stock Python], [231.20 ± 7.85 ms], [1.00×],
+  table.header([*Configuration*], [*Mean ± SD*], [*vs original*]),
+  [Original Python], [231.20 ± 7.85 ms], [1.00×],
   [Optimized Python], [143.13 ± 1.56 ms], [*1.62×*],
 )
 
 The optimization reduces runtime by *38.1%*, exceeding the course's 7% requirement.
 It specializes the interaction schedule into local-variable arithmetic while preserving
-operation order. Final state and energy compare exactly equal to stock after 20,000 steps.
+operation order. Final state and energy compare exactly equal to the original after 20,000 steps.
 Energy is a useful physical sanity check; componentwise state comparison is the stronger
 equivalence check.
 
@@ -55,7 +56,7 @@ costs. These debug-build percentages locate costs to investigate; release-build 
 establishes the optimization's benefit.
 
 #result-table(columns: (1.9fr, 1fr, 1fr), align: (left, right, right),
-  table.header([*Stock nbody, C-frame profile*], [*Self*], [*Inclusive*]),
+  table.header([*Original nbody, C-frame profile*], [*Self*], [*Inclusive*]),
   [`_PyEval_EvalFrameDefault`], [44.10%], [99.31%],
   [`binary_op1` (generic arithmetic dispatch)], [4.90%], [20.07%],
   [`float_mul`], [3.86%], [3.86%],
@@ -93,7 +94,7 @@ pairs are omitted only from the illustration. `M0` and `M1` denote the numeric m
 that the generator inserts; they are not new runtime lookups.
 
 #grid(columns: (1fr, 1fr), gutter: 12pt,
-  [*Stock: inside the pair loop*
+  [*Original: inside the pair loop*
 ```python
 for (([x1, y1, z1], v1, m1),
      ([x2, y2, z2], v2, m2)) in pairs:
@@ -122,7 +123,7 @@ so removing indexing does not remove all interpreter arithmetic or allocation co
 Source: `benchmarks/bm_nbody/run_benchmark.py`, `_advance_source`.
 
 *Correctness constrains the arithmetic.* The kernel retains `dt * (dsq ** -1.5)` and the
-stock pair-update order. A square-root/division replacement changes rounding and is not used
+original pair-update order. A square-root/division replacement changes rounding and is not used
 in the shipped bit-exact version. The emitter accepts a body list and pair schedule, so the same
 transformation extends to larger systems.
 
@@ -130,7 +131,7 @@ transformation extends to larger systems.
 == Reading the profiles
 
 #figure(flamefig("fig/print_nbody_stock.svg", width: 100%),
-  caption: [Full stock C-frame profile (debug CPython), with the same call paths outlined
+  caption: [Full original C-frame profile (debug CPython), with the same call paths outlined
   and enlarged. All original frames, widths and startup context are retained. Each label
   gives the function's total inclusive share; the outlined box is the widest of the per-line
   frames the profiler splits it into, and callers sit below it.])
@@ -142,7 +143,7 @@ transformation extends to larger systems.
   runtime reduction from 231 to 143 ms.])
 #v(0.5em)
 
-*Reading the flame graphs:* the stock graph is a single tower, `_PyEval_EvalFrameDefault`
+*Reading the flame graphs:* the original graph is a single tower, `_PyEval_EvalFrameDefault`
 (99.31% inclusive) with `binary_op1` (20.07%), float allocation/free and list indexing as
 children; there is no second hotspot. In py-spy Python frames `advance` holds 97.7% of samples
 before and 91.4% after; the rest is start-up and imports. Originals:
@@ -152,17 +153,17 @@ before and 91.4% after; the rest is start-up and imports. Originals:
 = 3. Performance comparison: native execution does less work, not higher IPC
 
 The Rust/PyO3 `System` executes all 20,000 steps in one call, with both energy evaluations
-also native. State and energy match stock exactly on the tested VM build; this does not
+also native. State and energy match the original exactly on the tested VM build; this does not
 guarantee equality across all compilers and math libraries.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
   [Optimized Python (fallback backend)], [145.30 ± 4.97 ms], [1.00×],
-  [Native backend], [9.530 ± 0.050 ms], [*15.25×*],
+  [Native Rust backend], [9.530 ± 0.050 ms], [*15.25×*],
 )
 
 Source: canonical `suite/{fallback,native}_nbody.json` (Appendix A7). Both use direct
-pyperf; Section 1 uses pyperformance. Against canonical stock, native is 24.26× faster.
+pyperf; Section 1 uses pyperformance. Against the canonical original, native is 24.26× faster.
 Different Python denominators prevent multiplying the two reported ratios. Explicit backend
 selection and worker metadata establish what ran; native mode fails if unavailable.
 
@@ -174,7 +175,7 @@ Rates are medians of per-run rates, so they can differ from the ratio of the dis
 (cache: 59.6/3,006 = 1.98%). All events are user-mode.
 
 #result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
-  table.header([*Metric per iteration*], [*Optimized Python*], [*Native*]),
+  table.header([*Metric per iteration*], [*Optimized Python*], [*Native Rust*]),
   [Elapsed time], [141.08 ms], [9.462 ms],
   [Instructions], [1,103.62 M], [41.32 M],
   [Cycles], [336.24 M], [22.55 M],
@@ -195,7 +196,7 @@ runs); they do not establish a cache bottleneck. Invalid L1 load counts are omit
 = 4. Beyond the benchmark: what changes when N grows?
 
 At five bodies, Barnes-Hut (BH, an O(N log N) tree approximation) is *3.92× slower*: tree setup/traversal does not pay off for ten
-pairs. Development NumPy and struct-of-arrays variants also lose at this size (0.88× and 0.35–0.46× of stock speed); the fast multipole
+pairs. Development NumPy and struct-of-arrays variants also lose at this size (0.88× and 0.35–0.46× of the original's speed); the fast multipole
 method (FMM) was not measured. Unrolled source grows as O(N²), so the shipped generator falls back to the ordinary (rolled) pair
 loop above 20,000 pairs. Detailed code-size experiments are WSL2/CPython 3.10.21 development
 evidence, distinct from the VM sweep below (`dev/nbody/FINDINGS.md`).
@@ -310,19 +311,19 @@ time and adds the hardware's time plus the cost of moving data,
 `T_new = (1 - f)*T_sw + T_hw + T_if`. `T_sw` is the measured software run time and `f` the
 fraction of it that moves to hardware. `T_hw` is RTL cycles divided by the clock frequency.
 `T_if` is the interface time, here about 150 AXI-Lite register transactions per run, which is
-not measured. We assume 5% of stock runtime (harness and energy evaluation) stays in Python;
+not measured. We assume 5% of the original runtime (harness and energy evaluation) stays in Python;
 that residual is an assumption, not a matched phase measurement.
 
 #result-table(columns: (1.7fr, 0.8fr, 0.7fr, 1.5fr), align: (left, right, right, left),
-  table.header([*Tier*], [*Time / run*], [*vs stock*], [*Evidence*]),
-  [Stock Python], [231.20 ms], [1.00×], [measured],
+  table.header([*Tier*], [*Time / run*], [*vs original*], [*Evidence*]),
+  [Original Python], [231.20 ms], [1.00×], [measured],
   [Optimized Python], [143.13 ms], [1.62×], [measured],
   [Native Rust], [9.53 ms], [24.26×], [measured],
   [Hardware at 19.46 MHz (achievable)], [≈ 139 ms], [≈ 1.66×], [projected: 127.4 ms compute + residual],
   [Hardware at 50 MHz (design target)], [≈ 61 ms], [≈ 3.8×], [projected: 49.6 ms compute + residual],
 )
 
-*Verdict:* at the achievable clock the accelerator is a projected 1.66× over stock, level
+*Verdict:* at the achievable clock the accelerator is a projected 1.66× over the original, level
 with the optimized Python tier (1.03×) and about 15× slower than the native Rust tier; it
 would still be about 6× slower at the 50 MHz target. One step costs 124 cycles, 6.4 µs at
 19.46 MHz, against 0.48 µs natively. The benchmark's cost was interpreter overhead rather
@@ -364,8 +365,8 @@ while our one-wide versus three-wide measurement shows the opposite trend; body 
 move from flops to SRAM; and above N ≈ 300 the software competitor becomes Barnes-Hut rather
 than direct summation. N = 5 is the worst case for this architecture, not a representative one.
 
-The hardware's square-root/reciprocal expression differs from stock `pow`. RTL is checked
-against its own arithmetic model. Comparison with stock targets relative energy error ≤ 1e-12
+The hardware's square-root/reciprocal expression differs from original `pow`. RTL is checked
+against its own arithmetic model. Comparison with the original targets relative energy error ≤ 1e-12
 and per-body position/velocity errors ≤ 2e-9 / 5e-11 at completion. The full 20,000-step RTL
 run meets them: relative energy error 1.7e-14 and position/velocity errors 2.1e-12. These
 tolerances are distinct from the software tier's observed exact equality.
@@ -374,11 +375,11 @@ tolerances are distinct from the software tier's observed exact equality.
 
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state
 and energy exactly. Native execution removes far more interpreter work through the same coarse
-`advance(dt, n)` interface and reaches 9.53 ms, 24.26× over stock.
+`advance(dt, n)` interface and reaches 9.53 ms, 24.26× over the original.
 
 In hardware, `grape_pipeline` executes the whole `advance()` kernel over that same boundary,
 bit-exactly against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that
-static timing supports this projects to about 139 ms per run: 1.66× over stock, level with the
+static timing supports this projects to about 139 ms per run: 1.66× over the original, level with the
 optimized Python, and about 15× slower than the native tier (about 6× at the 50 MHz target),
 for 4.1 mm² of 130 nm standard cells. The benchmark's cost was interpreter overhead rather
 than arithmetic, so removing the interpreter captures nearly all of the gain. At five bodies

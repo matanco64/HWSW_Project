@@ -13,11 +13,12 @@ through one call per block.
 Despite its name, the measured pyflate workload is bzip2, not DEFLATE. Each iteration decompresses
 interpreter.tar.bz2 from 67,562 bytes to 399,360 bytes; the harness checks the original MD5 outside the
 timer. The Python tier uses only the standard library (re for RLE4 runs, collections.Counter for the BWT
-histogram, hashlib for MD5) plus pyperf for timing; the native tier adds our Rust crate bound through
-PyO3. No native decompression library is called. Its main structures are an integer bit buffer, Huffman tables,
-a move-to-front (MTF) alphabet, Burrows-Wheeler transform (BWT) index vectors and output buffers:
-concretely a Python int bit window, list lookup tables packing (symbol, length) into one integer, a list
-MTF alphabet and traversal vector, and bytearray outputs.
+histogram, hashlib for MD5) plus pyperf for timing; the native Rust tier adds our compiled Rust crate bound
+through PyO3, as opposed to Python run by the interpreter. Original means the benchmark exactly as
+shipped in pyperformance, unmodified. No native decompression library is called. Its main structures are an
+integer bit buffer, Huffman tables, a move-to-front (MTF) alphabet, Burrows-Wheeler transform (BWT) index
+vectors and output buffers: concretely a Python int bit window, list lookup tables packing (symbol,
+length) into one integer, a list MTF alphabet and traversal vector, and bytearray outputs.
 
  One block, six Huffman tables, 148,271 symbols. The decoder switches tables every 50 symbols.
  Huffman decoding, move-to-front and RUNA/RUNB expansion produce a 336,184-byte L-vector. Inverse
@@ -32,22 +33,22 @@ MTF alphabet and traversal vector, and bytearray outputs.
 
 
 
-                  Output + MD5 check                                                 Inverse BWT + RLE4
-                       399,360 B                                                            Python
+                   Output + MD5 check                                                Inverse BWT + RLE4
+                        399,360 B                                                           Python
 
 
  Figure 1: The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop. The Rust kernel replaces
                that boundary in one call per block, and it is the same boundary the two accelerators implement.
- Configuration                                                               Mean ± SD                            vs stock
- Stock Python                                                       1,123.49 ± 10.99 ms                              1.00×
- Optimized Python                                                        281.16 ± 3.05 ms                            4.00×
- Python + Rust extension                                             170.01 ± 2.30 ms                               6.61×
-Our final software path is 6.61× faster than stock: an 84.9% runtime reduction. Python improvements
-provide 4.00×; over the same benchmark’s Python back end, the Rust symbol decoder adds 1.67× (Section 4;
-its baseline is 283.88 ms, not 281.16 ms, so the two ratios do not multiply exactly). Both tiers exceed the
-course’s 7% improvement requirement and match bz2.decompress byte for byte, passing the unchanged
-MD5 check. Rust handles the stage labeled Rust extension above; block headers, inverse BWT and RLE4
-remain in Python.
+ Configuration                                                               Mean ± SD                      vs original
+ Original Python                                                    1,123.49 ± 10.99 ms                           1.00×
+ Optimized Python                                                        281.16 ± 3.05 ms                         4.00×
+ Python + Rust extension                                             170.01 ± 2.30 ms                             6.61×
+Our final software path is 6.61× faster than the original: an 84.9% runtime reduction. Python
+improvements provide 4.00×; over the same benchmark’s Python back end, the Rust symbol decoder adds
+1.67× (Section 4; its baseline is 283.88 ms, not 281.16 ms, so the two ratios do not multiply exactly). Both tiers
+exceed the course’s 7% improvement requirement and match bz2.decompress byte for byte, passing the
+unchanged MD5 check. Rust handles the stage labeled Rust extension above; block headers, inverse BWT and
+RLE4 remain in Python.
 
  Measurement scope: Course QEMU/KVM virtual machine (VM), Ubuntu 22.04, release CPython 3.10.12;
  120 values per configuration, pinned to guest CPU 0, from revision 2c8c754 through the documented
@@ -56,9 +57,8 @@ remain in Python.
  the BWT histogram to collections.Counter and lowered the Rust code-length cap from 23 to 20; they
  pass the same byte-exact checks but were not re-timed.
 
-
                                                            1
-HWSW Final Project                                                                                     Benchmark Report: pyflate
+HWSW Final Project                                                                                       Benchmark Report: pyflate
 
 Appendix A5 gives the timing distributions and worker-clustering analysis. The repeated measurements
 support a large improvement on this input; one bzip2 fixture does not establish the same speedup for every
@@ -68,25 +68,25 @@ file, compression setting or interpreter.
 Profiles were recorded on the VM with py-spy on release CPython (Python frames), rendered with
 FlameGraph. The brief’s perf record -F 999 on python3-dbg shows only interpreter C frames
 (_PyEval_EvalFrameDefault 99.50% inclusive; results/perf_report_pyflate_stock.txt), so it locates no
-Python-level hotspot. The stock Python-frame profile highlights Huffman decoding and bit-buffer work, with
-move-to-front and inverse BWT alongside them. Development instrumentation found a mean of about five
-entries visited by the symbol matcher, despite its table capacity of 258. A lookup table can remove this scan,
-but the measured scan is short; per-symbol interpreter work and the later transformations also deserve
+Python-level hotspot. The original Python-frame profile highlights Huffman decoding and bit-buffer work,
+with move-to-front and inverse BWT alongside them. Development instrumentation found a mean of about
+five entries visited by the symbol matcher, despite its table capacity of 258. A lookup table can remove this
+scan, but the measured scan is short; per-symbol interpreter work and the later transformations also deserve
 attention.
-                               (flame graph omitted from the text companion — see the PDF edition)
- Figure 2: Full stock Python-frame flame graph, retaining startup and harness context. Numbered outlines identify exactly the
-   call paths enlarged on the right. Inclusive percentages use the original whole-profile denominator; nested shares overlap.
- Function                                         Stock self              Stock incl.         Opt. self            Opt. incl.
- decode_huffman_block                                 26.08%                   97.31%             1.64%               82.79%
- _decode_symbols_python                                     –                      –            32.79%                32.79%
- find_next_symbol                                     12.63%                   40.86%                 –                      –
- move_to_front                                        13.44%                   13.44%             0.82%                 0.82%
- snoopbits                                             9.41%                   16.13%                 –                      –
- readbits                                              9.95%                   13.44%             2.46%                 2.46%
- _mask                                                 5.91%                    5.91%                 –                      –
- bwt_reverse                                           8.33%                   14.52%           13.11%                38.52%
- bwt_transform                                         6.18%                    6.18%           25.41%                25.41%
- rle4_expand                                                –                      –              5.74%                 5.74%
+                              (flame graph omitted from the text companion — see the PDF edition)
+ Figure 2: Full original Python-frame flame graph, retaining startup and harness context. Numbered outlines identify exactly
+ the call paths enlarged on the right. Inclusive percentages use the original whole-profile denominator; nested shares overlap.
+ Function                                      Original self            Original incl.         Opt. self             Opt. incl.
+ decode_huffman_block                                  26.08%                   97.31%             1.64%                82.79%
+ _decode_symbols_python                                      –                      –             32.79%                32.79%
+ find_next_symbol                                      12.63%                   40.86%                 –                       –
+ move_to_front                                         13.44%                   13.44%             0.82%                  0.82%
+ snoopbits                                              9.41%                   16.13%                 –                       –
+ readbits                                               9.95%                   13.44%             2.46%                  2.46%
+ _mask                                                  5.91%                    5.91%                 –                       –
+ bwt_reverse                                            8.33%                   14.52%            13.11%                38.52%
+ bwt_transform                                          6.18%                    6.18%            25.41%                25.41%
+ rle4_expand                                                 –                      –              5.74%                  5.74%
 Self excludes callees; inclusive includes them. Each profile has its own denominator, so percentages locate
 remaining work rather than measure absolute speedup. The optimized symbol loop incorporates the old
 matcher, bit reader and most MTF handling; residual readbits / move_to_front calls parse header selectors.
@@ -104,20 +104,20 @@ Symbol decoding is the largest optimized function (32.79% self), while whole inv
 • Improve the back end: replace comparison sorting with counting-sort BWT construction; reverse the
   MTF list so updates move O(rank) entries; use regex-assisted RLE4 expansion to reduce Python loop
   iterations. The byte scan/output work is still linear overall.
- Component reverted from T3                                  VM trial 1                 VM trial 2                 Dev, 3.12
- None (full T3 runtime)                                             271.2 ms              273.9 ms                  175.5 ms
- Regex-assisted RLE4                                            +100.6 ms                 +98.7 ms                  +32.3 ms
- Primary Huffman lookup                                             +52.6 ms              +49.4 ms                  +10.1 ms
- Counting-sort BWT                                                  +20.8 ms              +17.2 ms                  +38.6 ms
- All reverted (T1 only)                                         +393.6 ms                +397.2 ms                +200.6 ms
+ Component reverted from T3                                   VM trial 1                 VM trial 2                  Dev, 3.12
+ None (full T3 runtime)                                              271.2 ms              273.9 ms                   175.5 ms
+ Regex-assisted RLE4                                             +100.6 ms                 +98.7 ms                   +32.3 ms
+ Primary Huffman lookup                                              +52.6 ms              +49.4 ms                   +10.1 ms
+ Counting-sort BWT                                                   +20.8 ms              +17.2 ms                   +38.6 ms
+ All reverted (T1 only)                                          +393.6 ms                +397.2 ms                 +200.6 ms
 
 
-                                                                2
+                                                                 2
 HWSW Final Project                                                                                          Benchmark Report: pyflate
 
-Ablation scope: T3 is the last tier of our development ladder (T0 stock, T1 per-byte fixes, T2 canonical
+Ablation scope: T3 is the last tier of our development ladder (T0 original, T1 per-byte fixes, T2 canonical
 decode, T3 the shipped decoder). Each row reverts one optimization in the optimized Python decoder (the
-lookup row falls back to canonical length-stepping, not the stock scan) (dev/pyflate/ablate.py, which
+lookup row falls back to canonical length-stepping, not the original scan) (dev/pyflate/ablate.py, which
 drives the T3 module directly rather than the pyperf harness) and reports the added time, best of seven
 interleaved decompressions. Costs need not add. The two VM trials are separate runs on the course VM,
 release CPython 3.10.12, pinned to one guest CPU; the last column is the earlier development run on
@@ -130,14 +130,14 @@ the algorithms. What survives on both is that no single change dominates: the pi
 alone, had to be optimized. Raw output: results/vm_rerun_20260910_3697a63/.
                              (flame graph omitted from the text companion — see the PDF edition)
  Figure 3: Full optimized Python profile, before native offload. Inverse BWT and its index-table construction remain visible
- beside _decode_symbols_python, the single symbol-decode loop that replaced the stock matcher and bit-reader frames.
+beside _decode_symbols_python, the single symbol-decode loop that replaced the original matcher and bit-reader frames.
 
 Worked examples of the shipped transformations
-Before/after, removing the per-symbol search: The stock matcher visits Huffman entries and calls the bit
-reader for candidate lengths. The optimized loop peeks once into a flat table; a nonzero entry packs the
+Before/after, removing the per-symbol search: The original matcher visits Huffman entries and calls the
+bit reader for candidate lengths. The optimized loop peeks once into a flat table; a nonzero entry packs the
 symbol and consumed length. These excerpts summarize the control flow, omitting refill, table switches and
 output handling.
-Stock matcher (schematic)                               Optimized lookup (abbreviated)
+Original matcher (schematic)                            Optimized lookup (abbreviated)
 for entry in table:                                                 v = tbl[peek(pb)]
     code = field.snoopbits(entry.bits)                              if v:
     if code == entry.code:                                              consume(v & 31)
@@ -172,14 +172,14 @@ individual symbols. With a three-bit primary table, 00x, 01x and 10x each duplic
 slots; the stored length still consumes only two bits, preserving the next symbol’s first bit.
 Counting-sort BWT construction: For L = banana, counts are a:3, b:1, n:2. Prefix sums place their buckets
 at offsets 0, 3 and 4. Scanning L left to right stores each original index in the next slot of its bucket, giving T =
-[1,3,5,0,2,4]. Equal symbols keep their original order. The stock path sorts L and searches for bucket
-starts; the optimized path counts 256 possible byte values and fills T in O(n + 256) work. This constructs the
-traversal table; inverse BWT still follows end = T[end] once per output byte.
+[1,3,5,0,2,4]. Equal symbols keep their order of occurrence. The original path sorts L and searches for
+bucket starts; the optimized path counts 256 possible byte values and fills T in O(n + 256) work. This
+constructs the traversal table; inverse BWT still follows end = T[end] once per output byte.
 
                                                                 3
 HWSW Final Project                                                                        Benchmark Report: pyflate
 
-Reversed move-to-front: Start with logical order [a,b,c,d], rank 2 selecting c. The stock slicing update
+Reversed move-to-front: Start with logical order [a,b,c,d], rank 2 selecting c. The original slicing update
 produces [c,a,b,d] by rebuilding the list. The optimized physical list is reversed, [d,c,b,a]. The non-run
 symbol is r = rank + 1 = 3; pop(-3) returns c, then append(c) leaves [d,b,a,c], the reverse of the same
 logical answer. The pop shifts only two trailing entries and append places c at the logical front. This
@@ -266,7 +266,7 @@ storage (table and register storage is 95% of huffman_engine); move-to-front is 
 is the output rate (73% of the output bytes come from runs). Separate modules are verified against separate
 golden models and sized by separate trade-offs, and the Huffman block stays reusable (it also implements
 DEFLATE). They are chained on chip so the 148,271 intermediate symbols never cross to software; leaving
-move-to-front in software would have kept its 13.44% share of stock runtime on the CPU.
+move-to-front in software would have kept its 13.44% share of the original runtime on the CPU.
 
         CPU: parse block headers                                                Platform DMA
          configure via AXI4-Lite                                 32-bit bits + 8-bit selectors in; L-vector out
@@ -361,8 +361,8 @@ native decode phase takes 3.30 ms.
  Hardware chain at 37.6 MHz (achievable)                    ≈ 4.24 ms    159,303 simulated cycles ÷ clock
  Hardware chain at 50 MHz (design target)                   ≈ 3.19 ms    same cycles ÷ target clock
 
- End to end                                                     Time     vs stock
- Stock Python                                              1,123.49 ms   1.00×
+ End to end                                                     Time     vs original
+ Original Python                                           1,123.49 ms   1.00×
  Optimized Python                                           281.16 ms    4.00×
  Python + Rust kernel                                       170.01 ms    6.61×
  Python + hardware chain at 37.6 MHz                         ≈ 171 ms    ≈ 6.6× (projected, before T_if)
@@ -391,9 +391,9 @@ saves little total area. Timing must be checked for each implementation rather t
 frequency across widths.
 
 6. Conclusion
-The delivered Python-plus-Rust path decompresses the input in 170.01 ms, achieving 6.61× over stock with
-byte-exact output. Python improvements provide 4.00× and the native decoder adds 1.67×, leaving BWT and
-RLE4 as the next software targets.
+The delivered Python-plus-Rust path decompresses the input in 170.01 ms, achieving 6.61× over the
+original with byte-exact output. Python improvements provide 4.00× and the native decoder adds 1.67×,
+leaving BWT and RLE4 as the next software targets.
 In hardware, huffman_engine and mtf_cam implement the same symbol-decode boundary as the Rust kernel.
 Simulated together on the real benchmark block they are byte-exact over all 336,184 output bytes and need
 159,303 clock cycles, about 4.2 ms at the 37.6 MHz clock that static timing supports. That is about 28× faster

@@ -12,12 +12,12 @@ to calculate ratios, rather than rounded display values.
 
 #result-table(columns: (1fr, 2fr),
   table.header([*Comparison*], [*Files in the results directory*]),
-  [Nbody stock / Python], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json`],
+  [Nbody original / Python], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json`],
   [Nbody Python / native], [`vm_canonical_20260910_2c8c754/suite/{fallback,native}_nbody.json`],
   [Pyflate all tiers], [`vm_canonical_20260910_2c8c754/suite/{baseline,optimized,fallback,native}_pyflate.json`],
 )
 
-Stock/optimized use pyperformance; fallback/native use direct pyperf on the optimized
+Original/optimized use pyperformance; fallback/native use direct pyperf on the optimized
 benchmark. These are different pairs, so their ratios must not be multiplied as one paired
 experiment. A7 maps backend, affinity and binary metadata to the canonical run. Development
 hosts, older captures and revision history are documented in `report/history/`.
@@ -49,11 +49,11 @@ The runner validates worker backend requests, actual backend and CPU affinity in
 
 == Correctness contracts
 
-- *Nbody shipped Python and native:* compare all state components and energy against stock
+- *Nbody shipped Python and native:* compare all state components and energy against the original
   after identical initial conditions and 20,000 steps. `dev/nbody/verify.py` gates the landed
   kernel on exact equality; its development tiers use tolerances.
   `dev/nbody/rs_check.py` defaults to the exact contract.
-- *Nbody hardware:* compare RTL with its own arithmetic model, then compare stock using the
+- *Nbody hardware:* compare RTL with its own arithmetic model, then compare the original using the
   declared energy and position/velocity tolerances. Exact and tolerance verdicts are separate.
 - *Pyflate:* `dev/pyflate/rs_check.py` checks output bytes against `bz2.decompress`, MD5,
   intermediate L-vector and ending bit position. Output validation is outside headline timing.
@@ -163,7 +163,7 @@ in each overview. The updated detail panels retain row-aligned crops with caller
 selected frame. Labels aggregate a function's inclusive share across its frames; outlines
 mark the widest individual occurrence. `report/fig/profile_counts.json` preserves both.
 
-Stock nbody uses debug-CPython C frames; optimized nbody and both pyflate figures use
+Original nbody uses debug-CPython C frames; optimized nbody and both pyflate figures use
 Python-frame py-spy sampling. The original SVGs remain in `results/` for zooming.
 Widths represent inclusive samples on a call path; parents include children and must not
 be added to them. Each graph has its own denominator, so widths cannot show absolute
@@ -195,11 +195,11 @@ and it is between 0.4% and 2.0% of the median in every configuration.
 #result-table(columns: (1.5fr, auto, auto, auto, auto, auto),
   align: (left, right, right, right, right, right),
   table.header([*Configuration*], [*Median*], [*IQR*], [*p95*], [*Max*], [*Mean*]),
-  [Nbody stock], [228.84], [3.09], [246.29], [266.97], [231.20],
+  [Nbody original], [228.84], [3.09], [246.29], [266.97], [231.20],
   [Nbody optimized], [142.64], [0.52], [145.95], [151.09], [143.13],
   [Nbody Python], [143.13], [2.87], [160.06], [165.08], [145.30],
   [Nbody native], [9.544], [0.076], [9.626], [9.665], [9.530],
-  [Pyflate stock], [1122.68], [14.67], [1142.92], [1164.32], [1123.49],
+  [Pyflate original], [1122.68], [14.67], [1142.92], [1164.32], [1123.49],
   [Pyflate optimized], [280.43], [3.47], [287.33], [291.55], [281.16],
   [Pyflate Python], [283.94], [3.33], [288.78], [300.03], [283.88],
   [Pyflate native], [169.67], [2.06], [173.39], [186.74], [170.01],
@@ -225,11 +225,11 @@ native_pyflate        1.011     2.065   0.193    1.39    0.2095    0.2468
 ```
 
 SD and SE columns are in ms; ICC and deff are dimensionless. `SE naive` treats the
-120 values as independent; `SE clust` adjusts for worker clustering under this model. Effective sample size is 120 / deff: 40.2 and 41.8 for nbody's stock and
+120 values as independent; `SE clust` adjusts for worker clustering under this model. Effective sample size is 120 / deff: 40.2 and 41.8 for nbody's original and
 optimized runs, 55.1 and 120.0 for its Python and native runs, and 61.0, 78.4, 120.0 and
-86.5 for pyflate's stock, optimized, Python and native runs.
+86.5 for pyflate's original, optimized, Python and native runs.
 
-Nbody's stock and optimized runs are almost entirely between-worker (ICC 0.99 and 0.93): a
+Nbody's original and optimized runs are almost entirely between-worker (ICC 0.99 and 0.93): a
 worker's three values agree closely with each other and less well with another worker's, so
 the effective sample size is about 40--42 rather than 120 and the standard error of the mean
 is roughly 1.7x what independence would give. All were pinned to guest CPU 0, so CPU
@@ -284,11 +284,11 @@ native JSONs the extension hash, which matches the wheel built in the same run.
 #result-table(columns: (1.6fr, 1fr, 1fr, 0.8fr),
   align: (left, right, right, right),
   table.header([*Comparison*], [*Before (ms)*], [*After (ms)*], [*Speedup*]),
-  [Nbody stock / optimized], [231.20], [143.13], [1.62×],
+  [Nbody original / optimized], [231.20], [143.13], [1.62×],
   [Nbody Python / native], [145.30], [9.530], [15.25×],
-  [Pyflate stock / optimized], [1,123.49], [281.16], [4.00×],
+  [Pyflate original / optimized], [1,123.49], [281.16], [4.00×],
   [Pyflate Python / native], [283.88], [170.01], [1.67×],
-  [Pyflate stock / native], [1,123.49], [170.01], [6.61×],
+  [Pyflate original / native], [1,123.49], [170.01], [6.61×],
 )
 
 Every native JSON identifies the binary installed from the wheel built in that run;

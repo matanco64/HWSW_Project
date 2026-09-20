@@ -148,14 +148,14 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
 - Amdahl `S = T / ((1−f)·T + t_hw)`:
   - **50 MHz** (target): t_hw = 49.6 ms → **3.78×** at f = 0.95 (4.45× at f = 0.99); the speedup KPI (≥ 4×) is not met at the stated `f`.
   - **19.46 MHz** (achievable): t_hw = 127.4 ms → **≈ 1.66×** (compute-only upper bound
-    1.81× vs stock / 1.12× vs the 143.13 ms optimized-Python tier). Does **not** beat the
+    1.81× vs the original / 1.12× vs the 143.13 ms optimized-Python tier). Does **not** beat the
     9.53 ms native-software tier. (`docs/integration.md §3`.)
 - **Bottom line vs the software tiers** (hardware rows are *projections*: RTL cycles ÷ STA
   clock + 5 % Python residual; software rows are VM measurements, `report_nbody` §1/§3):
 
-  | Tier | Time / run | vs stock |
+  | Tier | Time / run | vs original |
   |---|---:|---:|
-  | Stock Python | 231.20 ms | 1.00× |
+  | Original Python | 231.20 ms | 1.00× |
   | Optimized Python | 143.13 ms | 1.62× |
   | Native Rust | 9.53 ms | 24.26× |
   | **Hardware @ 19.46 MHz** | **≈ 139 ms** | **≈ 1.66×** |
@@ -299,7 +299,7 @@ feeds a W=8-lane packer. K3 = **1.063** cyc/sym (model) / **1.0686** measured on
   model 157,560 cycles (K3 = 1.063) at W=8 (`docs/ppa.md §3.1`, `docs/integration.md`). Both
   cycle figures are disclosed; the DUT number carries implementation overhead over the model.
 - Standalone end-to-end: **≈ 1.15×** (small stage share). The isolated-stage ratio (80.4 ms
-  stock MTF microbench → 19.1× @ 37.6 MHz / 25.4× @ 50 MHz, PRD K5) is a **different
+  original MTF microbench → 19.1× @ 37.6 MHz / 25.4× @ 50 MHz, PRD K5) is a **different
   experiment** from the whole-decoder profile and must not be substituted for it.
 
 ### 3.6 Block diagram
@@ -329,7 +329,7 @@ decoding is table-driven and storage-bound; move-to-front + run expansion is a w
 whose risk is the output rate (73 % of output bytes come from runs). Separate modules are
 verified against separate golden models, sized by separate trade-offs, and keep `huffman_engine`
 reusable (DEFLATE mode). They chain on chip so 148 k intermediate symbols never cross to
-software; MTF left in software would keep its 13.44 % share of stock runtime on the CPU. *Naming:* the
+software; MTF left in software would keep its 13.44 % share of the original runtime on the CPU. *Naming:* the
 "CAM" in `mtf_cam` is the MTF list; the decode path reads it **by rank** (`docs/uarch.md §3.2`),
 there is no content search.
 
@@ -363,9 +363,9 @@ mtf on 10,013 cycles, mtf starved on 873 — the chain runs at mtf's rate.
 cycle count is measured, the clock is a static-timing estimate; the Rust figure is a phase-isolated VM measurement (`report_appendix` A3,
 `results/pyflate_phase_cpi.txt`); the Python figure is derived across separate experiments.
 
-| Stage implementation | Time |  | End to end | Time | vs stock |
+| Stage implementation | Time |  | End to end | Time | vs original |
 |---|---:|---|---|---:|---:|
-| Optimized Python loop | ≈ 117 ms | | Stock Python | 1,123.49 ms | 1.00× |
+| Optimized Python loop | ≈ 117 ms | | Original Python | 1,123.49 ms | 1.00× |
 | Rust kernel | 3.30 ms | | Optimized Python | 281.16 ms | 4.00× |
 | HW chain @ 37.6 MHz (159,303 cyc, measured) | ≈ 4.24 ms | | Python + Rust kernel | 170.01 ms | 6.61× |
 | HW chain @ 50 MHz | ≈ 3.19 ms | | Python + HW chain @ 37.6 / 50 MHz | ≈ 171 / 170 ms | ≈ 6.6× / 6.6× |
@@ -373,7 +373,7 @@ cycle count is measured, the clock is a static-timing estimate; the Rust figure 
 **Verdict.** ≈ 28× over the Python loop, ≈ 1.3× slower than the Rust kernel at the achievable
 clock (parity at target). End to end a tie with the delivered 170 ms path: off the interpreter
 this stage is ≈ 2 % of what remains, and inverse BWT (137.7 ms, ≈ 80 %) sets the floor for both
-routes. The stock-based 1.97× / 1.15× figures in §2.5/§3.5 are profile-share projections, not
+routes. The 1.97× / 1.15× figures in §2.5/§3.5 (against the original Python) are profile-share projections, not
 this matched comparison.
 
 ---
@@ -390,7 +390,7 @@ this matched comparison.
 | Power | ≈ 19.2 mW (indic., 150 ns) | ≈ 283 mW (indic., 40 ns) | ≈ 13.7 mW (indic., 20 ns) |
 | Directed + random tests | 9/9 | 17/17 | 16/16 |
 | Line / toggle coverage | 91.7 % / 96.0 % | 90.4 % / 90.3 %† | 92.0 % / 93.8 %† |
-| End-to-end estimate | ~1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ~1.97× vs stock (clock-insensitive) | ~1.15× vs stock |
+| End-to-end estimate | ~1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ~1.97× vs the original (clock-insensitive) | ~1.15× vs the original |
 
 † huffman and mtf toggle coverage is measured over the **control-signal subset** (signals ≤ 4 bits
 wide); wide data buses whose upper bits the benchmark cannot toggle are waived, with the width

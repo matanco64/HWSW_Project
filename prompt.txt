@@ -1419,3 +1419,9 @@ Prompt: "how about the 10 vs tests? was it solved or do we need to let matan rev
 
 2026-09-20T08:48:29Z — Claude Code session (auto-logged)
 Prompt: "don't we need to move this out of the already applied and give him to double check it under a different header?"
+
+2026-09-20T08:55:25Z — Claude Code session (auto-logged)
+Prompt: "looking at the nbody report now, what is the difference between "stock" and "native"? is this common language I am not familiar with, or something we defined?"
+
+2026-09-20T08:59:41Z — Claude Code session (auto-logged)
+Prompt: "won't it be better to use "original python", "optimized python" and "native rust" instead? in every appearence?"
