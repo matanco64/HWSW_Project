@@ -1440,3 +1440,55 @@ Prompt: "reading the pyflate report, hw part. in the table I see "
 
 2026-09-20T09:13:46Z — Claude Code session (auto-logged)
 Prompt: "is BWT a known synonim? and RLE4 ?"
+
+2026-09-20T12:42:33Z — Claude Code session (auto-logged)
+Prompt: "I want a swarm of agents-as-judges now to check our work:
+1. SW manager - 
+
+<pasted_content id="0f49">
+aggregates all SW parts:
+</pasted_content id="0f49">
+
+1.1. 
+
+<pasted_content id="0f49">
+nbody - check all what done is reported and vice versa - nothing is missing or wrong.
+</pasted_content id="0f49">
+
+1.2. 
+
+<pasted_content id="0f49">
+pyflate - check all what done is reported and vice versa - nothing is missing or wrong.
+</pasted_content id="0f49">
+
+2. HW manager - aggregates all HW parts:
+2.1. 
+
+<pasted_content id="0f49">
+nbody - check all what done is reported and vice versa - nothing is missing or wrong.
+</pasted_content id="0f49">
+
+2.2. 
+
+<pasted_content id="0f49">
+pyflate - check all what done is reported and vice versa - nothing is missing or wrong.
+</pasted_content id="0f49">
+
+2.3. HW report - 
+
+<pasted_content id="0f49">
+check all what done is reported and vice versa - nothing is missing or wrong.
+</pasted_content id="0f49">
+
+3. Report manager
+3.1 check all required files exist, desired structure and info - ready for submission from end to end
+
+each manager reports back with grade out of 100 and gives improvement points - none of the sub-agents should change any existing file.
+after all agents are finished, give detailed step-by-step instruction in order to bring the project production/submission ready.
+/superpowers:using-superpowers /ask-matt"
+
+2026-09-20T20:47:33Z — Claude Code session (auto-logged)
+Prompt: "let's fix all the must findings - plan the tackle strategy with DoD for each task and a checkbox for done, then we are ready to go."
+
+2026-09-20T20:53:08Z — Claude Code session (auto-logged)
+Prompt: "go"

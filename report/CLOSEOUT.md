@@ -120,8 +120,18 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
       then `git status -sb` shows `main...origin/main` with no ahead/behind. (Local work is committed
       and the tree is clean; nothing has been pushed since `54a738c`.)
 - [ ] F4 **Yuval:** submit per course instructions (repo URL; or the zip from `./make_submission.sh`
-      if a URL is not accepted). First push (`20e8080`) done 2026-09-19; after the 2026-09-20 round push again and record the
-      submitted `git rev-parse --short HEAD` here: `________`.
+      if a URL is not accepted). Pushes so far: `20e8080` (2026-09-19), `59a7632` (2026-09-20). The
+      judge-swarm must-fix round (M1-M5, 2026-09-20) is committed locally after that. Final sequence,
+      from a plain terminal AFTER the last Claude prompt (every prompt appends to `prompt.txt`):
+      ```
+      cd ~/HWSW/HWSW_Proj
+      git commit -m "skills: quote hw-mas description" .claude/skills/hw-mas/SKILL.md   # or: git checkout -- .claude/skills/hw-mas/SKILL.md
+      git commit -m "prompt log: final" prompt.txt
+      git status --porcelain                      # must print nothing
+      ./make_submission.sh                        # needs pyperf importable (see D5)
+      git push origin main && git rev-parse --short HEAD
+      ```
+      Submitted hash: `________`.
 
 **Gate F:** submitted hash recorded above.
 
