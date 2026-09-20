@@ -157,7 +157,7 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
   |---|---:|---:|
   | Stock Python | 231.20 ms | 1.00× |
   | Optimized Python | 143.13 ms | 1.62× |
-  | Native Rust | 9.53 ms | 24.3× |
+  | Native Rust | 9.53 ms | 24.26× |
   | **Hardware @ 19.46 MHz** | **≈ 139 ms** | **≈ 1.66×** |
   | Hardware @ 50 MHz (target) | ≈ 61 ms | ≈ 3.8× |
 

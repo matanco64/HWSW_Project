@@ -287,7 +287,7 @@ residual is an assumption, not a matched phase measurement.
  Tier                                                Time / run           vs stock Evidence
  Stock Python                                         231.20 ms               1.00× measured
  Optimized Python                                     143.13 ms               1.62× measured
- Native Rust                                            9.53 ms               24.3× measured
+ Native Rust                                            9.53 ms              24.26× measured
  Hardware at 19.46 MHz (achievable)                    ≈ 139 ms              ≈ 1.66× projected: 127.4 ms compute +
                                                                                      residual
  Hardware at 50 MHz (design target)                     ≈ 61 ms               ≈ 3.8× projected: 49.6 ms compute +
@@ -337,7 +337,7 @@ equality.
 6. Conclusion
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state and energy
 exactly. Native execution removes far more interpreter work through the same coarse advance(dt, n)
-interface and reaches 9.53 ms, 24.3× over stock.
+interface and reaches 9.53 ms, 24.26× over stock.
 In hardware, grape_pipeline executes the whole advance() kernel over that same boundary, bit-exactly
 against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that static timing supports this
 projects to about 139 ms per run: 1.66× over stock, level with the optimized Python, and about 15× slower

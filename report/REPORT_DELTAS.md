@@ -42,8 +42,8 @@ Later hardware results folded in: huffman 27 ns confirmation run meets timing (3
 | Item | What | Status |
 |---|---|---|
 | S1 | section headings use the brief's names | applied, both reports |
-| S2 | grader read of nbody §1–§4 (B1m): numbers all re-derived OK; 12 coverage/wording items | 11 applied; 24.26× vs 24.3× left |
-| S3 | grader read of pyflate §1–§4 (B2m): numbers all re-derived OK; 10 items, 2 provenance | applied except naming unification and the extra "T1 only" ablation row |
+| S2 | grader read of nbody §1–§4 (B1m): numbers all re-derived OK; 12 coverage/wording items | all applied (24.26× used consistently) |
+| S3 | grader read of pyflate §1–§4 (B2m): numbers all re-derived OK; 10 items, 2 provenance | all applied, incl. one name per configuration and the "T1 only" ablation row |
 | S4 | "T3" undefined | applied (development-ladder definition) |
 | S5 | forced page breaks stranding text after the additions | removed; nbody 7 pages, pyflate 9 |
 | S6 | larger-N hardware projection (Yuval's question) | new nbody §5 subsection + `schedule_model_n.py` |

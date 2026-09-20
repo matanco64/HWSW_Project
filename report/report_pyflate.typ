@@ -113,6 +113,7 @@ fraction for the separately measured native timing pair.
   [Regex-assisted RLE4], [+100.6 ms], [+98.7 ms], [+32.3 ms],
   [Primary Huffman lookup], [+52.6 ms], [+49.4 ms], [+10.1 ms],
   [Counting-sort BWT], [+20.8 ms], [+17.2 ms], [+38.6 ms],
+  [All of the above plus canonical decode (T1 only)], [+393.6 ms], [+397.2 ms], [+200.6 ms],
 )
 
 *Ablation scope:* T3 is the last tier of our development ladder (T0 stock, T1 per-byte fixes,
@@ -212,7 +213,7 @@ stream desynchronization.
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
   [Python backend], [283.88 ± 3.34 ms], [1.00×],
-  [Native decode backend], [170.01 ± 2.30 ms], [*1.67×*],
+  [Native decode backend (Python + Rust extension)], [170.01 ± 2.30 ms], [*1.67×*],
 )
 
 The native row is the same measurement as the Python + Rust row on page 1. The Python row
@@ -238,7 +239,7 @@ These are medians of three warm-loop VM runs, each decoding the input 16 times, 
 rigorous timing table above, with counters enabled only around the timed loop (Appendix A2).
 
 #result-table(columns: (1.8fr, 1fr, 1fr), align: (left, right, right),
-  table.header([*Metric per complete decode*], [*Python*], [*Hybrid native*]),
+  table.header([*Metric per complete decode*], [*Python backend*], [*Python + Rust extension*]),
   [Elapsed time], [288.68 ms], [174.44 ms],
   [Instructions], [1,947.94 M], [1,171.65 M],
   [Cycles], [675.92 M], [404.24 M],

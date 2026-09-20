@@ -41,27 +41,18 @@ gaps against the brief. Applied, all small and factual (`git diff 20e8080 -- rep
 - **New in nbody §5:** "Would a larger N change the verdict?" — the hardware schedule model run for
   N bodies (`hw/grape_pipeline/docs/schedule_model_n.py`), compared with your §4 sweep.
 
-Not applied (your call): unify the three names of one configuration ("Python + Rust extension" /
-"Native decode backend" / "Hybrid native"); an extra ablation row "T1 only" (+393.6 / +397.2 /
-+200.6 ms); 24.26× (§3) vs 24.3× (§5–6) precision.
+Also applied: one name per configuration in pyflate ("Python + Rust extension" now appears in the
+§4 table row and the counters header), the "T1 only" ablation row (+393.6 / +397.2 / +200.6 ms, from
+the two VM logs and FINDINGS), and 24.26× used consistently in nbody.
 
 ## Asks
 
-1. **Skim §5 and §6 of both reports** (10 min) and tell Yuval anything you disagree with.
-2. **Read your software sections once as a grader** (CLOSEOUT B1m / B2m) — we did not.
+1. **Skim the diff** (`git diff 54a738c -- report/*.typ`, about 15 min), especially §5 / §6 and the two
+   provenance corrections above, and tell Yuval anything you disagree with.
 
-## Left for you, optional (software-side, so we did not touch them)
+## Nothing else is left open on the report side
 
-- Bold run-in labels ending in "." read as one-word sentences; ":" is the usual mark. §5 now uses
-  ":". Software-side labels: pyflate "Ablation scope", worked-example
-  titles; appendix "Counter scope", "Interpretation", "PMU configuration", "Shape", "Grouping".
-- An independent check against the brief found no failures, but two software-side nits: the brief
-  names the sections Overview / Initial Analysis / Optimizations / **Performance Comparison** /
-  Hardware / Conclusion, and our headings use other titles (there is no heading called
-  "Performance Comparison"; the tables live in §1, §3, §4) — consider adding the brief's words to the
-  headings. And "T3" (pyflate §3 ablation table) is never defined.
-- "VM" is never spelled out (first uses: nbody §1, pyflate §1, appendix A1) — "virtual machine (VM)".
-- A global figure-spacing line in `style.typ` was tried and **rejected**: it pushes a pyflate
-  software figure to the next page (+1 page). §5 uses a local `#v(0.5em)` after its figures instead.
+Tried and rejected: a global figure-spacing line in `style.typ` (it re-flows pyflate and adds a page);
+nbody uses a local `#v(0.5em)` after its figures instead, pyflate keeps its original spacing.
 
 Full rationale for every item is in git history: `git show 54a738c:report/REPORT_DELTAS.md`.
