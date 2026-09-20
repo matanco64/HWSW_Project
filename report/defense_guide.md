@@ -373,7 +373,7 @@ timing and gives 39.5 MHz; MTF missed its 20 ns constraint by 6.60 ns, so
 bound. All have a 50 MHz target and none has demonstrated it.
 
 **Evidence:** module `docs/ppa.md`; the small report files are preserved under each
-module's `synth/evidence/` (`ws.max.rpt`, `power.rpt`, worst path). The full
+module's `synth/evidence/` (`ws.max.rpt` for grape and MTF; for Huffman `worst_setup_path.rpt` from the 40 ns setup report plus `tight27_ws.max.rpt`; `power.rpt`). The full
 OpenLane run folders are gitignored; have them available if staff want to inspect.
 
 ### 24. Does 13.7 mW establish an energy advantage? Will SRAM fix the area?

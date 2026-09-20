@@ -389,7 +389,7 @@ In hardware, `grape_pipeline` executes the whole `advance()` kernel over that sa
 bit-exactly against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that
 static timing supports this projects to about 139 ms per run: 1.66× over the original, level with the
 optimized Python, and about 15× slower than the native tier (about 6× at the 50 MHz target),
-for 4.1 to 4.7 mm² of 130 nm standard cells, depending on the synthesis recipe. The benchmark's cost was interpreter overhead rather
+for about 4.7 mm² of 130 nm standard cells at synthesis (4.1 mm² under plain Yosys before the last rewrite). The benchmark's cost was interpreter overhead rather
 than arithmetic, so removing the interpreter captures nearly all of the gain. At five bodies
 with ordered pair dependencies there is too little parallelism for custom FP64 hardware to
 repay its area: a step is latency-bound at 12.3 cycles per pair, where the schedule model

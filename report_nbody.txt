@@ -341,7 +341,7 @@ exact equality.
 
 
                                                        6
-HWSW Final Project                                                                           Benchmark Report: nbody
+HWSW Final Project                                                                          Benchmark Report: nbody
 
 6. Conclusion
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state and energy
@@ -350,13 +350,13 @@ interface and reaches 9.53 ms, 24.26× over the original.
 In hardware, grape_pipeline executes the whole advance() kernel over that same boundary, bit-exactly
 against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that static timing supports this
 projects to about 139 ms per run: 1.66× over the original, level with the optimized Python, and about 15×
-slower than the native tier (about 6× at the 50 MHz target), for 4.1 to 4.7 mm² of 130 nm standard cells,
-depending on the synthesis recipe. The benchmark’s cost was interpreter overhead rather than arithmetic, so
-removing the interpreter captures nearly all of the gain. At five bodies with ordered pair dependencies there
-is too little parallelism for custom FP64 hardware to repay its area: a step is latency-bound at 12.3 cycles per
-pair, where the schedule model projects 4.4 at N = 100 and native-class throughput only with four to eight
-times the arithmetic units. The measured cycle/area trade-off shows why a fast schedule alone is insufficient:
-the parallelism that saves cycles also lengthens the clock path.
+slower than the native tier (about 6× at the 50 MHz target), for about 4.7 mm² of 130 nm standard cells at
+synthesis (4.1 mm² under plain Yosys before the last rewrite). The benchmark’s cost was interpreter overhead
+rather than arithmetic, so removing the interpreter captures nearly all of the gain. At five bodies with ordered
+pair dependencies there is too little parallelism for custom FP64 hardware to repay its area: a step is latency-
+bound at 12.3 cycles per pair, where the schedule model projects 4.4 at N = 100 and native-class throughput
+only with four to eight times the arithmetic units. The measured cycle/area trade-off shows why a fast
+schedule alone is insufficient: the parallelism that saves cycles also lengthens the clock path.
 Evidence: hw/grape_pipeline/docs/uarch.md, prd.md, testplan.md, ppa.md and integration.md; hw/docs/
 hardware_report.md. Reproduction and supporting profiles: report_appendix.pdf. Repository: HWSW_Project.
 

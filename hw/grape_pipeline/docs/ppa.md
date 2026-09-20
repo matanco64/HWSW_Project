@@ -78,7 +78,7 @@ routing. That STA is what we report:
 | Achievable period | 150 − 60.3164 = **89.68 ns** | derived |
 | **Fmax** | **≈ 11.15 MHz** (1 / 89.68 ns) | derived from the slack above |
 | Worst path | `u_fsm._948_` (state FF) → `g_add[1].u_add._6265_` (accumulate-picker adder) | `synth/runs/grape_relaxed/35-openroad-stamidpnr-1/checks.rpt` Startpoint/Endpoint |
-| Area (post-place, µm²) | not reported — OpenLane never reached signoff; use Yosys 4.075 mm² (§ Yosys) | — |
+| Area (post-CTS instances) | 5.646 mm² / 764,907 cells, 38.8 % of the 14.55 mm² core (`grape_prefix2`); no signoff area — flow stopped after post-CTS timing | `synth/evidence/area_openlane.txt` |
 | Power (mW) | **≈ 19.2 mW — indicative only** (post-CTS `report_power`, **default switching activity**, at the 150 ns run constraint ≈ 6.7 MHz; `grape_prefix2`; `grape_relaxed` gave 20.2 mW). Not workload power; no signoff/GDS figure exists | `synth/runs/grape_prefix2/35-openroad-stamidpnr-1/power.rpt` (`power__total: 0.019231`) |
 | Die shot | **not obtained** — no GDS produced | — |
 
@@ -143,7 +143,7 @@ because of the OpenROAD GRT-0607 router bug — an environment/tool limitation, 
 
 The Yosys area above (584,454 cells, 4.075 mm², `synth/area.txt`, identical copy kept as
 `synth/area_preprefix.txt`) was measured on the three-wide design **before** the parallel-prefix
-rewrite of the accumulate picker; the 19.46 MHz timing is from the netlist **after** it. The
+rewrite of the accumulate picker; the 19.46 MHz timing is from the netlist **after** it.
 A re-measurement on the final RTL with the same recipe (`make area`) was attempted on 2026-09-19
 and stopped after about 7 hours in Yosys ABC technology mapping without a result (close-out time
 limit).

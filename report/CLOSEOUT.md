@@ -6,8 +6,8 @@ Each step names the command or artifact that proves it is done — tick only wit
 
 Progress: `grep -c '^- \[x\]' report/CLOSEOUT.md` done / `grep -c '^- \[ \]' report/CLOSEOUT.md` left.
 
-**Current phase → F3b / F4** — a second local round (2026-09-20: software-side fixes, larger-N
-projection) sits on top of pushed `20e8080`; Yuval: push again, then submit the new HEAD. Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
+**Current phase → F3b / F4** — the judge-swarm must-fix round (M1-M5, local commits) sits on top of pushed
+`59a7632`; Yuval: run the F4 final sequence, then submit the new HEAD. Ownership change 2026-09-19: Yuval took over Phase C; rule applied — only the
 hardware section, the Conclusion and the appendix hardware paragraph of the `.typ` files were
 edited, software text is byte-identical (script-checked). Matan's note: `report/FOR_MATAN.md`.
 
@@ -126,7 +126,7 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
       ```
       cd ~/HWSW/HWSW_Proj
       git commit -m "skills: quote hw-mas description" .claude/skills/hw-mas/SKILL.md   # or: git checkout -- .claude/skills/hw-mas/SKILL.md
-      git commit -m "prompt log: final" prompt.txt
+      git commit -m "prompt log: final" prompt.txt       # skip if prompt.txt is already clean
       git status --porcelain                      # must print nothing
       ./make_submission.sh                        # needs pyperf importable (see D5)
       git push origin main && git rev-parse --short HEAD
