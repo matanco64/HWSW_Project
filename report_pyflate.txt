@@ -81,6 +81,7 @@ attention.
                               (flame graph omitted from the text companion — see the PDF edition)
  Figure 2: Full original Python-frame flame graph, retaining startup and harness context. Numbered outlines identify exactly
  the call paths enlarged on the right. Inclusive percentages use the original whole-profile denominator; nested shares overlap.
+                                  Original: results/pyspy_pyflate_stock_full.svg.
  Function                                      Original self         Original incl.            Opt. self             Opt. incl.
  decode_huffman_block                                  26.08%               97.31%                 1.64%                82.79%
  _decode_symbols_python                                      –                    –               32.79%                32.79%
@@ -139,6 +140,7 @@ alone, had to be optimized. Raw output: results/vm_rerun_20260910_3697a63/.
                              (flame graph omitted from the text companion — see the PDF edition)
  Figure 3: Full optimized Python profile, before native offload. Inverse BWT and its index-table construction remain visible
 beside _decode_symbols_python, the single symbol-decode loop that replaced the original matcher and bit-reader frames.
+                                  Original: results/pyspy_pyflate_opt_full.svg.
 
 Worked examples of the shipped transformations
 Before/after, removing the per-symbol search: The original matcher visits Huffman entries and calls the
@@ -174,11 +176,11 @@ run_benchmark.py.
 A four-entry lookup, step by step: Use the illustrated code lengths [2,2,2,3,3] and temporarily choose
 pb = 2 (the shipped default is 11, capped by the longest code). The primary entries for 00, 01, 10, 11 are
 (a,2), (b,2), (c,2), and fallback. On input 01110, peek 01, output b and consume two bits; 110 remains.
-Peek 11: its entry is zero, so extend to three bits. Now code 6 lies at or below limit[3] = 7; base[3] = 3,
 
                                                                 3
 HWSW Final Project                                                                              Benchmark Report: pyflate
 
+Peek 11: its entry is zero, so extend to three bits. Now code 6 lies at or below limit[3] = 7; base[3] = 3,
 hence perm[6 - 3] = perm[3] = d. Consume three bits. Thus the stream decodes to b,d without searching
 individual symbols. With a three-bit primary table, 00x, 01x and 10x each duplicate a two-bit code into two
 slots; the stored length still consumes only two bits, preserving the next symbol’s first bit.
@@ -292,13 +294,20 @@ move-to-front in software would have kept its 13.44% share of the original runti
 
 
 
-             huffman_engine                                  mtf_cam                                      Output packer
-         align / canonical decode                        rank select / shift                                64-bit data
-             selector control                          run expander + FIFO                                + byte enables
+             huffman_engine                                   mtf_cam                                     Output packer
+         align / canonical decode                         rank select / shift                               64-bit data
+             selector control                           run expander + FIFO                               + byte enables
 
 
-   Figure 5: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays on chip. Platform DMA
-                                              returns the L-vector to software.
+   Figure 5: Block diagram: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays on chip.
+                                       Platform DMA returns the L-vector to software.
+
+Block diagram in words: CPU driver → AXI4-Lite → registers of huffman_engine (code lengths) and
+mtf_cam (used-byte map). Compressed bits and table selectors → AXI4-Stream → huffman_engine → 32-bit
+symbol beats, on chip → mtf_cam (move-to-front and run expansion) → AXI4-Stream bytes → platform
+DMA → the L-vector in memory. Each module raises its own interrupt. Full drawings: hw/huffman_engine/
+docs/block_diagram.svg, hw/mtf_cam/docs/block_diagram.svg; chain wrapper hw/pyflate_accel/rtl/
+pyflate_accel.sv.
 
 Huffman engine
 A bit aligner feeds a canonical-code comparator/lookup datapath; a selector controller changes the active
@@ -324,29 +333,34 @@ wire delays along every register-to-register path; the slowest path sets the max
 clock-tree synthesis (post-CTS): cells and the clock network are placed but signal wires are not routed, so the
 frequency is an estimate, not silicon. The toolchain is entirely open source, so every number can be
 regenerated from the repository.
- sky130, Yosys + OpenLane                                          huffman_engine                                     mtf_cam
- Cells (synthesis)                                                               151,058                                   18,814
- Area (synthesis)                                                              1.634 mm²                             0.187 mm²
- Largest area share                                             tables + registers, 95%                move-to-front list, 68%
- Timing-derived frequency (post-CTS)                                        ≈ 39.9 MHz                              ≈ 37.6 MHz
- Power estimate (post-CTS)                                                     ≈ 283 mW                              ≈ 13.7 mW
- Cycles per symbol (simulation)                                                   1.0068                                   1.0686
- Directed + random tests                                                          17 / 17                                  16 / 16
- Line / toggle coverage                                                   90.4% / 90.3%                            92.0% / 93.8%
+
+
+
+
+                                                             6
+HWSW Final Project                                                                               Benchmark Report: pyflate
+
+
+ sky130, Yosys + OpenLane                                     huffman_engine                                   mtf_cam
+ Cells (synthesis)                                                         151,058                               18,814
+ Area (synthesis)                                                       1.634 mm²                            0.187 mm²
+ Largest area share                                        tables + registers, 95%             move-to-front list, 68%
+ Timing-derived frequency (post-CTS)                                    ≈ 39.9 MHz                           ≈ 37.6 MHz
+ Power estimate (post-CTS)                                               ≈ 283 mW                            ≈ 13.7 mW
+ Cycles per symbol (simulation)                                             1.0068                               1.0686
+ Directed + random tests                                                    17 / 17                              16 / 16
+ Line / toggle coverage                                             90.4% / 90.3%                        92.0% / 93.8%
 Evidence levels: both frequencies come from post-CTS static timing at the typical corner: 39.9 MHz for
 Huffman (40 ns constraint, +14.94 ns worst setup slack; a tighter 27 ns run also meets timing and gives 39.5
 MHz) and 37.6 MHz for MTF. They are estimates, not demonstrated silicon operating frequencies; routing
 may change either, and neither completed 50 MHz sign-off or produced a final layout (GDS). The power
-
-                                                            6
-HWSW Final Project                                                                              Benchmark Report: pyflate
-
 figures are tool estimates using default switching activity at each run’s own clock constraint (40 ns for
 Huffman, 20 ns for MTF), so they are not comparable with each other, are not workload power, and cannot
 support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops. Coverage
 percentages use the documented exclusions. Three MTF list invariants are proven for unbounded time by
-induction on a 16-entry list; the full 256-entry permutation proof is bounded to depth 24. The regression
-counts are recorded results.
+induction on a 16-entry list. At the production 256-entry width the general check is bounded to depth 6; a
+second run that starts from a valid filled list with 8 live entries shows that 24 consecutive moves preserve the
+permutation (hw/mtf_cam/synth/formal.sby). The regression counts are recorded results.
 Does the hardware win?
 Clocking and the link between the modules: both modules are single-clock synchronous designs and the
 chain uses one shared clock; there is no clock-domain crossing. The link is an AXI4-Stream valid/ready
@@ -368,11 +382,18 @@ chain cycle count divided by the clock frequency. T_if is the interface time: co
 copies for the compressed input and the 336,184 L-vector bytes. It is not measured here, and transfers overlap
 compute only if buffers and bandwidth sustain it. The replaced stage is timed on its own in Appendix A3: the
 native decode phase takes 3.30 ms.
- Replaced stage only                                            Time     Evidence
- Optimized Python loop                                       ≈ 117 ms    derived: 283.88 − 170.01 + 3.30 ms
- Rust kernel                                                  3.30 ms    measured, Appendix A3
- Hardware chain at 37.6 MHz (achievable)                    ≈ 4.24 ms    159,303 simulated cycles ÷ clock
- Hardware chain at 50 MHz (design target)                   ≈ 3.19 ms    same cycles ÷ target clock
+ Replaced stage only                                           Time       Evidence
+ Optimized Python loop                                      ≈ 117 ms      derived: 283.88 − 170.01 + 3.30 ms
+ Rust kernel                                                  3.30 ms     measured, Appendix A3
+ Hardware chain at 37.6 MHz (achievable)                    ≈ 4.24 ms     159,303 simulated cycles ÷ clock
+ Hardware chain at 50 MHz (design target)                   ≈ 3.19 ms     same cycles ÷ target clock
+
+
+
+
+                                                       7
+HWSW Final Project                                                                                Benchmark Report: pyflate
+
 
  End to end                                                     Time     vs original
  Original Python                                           1,123.49 ms   1.00×
@@ -393,16 +414,12 @@ Area and throughput trade-offs
 Huffman storage includes a 17.3 kbit symbol table and an 8.6 kbit length window implemented as flops in this
 standard-cell flow. SRAM is a proposed alternative: the documented estimate is about 0.75 mm² of
 remaining standard cells plus two macros. Macro area, access latency, ports and integration must be
-
-                                                       7
-HWSW Final Project                                                                         Benchmark Report: pyflate
-
 established before claiming total area below 1 mm² or unchanged throughput. No SRAM version was
 synthesized here.
- MTF output bytes/cycle                                     Mapped area               Modeled cycles/symbol
- 4-byte output                                                 0.182 mm²                                    1.175
- 8-byte output (selected)                                      0.187 mm²                                    1.063
- 16-byte output                                                0.208 mm²                                    1.023
+ MTF output bytes/cycle                                      Mapped area                      Modeled cycles/symbol
+ 4-byte output                                                   0.182 mm²                                         1.175
+ 8-byte output (selected)                                        0.187 mm²                                         1.063
+ 16-byte output                                                  0.208 mm²                                         1.023
 W = 8 is the smallest modeled width meeting the 1.10 cycles/symbol goal; W = 16 costs 10.9% more area for
 about 3.9% modeled throughput gain. The W-sweep uses the cycle model; the default RTL’s measured 1.0686
 includes additional implementation overhead. The list’s 68% area share explains why reducing packer width

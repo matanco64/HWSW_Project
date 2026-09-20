@@ -125,19 +125,13 @@ inclusive) with binary_op1 (20.07%), float allocation/free and list indexing as 
 hotspot. In py-spy Python frames advance holds 97.7% of samples before and 91.4% after; the rest is start-up
 and imports. Originals: results/flame_nbody_stock_full.svg, results/pyspy_nbody_opt_full.svg.
 
-
-
-
-                                                                3
-HWSW Final Project                                                                         Benchmark Report: nbody
-
 3. Performance comparison: native execution does less work, not higher IPC
 The Rust/PyO3 System executes all 20,000 steps in one call, with both energy evaluations also native. State
 and energy match the original exactly on the tested VM build; this does not guarantee equality across all
 compilers and math libraries.
- Same benchmark file                                                 Mean ± SD                      vs Python
- Optimized Python (fallback backend)                             145.30 ± 4.97 ms                         1.00×
- Native Rust backend                                             9.530 ± 0.050 ms                        15.25×
+ Same benchmark file                                                             Mean ± SD                           vs Python
+ Optimized Python (fallback backend)                                        145.30 ± 4.97 ms                                1.00×
+ Native Rust backend                                                        9.530 ± 0.050 ms                              15.25×
 Source: canonical suite/{fallback,native}_nbody.json (Appendix A7). Both use direct pyperf; Section 1
 uses pyperformance. Against the canonical original, native is 24.26× faster. Different Python denominators
 prevent multiplying the two reported ratios. Explicit backend selection and worker metadata establish what
@@ -146,15 +140,15 @@ Matched-work CPU counters
 A separate pinned warm-loop experiment repeats the work 64 times per run. Medians of three runs are
 normalized per iteration, excluding setup/warmup (Appendix A2). Rates are medians of per-run rates, so they
 can differ from the ratio of the displayed medians (cache: 59.6/3,006 = 1.98%). All events are user-mode.
- Metric per iteration                                          Optimized Python                   Native Rust
- Elapsed time                                                           141.08 ms                      9.462 ms
- Instructions                                                          1,103.62 M                       41.32 M
- Cycles                                                                  336.24 M                       22.55 M
- IPC                                                                          3.28                          1.83
- Branches                                                                185.97 M                        3.92 M
- Branch misses (rate)                                             583,560 (0.314%)                60 (0.00153%)
- Generic cache references (perf cache-references)                           3,006                           255
- Generic cache misses (rate)                                         59.6 (2.245%)                  2.5 (1.134%)
+ Metric per iteration                                                    Optimized Python                          Native Rust
+ Elapsed time                                                                       141.08 ms                           9.462 ms
+ Instructions                                                                      1,103.62 M                            41.32 M
+ Cycles                                                                              336.24 M                            22.55 M
+ IPC                                                                                      3.28                               1.83
+ Branches                                                                            185.97 M                             3.92 M
+ Branch misses (rate)                                                        583,560 (0.314%)                      60 (0.00153%)
+ Generic cache references (perf cache-references)                                        3,006                                255
+ Generic cache misses (rate)                                                     59.6 (2.245%)                       2.5 (1.134%)
 Native needs 26.7× fewer instructions and 14.9× fewer cycles. Removing Python dispatch and object
 handling reduces work. Lower IPC (instructions per cycle) still yields faster execution because so many fewer
 instructions remain; IPC alone does not measure useful work.
@@ -168,22 +162,22 @@ not pay off for ten pairs. Development NumPy and struct-of-arrays variants also 
 grows as O(N²), so the shipped generator falls back to the ordinary (rolled) pair loop above 20,000 pairs.
 Detailed code-size experiments are WSL2/CPython 3.10.21 development evidence, distinct from the VM
 sweep below (dev/nbody/FINDINGS.md).
+
+
+                                                                3
+HWSW Final Project                                                                                        Benchmark Report: nbody
+
 The pure-Python VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each evaluation (θ =
 0.5, best of seven; ratios use unrounded times). It evaluates an extended workload, not the required N = 5
 benchmark.
-    N                        Direct                     BH                BH/direct         Median rel. error
-       5                   0.020 ms                 0.077 ms                    3.92×                          0
-   100                     4.746 ms                 8.410 ms                    1.77×                     1.6e-5
-   300                    42.977 ms             42.489 ms                       0.99×                     3.3e-5
-   800                   313.489 ms            158.846 ms                       0.51×                     8.7e-5
- 1,600                  1,254.660 ms           382.471 ms                       0.30×                     1.8e-4
+    N                           Direct                        BH                      BH/direct            Median rel. error
+     5                        0.020 ms                  0.077 ms                          3.92×                               0
+   100                        4.746 ms                  8.410 ms                          1.77×                          1.6e-5
+   300                      42.977 ms                 42.489 ms                           0.99×                          3.3e-5
+   800                     313.489 ms                158.846 ms                           0.51×                          8.7e-5
+ 1,600                   1,254.660 ms                382.471 ms                           0.30×                          1.8e-4
 The crossover is near N = 300 for this distribution (near-coplanar circular orbits added outward from 40 AU);
 median acceleration error is not a worst-case or trajectory bound. A separate VM native sweep gives 21–22×
-
-
-                                                         4
-HWSW Final Project                                                                                             Benchmark Report: nbody
-
 over rolled Python at N = 100–3,200, using approximately equal pair-update counts (results/
 bigN_sweep.txt).
 
@@ -197,20 +191,25 @@ from the Python energy trace. It also retains state on the device and executes a
 request, rather than returning forces to a host integrator. Force computation suits a scheduled datapath, while
 velocity accumulation must respect dependencies between pairs sharing a body. Steps remain serial.
 
-       Python + driver                         AXI4-Lite config / status                               State registers
-      one advance(dt, n)                       FP64 state, DT, NSTEPS                               working + committed
+                Python + driver                 AXI4-Lite config / status                      State registers
+               one advance(dt, n)               FP64 state, DT, NSTEPS                      working + committed
 
 
 
 
-        Step / pair scheduler                           Shared FP64 datapath                              Ordered accumulate
-            issue control                            3 add, 3 mul, sqrt, reciprocal                        position / commit
+                Step / pair scheduler                   Shared FP64 datapath                      Ordered accumulate
+                    issue control                    3 add, 3 mul, sqrt, reciprocal                position / commit
 
 
 
-      Figure 4: Current datapath and software boundary, summarized from the approved architecture. Multiplication and
-                                    accumulation round separately; there is no FMA unit.
+Figure 4: Block diagram: current datapath and software boundary, summarized from the approved architecture. Multiplication
+                                  and accumulation round separately; there is no FMA unit.
 
+Block diagram in words: Python driver → AXI4-Lite registers (FP64 state, DT, NSTEPS, pair list) → step/
+pair scheduler → shared FP64 units (3 add, 3 multiply, square root, reciprocal) → ordered accumulate →
+working and committed state registers → read back over AXI4-Lite when STATUS.DONE or irq is raised.
+All traffic is register access; there is no stream or DMA port. Full drawing: hw/grape_pipeline/docs/
+block_diagram.svg.
 Datapath: Three FP64 add/subtract units, three multipliers, one square-root unit and one reciprocal unit
 share a scheduled 290-operation step. The square root uses radix-4 iteration; the reciprocal uses a ROM seed
 and refined fixed-point arithmetic. An ordered accumulation sequencer resolves body-component
@@ -225,16 +224,20 @@ Pairs (0, 1) and (0, 2) can form their distance terms from the same step’s pos
 velocity. Its x lane must compute u0a = u0 - dx01*b1m, then u0b = u0a - dx02*b2m; issuing both against
 the old u0 would lose an update. Regrouping them into one subtraction may also change FP64 rounding.
 Different body-component lanes can progress independently; a dependency tracker and ordered issue logic
+
+                                                               4
+HWSW Final Project                                                                                              Benchmark Report: nbody
+
 wait for each lane’s preceding result. Positions update only after their required velocity contributions, and
 the next step uses the committed positions.
 
-                                     Pair (0, 1) force term                           Pair (0, 2) force term
+                                         Pair (0, 1) force term                       Pair (0, 2) force term
 
 
 
-                                      Subtract dx01 * b1m                             Subtract dx02 * b2m
-        Old u0
-                                       rounded result u0a                             rounded result u0b
+                                         Subtract dx01 * b1m                          Subtract dx02 * b2m
+                 Old u0
+                                          rounded result u0a                          rounded result u0b
 
 
 
@@ -244,11 +247,6 @@ the next step uses the committed positions.
 Verification and physical cost
 How these numbers were produced: the accelerator is written in SystemVerilog and simulated cycle by
 cycle (Verilator, cross-checked with Icarus) inside a Python testbench that runs the real 20,000-step
-
-
-                                                               5
-HWSW Final Project                                                                                       Benchmark Report: nbody
-
 benchmark and compares every result against a golden model, a Python reference of the same arithmetic.
 Cycle counts, test results and coverage come from these runs. The design is then synthesized: Yosys translates
 it into a netlist of standard logic cells from sky130, the open-source SkyWater 130 nm process, which gives
@@ -257,51 +255,55 @@ which sums gate and wire delays along every register-to-register path; the slowe
 clock. We stop after clock-tree synthesis (post-CTS): cells and the clock network are placed but signal wires
 are not routed, so the frequency is an estimate, not silicon. The toolchain is entirely open source, so every
 number can be regenerated from the repository.
- Quantity                                     grape_pipeline          Produced by
- Cycles per step                                                124   RTL simulation against the golden model
- Full-benchmark cycles                   2,480,000; 0 mismatches      same, 20,000 steps
- Directed + random tests                                    9 of 9 same, Verilator and Icarus
- Line / toggle coverage                              91.7% / 96.0%    same
- Cells                                                    584,454     Yosys synthesis onto sky130 cells
- Area                                                   4.075 mm²     same
- Timing-derived frequency                             ≈ 19.46 MHz     OpenLane: place, clock tree, static timing
- Power estimate                                          ≈ 19 mW      same, default switching activity
+ Quantity                                        grape_pipeline              Produced by
+ Cycles per step                                                       124   RTL simulation against the golden model
+ Full-benchmark cycles                    2,480,000; 0 mismatches            same, 20,000 steps
+ Directed + random tests                                           9 of 9 same, Verilator and Icarus
+ Line / toggle coverage                                  91.7% / 96.0%       same
+ Cells                                                            584,454    Yosys synthesis onto sky130 cells
+ Area                                                        4.075 mm²       same
+ Timing-derived frequency                                 ≈ 19.46 MHz        OpenLane: place, clock tree, static timing
+ Power estimate                                                ≈ 19 mW       same, default switching activity
 Evidence levels: the schedule model predicted 123–127 cycles/step and RTL measured 124. The 19.46 MHz
 estimate derives from a 150 ns constraint and +98.6212 ns worst setup slack at the typical corner; the critical
 path is the integrate-multiplier operand path. It is a preliminary timing estimate rather than measured silicon
 performance: there is no routed sign-off or final layout (GDS), and the design has not demonstrated its 50
-MHz target. The power figure is a tool estimate at the run’s 150 ns clock constraint, not workload power. Cell
-count and area were synthesized before the final rewrite of the issue-selection logic into balanced trees,
-which changes selection logic only, not the arithmetic units that dominate the area.
- Recorded architecture                                                Mapped cell area                          Cycles/step
- One-wide accumulation, one-port register file                                2.938 mm²                                   162
- Three-wide accumulation, three-port register file                            4.075 mm²                                   124
+MHz target. The power figure is a tool estimate at the run’s 150 ns clock constraint, not workload power. The
+table’s cell count and area come from a plain Yosys synthesis made before the final rewrite of the issue-
+selection logic into balanced trees. The OpenLane synthesis that produced the timing maps the final RTL to
+446,932 cells and 4.66 mm² (5.65 mm² after buffering and the clock tree, 39% of the core). The two recipes are
+not comparable with each other; within the OpenLane recipe the rewrite made the design 5% smaller (4.92 to
+4.66 mm²) as well as faster (hw/grape_pipeline/synth/evidence/area_openlane.txt).
+ Recorded architecture                                                       Mapped cell area                          Cycles/step
+ One-wide accumulation, one-port register file                                       2.938 mm²                                   162
+ Three-wide accumulation, three-port register file                                   4.075 mm²                                   124
 The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%. More parallelism can
 reduce cycles while adding selection, forwarding and wiring cost that limits the clock.
 Does the hardware win?
 How the end-to-end time is estimated: offloading a stage removes its share of the software time and adds
 the hardware’s time plus the cost of moving data, T_new = (1 - f)*T_sw + T_hw + T_if. T_sw is the
 measured software run time and f the fraction of it that moves to hardware. T_hw is RTL cycles divided by
+
+
+                                                                   5
+HWSW Final Project                                                                                 Benchmark Report: nbody
+
 the clock frequency. T_if is the interface time, here about 150 AXI-Lite register transactions per run, which
 is not measured. We assume 5% of the original runtime (harness and energy evaluation) stays in Python; that
 residual is an assumption, not a matched phase measurement.
- Tier                                                Time / run        vs original    Evidence
- Original Python                                      231.20 ms               1.00× measured
- Optimized Python                                     143.13 ms               1.62× measured
- Native Rust                                            9.53 ms              24.26× measured
- Hardware at 19.46 MHz (achievable)                    ≈ 139 ms              ≈ 1.66× projected: 127.4 ms compute +
-                                                                                     residual
- Hardware at 50 MHz (design target)                     ≈ 61 ms               ≈ 3.8× projected: 49.6 ms compute +
-                                                                                     residual
+ Tier                                          Time / run            vs original   Evidence
+ Original Python                                 231.20 ms                 1.00× measured
+ Optimized Python                                143.13 ms                 1.62× measured
+ Native Rust                                        9.53 ms              24.26× measured
+ Hardware at 19.46 MHz (achievable)               ≈ 139 ms               ≈ 1.66× projected: 127.4 ms compute +
+                                                                                 residual
+ Hardware at 50 MHz (design target)                ≈ 61 ms                ≈ 3.8× projected: 49.6 ms compute +
+                                                                                 residual
 Verdict: at the achievable clock the accelerator is a projected 1.66× over the original, level with the optimized
 Python tier (1.03×) and about 15× slower than the native Rust tier; it would still be about 6× slower at the 50
 MHz target. One step costs 124 cycles, 6.4 µs at 19.46 MHz, against 0.48 µs natively. The benchmark’s cost
 was interpreter overhead rather than arithmetic, so removing the interpreter captures almost all of the gain,
 and at N = 5 with ordered pair dependencies there is little parallelism for custom FP64 hardware to exploit
-
-                                                            6
-HWSW Final Project                                                                            Benchmark Report: nbody
-
 (the next subsection projects larger N). Matching Rust would need the datapath alone to run at about 260
 MHz, and the assumed 11.6 ms Python residual already exceeds Rust’s 9.53 ms on its own. These are
 projections: no run of Python attached to hardware exists, and no energy-efficiency advantage follows
@@ -315,10 +317,10 @@ accumulate is about 80 cycles, and ten pairs cannot fill it, so the step costs 1
 pairs the pipelined units stay busy and the cost falls to the unit-bound limit of about 4.4 cycles per pair
 (eleven multiplies and eleven adds per pair over three units of each). The ordered-accumulation constraint
 also fades: 3N independent velocity lanes interleave, so no lane waits on itself.
- Datapath (model, N = 100)                           Cycles/pair              µs/pair   vs native
- As built: 3 add, 3 mul, 1 sqrt, 1 rcp                       4.36               0.224 5.0× slower
- Wider: 12 add, 12 mul                                       1.10               0.056 1.25× slower
- Widest: 24 add, 24 mul, 2 sqrt, 2 rcp                       0.56               0.029 1.6× faster
+ Datapath (model, N = 100)                          Cycles/pair                    µs/pair   vs native
+ As built: 3 add, 3 mul, 1 sqrt, 1 rcp                        4.36                   0.224 5.0× slower
+ Wider: 12 add, 12 mul                                        1.10                   0.056 1.25× slower
+ Widest: 24 add, 24 mul, 2 sqrt, 2 rcp                        0.56                   0.029 1.6× faster
 Times are at the 19.46 MHz clock; rcp is the reciprocal unit; the two wider rows also let square root and
 reciprocal accept a new pair every cycle (as built: every second cycle). The software references are Section 4′s
 VM sweep: 0.98 µs per pair-update for rolled Python and 0.045 µs native. The as-built datapath would
@@ -335,6 +337,12 @@ velocity errors ≤ 2e-9 / 5e-11 at completion. The full 20,000-step RTL run mee
 1.7e-14 and position/velocity errors 2.1e-12. These tolerances are distinct from the software tier’s observed
 exact equality.
 
+
+
+
+                                                       6
+HWSW Final Project                                                                           Benchmark Report: nbody
+
 6. Conclusion
 Specializing a fixed schedule cuts Python runtime by 38.1% while preserving the tested state and energy
 exactly. Native execution removes far more interpreter work through the same coarse advance(dt, n)
@@ -342,18 +350,18 @@ interface and reaches 9.53 ms, 24.26× over the original.
 In hardware, grape_pipeline executes the whole advance() kernel over that same boundary, bit-exactly
 against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that static timing supports this
 projects to about 139 ms per run: 1.66× over the original, level with the optimized Python, and about 15×
-slower than the native tier (about 6× at the 50 MHz target), for 4.1 mm² of 130 nm standard cells. The
-benchmark’s cost was interpreter overhead rather than arithmetic, so removing the interpreter captures
-nearly all of the gain. At five bodies with ordered pair dependencies there is too little parallelism for custom
-FP64 hardware to repay its area: a step is latency-bound at 12.3 cycles per pair, where the schedule model
-projects 4.4 at N = 100 and native-class throughput only with four to eight times the arithmetic units. The
-measured cycle/area trade-off shows why a fast schedule alone is insufficient: the parallelism that saves
-cycles also lengthens the clock path.
+slower than the native tier (about 6× at the 50 MHz target), for 4.1 to 4.7 mm² of 130 nm standard cells,
+depending on the synthesis recipe. The benchmark’s cost was interpreter overhead rather than arithmetic, so
+removing the interpreter captures nearly all of the gain. At five bodies with ordered pair dependencies there
+is too little parallelism for custom FP64 hardware to repay its area: a step is latency-bound at 12.3 cycles per
+pair, where the schedule model projects 4.4 at N = 100 and native-class throughput only with four to eight
+times the arithmetic units. The measured cycle/area trade-off shows why a fast schedule alone is insufficient:
+the parallelism that saves cycles also lengthens the clock path.
 Evidence: hw/grape_pipeline/docs/uarch.md, prd.md, testplan.md, ppa.md and integration.md; hw/docs/
 hardware_report.md. Reproduction and supporting profiles: report_appendix.pdf. Repository: HWSW_Project.
 
 
 
 
-                                                        7
+                                                       7
 

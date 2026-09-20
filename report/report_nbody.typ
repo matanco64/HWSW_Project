@@ -149,7 +149,6 @@ children; there is no second hotspot. In py-spy Python frames `advance` holds 97
 before and 91.4% after; the rest is start-up and imports. Originals:
 `results/flame_nbody_stock_full.svg`, `results/pyspy_nbody_opt_full.svg`.
 
-#pagebreak()
 = 3. Performance comparison: native execution does less work, not higher IPC
 
 The Rust/PyO3 `System` executes all 20,000 steps in one call, with both energy evaluations
@@ -228,10 +227,16 @@ It also retains state on the device and executes a complete `advance(dt, n)` req
 than returning forces to a host integrator. Force computation suits a scheduled datapath, while
 velocity accumulation must respect dependencies between pairs sharing a body. Steps remain serial.
 
-#figure(image("fig/grape_report.svg", width: 100%),
-  caption: [Current datapath and software boundary, summarized from the approved architecture.
-  Multiplication and accumulation round separately; there is no FMA unit.])
+#figure(image("fig/grape_report.svg", width: 86%),
+  caption: [Block diagram: current datapath and software boundary, summarized from the approved
+  architecture. Multiplication and accumulation round separately; there is no FMA unit.])
 #v(0.5em)
+
+*Block diagram in words:* Python driver → AXI4-Lite registers (FP64 state, DT, NSTEPS, pair list) →
+step/pair scheduler → shared FP64 units (3 add, 3 multiply, square root, reciprocal) → ordered
+accumulate → working and committed state registers → read back over AXI4-Lite when STATUS.DONE or
+`irq` is raised. All traffic is register access; there is no stream or DMA port. Full drawing:
+`hw/grape_pipeline/docs/block_diagram.svg`.
 
 *Datapath:* Three FP64 add/subtract units, three multipliers, one square-root unit and one
 reciprocal unit share a scheduled 290-operation step. The square root uses radix-4 iteration;
@@ -254,7 +259,7 @@ Different body-component lanes can progress independently; a dependency tracker 
 issue logic wait for each lane's preceding result. Positions update only after their required
 velocity contributions, and the next step uses the committed positions.
 
-#figure(image("fig/pair_dependency.svg", width: 100%),
+#figure(image("fig/pair_dependency.svg", width: 84%),
   caption: [Illustrative dependency chain for body 0's x velocity. Force terms may be
   prepared independently, while the two rounded velocity updates remain ordered.])
 #v(0.5em)

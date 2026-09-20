@@ -70,7 +70,8 @@ work and the later transformations also deserve attention.
 #figure(flamefig("fig/print_pyflate_stock.svg", width: 90%),
   caption: [Full original Python-frame flame graph, retaining startup and harness context.
   Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
-  percentages use the original whole-profile denominator; nested shares overlap.])
+  percentages use the original whole-profile denominator; nested shares overlap.
+  Original: `results/pyspy_pyflate_stock_full.svg`.])
 
 #result-table(columns: (1.6fr, 0.8fr, 0.8fr, 0.8fr, 0.8fr),
   align: (left, right, right, right, right),
@@ -138,7 +139,8 @@ Raw output: `results/vm_rerun_20260910_3697a63/`.
 #figure(flamefig("fig/print_pyflate_opt.svg", width: 100%),
   caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
   index-table construction remain visible beside `_decode_symbols_python`, the single
-  symbol-decode loop that replaced the original matcher and bit-reader frames.])
+  symbol-decode loop that replaced the original matcher and bit-reader frames.
+  Original: `results/pyspy_pyflate_opt_full.svg`.])
 
 == Worked examples of the shipped transformations
 
@@ -302,9 +304,16 @@ the 148,271 intermediate symbols never cross to software; leaving move-to-front 
 would have kept its 13.44% share of the original runtime on the CPU.
 
 #figure(image("fig/decode_report.svg", width: 100%),
-  caption: [AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol stream stays
-  on chip. Platform DMA returns the L-vector to software.])
+  caption: [Block diagram: AXI4-Lite configures both modules; AXI4-Stream carries data. The symbol
+  stream stays on chip. Platform DMA returns the L-vector to software.])
 #v(0.5em)
+
+*Block diagram in words:* CPU driver → AXI4-Lite → registers of `huffman_engine` (code lengths) and
+`mtf_cam` (used-byte map). Compressed bits and table selectors → AXI4-Stream → `huffman_engine` →
+32-bit symbol beats, on chip → `mtf_cam` (move-to-front and run expansion) → AXI4-Stream bytes → platform
+DMA → the L-vector in memory. Each module raises its own interrupt. Full drawings:
+`hw/huffman_engine/docs/block_diagram.svg`, `hw/mtf_cam/docs/block_diagram.svg`; chain wrapper
+`hw/pyflate_accel/rtl/pyflate_accel.sv`.
 
 == Huffman engine
 
