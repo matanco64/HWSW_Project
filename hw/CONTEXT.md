@@ -103,7 +103,7 @@ _Avoid_: BWT input, tt
 and its cycle model; the pyuvm predictor. Never derived from pyflate.
 
 **Golden model** (this module):
-`golden/pyflate_ref.py` — the stock pyflate decoder (`dev/pyflate/t0_stock.py`) instrumented to
+`golden/pyflate_ref.py` — the original pyflate decoder (`dev/pyflate/t0_stock.py`) instrumented to
 emit the symbol trace, cross-checked against libbzip2/zlib.
 
 **MTF list**:

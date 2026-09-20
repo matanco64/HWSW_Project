@@ -146,7 +146,7 @@ Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
   the caveat, confirmed.
 - **Fmax vs K3.** K3 (cycles/symbol) is frequency-independent; at the chosen W=8 the
   full-benchmark block is 157,560 cycles (`testplan.md §2`, K3 = 1.063). At the 50 MHz
-  target that is 3.15 ms (PRD K5, ≈ 25× vs stock MTF); at the **measured 37.6 MHz** it is
+  target that is 3.15 ms (PRD K5, ≈ 25× vs the original MTF); at the **measured 37.6 MHz** it is
   **4.19 ms**. The documented RTL follow-up to reach 50 MHz is to **register the CAM
   read-mux** (pipeline `byte_out = list[r]` into a second stage) — a datapath change
   deferred to a future RTL iteration, not a PPA-stage fix, and it is the same block
@@ -182,6 +182,6 @@ Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
 | Performance / area / power trade-offs | §1 (0.187 mm², 18,814 cells), §1.1 (per-module: CAM = 68 %), §2 (W-sweep trade-off table + K5/K6), §3 (OpenLane/STA operating frequency 37.6 MHz + power) |
 
 Performance (K3 = 1.063 cyc/sym at W=8, block 157,560 cycles) is carried in
-`docs/testplan.md §2`; the speedup (≈ 25× vs stock MTF) in the PRD K5 / `hw-integrate`.
+`docs/testplan.md §2`; the speedup (≈ 25× vs the original MTF) in the PRD K5 / `hw-integrate`.
 Operating frequency ≈ 37.6 MHz (post-CTS STA) here in §3.1, critical path the 256-way
 CAM read-mux (uArch §6), fix = register the read-mux path.

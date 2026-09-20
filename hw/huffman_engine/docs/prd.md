@@ -25,7 +25,7 @@ Profile shares (`results/perf_report_pyflate.txt` is interpreter-level: `_PyEval
 23.29 % l.12; the function-level split comes from cProfile, `dev/pyflate/FINDINGS.md` §3 and the
 calibration agent's run on this machine):
 
-Self-time (tottime) shares, stock pyflate, cProfile of one decode (calibration agent, this machine):
+Self-time (tottime) shares, original pyflate, cProfile of one decode (calibration agent, this machine):
 
 | Stage | Functions | Self time | Replaced by |
 |---|---|---|---|
@@ -37,10 +37,10 @@ Self-time (tottime) shares, stock pyflate, cProfile of one decode (calibration a
 | RLE4, join, MD5, headers | rest | ~4 % | software |
 
 So **this module's slice = 49.6 %** (decode + bit reader) and the **Huffman+MTF loop = 79.9 %** of
-stock (0.372 s local; VM 3.10: 1.12 s mean, `results/baseline_pyflate_stats.txt:18`). In Matan's T3
+original (0.372 s local; VM 3.10: 1.12 s mean, `results/baseline_pyflate_stats.txt:18`). In Matan's T3
 (landed `run_benchmark.py`, 0.119 s local, VM pending) the loop is fused: `decode_huffman_block`
 ≈ 39 % (Huffman + MTF + runs, not separable), inverse BWT ≈ 37 %, RLE4 + rest ≈ 12 %. The inverse
-BWT is a deliberate non-target (ADR-0003, §6); the Amdahl chain stock → T3 → T3 + HW is K4.
+BWT is a deliberate non-target (ADR-0003, §6); the Amdahl chain original → T3 → T3 + HW is K4.
 
 ## 2. KPIs
 
@@ -49,8 +49,8 @@ BWT is a deliberate non-target (ADR-0003, §6); the Amdahl chain stock → T3 �
 | K1 sustained decode rate over the benchmark block, doorbell → DONE (table builds, selector switches, refills included) | cycles/symbol | **≤ 1.10** (block ≤ 163,100 cycles); provisional — confirmed or tightened at uArch (Yuval, Q3) | 1.033 = cycle model 153,121 / 148,271 (assumptions: serial builds 6 × 314, switch = 1 cycle, refill = 0, extra bits = 0 — each to be confirmed at uArch) | `CYCLES / SYMBOLS` registers, `test_full_benchmark` |
 | K2 table build, per table, from accepted doorbell (tables are built serially after the doorbell; first symbol after N_TABLES × K2) | cycles/table | **≤ 2 × ALPHABET + MAXLEN** (= 314 for 147/20 ⇒ ≤ 1,884 before the first beat, 1.27 % of the block) | overlap builds with the last configuration writes | `BUILD_CYCLES` register; doorbell → first `m_sym` beat ≤ N_TABLES × K2 + 16 in `test_driver` |
 | K3 clock, sky130_fd_sc_hd tt_025C_1v80 | MHz | **≥ 50** | 100 (reported design point) | `make ppa` STA |
-| K4a block decode time of this module vs its own software slice (Huffman + bit reader, 49.6 % of stock) | ms | 153,121 cycles @ 50 MHz = **3.06 ms** vs 185 ms (stock, local) | 1.53 ms @ 100 MHz | K1 + `docs/integration.md` |
-| K4b end-to-end speed-up of huffman_engine + `mtf_cam` together (SoC-peripheral model, driver ≤ 1 ms, `mtf_cam` adds ≤ 0.34 M cycles = 6.7 ms @ 50 MHz for 336,184 L-bytes) | × | vs stock ≈ 0.372 / (0.372 − 0.297 + 0.0031 + 0.0067 + 0.001) ≈ **4.3×**; vs T3 ≈ 0.119 / (0.119 − 0.046 + 0.011) ≈ **1.4×** (Amdahl: iBWT + RLE4 remain in software) | — | `test_driver` cycle model; VM numbers replace local ones when Matan measures them |
+| K4a block decode time of this module vs its own software slice (Huffman + bit reader, 49.6 % of the original) | ms | 153,121 cycles @ 50 MHz = **3.06 ms** vs 185 ms (original, local) | 1.53 ms @ 100 MHz | K1 + `docs/integration.md` |
+| K4b end-to-end speed-up of huffman_engine + `mtf_cam` together (SoC-peripheral model, driver ≤ 1 ms, `mtf_cam` adds ≤ 0.34 M cycles = 6.7 ms @ 50 MHz for 336,184 L-bytes) | × | vs the original ≈ 0.372 / (0.372 − 0.297 + 0.0031 + 0.0067 + 0.001) ≈ **4.3×**; vs T3 ≈ 0.119 / (0.119 − 0.046 + 0.011) ≈ **1.4×** (Amdahl: iBWT + RLE4 remain in software) | — | `test_driver` cycle model; VM numbers replace local ones when Matan measures them |
 | K5 standard-cell area (no macros) | mm² | soft ceiling 1.0 (flagged, not gating); compared with published decoders in `docs/ppa.md` (Yuval, Q11) | — | `make area`, OpenLane |
 | K6 power | mW | report only | — | OpenLane |
 
@@ -72,7 +72,7 @@ BWT is a deliberate non-target (ADR-0003, §6); the Amdahl chain stock → T3 �
 | PRD-F12 | Counters, read-only: CYCLES (64-bit, accepted doorbell → DONE/ABORTED/ERR inclusive), SYMBOLS (32-bit, beats emitted), BITS (32-bit, bits consumed since START_BIT), BUILD_CYCLES (16-bit, longest single table build of the invocation), OVERFETCH (8-bit, beats). With SYMBOL_LIMIT ≤ 2^27 (F9) no counter overflows: BITS ≤ 2^27 × 20 < 2^32, CYCLES ≤ 2^27 × 20 ≪ 2^64. | == testbench counts (exact) | `test_driver`, `test_full_benchmark` | Q9; review R13, R14 |
 | PRD-F13 | Multi-block streams: one invocation per block; the next block's header starts at bit START_BIT + BITS of the same buffer and is parsed by software, which issues the next doorbell with the new START_BIT and lengths. | 2-block synthetic bzip2 stream decodes both blocks == golden; surplus `s_sel` beats of block 1 do not affect block 2 | `test_corner` | Q9; review R14 |
 | PRD-F14 | Bus verification: AXI-Lite and all three AXI-Stream ports are checked by independent protocol agents (`cocotbext-axi` master/slave, stream source/sink with protocol assertions), never only by datapath results. | 0 protocol violations across all tests | all tests | Q7 |
-| PRD-F15 | Reference models: golden = instrumented stock pyflate (`golden/pyflate_ref.py`) cross-checked against libbzip2 (`bz2`) / zlib on every run; predictor = independent emulation model (`golden/canonical_model.py`). The scoreboard compares DUT vs predictor and predictor vs golden trace, so a golden error is caught too (Yuval, Q8). | `calibrate.py`: stock == bz2; emulation == stock trace exactly (148,271 bzip2 symbols; 11 DEFLATE block bodies incl. end bits, one multi-block and one stored stream) | `golden/calibrate.py` (software), `test_full_benchmark` | Q8; review R8 |
+| PRD-F15 | Reference models: golden = instrumented original pyflate (`golden/pyflate_ref.py`) cross-checked against libbzip2 (`bz2`) / zlib on every run; predictor = independent emulation model (`golden/canonical_model.py`). The scoreboard compares DUT vs predictor and predictor vs golden trace, so a golden error is caught too (Yuval, Q8). | `calibrate.py`: original == bz2; emulation == original trace exactly (148,271 bzip2 symbols; 11 DEFLATE block bodies incl. end bits, one multi-block and one stored stream) | `golden/calibrate.py` (software), `test_full_benchmark` | Q8; review R8 |
 | PRD-F16 | Single clock, synchronous active-low reset (as grape). | — | `test_driver` | ADR-0001 |
 
 ## 4. HW/SW split

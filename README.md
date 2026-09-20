@@ -88,10 +88,10 @@ hw/                                     Hardware accelerator designs (SystemVeri
 research/                               Cited research notes (agent skills/toolchain, nbody & pyflate algorithms)
 ```
 
-`benchmarks/bm_*` start as byte-identical copies of the stock pyperformance
+`benchmarks/bm_*` start as byte-identical copies of the original pyperformance
 1.14.0 benchmarks (see git history); every optimization is a visible diff
 against that baseline. The `[tool.pyperformance] name` fields are kept
-identical to the stock names so `pyperf compare_to` lines up before/after.
+identical to the original names so `pyperf compare_to` lines up before/after.
 
 ### `dev/<bench>/` — the optimization ladder
 
@@ -154,7 +154,7 @@ because `pyperf` re-executes its workers with a scrubbed environment and
   loudly even when the fallback happened to pick the right path.
 
 Every measured *and profiled* invocation is pinned, including `perf record`,
-`py-spy` and `perf stat` on both the stock and optimized sides — an unpinned
+`py-spy` and `perf stat` on both the original and optimized sides — an unpinned
 profile would silently sample the Rust kernel on any host with the wheel
 installed.
 
@@ -278,7 +278,7 @@ python3 -m unittest discover -s tests -v
 and at N = 5, 10, 20), both native contracts (`rs_check.py`) and the report
 text-export check, and names anything it skipped. `tests/test_software.py`
 turns each failure this project actually hit into a regression test: a
-tolerance-only pass accepted as exact, a missing stock reference reported as a
+tolerance-only pass accepted as exact, a missing original reference reported as a
 pass, the oracle checking a stale kernel when `nbody_rs` is installed, metadata
 hashing maturin's `__init__.py` instead of the compiled extension, a text export
 that shifted table rows, and runner assertions for wrong, unpinned or
@@ -336,8 +336,8 @@ reader would actually measure depending on which script they ran.
 - **Prerequisites are checked, not assumed.** Missing `pyperf` or `pyperformance`
   is an error; a CPython or pyperformance version other than the VM's is a
   warning saying the run is not comparable with `results/`. The versions, host
-  and stock path are written to `environment_<bench>.txt` beside the results.
-- **The stock benchmark is located programmatically** through the installed
+  and original path are written to `environment_<bench>.txt` beside the results.
+- **The original benchmark is located programmatically** through the installed
   `pyperformance` package, falling back to a sibling source checkout, instead of
   a hard-coded `dist-packages` path.
 - **Results go to a fresh directory,** `results/runs/<UTC stamp>_<bench>/`, with
@@ -354,9 +354,9 @@ reader would actually measure depending on which script they ran.
   end in `native || true`, which left an incomplete results directory looking
   complete. A native failure is now named on stderr, recorded in
   `stages_incomplete.txt`, and returned as a nonzero exit status — the
-  stock/optimized comparison is still complete and still valid.
+  original/optimized comparison is still complete and still valid.
 
-- **Baseline** = stock benchmark via `pyperformance run --rigorous`.
+- **Baseline** = original benchmark via `pyperformance run --rigorous`.
 - **Optimized** = this repo's `benchmarks/` via `--manifest benchmarks/MANIFEST`
   (same benchmark names, so the comparison matches by name).
 - **Native** = the Rust back end against the pure-Python fallback *of the same

@@ -53,7 +53,7 @@ Inputs, all cited:
 
 | Symbol | Value | Source |
 |---|---|---|
-| Baseline `T` (stock Python) | **231.20 ms** (mean ± 8 ms; median 229 ms) | `results/baseline_nbody_stats.txt` (canonical VM run `vm_canonical_20260910_2c8c754`) |
+| Baseline `T` (original Python) | **231.20 ms** (mean ± 8 ms; median 229 ms) | `results/baseline_nbody_stats.txt` (canonical VM run `vm_canonical_20260910_2c8c754`) |
 | Accelerated fraction `f` | **0.95** (doubly-nested advance loop) | `benchmarks/bm_nbody/run_benchmark.py:71` header comment; PRD §4 (advance = HW) |
 | HW cycles / invocation | **2,480,000** (124 cyc/step × 20 000) | `driver/test_driver.py` (K1 = docs/ppa.md point 2; `test_full_benchmark`) |
 | PRD-target clock | 50 MHz | prd.md K-table; mas.md §3 |
@@ -81,11 +81,11 @@ HW compute time `t_hw = 2.48e6 / f_clk`; new total `= (1−f)·T + t_hw`; Amdahl
 | **19.46 MHz (achievable)** | **127.4 ms** | 11.56 ms | 139.0 ms | **≈ 1.66×** | **misses** |
 
 - **Compute-only upper bounds** (residual → 0, the headline the report quotes): `t_hw` alone
-  is 127.4 ms, so **231.20 / 127.4 = 1.81× vs stock** and **143.13 / 127.4 = 1.12× vs the
+  is 127.4 ms, so **231.20 / 127.4 = 1.81× vs the original** and **143.13 / 127.4 = 1.12× vs the
   143.13 ms optimized-Python tier** (`report_nbody` §1/§3). These bound `S` from above; the
   Amdahl rows include the 5 % residual.
 - **Ideal bound** `1/(1−f) = 20×` (infinite-speed accelerator; the 5 % residual caps it).
-- **Sensitivity — residual:** retaining 1–5 % of stock runtime gives **1.66–1.78×** at
+- **Sensitivity — residual:** retaining 1–5 % of the original runtime gives **1.66–1.78×** at
   19.46 MHz (f = 0.99 → residual 2.3 ms → 1.78×; f = 0.95 → 1.66×). The conclusion is
   clock-driven, not residual-driven.
 - **Sensitivity — `f` at target clock:** at 50 MHz, f = 0.99 gives **4.45×** (clears K3),
@@ -124,7 +124,7 @@ path the latest PPA STA flags — the speedup story and the timing story point t
 > doorbell once per 20,000-step invocation; the driver model is
 > `hw/grape_pipeline/driver/grape_pipeline_driver.py`, verified register-for-register
 > against the architecture spec (0 differences) and against a full-invocation cycle model
-> (2,480,000 cycles = 124 cyc/step × 20,000). Against the 231.20 ms stock-Python baseline
+> (2,480,000 cycles = 124 cyc/step × 20,000). Against the 231.20 ms original-Python baseline
 > (mean; 95 % of it in advance), Amdahl gives **~3.8–4.5× at the 50 MHz design target**. The
 > achievable clock from post-CTS static timing (the furthest the OpenLane 2 flow reached before
 > the OpenROAD GRT-0607 router bug) is **19.46 MHz** on the parallel-prefix netlist

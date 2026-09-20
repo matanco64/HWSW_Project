@@ -61,7 +61,7 @@ Inputs, all cited:
 
 | Symbol | Value | Source |
 |---|---|---|
-| Baseline `T` (stock Python) | **1,123.49 ms** (mean ± 0.01 s ≈ 1.12 s; median 1.12 s) | `results/baseline_pyflate_stats.txt:18` ("Mean +- std dev: 1.12 sec"), precise mean from `report_pyflate` §1 canonical run |
+| Baseline `T` (original Python) | **1,123.49 ms** (mean ± 0.01 s ≈ 1.12 s; median 1.12 s) | `results/baseline_pyflate_stats.txt:18` ("Mean +- std dev: 1.12 sec"), precise mean from `report_pyflate` §1 canonical run |
 | Accelerated fraction `f` | **0.496** (Huffman decode 12.0 % + bit reader 37.6 %) | `docs/prd.md §1` ("this module's slice = 49.6 %", cProfile self-time table) |
 | HW decode cycles (full benchmark) | **149,276** (148,271 symbols, K1 = 1.0068) | `docs/decode_model.py`; `docs/uarch.md §7` |
 | PRD-target clock | 50 MHz (20 ns) | `docs/prd.md` K3; `docs/mas.md §6` |
@@ -97,7 +97,7 @@ Amdahl `S = T / new_total`.
   intended `pyflate_accel` two-block pipeline.
 
 > **How this relates to the delivered software (added 2026-09-19).** The speedups in this section
-> are projections against *stock* Python. Against the delivered Python + Rust path (170.01 ms) the
+> are projections against *original* Python. Against the delivered Python + Rust path (170.01 ms) the
 > comparison is made at the matched boundary instead: the `huffman_engine → mtf_cam` chain,
 > co-simulated in 159,303 cycles (≈ 4.24 ms at the shared 37.6 MHz clock), against the Rust
 > kernel's 3.30 ms — end to end a tie (≈ 171 ms). See `hw/docs/hardware_report.md §3.8`.
@@ -125,7 +125,7 @@ Amdahl `S = T / new_total`.
 > against the architecture spec (0 differences) and against the signed-off cycle model
 > (149,276 cycles for the 148,271-symbol benchmark, K1 = 1.0068 cyc/sym). The engine
 > decodes 1 symbol/cycle via a 20-wide comparator cascade with a 0-cycle selector switch.
-> Against the 1,123.49 ms (≈ 1.12 s) stock-Python baseline, of which **49.6 %** is the Huffman decode plus
+> Against the 1,123.49 ms (≈ 1.12 s) original-Python baseline, of which **49.6 %** is the Huffman decode plus
 > bit reader (prd.md §1), Amdahl gives **~1.97× at the 50 MHz design target** — essentially
 > the ideal 1.98× bound, because the 3 ms of hardware decode is negligible against the
 > ~560 ms of software Huffman work it removes. Notably the speedup is **clock-insensitive**

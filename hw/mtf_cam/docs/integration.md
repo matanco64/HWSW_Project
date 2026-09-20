@@ -79,8 +79,8 @@ Inputs, all cited by file:
 
 | Symbol | Value | Source |
 |---|---|---|
-| Baseline `T` (stock Python) | **1.12 s** (Mean ± 0.01 s) | `results/baseline_pyflate_stats.txt` ("Mean +- std dev: 1.12 sec") |
-| Accelerated fraction `f` (MTF stage) | **0.1344** (`move_to_front` self-time share) | `results/profile_functions.txt` (pyflate stock, `move_to_front` 13.44 %); `results/pyspy_pyflate_stock_full.svg`; `report_pyflate.txt:75` |
+| Baseline `T` (original Python) | **1.12 s** (Mean ± 0.01 s) | `results/baseline_pyflate_stats.txt` ("Mean +- std dev: 1.12 sec") |
+| Accelerated fraction `f` (MTF stage) | **0.1344** (`move_to_front` self-time share) | `results/profile_functions.txt` (pyflate original, `move_to_front` 13.44 %); `results/pyspy_pyflate_stock_full.svg`; `report_pyflate.txt:75` |
 | HW cycles / benchmark block | **158,441** (148,271 symbols, K3 = 1.0686) | `tb/test_mtf_cam.py::test_full_benchmark` (DUT `CYCLES`); model 157,560 / K3 1.063 in `docs/ppa.md §3.1`, `docs/testplan.md §2` |
 | **Achievable clock (Fmax)** | **≈ 37.6 MHz** (post-CTS STA, tt) | `docs/ppa.md §3.1` (`synth/runs/signoff/31-openroad-stamidpnr-1/ws.max.rpt`) |
 | PRD-target clock | 50 MHz (20 ns) | `docs/prd.md` K4; `docs/mas.md §3` |
@@ -121,7 +121,7 @@ At the achievable **37.6 MHz**: `t_hw = 158,441 / 37.6e6 = ` **4.214 ms**; bus o
 ### Reconciliation with PRD K5 (≈ 25×)
 
 PRD K5 (`prd.md:37`) is a **stage-level** target, not the end-to-end number: the HW MTF-stage time
-vs the **isolated stock MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs the stock MTF alone:
+vs the **isolated original MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs the original MTF alone:
 80.4 ms (FINDINGS §1e micro-benchmark) / 110 ms `move_to_front` tottime (cProfile) ⇒ ≈ 25×".
 
 - **At 50 MHz** with the DUT 158,441-cycle block (3.169 ms): stage speedup = 80.4 / 3.169 =
@@ -138,7 +138,7 @@ vs the **isolated stock MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs the
   from software — combined `f ≈ 0.63`, ideal ceiling **≈ 2.7×** — the intended two-block pipeline.
 
 > **How this relates to the delivered software (added 2026-09-19).** The speedups in this section
-> are projections against *stock* Python. Against the delivered Python + Rust path (170.01 ms) the
+> are projections against *original* Python. Against the delivered Python + Rust path (170.01 ms) the
 > comparison is made at the matched boundary instead: the `huffman_engine → mtf_cam` chain,
 > co-simulated in 159,303 cycles (≈ 4.24 ms at the shared 37.6 MHz clock), against the Rust
 > kernel's 3.30 ms — end to end a tie (≈ 171 ms). See `hw/docs/hardware_report.md §3.8`.
@@ -167,11 +167,11 @@ vs the **isolated stock MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs the
 > golden-backed register model and — via `SimBackend` — through the RTL in cocotb (scoreboard:
 > 0 mismatches, BYTES_OUT/SYMBOLS_IN/MAX_RUN read back exact). The engine sustains 1 symbol/cycle
 > through a 256-entry shift-register CAM (K3 = 1.07 cyc/sym; a 148,271-symbol block in 158,441
-> cycles). Against the 1.12 s stock-Python baseline, of which **13.44 %** is `move_to_front`
+> cycles). Against the 1.12 s original-Python baseline, of which **13.44 %** is `move_to_front`
 > (results/profile_functions.txt), Amdahl gives **≈ 1.15× end-to-end** — essentially the ideal
 > 1.155× bound, because the ~4 ms of hardware MTF is negligible against the ~150 ms of software
 > move-to-front it removes. At the **stage** level this is the PRD-K5 ~25× (3.17 ms @ 50 MHz vs
-> 80.4 ms stock MTF); the two figures are the same result at different altitudes. Like the Huffman
+> 80.4 ms original MTF); the two figures are the same result at different altitudes. Like the Huffman
 > engine the speedup is **clock-insensitive** (1.150× at 37.6 MHz vs 1.151× at the 50 MHz target):
 > it is limited by the software residual (Huffman decode, iBWT, RLE4, MD5), not by timing closure.
 > Chaining `mtf_cam` behind `huffman_engine` on chip (`pyflate_accel`) removes both stages from

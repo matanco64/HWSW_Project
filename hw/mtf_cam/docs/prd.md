@@ -20,11 +20,11 @@ output **336,184 L-bytes** = 89,837 MTF bytes + 246,347 run bytes (73.3 %) from 
 MTF rank: mean 7.17, p50 3, p90 17, p99 62, max 144, rank 0 never (zeros are runs), rank 1 = 30.4 %.
 Runs: length mean 7.11, p50 2, max 8,157; ≤ 12 run symbols per group. 145 used byte values.
 
-Software share (self time, cProfile; `dev/pyflate/FINDINGS.md` §3, §1e): stock `move_to_front`
+Software share (self time, cProfile; `dev/pyflate/FINDINGS.md` §3, §1e): original `move_to_front`
 0.110 s / 92,803 calls ≈ 9.3 % of the 1.186 s profile plus the run/MTF control inside
 `decode_huffman_block` (18.9 % self, shared with the selector walk); the 3-slice MTF alone costs
 80.4 ms for this trace (§1e). T3: `list.pop` + `list.append` + `bytearray.append` ≈ 0.030 s ≈ 10.5 %
-of 0.285 s. With `huffman_engine`, the two modules cover the stock loop's 79.9 % (huffman PRD §1).
+of 0.285 s. With `huffman_engine`, the two modules cover the original loop's 79.9 % (huffman PRD §1).
 
 ## 2. KPIs
 
@@ -34,7 +34,7 @@ of 0.285 s. With `huffman_engine`, the two modules cover the stock loop's 79.9 %
 | K2 expander output | bytes/cycle | **W** (parameter, default 8) sustained during a run; output byte-packed, TKEEP partial only on the block's last beat | W = 16 design point | testbench beat counter over the 8,157-byte run: 1,020 full beats in 1,020 consecutive cycles at W = 8 (`tready` = 1) |
 | K3 block cycles, accepted doorbell → DONE (last beat handshaken), benchmark block, W = 8, `m_l.tready` = 1 and `s_sym.tvalid` = 1 throughout | cycles/input symbol | **≤ 1.10** (block ≤ 163,098 cycles). Cycle model (`golden/list_model.cycles`, assumptions in F7): symbol side 1/cycle producing items into an item FIFO of depth D, drain side 1 cycle per MTF byte and ⌈n/W⌉ per run: D = 0 → 1.370 (fully serialised), **D = 8 → 1.063**, D = 32 → 1.046, D = 128 → 1.035; lower bound max(148,271, 144,533)/148,271 = 1.0 | 1.023 at W = 16, D = 8 | `CYCLES / SYMBOLS_IN`, `test_full_benchmark` |
 | K4 clock, sky130_fd_sc_hd tt_025C_1v80 | MHz | **≥ 50** | 100 | `make ppa` STA |
-| K5 block time and speed-up | ms / × | 157,560 cycles (D = 8) @ 50 MHz = **3.15 ms** vs the stock MTF alone: 80.4 ms measured on this trace (FINDINGS §1e micro-benchmark) / 110 ms `move_to_front` tottime under cProfile (§3) ⇒ **≈ 25×** on the stage; end-to-end with `huffman_engine`: huffman PRD K4b (4.3× stock / 1.4× T3, local numbers) | — | `docs/integration.md` (integration stage, `test_driver` cycle model) |
+| K5 block time and speed-up | ms / × | 157,560 cycles (D = 8) @ 50 MHz = **3.15 ms** vs the original MTF alone: 80.4 ms measured on this trace (FINDINGS §1e micro-benchmark) / 110 ms `move_to_front` tottime under cProfile (§3) ⇒ **≈ 25×** on the stage; end-to-end with `huffman_engine`: huffman PRD K4b (4.3× original / 1.4× T3, local numbers) | — | `docs/integration.md` (integration stage, `test_driver` cycle model) |
 | K6 area (no macros), W sweep 4/8/16 | mm² | soft ceiling 1.0 (flagged, not gating); trade-off table area vs K3 for W ∈ {4, 8, 16} (K3 model: 1.175 / 1.063 / 1.023 at D = 8) | — | `make area PARAMS=W=…`, OpenLane (PPA stage row in §7) |
 | K7 power | mW | report only | — | OpenLane |
 | K8 formal | — | SymbiYosys proof of the MTF-list invariants (F5) passes: unbounded induction on a 16-entry parametrisation, bounded depth ≥ 20 on 256 | — | `make formal` |
@@ -57,7 +57,7 @@ of 0.285 s. With `huffman_engine`, the two modules cover the stock loop's 79.9 %
 | PRD-F12 | Counters, read-only: CYCLES (64-bit, accepted doorbell → DONE = last beat handshaken / ABORTED / ERR inclusive), SYMBOLS_IN (32-bit), BYTES_OUT (32-bit, bytes handshaken), INIT_CYCLES (9-bit), MAX_RUN (21-bit, longest run of the block). No overflow by construction: SYMBOLS_IN ≤ SYMBOL_LIMIT ≤ 2^27, BYTES_OUT ≤ BYTES_LIMIT ≤ 2^30 (ERR_LIMIT otherwise, F10), CYCLES ≤ 2^27 + 2^30/W ≪ 2^64. | == testbench counts (exact) | `test_driver`, `test_full_benchmark` | Q7 |
 | PRD-F13 | Empty block: EOB as the first symbol → 0 bytes, one `m_l` beat with TKEEP = 0 and TLAST (or no beat — MAS decides, testbench accepts the MAS choice), DONE. | DONE, BYTES_OUT = 0 | `test_corner` | Q7 |
 | PRD-F14 | Bus verification: AXI-Lite and both AXI-Stream ports checked by independent protocol agents (`cocotbext-axi`), never only by datapath results. | 0 protocol violations across all tests | all tests | Q7 (huffman F14) |
-| PRD-F15 | Reference models: golden = `golden/mtf_ref.py` (instrumented stock pyflate via the huffman_engine wrapper, == libbzip2), capturing the used map, the symbol stream, per-symbol MTF bytes and the L-vector; predictor = `golden/list_model.py` (functional model `expand`, cycle model `cycles`). Scoreboard: DUT vs predictor per beat, predictor vs golden per block; the cycle model is validated only against the DUT in `test_full_benchmark` (K3). | `calibrate.py`: L-vector and per-symbol bytes == golden (336,184 B / 89,837 lookups) | `golden/calibrate.py`, `test_full_benchmark` | Q8 |
+| PRD-F15 | Reference models: golden = `golden/mtf_ref.py` (instrumented original pyflate via the huffman_engine wrapper, == libbzip2), capturing the used map, the symbol stream, per-symbol MTF bytes and the L-vector; predictor = `golden/list_model.py` (functional model `expand`, cycle model `cycles`). Scoreboard: DUT vs predictor per beat, predictor vs golden per block; the cycle model is validated only against the DUT in `test_full_benchmark` (K3). | `calibrate.py`: L-vector and per-symbol bytes == golden (336,184 B / 89,837 lookups) | `golden/calibrate.py`, `test_full_benchmark` | Q8 |
 | PRD-F16 | Single clock, synchronous active-low reset; one level IRQ. | — | `test_driver` | ADR-0001 |
 
 ## 4. HW/SW split
