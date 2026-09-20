@@ -1,6 +1,6 @@
 ---
 name: hw-mas
-description: Write the Architecture Spec (external view: I/O, register map, DMA/stream, driver API, block diagram) for an accelerator module through a grilling interview (stage 2 of hw/FLOW.md). Use when hw-flow reaches the mas stage or the user asks for the interface spec, register map, or block diagram.
+description: "Write the Architecture Spec (external view: I/O, register map, DMA/stream, driver API, block diagram) for an accelerator module through a grilling interview (stage 2 of hw/FLOW.md). Use when hw-flow reaches the mas stage or the user asks for the interface spec, register map, or block diagram."
 ---
 
 # hw-mas — stage 2, MAS
