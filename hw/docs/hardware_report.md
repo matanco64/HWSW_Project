@@ -413,9 +413,11 @@ as workload-energy numbers.
   single benchmark input; the on-chip chain is co-simulated (§3.8), but the platform
   DMA/host-interface cost is **not measured** (module + driver tests do not exercise it).
 - huffman's SRAM-macro sub-1 mm² path is **projected, not synthesized**.
-- mtf_cam's formal move-to-front invariants are proven **unbounded @ N_LIST=16** and
-  **bounded depth-24 @ N_LIST=256** (general unbounded-256 is SAT-intractable — honestly a
-  wall, not skipped).
+- mtf_cam's formal move-to-front invariants are proven **unbounded @ N_LIST=16**. At the
+  production **N_LIST=256** the general check (`bmc`) is bounded to **depth 6**; the depth-24
+  result (`bmc256moves`) is **fill-abstracted**: it starts from a valid filled list with 8 live
+  entries and shows 24 consecutive moves preserve the permutation (`hw/mtf_cam/synth/formal.sby`;
+  general unbounded-256 is SAT-intractable — honestly a wall, not skipped).
 - all three miss 50 MHz post-CTS (grape 2.6×, mtf 1.33×, huffman 1.25×); documented RTL follow-ups
   (pipeline the integrate-multiply path; pipeline the table build + register the symtab mux)
   are datapath changes deferred beyond the PPA stage.

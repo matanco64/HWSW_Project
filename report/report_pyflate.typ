@@ -359,8 +359,10 @@ using default switching activity at each run's own clock constraint (40 ns for H
 for MTF), so they are not comparable with each other, are not workload power, and cannot
 support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops.
 Coverage percentages use the documented exclusions. Three MTF list invariants are proven
-for unbounded time by induction on a 16-entry list; the full 256-entry permutation proof is bounded
-to depth 24. The regression counts are recorded results.
+for unbounded time by induction on a 16-entry list. At the production 256-entry width the general
+check is bounded to depth 6; a second run that starts from a valid filled list with 8 live entries
+shows that 24 consecutive moves preserve the permutation (`hw/mtf_cam/synth/formal.sby`). The
+regression counts are recorded results.
 
 == Does the hardware win?
 
