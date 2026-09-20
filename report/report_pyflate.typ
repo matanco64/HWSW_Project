@@ -401,16 +401,19 @@ phase takes 3.30 ms.
   [Original Python], [1,123.49 ms], [1.00×],
   [Optimized Python], [281.16 ms], [4.00×],
   [Python + Rust kernel], [170.01 ms], [6.61×],
-  [Python + hardware chain at 37.6 MHz], [≈ 171 ms], [≈ 6.6× (projected, before `T_if`)],
-  [Python + hardware chain at 50 MHz], [≈ 170 ms], [≈ 6.6× (projected, before `T_if`)],
+  [Python + hardware chain at 37.6 MHz], [≈ 171 ms], [≈ 6.6× (projected)],
+  [Python + hardware chain at 50 MHz], [≈ 170 ms], [≈ 6.6× (projected)],
 )
+
+The two hardware rows are projections and do not include the interface time `T_if`
+(configuration, DMA setup and copies), which is not measured; adding it can only make them slower.
 
 *Verdict:* for the stage it replaces, the hardware chain is about 28× faster than the
 optimized Python loop and about 1.3× slower than the Rust kernel at the achievable clock, with
 parity at the 50 MHz target. End to end it ties the delivered 170 ms path, because once this
 stage is off the interpreter it is about 2% of what remains; inverse BWT (137.7 ms, about 80%)
 sets the floor for both the native and the hardware route. The cycle count is measured in
-simulation; the clock is a static-timing estimate and `T_if` is unmeasured, so these are
+simulation; the clock is a static-timing estimate and the interface time is unmeasured, so these are
 projections, not a run of Python attached to hardware. The 117 ms figure combines separate
 experiments and is approximate.
 

@@ -359,7 +359,7 @@ projection (decoder table-build start-up). 148,271 link beats, 0 malformed; deco
 mtf on 10,013 cycles, mtf starved on 873 — the chain runs at mtf's rate.
 
 **Same boundary as the Rust kernel** (148,271 symbols → 336,184 bytes). Hardware rows are
-**measured chain RTL cycles** ÷ post-CTS clock (shared 37.6 MHz), before DMA/interface — the
+**measured chain RTL cycles** ÷ post-CTS clock (shared 37.6 MHz), not including DMA/interface time — the
 cycle count is measured, the clock is a static-timing estimate; the Rust figure is a phase-isolated VM measurement (`report_appendix` A3,
 `results/pyflate_phase_cpi.txt`); the Python figure is derived across separate experiments.
 
