@@ -113,7 +113,7 @@ fraction for the separately measured native timing pair.
   [Regex-assisted RLE4], [+100.6 ms], [+98.7 ms], [+32.3 ms],
   [Primary Huffman lookup], [+52.6 ms], [+49.4 ms], [+10.1 ms],
   [Counting-sort BWT], [+20.8 ms], [+17.2 ms], [+38.6 ms],
-  [All of the above plus canonical decode (T1 only)], [+393.6 ms], [+397.2 ms], [+200.6 ms],
+  [All reverted (T1 only)], [+393.6 ms], [+397.2 ms], [+200.6 ms],
 )
 
 *Ablation scope:* T3 is the last tier of our development ladder (T0 stock, T1 per-byte fixes,
