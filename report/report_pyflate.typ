@@ -13,18 +13,19 @@ then a Rust extension that executes the symbol decoder through one call per bloc
 
 Despite its name, the measured `pyflate` workload is *bzip2*, not DEFLATE.
 Each iteration decompresses `interpreter.tar.bz2` from *67,562 bytes to 399,360 bytes*;
-the harness checks the original MD5 outside the timer. The Python tier uses only the standard library (`re` for RLE4 runs, `collections.Counter`
-for the BWT histogram, `hashlib` for MD5) plus `pyperf` for timing; the _native Rust_ tier adds our compiled
+the harness checks the original MD5 outside the timer. The Python tier uses only the standard library (`re` for the final run-length stage, `collections.Counter` for the Burrows-Wheeler transform
+(BWT) histogram, `hashlib` for MD5) plus `pyperf` for timing; the _native Rust_ tier adds our compiled
 Rust crate bound through PyO3, as opposed to Python run by the interpreter. _Original_ means the
 benchmark exactly as shipped in pyperformance, unmodified. No native decompression library is called. Its main structures are an
-integer bit buffer, Huffman tables, a move-to-front (MTF) alphabet, Burrows-Wheeler transform
-(BWT) index vectors and output buffers: concretely a Python `int` bit window, `list` lookup
+integer bit buffer, Huffman tables, a move-to-front (MTF) alphabet, BWT index vectors and output
+buffers: concretely a Python `int` bit window, `list` lookup
 tables packing `(symbol, length)` into one integer, a `list` MTF alphabet and traversal
 vector, and `bytearray` outputs.
 
 #note[*One block, six Huffman tables, 148,271 symbols.* The decoder switches tables every
-50 symbols. Huffman decoding, move-to-front and RUNA/RUNB expansion produce a 336,184-byte
-L-vector. Inverse BWT and final RLE4 expansion produce the 399,360-byte output.]
+50 symbols. Huffman decoding, move-to-front and RUNA/RUNB expansion (bzip2's two run-length
+symbols) produce a 336,184-byte L-vector, the last column of the BWT matrix. Inverse BWT and the final run-length expansion produce the 399,360-byte output. We call that
+last stage *RLE4*: four equal bytes followed by a count byte k stand for 4 + k copies.]
 
 #figure(image("fig/pyflate_stages.svg", width: 100%),
   caption: [The bzip2 path. RUNA/RUNB and move-to-front are handled together in the symbol loop.
