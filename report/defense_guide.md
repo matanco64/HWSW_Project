@@ -9,9 +9,10 @@ This is rehearsal material, not a record of new VM benchmarks or RTL/physical ru
 executes ten fixed body interactions, so specializing its schedule reduced Python
 runtime by 38.1%. Pyflate decodes a bzip2 block through several transformations;
 optimizing the whole pipeline gave 4.00x, and moving symbol decoding into Rust gave
-6.61x over stock. Correctness checks constrain both transformations. Our hardware
-implements coarse offload boundaries, but simulation cycles alone do not establish
-system speedup: clock frequency, area, residual software and communication matter.
+6.61x over original. Correctness checks constrain both transformations. Our hardware
+implements the same offload boundaries and is verified bit- and byte-exactly, but it
+does not beat native Rust: clock frequency, area, residual software and communication
+matter, not simulation cycles alone.
 The project demonstrates both where offload helps and where its costs limit it.”
 
 ## A 23-minute presentation route
@@ -36,15 +37,18 @@ calculation. Leave the required 5–10 minute discussion outside this presentati
 
 | Comparison | Before → after | Result |
 |---|---|---|
-| Nbody stock → optimized Python, pyperformance route | 231.20 → 143.13 ms | 1.62x, 38.1% less time |
+| Nbody original → optimized Python, pyperformance route | 231.20 → 143.13 ms | 1.62x, 38.1% less time |
 | Nbody optimized Python → Rust, direct pyperf route | 145.30 → 9.530 ms | 15.25x |
-| Pyflate stock → optimized Python | 1123.49 → 281.16 ms | 4.00x |
-| Pyflate optimized Python → hybrid, direct pyperf route | 283.88 → 170.01 ms | 1.67x |
-| Pyflate stock → hybrid | 1123.49 → 170.01 ms | 6.61x, 84.9% less time |
+| Pyflate original → optimized Python | 1123.49 → 281.16 ms | 4.00x |
+| Pyflate optimized Python → Python + Rust extension, direct pyperf route | 283.88 → 170.01 ms | 1.67x |
+| Pyflate original → Python + Rust extension | 1123.49 → 170.01 ms | 6.61x, 84.9% less time |
 | Nbody RTL simulation | 124 cycles/step × 20,000 | 2.48 million cycles |
 | Nbody compute projection | 2.48 Mcycles / 19.46 MHz | 127.4 ms, before residual and interface |
 | Huffman module simulation | 149,276 cycles / 148,271 symbols | 1.0068 cycles/symbol |
 | MTF module simulation | 158,441 cycles / 148,271 symbols | 1.0686 cycles/symbol |
+| Huffman + MTF chain simulation | 159,303 cycles, 336,184 bytes byte-exact | ≈ 4.24 ms at the shared 37.6 MHz clock |
+| Post-CTS timing estimates | grape 19.46, Huffman 39.9, MTF 37.6 MHz | none has met the 50 MHz target |
+| Nbody hardware projection | 127.4 ms compute + 11.6 ms residual | ≈ 139 ms: 1.66x vs original, ≈ 15x slower than Rust |
 
 Sources: [canonical suite](../results/vm_canonical_20260910_2c8c754/suite/),
 [grape PPA](../hw/grape_pipeline/docs/ppa.md),
@@ -59,11 +63,11 @@ Sources: [canonical suite](../results/vm_canonical_20260910_2c8c754/suite/),
 There are five bodies and ten unordered pairs, or 200,000 pair-force evaluations.
 
 **If pressed:** Position, velocity and mass give 35 float state values. We use the
-same arithmetic order as stock. This is a small direct Newtonian-gravity benchmark,
+same arithmetic order as original. This is a small direct Newtonian-gravity benchmark,
 not a validated spacecraft-navigation application; the opening story is motivation.
 
 **Evidence:** [benchmark](../benchmarks/bm_nbody/run_benchmark.py),
-[stock oracle](../dev/nbody/t0_stock.py).
+[original oracle](../dev/nbody/t0_stock.py).
 
 ### 2. Why is unrolling faster if the arithmetic is unchanged?
 
@@ -95,12 +99,12 @@ The report should claim benchmark specialization, not universal Python accelerat
 ### 4. Why not replace pow with sqrt and division?
 
 **Short answer:** Equal real-number formulas need not produce equal FP64 results.
-The exact software tier preserves `dt * (dsq ** -1.5)` and the stock update order.
+The exact software tier preserves `dt * (dsq ** -1.5)` and the original update order.
 
 **If pressed:** Sqrt/multiply/reciprocal rounds at different operations; FMA also
 changes rounding. Software equality is observed on the tested build, not promised
 for every compiler or math library. Hardware has a distinct arithmetic model and
-stock-relative tolerance contract. Passing one contract does not establish another.
+original-relative tolerance contract. Passing one contract does not establish another.
 
 **Evidence:** [hardware arithmetic model](../hw/grape_pipeline/golden/emulation.py),
 [FP64 decision](../hw/docs/adr/0002-grape-fp64-datapath-and-tolerance-oracle.md).
@@ -113,7 +117,7 @@ We compare every state component as well as energy.
 **If pressed:** Energy is a physical sanity check; state equality is stronger for
 software equivalence. Even numerical `==` and bitwise equality differ for signed
 zero. The hardware is checked against its own arithmetic oracle and separately
-against stock tolerances. Neither finite tests nor bounded proofs establish all
+against original tolerances. Neither finite tests nor bounded proofs establish all
 possible inputs automatically.
 
 **Evidence:** [Python checker](../dev/nbody/verify.py),
@@ -253,7 +257,7 @@ values each; mean ± SD describes observed spread.
 
 **If pressed:** A random-effects decomposition estimates within- and between-worker
 variance. The design effect 1+(3-1)*ICC adjusts the mean's SE under that model. For
-stock and optimized nbody the implied effective sample size is about 40–42, not
+original and optimized nbody the implied effective sample size is about 40–42, not
 120. This assumes independent workers and does not remove VM drift. Compare runtime
 differences with uncertainties in time, or derive uncertainty for a ratio; don't
 compare a dimensionless speedup directly with an SE in milliseconds.
@@ -301,67 +305,86 @@ forwarding and selection logic, which costs area and can lengthen critical paths
 
 ### 20. Does the hardware beat Rust? If not, why build it?
 
-**Short answer:** The current nbody evidence does not beat Rust. Even its 50 MHz
-target gives 49.6 ms of compute, versus 9.53 ms for the native benchmark.
+**Short answer:** No, on both benchmarks. Nbody hardware projects to about 139 ms per
+run at the 19.46 MHz clock that static timing supports: 1.66x over the original,
+level with the optimized Python, about 15x slower than the 9.53 ms native Rust tier.
+The pyflate chain takes about 4.24 ms for the stage Rust does in 3.30 ms, and ties
+the delivered 170 ms path end to end.
 
-**If pressed:** At the latest preliminary 19.46 MHz estimate, compute is 127.4 ms,
-before residual and communication. The course asks for a complete, reasoned HDL
-design, not a winning fabricated chip. The outcome teaches why reducing instruction
-overhead and building a viable physical datapath are different problems. A power
-advantage is possible in principle but has not been demonstrated here.
+**If pressed:** Nbody compute is 2.48 Mcycles / 19.46 MHz = 127.4 ms, plus the
+11.6 ms Python residual (5% of the original), which alone exceeds Rust's 9.53 ms.
+At the 50 MHz design target it would be about 61 ms (3.78x), still about 6x slower
+than Rust; the datapath would need about 260 MHz to match. The course asks for a
+complete, reasoned HDL design, not a winning chip. The outcome shows that removing
+interpreter overhead and building a fast physical datapath are different problems.
+The schedule model projects native-class throughput only at large N with four to
+eight times the arithmetic units. No energy advantage has been demonstrated.
 
-**Evidence:** [grape PPA addendum](../hw/grape_pipeline/docs/ppa.md), nbody hardware section.
+**Evidence:** nbody report Section 5 "Does the hardware win?", pyflate report
+Section 5, [grape PPA](../hw/grape_pipeline/docs/ppa.md).
 
 ### 21. What did the area/timing trade-off teach you?
 
 **Short answer:** Three-wide accumulation reduced cycles from 162 to 124, at a
 38.7% mapped-area increase. But its issue-selection logic became a timing problem.
 
-**If pressed:** The prefix rewrite removed a long sequential combinational scan
-without adding pipeline cycles. Post-CTS estimates improved from 11.15 to 19.46 MHz,
-and the critical path moved. The 2.938/4.075 mm² comparison describes earlier mapped
-design points; it is not fresh area evidence for the prefix netlist. Each result
-must retain its implementation revision and physical-design stage.
+**If pressed:** Rewriting the picker as balanced prefix trees removed a long
+sequential combinational scan without adding pipeline cycles. Post-CTS estimates
+improved from 11.15 to 19.46 MHz (1.75x), bit-exact, same 124 cycles. The
+2.938/4.075 mm² comparison is two plain-Yosys design points made before that
+rewrite. Under the OpenLane synthesis recipe, which is not comparable with plain
+Yosys, the final netlist is 446,932 cells / 4.66 mm² (5.65 mm² after buffering and
+clock tree) against 4.92 mm² before the rewrite, so the rewrite made the design 5%
+smaller as well as faster. Each result must retain its revision, recipe and stage.
 
-**Evidence:** grape `docs/ppa.md`, including September 13/14 addendum.
+**Evidence:** grape `docs/ppa.md`; `hw/grape_pipeline/synth/evidence/area_openlane.txt`.
 
 ### 22. What exactly is verified in hardware?
 
 **Short answer:** Module regressions check functionality and interfaces against
 golden models, including full benchmark inputs, directed/random tests and recorded
-coverage. Some properties also have bounded formal checks.
+coverage. The two pyflate modules are also simulated together as one chain. Some
+control properties have formal checks.
 
-**If pressed:** Recorded default regressions are grape 9/9, Huffman 17/17 and MTF
-16/16. MTF's driver also has a separate smoke cosimulation. Coverage exclusions
-matter; 90% control coverage is not exhaustive datapath coverage. MTF invariant
-proofs bounded at depth 24 do not prove all unbounded traces. Module-level results
-do not establish a complete CPU/DMA/chained-system run.
+**If pressed:** Recorded regressions are grape 9/9, Huffman 17/17, MTF 16/16 and
+the chain 2/2. The chain (`hw/pyflate_accel`) is byte-exact over all 336,184
+L-vector bytes of the real benchmark block, with and without random back-pressure,
+in 159,303 cycles. Coverage exclusions matter; 90% control coverage is not
+exhaustive datapath coverage. The three MTF list invariants are proven unbounded by
+induction at 16 entries; at the production 256 entries the general check is bounded
+to depth 6, and a fill-abstracted run (valid filled list, 8 live entries) shows 24
+consecutive moves preserve the permutation. What is not established: a run of
+Python attached to hardware, so CPU/DMA interface time is unmeasured.
 
 **Evidence:** each module's `docs/testplan.md`, `docs/review_signoff.md`,
-`docs/coverage_waivers.md`, and MTF `docs/integration.md`.
+`docs/coverage_waivers.md`; `hw/mtf_cam/synth/formal.sby`; `hw/pyflate_accel/README.md`.
 
-### 23. Are 8.9 MHz, 19.46 MHz and 37.6 MHz measured frequencies?
+### 23. Are 19.46 MHz, 39.9 MHz and 37.6 MHz measured frequencies?
 
-**Short answer:** They are derived from static timing reports at different physical
-design stages, not measured on silicon or final routed sign-off.
+**Short answer:** They are derived from static timing reports, not measured on
+silicon and not final routed sign-off. All three are post-CTS.
 
-**If pressed:** Huffman is pre-placement; grape and MTF are post-CTS, which includes
-a placed clock tree. Timing-derived period uses the recorded constraint minus
-setup slack in the stated corner. Later placement/buffering/routing can change
-results; preliminary timing is not a guaranteed bound. All have a 50 MHz target,
-and none has completed 50 MHz routed sign-off.
+**If pressed:** Post-CTS means cells and the clock tree are placed but signal wires
+are not routed. Each figure is 1/(clock constraint minus worst setup slack) at the
+typical corner, read from the setup (max) report: grape 150 ns with +98.62 ns slack;
+Huffman 40 ns with +14.94 ns slack, confirmed by a tighter 27 ns run that meets
+timing and gives 39.5 MHz; MTF missed its 20 ns constraint by 6.60 ns, so
+1/26.6 ns. Routing can change the results; preliminary timing is not a guaranteed
+bound. All have a 50 MHz target and none has demonstrated it.
 
-**Evidence:** module `docs/ppa.md`. Raw physical-run paths are referenced there but
-are not present in this checkout; have the original run artifacts available if
-staff want to inspect them. The report revision did not re-run STA.
+**Evidence:** module `docs/ppa.md`; the small report files are preserved under each
+module's `synth/evidence/` (`ws.max.rpt`, `power.rpt`, worst path). The full
+OpenLane run folders are gitignored; have them available if staff want to inspect.
 
 ### 24. Does 13.7 mW establish an energy advantage? Will SRAM fix the area?
 
-**Short answer:** Neither conclusion is established. MTF power uses default tool
-switching activity, and Huffman's SRAM alternative has not been implemented.
+**Short answer:** Neither conclusion is established. The power figures use default
+tool switching activity, and Huffman's SRAM alternative has not been implemented.
 
-**If pressed:** The power estimate belongs to its run constraint and cannot simply
-be paired with a different inferred frequency as measured workload energy. System
+**If pressed:** The estimates are about 19 mW (grape, at its 150 ns constraint),
+about 283 mW (Huffman, 40 ns) and about 13.7 mW (MTF, 20 ns). Each belongs to its
+own run constraint, so they are not comparable with each other, are not workload
+power and cannot be paired with a different frequency as measured energy. System
 energy includes CPU, DMA and memory. Huffman's projected 0.75 mm² is remaining
 standard cells plus two SRAM macros, whose area is additional. Access latency,
 ports and integration must be checked before claiming unchanged throughput or a
@@ -372,30 +395,38 @@ total below 1 mm².
 ### 25. Why doesn't a near-one-symbol-per-cycle decoder imply huge total speedup?
 
 **Short answer:** Most of the gain disappears behind surviving software and
-communication. Amdahl's law uses the fraction of total time actually replaced.
+communication. Only the replaced stage's time can be removed.
 
-**If pressed:** The old Huffman model assumes 49.6% of stock time, making about 1.97x
-at 50 MHz conditional on that fraction and omitted interface costs. Adding its old
-fraction to MTF's newer profile fraction gives only an illustrative 2.7x ideal
-ceiling, not a matched decomposition of the combined boundary. Compare a real chain
-against optimized Python and the 170.01 ms hybrid, not only stock Python.
+**If pressed:** The report uses T_new = T_sw - T_stage + T_hw + T_if. The replaced
+stage is about 117 ms in the optimized Python loop (derived: 283.88 - 170.01 +
+3.30 ms) and 3.30 ms in the Rust kernel. The chain needs 159,303 cycles: about
+4.24 ms at the shared 37.6 MHz clock, 3.19 ms at 50 MHz. That is about 28x faster
+than the Python loop and about 1.3x slower than Rust. End to end it projects to
+about 171 ms, a tie with the delivered 170.01 ms path (6.6x over the original),
+because inverse BWT (137.7 ms, about 80% of what remains) sets the floor for both
+routes. T_if is not measured, and adding it can only make the hardware rows slower.
 
-**Evidence:** hardware integration docs and revised pyflate Section 5.
+**Evidence:** pyflate report Section 5 "Does the hardware win?", Appendix A3.
 
-### 26. How would the Huffman/MTF chain connect to software?
+### 26. How does the Huffman/MTF chain connect to software?
 
-**Short answer:** CPU parses headers and configures AXI4-Lite; streams carry bits
-and selectors to Huffman, symbols stay on chip, and platform DMA returns L-vector
-bytes from the MTF packer. Python finishes inverse BWT and RLE4.
+**Short answer:** CPU parses headers and configures both modules over AXI4-Lite;
+streams carry bits and selectors to Huffman, symbols stay on chip, and platform DMA
+returns L-vector bytes from the MTF packer. Python finishes inverse BWT and RLE4.
 
-**If pressed:** Start the consumer before the producer; handle ready/valid
-backpressure, output capacity, completion and error propagation. A shared clock
-must satisfy both modules; separate clocks need an explicit crossing. Standalone
-cycles/symbol cannot simply be added to predict a pipelined chain. DMA setup,
-buffer copies and cache maintenance need platform measurements. The 32-bit
-control bus and 64-bit default MTF output data bus serve different purposes.
+**If pressed:** Both modules are single-clock and the chain uses one shared clock,
+37.6 MHz set by MTF, so there is no clock-domain crossing; the two estimates are 6%
+apart, so an asynchronous FIFO would add area and verification for no benefit. The
+link is a valid/ready stream, one symbol per beat. MTF needs 1.0686 cycles/symbol
+against Huffman's 1.0068, so it back-pressures the decoder and the chain runs at
+MTF's rate: 159,303 cycles, 0.5% above MTF's standalone 158,441. Software starts
+the consumer before the producer and handles output capacity, completion and error
+propagation. DMA setup, buffer copies and cache maintenance need platform
+measurements. The 32-bit control bus and 64-bit default MTF output data bus serve
+different purposes.
 
-**Evidence:** [decode diagram](fig/decode_report.svg), module `docs/mas.md` and integration docs.
+**Evidence:** [decode diagram](fig/decode_report.svg), module `docs/mas.md`,
+integration docs, `hw/pyflate_accel/README.md`.
 
 ## Demonstrations and evidence lookup
 
