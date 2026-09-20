@@ -290,9 +290,12 @@ The 19.46 MHz estimate derives from a 150 ns constraint and +98.6212 ns worst se
 the typical corner; the critical path is the integrate-multiplier operand path. It is a
 preliminary timing estimate rather than measured silicon performance: there is no routed
 sign-off or final layout (GDS), and the design has not demonstrated its 50 MHz target. The power figure is a
-tool estimate at the run's 150 ns clock constraint, not workload power. Cell count and area
-were synthesized before the final rewrite of the issue-selection logic into balanced trees,
-which changes selection logic only, not the arithmetic units that dominate the area.
+tool estimate at the run's 150 ns clock constraint, not workload power. The table's cell count
+and area come from a plain Yosys synthesis made before the final rewrite of the issue-selection
+logic into balanced trees. The OpenLane synthesis that produced the timing maps the final RTL to
+446,932 cells and 4.66 mm² (5.65 mm² after buffering and the clock tree, 39% of the core). The two
+recipes are not comparable with each other; within the OpenLane recipe the rewrite made the design
+5% smaller (4.92 to 4.66 mm²) as well as faster (`hw/grape_pipeline/synth/evidence/area_openlane.txt`).
 
 #result-table(columns: (1.6fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Recorded architecture*], [*Mapped cell area*], [*Cycles/step*]),
@@ -381,7 +384,7 @@ In hardware, `grape_pipeline` executes the whole `advance()` kernel over that sa
 bit-exactly against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that
 static timing supports this projects to about 139 ms per run: 1.66× over the original, level with the
 optimized Python, and about 15× slower than the native tier (about 6× at the 50 MHz target),
-for 4.1 mm² of 130 nm standard cells. The benchmark's cost was interpreter overhead rather
+for 4.1 to 4.7 mm² of 130 nm standard cells, depending on the synthesis recipe. The benchmark's cost was interpreter overhead rather
 than arithmetic, so removing the interpreter captures nearly all of the gain. At five bodies
 with ordered pair dependencies there is too little parallelism for custom FP64 hardware to
 repay its area: a step is latency-bound at 12.3 cycles per pair, where the schedule model

@@ -144,10 +144,22 @@ because of the OpenROAD GRT-0607 router bug — an environment/tool limitation, 
 The Yosys area above (584,454 cells, 4.075 mm², `synth/area.txt`, identical copy kept as
 `synth/area_preprefix.txt`) was measured on the three-wide design **before** the parallel-prefix
 rewrite of the accumulate picker; the 19.46 MHz timing is from the netlist **after** it. The
-rewrite changes issue-selection logic only, not the FP64 arithmetic units that dominate the area.
-A re-measurement on the final RTL (`make area`) was attempted on 2026-09-19 and stopped after
-about 7 hours in Yosys ABC technology mapping without a result (close-out time limit), so the
-area is reported with this caveat wherever it appears.
+A re-measurement on the final RTL with the same recipe (`make area`) was attempted on 2026-09-19
+and stopped after about 7 hours in Yosys ABC technology mapping without a result (close-out time
+limit).
+
+A same-recipe before/after does exist under the **OpenLane** synthesis recipe, because both timing
+runs synthesized their own netlist with an identical `resolved.json` (150 ns clock); the lines are
+preserved in `synth/evidence/area_openlane.txt`:
+
+| OpenLane run | RTL | cells (synthesis) | area (synthesis) | after buffering + CTS |
+|---|---|---:|---:|---:|
+| `grape_relaxed` | linear-scan picker (11.15 MHz) | 474,634 | 4.918 mm² | 816,789 cells / 6.077 mm² |
+| `grape_prefix2` | final, balanced trees (19.46 MHz) | 446,932 | 4.658 mm² | 764,907 cells / 5.646 mm² (38.8 % of the 14.55 mm² core) |
+
+So the rewrite made the design 5.3 % smaller at synthesis (7.1 % after CTS) as well as 1.75× faster.
+The plain-Yosys figure (4.075 mm²) and the OpenLane figures use different synthesis scripts and are
+not comparable with each other; the 2-point trade-off table above compares two plain-Yosys points.
 
 ## Report §7 mapping
 

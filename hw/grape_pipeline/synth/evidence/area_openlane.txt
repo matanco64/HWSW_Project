@@ -1,0 +1,24 @@
+# grape_pipeline - area under the OpenLane synthesis recipe, before and after the accumulate-picker rewrite
+# Verbatim lines copied 2026-09-20 from the gitignored run folders. Both runs: OpenLane 2.3.10, identical
+# resolved.json apart from the RTL (CLOCK_PERIOD 150 ns), sky130_fd_sc_hd, flow stopped after post-CTS timing.
+# grape_relaxed = linear-scan picker (11.15 MHz netlist); grape_prefix2 = final RTL (19.46 MHz netlist).
+
+## grape_relaxed: synth/runs/grape_relaxed/06-yosys-synthesis/reports/stat.rpt
+   Number of cells:             474634
+   Chip area for module '\grape_pipeline': 4917814.073607
+     of which used for sequential elements: 615033.616000 (12.51%)
+## grape_relaxed: synth/runs/grape_relaxed/34-openroad-cts/or_metrics_out.json (after buffering and clock tree)
+   "design__instance__count": 816789
+   "design__instance__area": 6076740.0
+   "design__core__area": 15365000.0
+   "design__die__area": 15497000.0
+
+## grape_prefix2: synth/runs/grape_prefix2/06-yosys-synthesis/reports/stat.rpt
+   Number of cells:             446932
+   Chip area for module '\grape_pipeline': 4657590.748804
+     of which used for sequential elements: 615033.616000 (13.20%)
+## grape_prefix2: synth/runs/grape_prefix2/34-openroad-cts/or_metrics_out.json (after buffering and clock tree)
+   "design__instance__count": 764907
+   "design__instance__area": 5645500.0
+   "design__core__area": 14547400.0
+   "design__die__area": 14680300.0

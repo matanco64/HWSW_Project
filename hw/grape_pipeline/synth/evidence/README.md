@@ -12,6 +12,7 @@ Files:
 - `ws.max.rpt`
 - `power.rpt`
 - `worst_setup_path.rpt` — first path block of checks.rpt
+- `area_openlane.txt` — cell count and area of the pre-rewrite (`grape_relaxed`) and final (`grape_prefix2`) netlists under the identical OpenLane recipe: synthesis `stat.rpt` lines and the post-CTS `or_metrics_out.json` values
 - `ws.max.before_prefix_rewrite.rpt` — run grape_relaxed, the 11.15 MHz linear-scan netlist, for the before/after in docs/ppa.md
 
 Regenerate: `. ~/.nix-profile/etc/profile.d/nix.sh && cd hw/grape_pipeline && openlane --run-tag <tag> <config>` (stops after post-CTS; no GDS).

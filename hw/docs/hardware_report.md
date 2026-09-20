@@ -187,7 +187,7 @@ scheduled FP64 units, no FMA). The report shows a condensed version (`report_nbo
 `report/fig/grape_report.svg`) and the ordering constraint (`report/fig/pair_dependency.svg`).
 
 ### 1.7 Performance / area / power trade-offs
-`docs/ppa.md`. Yosys+sky130 area **4.075 mm² / 584,454 cells** (synthesized before the final issue-selection rewrite that produced the 19.46 MHz netlist; that rewrite changes selection logic only, not the arithmetic units that dominate area). Measured 2-point trade-off:
+`docs/ppa.md`. Yosys+sky130 area **4.075 mm² / 584,454 cells** (plain Yosys, synthesized before the final issue-selection rewrite that produced the 19.46 MHz netlist). The OpenLane synthesis that produced the timing maps the final RTL to **446,932 cells / 4.66 mm²** (5.65 mm² after buffering and clock tree, 39 % of the core); under that same recipe the pre-rewrite netlist was 4.92 mm², so the rewrite made the design 5 % smaller as well as 1.75× faster (`hw/grape_pipeline/synth/evidence/area_openlane.txt`). The two recipes are not comparable with each other. Measured 2-point trade-off (both points plain Yosys):
 
 | Design point | Area | K1 cyc/step | Verdict |
 |---|---:|---:|---|

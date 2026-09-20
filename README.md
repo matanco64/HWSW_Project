@@ -36,7 +36,9 @@ separate simulation cycles, mapped area and timing evidence from design targets:
 
 All three frequencies are **post-CTS** static-timing estimates (cells and the clock tree
 placed, signal wires not routed); none has completed 50 MHz routed sign-off. The grape area
-was synthesized before the final rewrite of its issue-selection logic. The two pyflate
+is a plain Yosys figure from before the final rewrite of its issue-selection logic; the OpenLane
+synthesis of the final RTL gives 446,932 cells / 4.66 mm²
+(`hw/grape_pipeline/synth/evidence/area_openlane.txt`). The two pyflate
 modules are also simulated together as one chain (`hw/pyflate_accel/`): byte-exact over the
 benchmark block's 336,184 output bytes in 159,303 cycles.
 
