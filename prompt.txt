@@ -1413,3 +1413,9 @@ Prompt: "<agent-message from="a934ee545ae9f3637">
 
 2026-09-20T08:43:28Z — Claude Code session (auto-logged)
 Prompt: "didn't you say we fixed most of the points left for matan?"
+
+2026-09-20T08:46:14Z — Claude Code session (auto-logged)
+Prompt: "how about the 10 vs tests? was it solved or do we need to let matan review it?"
+
+2026-09-20T08:48:29Z — Claude Code session (auto-logged)
+Prompt: "don't we need to move this out of the already applied and give him to double check it under a different header?"

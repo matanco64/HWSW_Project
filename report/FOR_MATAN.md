@@ -27,11 +27,7 @@ gaps against the brief. Applied, all small and factual (`git diff 20e8080 -- rep
 - **Brief coverage:** profilers named (py-spy; `perf record -F 999` on `python3-dbg` + FlameGraph);
   libraries and concrete data structures stated in both §1; a "Reading the flame graphs" paragraph in
   nbody (the `.txt` has no figures); "T3" defined in the pyflate ablation.
-- **Provenance (please double-check these two):** pyflate §4 said *eleven* Rust crate tests passed on
-  the VM — the canonical VM log (`results/vm_canonical_20260910_2c8c754/rust_tests.log`) shows **10**;
-  the 11th (property test, `536ee64`) was added after the timed revision. And the "Measurement scope"
-  note now says the later commits (comment trim, `collections.Counter` histogram, Rust code-length cap
-  23 → 20) were **not re-timed**.
+- **Provenance:** two statements were corrected to match the logs — see "Needs your answer" below.
 - **Wording:** "VM" spelled out; run-in labels end with ":"; IPC, BH, FMM, pyperf vs pyperformance
   glossed; cache-miss rates explained as medians of per-run rates; nbody table columns say
   "Optimized Python"; the pyflate 23.8 % cache-miss drop is flagged as capture-dependent (an earlier
@@ -45,10 +41,31 @@ Also applied: one name per configuration in pyflate ("Python + Rust extension" n
 §4 table row and the counters header), the "T1 only" ablation row (+393.6 / +397.2 / +200.6 ms, from
 the two VM logs and FINDINGS), and 24.26× used consistently in nbody.
 
-## Asks
+## Needs your answer (only you know what ran on the VM)
 
-1. **Skim the diff** (`git diff 54a738c -- report/*.typ`, about 15 min), especially §5 / §6 and the two
-   provenance corrections above, and tell Yuval anything you disagree with.
+Both were changed to what the repository can prove. Neither blocks submission — the report now
+understates rather than overstates — but please confirm or correct them.
+
+1. **Rust crate tests on the VM: 10 or 11?** pyflate §4 used to say "*Eleven* crate tests … passed"
+   under "rebuilt on the VM". Both VM logs say **10 passed**
+   (`results/vm_canonical_20260910_2c8c754/rust_tests.log:35`, `results/vm_release_20260907/rust_tests.log:35`).
+   The 11th (the Kraft-complete property test) was added on 2026-09-13 in `536ee64`, three days after
+   the timed revision `2c8c754`; its commit message says "cargo test: 11 passed", on a development
+   machine. The text now reads: ten passed on the VM; an eleventh, added after the timed revision,
+   passes on the development host.
+   - If you did run all 11 on the VM: add that log under `results/` and change the sentence back to eleven.
+   - If not: nothing to do.
+2. **Code changed after the timed revision.** `benchmarks/bm_pyflate/run_benchmark.py` differs from
+   `2c8c754` (comment trim, BWT histogram moved to `collections.Counter` in `98a7da5`, Rust
+   `MAX_CODE_LEN` 23 → 20 in `536ee64`). The "Measurement scope" note in pyflate §1 now says these
+   commits pass the same byte-exact checks but **were not re-timed**.
+   - If you did re-time them on the VM: point the note at that run instead.
+   - If not: nothing to do.
+
+## Also worth a skim
+
+`git diff 54a738c -- report/*.typ` (about 15 min), especially §5 / §6 of both reports and the new nbody
+subsection "Would a larger N change the verdict?". Tell Yuval anything you disagree with.
 
 ## Nothing else is left open on the report side
 
