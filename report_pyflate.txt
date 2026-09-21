@@ -214,11 +214,13 @@ pyperformance (the suite runner that wraps it), so it differs slightly from the 
 native mode requires the extension, while auto mode falls back. The benchmark forwards the variable to
 pyperf’s workers itself, so a scrubbed worker environment cannot quietly change which back end is
 measured.
-The submitted Rust source was rebuilt on the VM. On the VM, ten crate tests and seven blocks across
-five Python/bz2 fixtures passed, including exact ending bit positions. An eleventh test, added after the timed
-revision, is a property test that decodes random Kraft-complete (no unused code space) Huffman tables
-against an independently written canonical encoder; it passes on the development host. A dispatch check
-confirmed that native and auto load the new extension and call it once per block.
+The submitted Rust source was rebuilt on the VM. All eleven crate tests pass there, together with seven
+blocks across five Python/bz2 fixtures, including exact ending bit positions. The eleventh is a property test
+that decodes random Kraft-complete (no unused code space) Huffman tables against an independently
+written canonical encoder; it was added after the timed revision, so the timed run’s log records the ten that
+existed then, and results/vm_verify_20260921_f407567/ records all eleven on the same VM at the
+submitted revision. A dispatch check confirmed that native and auto load the new extension and call it once
+per block.
 Matched-work CPU counters
 These are medians of three warm-loop VM runs, each decoding the input 16 times, divided by
 16. Both backends produced the same output digest. They are a separate experiment from the

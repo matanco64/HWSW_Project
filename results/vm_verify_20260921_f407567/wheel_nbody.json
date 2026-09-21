@@ -1,0 +1,21 @@
+{
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "crate": "nbody",
+  "installed_by_this_run": true,
+  "loaded_extension": "/home/ubuntu/vmverify_venv/lib/python3.10/site-packages/nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so",
+  "loaded_matches_wheel": true,
+  "loaded_sha256": "ab0708390e47ccd351e935de15f7dc179638b92dd11ce79c7e5b866e15820a1f",
+  "maturin": "maturin 1.15.0",
+  "module": "nbody_rs",
+  "python": "3.10.12",
+  "python_executable": "/home/ubuntu/vmverify_venv/bin/python3",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "sources": {
+    "lib.rs": "a32dafb1402a300addd4f5c673d10b71f6cfff6fb8b8a46f8b9e8c42f9bc6439"
+  },
+  "wheel": "/home/ubuntu/vmverify/rust/nbody/target/wheels/20260921_062636/nbody_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl",
+  "wheel_extensions": {
+    "nbody_rs/nbody_rs.cpython-310-x86_64-linux-gnu.so": "ab0708390e47ccd351e935de15f7dc179638b92dd11ce79c7e5b866e15820a1f"
+  },
+  "wheel_sha256": "5476bb586d76fd44e0dcd97eaa783099fef78e8143777d1822f6119213e7113e"
+}

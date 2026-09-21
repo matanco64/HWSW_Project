@@ -129,8 +129,11 @@ and imports. Originals: results/flame_nbody_stock_full.svg, results/pyspy_nbody_
 
 3. Performance comparison: native execution does less work, not higher IPC
 The Rust/PyO3 System executes all 20,000 steps in one call, with both energy evaluations also native. State
-and energy match the original exactly on the tested VM build; this does not guarantee equality across all
-compilers and math libraries.
+and energy match the original exactly on the tested VM build, and not only at five bodies: the same check at
+5, 10 and 31 bodies is bit-identical in state and energy after 20,000 steps (results/
+vm_verify_20260921_f407567/check_all.log). That matters because the pair schedule above five bodies is
+generated code the default workload never exercises. Exactness is a property of this build; it does not
+guarantee equality across all compilers and math libraries.
  Same benchmark file                                                             Mean ± SD                           vs Python
  Optimized Python (fallback backend)                                        145.30 ± 4.97 ms                                1.00×
  Native Rust backend                                                        9.530 ± 0.050 ms                              15.25×
@@ -161,14 +164,14 @@ establish a cache bottleneck. Invalid L1 load counts are omitted.
 At five bodies, Barnes-Hut (BH, an O(N log N) tree approximation) is 3.92× slower: tree setup/traversal does
 not pay off for ten pairs. Development NumPy and struct-of-arrays variants also lose at this size (0.88× and
 0.35–0.46× of the original’s speed); the fast multipole method (FMM) was not measured. Unrolled source
-grows as O(N²), so the shipped generator falls back to the ordinary (rolled) pair loop above 20,000 pairs.
-Detailed code-size experiments are WSL2/CPython 3.10.21 development evidence, distinct from the VM
-sweep below (dev/nbody/FINDINGS.md).
 
 
                                                                 3
 HWSW Final Project                                                                                        Benchmark Report: nbody
 
+grows as O(N²), so the shipped generator falls back to the ordinary (rolled) pair loop above 20,000 pairs.
+Detailed code-size experiments are WSL2/CPython 3.10.21 development evidence, distinct from the VM
+sweep below (dev/nbody/FINDINGS.md).
 The pure-Python VM force-evaluation sweep below includes a rebuilt Barnes-Hut tree at each evaluation (θ =
 0.5, best of seven; ratios use unrounded times). It evaluates an extended workload, not the required N = 5
 benchmark.
@@ -221,15 +224,18 @@ control/status, counters and IRQ. Software loads state and parameters, starts on
 state. There is no per-step DMA or Python call. A register-level driver model implements this protocol and is
 checked against the register map. It is not a deployed device driver or evidence of a physical CPU/accelerator
 run.
+
+
+
+
+                                                               4
+HWSW Final Project                                                                                              Benchmark Report: nbody
+
 Dependencies determine the schedule
 Pairs (0, 1) and (0, 2) can form their distance terms from the same step’s positions, but both update body 0′s
 velocity. Its x lane must compute u0a = u0 - dx01*b1m, then u0b = u0a - dx02*b2m; issuing both against
 the old u0 would lose an update. Regrouping them into one subtraction may also change FP64 rounding.
 Different body-component lanes can progress independently; a dependency tracker and ordered issue logic
-
-                                                               4
-HWSW Final Project                                                                                              Benchmark Report: nbody
-
 wait for each lane’s preceding result. Positions update only after their required velocity contributions, and
 the next step uses the committed positions.
 
@@ -281,15 +287,14 @@ not comparable with each other; within the OpenLane recipe the rewrite made the 
  Three-wide accumulation, three-port register file                                   4.075 mm²                                   124
 The three-wide design spends 38.7% more mapped area to reduce cycles/step by 23.5%. More parallelism can
 reduce cycles while adding selection, forwarding and wiring cost that limits the clock.
-Does the hardware win?
-How the end-to-end time is estimated: offloading a stage removes its share of the software time and adds
-the hardware’s time plus the cost of moving data, T_new = (1 - f)*T_sw + T_hw + T_if. T_sw is the
-measured software run time and f the fraction of it that moves to hardware. T_hw is RTL cycles divided by
-
 
                                                                    5
 HWSW Final Project                                                                                 Benchmark Report: nbody
 
+Does the hardware win?
+How the end-to-end time is estimated: offloading a stage removes its share of the software time and adds
+the hardware’s time plus the cost of moving data, T_new = (1 - f)*T_sw + T_hw + T_if. T_sw is the
+measured software run time and f the fraction of it that moves to hardware. T_hw is RTL cycles divided by
 the clock frequency. T_if is the interface time, here about 150 AXI-Lite register transactions per run, which
 is not measured. We assume 5% of the original runtime (harness and energy evaluation) stays in Python; that
 residual is an assumption, not a matched phase measurement.
@@ -338,9 +343,6 @@ arithmetic model. Comparison with the original targets relative energy error ≤
 velocity errors ≤ 2e-9 / 5e-11 at completion. The full 20,000-step RTL run meets them: relative energy error
 1.7e-14 and position/velocity errors 2.1e-12. These tolerances are distinct from the software tier’s observed
 exact equality.
-
-
-
 
                                                        6
 HWSW Final Project                                                                          Benchmark Report: nbody

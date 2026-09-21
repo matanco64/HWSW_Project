@@ -1,0 +1,211 @@
+python: Python 3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]
+
+== unit-tests: python3 -m unittest discover -s tests -v
+test_backend_reaches_pyperf_workers (test_software.BenchmarkBackend) ... ok
+test_native_metadata_hashes_the_compiled_extension (test_software.BenchmarkBackend) ... ok
+test_native_mode_leaves_a_correct_advance_at_any_n (test_software.BenchmarkBackend) ... ok
+test_calibration_runs_are_not_measurements (test_software.DistributionSummary) ... ok
+test_no_worker_effect_is_reported_as_zero (test_software.DistributionSummary) ... ok
+test_quantiles (test_software.DistributionSummary) ... ok
+test_recovers_a_known_icc (test_software.DistributionSummary) ... ok
+test_identical_state_holds_the_exact_contract (test_software.NbodyRsCheck) ... ok
+test_one_ulp_breaks_the_exact_contract (test_software.NbodyRsCheck) ... ok
+test_tolerance_flag_moves_the_gate (test_software.NbodyRsCheck) ... ok
+test_flame_self_and_inclusive (test_software.ProfileTables) ... ok
+test_perf_figures_the_nbody_report_quotes (test_software.ProfileTables) ... ok
+test_honoured_request_passes (test_software.RunnerAssertions) ... ok
+test_stock_run_without_backend_metadata (test_software.RunnerAssertions) ... ok
+test_unpinned_workers_fail_even_on_the_right_path (test_software.RunnerAssertions) ... ok
+test_wrong_backend_fails (test_software.RunnerAssertions) ... ok
+test_wrong_cpu_fails (test_software.RunnerAssertions) ... ok
+test_intact_table (test_software.TextExportCheck) ... /home/ubuntu/vmverify/report/check_txt_tables.py:100: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmpm13l27et/r.txt'>
+  raw = open(txt_path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_invalid_utf8_is_rejected (test_software.TextExportCheck) ... /home/ubuntu/vmverify/report/check_txt_tables.py:100: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmp367y7oeu/r.txt'>
+  raw = open(txt_path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_values_shifted_one_row_are_rejected (test_software.TextExportCheck) ... /home/ubuntu/vmverify/report/check_txt_tables.py:100: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmpaam8ajzp/r.txt'>
+  raw = open(txt_path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_wrapped_row_is_cosmetic (test_software.TextExportCheck) ... /home/ubuntu/vmverify/report/check_txt_tables.py:100: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmpja56u8nw/r.txt'>
+  raw = open(txt_path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_exactness_gates_the_exit_status (test_software.VerifyContracts) ... ok
+test_missing_stock_reference_is_a_failure_not_a_skip (test_software.VerifyContracts) ... ok
+test_python_kernel_is_checked_when_a_wheel_is_installed (test_software.VerifyContracts) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.727s
+
+OK
+
+== nbody-python-exact: python3 dev/nbody/verify.py --steps 20000
+reference: T0 stock, 20000 steps, energy = -0.16908926275527172
+tolerance: ||delta||_inf / ||ref||_inf <= 1e-11, energy rel <= 1e-12
+
+T1  micro-opt AoS        state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T2  SoA flat lists       state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T3e unrolled bit-exact   state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+T3  unrolled sqrt        state |d|=6.85e-12 (inf-rel 1.73e-13, worst-comp 1.31e-09) | energy rel=9.52e-15 | bit-identical=False
+T3f unrolled sqrt+fold   state |d|=7.78e-12 (inf-rel 1.97e-13, worst-comp 9.50e-10) | energy rel=2.30e-14 | bit-identical=False
+
+LANDED BENCHMARK: /home/ubuntu/vmverify/benchmarks/bm_nbody/run_benchmark.py
+           versus: /home/ubuntu/vmverify_venv/lib/python3.10/site-packages/pyperformance/data-files/benchmarks/bm_nbody/run_benchmark.py
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 20000 steps      state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+
+ALL TIERS WITHIN TOLERANCE, LANDED BENCHMARK BIT-EXACT
+
+== nbody-python-exact-N: python3 dev/nbody/verify.py --steps 2000 --bodies 5,10,20
+
+=== N = 5 (10 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 0 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.10e-05 relative
+
+=== N = 10 (45 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 5 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.09e-05 relative
+
+=== N = 20 (190 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 15 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.07e-05 relative
+
+BIT-EXACT AT EVERY N TESTED
+
+== nbody-python-exact-rolled: env NBODY_MAX_UNROLL_PAIRS=0 python3 dev/nbody/verify.py --steps 2000 --bodies 6,10
+
+=== N = 6 (15 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 1 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.10e-05 relative
+
+=== N = 10 (45 pairs), 2000 steps ===
+  body generators (common.py vs run_benchmark.py): 5 extra bodies, identical=True
+  initial energy         state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  after 2000 steps       state |d|=0.00e+00 (inf-rel 0.00e+00, worst-comp 0.00e+00) | energy rel=0.00e+00 | bit-identical=True
+  physical sanity: all finite=True | energy drift over 2000 steps = 2.09e-05 relative
+
+BIT-EXACT AT EVERY N TESTED
+
+== nbody-native-exact: env NBODY_ROUNDS=3 python3 dev/nbody/rs_check.py --bodies 5,10,31
+python 3.10.12 | steps=20000 rounds=3 | contract: exact equality | N: 5,10,31
+
+=== N = 5 (10 pairs), 20000 steps ===
+initial energy   py -0.1690751638285245
+                 rs -0.1690751638285245
+   equal: True
+after 20000 steps   py -0.16908926275527172
+                 rs -0.16908926275527172
+   state bit-identical : True
+   energy bit-identical: True
+   max |delta| state   : 0.000e+00  (inf-rel 0.000e+00)
+   energy rel delta    : 0.000e+00
+
+=== N = 10 (45 pairs), 20000 steps ===
+initial energy   py -0.17023905382850782
+                 rs -0.17023905382850782
+   equal: True
+after 20000 steps   py -0.1702531533664973
+                 rs -0.1702531533664973
+   state bit-identical : True
+   energy bit-identical: True
+   max |delta| state   : 0.000e+00  (inf-rel 0.000e+00)
+   energy rel delta    : 0.000e+00
+
+=== N = 31 (465 pairs), 20000 steps ===
+initial energy   py -0.1731536073686213
+                 rs -0.1731536073686213
+   equal: True
+after 20000 steps   py -0.17316771725553787
+                 rs -0.17316771725553787
+   state bit-identical : True
+   energy bit-identical: True
+   max |delta| state   : 0.000e+00  (inf-rel 0.000e+00)
+   energy rel delta    : 0.000e+00
+
+advance(0.01, 20000), min of 3 interleaved rounds:
+   CPython stock :   229.785 ms
+   Rust  nbody_rs:     9.463 ms
+   kernel speedup:      24.3x
+
+FFI crossing cost (System.energy(), 20000 calls): 226 ns/call
+   -> 2.39e-05 of one advance(0.01, 20000) call
+
+CONTRACT HELD (exact equality)
+
+== pyflate-native-exact: python3 dev/pyflate/rs_check.py
+python 3.10.12 | rounds=9
+input 67562 bytes -> 399360 bytes, md5 afa004a630fe072901b1d9628b960974
+blocks: 1
+
+--- kernel byte-exactness (Rust vs Python T3 symbol loop) ---
+  block 0: BlockDecoder(groups=6, selectors=2966, alphabet=147, primary_bits=11)  L identical: True  (336184 bytes)  end bit pos: True  (540415, 531571 bits of stream)
+
+--- pipeline byte-exactness (Rust kernel + Python BWT/RLE4) ---
+  pure Python T3 == bz2.decompress : True
+  hybrid         == bz2.decompress : True
+  hybrid         == pure Python T3 : True
+  hybrid md5 afa004a630fe072901b1d9628b960974 == benchmark md5 : True
+
+  ALL CORRECTNESS CHECKS PASS: True
+
+--- symbol-decode kernel, min of 9 interleaved rounds ---
+  Python T3 symbol loop :  116.595 ms
+  Rust  pyflate_rs      :    2.969 ms
+  KERNEL SPEEDUP        :     39.3x
+
+--- stages that stay in Python ---
+  inverse BWT           :  128.744 ms
+  RLE4 expand           :   24.026 ms
+  header + table build  :    8.606 ms
+  (sum of the three)    :  161.375 ms
+
+--- end to end ---
+  pure Python T3        :  276.159 ms
+  hybrid (Rust kernel)  :  158.814 ms
+  END-TO-END SPEEDUP    :     1.74x
+  T0 stock (context)    : 1131.490 ms  -> T3 4.10x, hybrid 7.12x
+
+  Amdahl:
+    symbol loop is 42.2% of the pure-Python decode
+    Python left in the hybrid: 155.845 ms (BWT 83% + RLE4 15% + header/join)
+    CAP with an infinitely fast kernel: 1.77x
+    achieved: 1.74x  (98% of the cap)
+
+  FFI crossing cost (attribute getter, 200000 calls): 91 ns
+  -> 3.06e-05 of one decode() call
+  config build BlockDecoder(...) : 0.108 ms, i.e. 3.6% of one decode
+
+== report-text-export: python3 report/check_txt_tables.py
+report_appendix    17 table rows verified
+report_nbody       33 table rows verified
+report_pyflate     46 table rows verified
+all report tables survive the text export
+
+== report-examples: python3 report/verify_examples.py
+Huffman: primary hit, fallback, packed entries and exact consumed bits PASS
+BWT: pointer table equals independent stable-sort oracle PASS
+MTF and final RLE4 examples PASS
+Nbody: actual generator matches stock on three bodies / 100 steps bit for bit PASS
+
+================ summary ================
+PASS  unit-tests
+PASS  nbody-python-exact
+PASS  nbody-python-exact-N
+PASS  nbody-python-exact-rolled
+PASS  nbody-native-exact
+PASS  pyflate-native-exact
+PASS  report-text-export
+PASS  report-examples
+all checks passed

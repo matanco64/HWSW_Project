@@ -1,0 +1,35 @@
+== building pyflate for Python 3.10.12 -> /home/ubuntu/vmverify/rust/pyflate/target/wheels/20260921_062705
+🐍 Found CPython 3.10 at /home/ubuntu/vmverify_venv/bin/python3
+🔗 Found pyo3 bindings
+📡 Using build options features from pyproject.toml
+   Compiling target-lexicon v0.12.16
+   Compiling once_cell v1.21.4
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling autocfg v1.5.1
+   Compiling libc v0.2.189
+   Compiling heck v0.5.0
+   Compiling cfg-if v1.0.4
+   Compiling indoc v2.0.7
+   Compiling unindent v0.2.4
+   Compiling memoffset v0.9.1
+   Compiling pyo3-build-config v0.22.6
+   Compiling syn v2.0.119
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyflate_rs v0.1.0 (/home/ubuntu/vmverify/rust/pyflate)
+    Finished `release` profile [optimized + debuginfo] target(s) in 21.56s
+📦 Built wheel for CPython 3.10 to /home/ubuntu/vmverify/rust/pyflate/target/wheels/20260921_062705/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+== built  /home/ubuntu/vmverify/rust/pyflate/target/wheels/20260921_062705/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+   sha256 3c1d9c4a1bfde9c0aaf915941a4053658300cea6f358b89e7372c07950511ba7
+== installing: python3 -m pip install --force-reinstall --no-deps /home/ubuntu/vmverify/rust/pyflate/target/wheels/20260921_062705/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Processing ./rust/pyflate/target/wheels/20260921_062705/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+Installing collected packages: pyflate-rs
+Successfully installed pyflate-rs-0.1.0
+== imported pyflate_rs extension from /home/ubuntu/vmverify_venv/lib/python3.10/site-packages/pyflate_rs/pyflate_rs.cpython-310-x86_64-linux-gnu.so
+   sha256 ad16cf345b6cfebf21cf229ace10a6ec1e87f0aeb2cfd7cace938eee25483611 (matches the wheel just built)
+   rustc  rustc 1.98.0 (88d9e12ae 2026-08-18)
+== provenance written to /home/ubuntu/vmverify/out/wheel_pyflate.json

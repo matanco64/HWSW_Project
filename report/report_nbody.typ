@@ -154,8 +154,12 @@ before and 91.4% after; the rest is start-up and imports. Originals:
 = 3. Performance comparison: native execution does less work, not higher IPC
 
 The Rust/PyO3 `System` executes all 20,000 steps in one call, with both energy evaluations
-also native. State and energy match the original exactly on the tested VM build; this does not
-guarantee equality across all compilers and math libraries.
+also native. State and energy match the original exactly on the tested VM build, and not only
+at five bodies: the same check at 5, 10 and 31 bodies is bit-identical in state and energy
+after 20,000 steps (`results/vm_verify_20260921_f407567/check_all.log`). That matters because
+the pair schedule above five bodies is generated code the default workload never exercises.
+Exactness is a property of this build; it does not guarantee equality across all compilers and
+math libraries.
 
 #result-table(columns: (1.7fr, 1fr, 1fr), align: (left, right, right),
   table.header([*Same benchmark file*], [*Mean ± SD*], [*vs Python*]),
