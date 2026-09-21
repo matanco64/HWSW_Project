@@ -45,3 +45,6 @@ output/
 # make_submission.sh output; the archive is rebuilt from any commit on demand
 submission/
 hw/**/synth/signoff_*.log
+
+# macOS
+.DS_Store
