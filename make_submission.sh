@@ -33,8 +33,8 @@ done
 
 fail() { echo "SUBMISSION NOT READY: $*" >&2; exit 1; }
 
-IDENT_DIR="$ROOT/submission/identified"
-IDFILE="$ROOT/report/identity.local.txt"
+IDFILE="$ROOT/report/ids.local"
+IDPDF="$ROOT/report/ids.pdf"
 
 # --- 0. rebuild the reports, so what ships is what the sources say ----------
 # This runs FIRST, and the dirty-tree check below is what makes it meaningful:
@@ -42,8 +42,7 @@ IDFILE="$ROOT/report/identity.local.txt"
 # report/, so an unchanged document rebuilds byte-identically. A report that
 # comes back modified is therefore genuinely stale, not just re-run.
 echo "== rebuilding the reports"
-./report/build.sh --identified >/dev/null \
-    || fail "report build failed; run ./report/build.sh --identified to see why"
+./report/build.sh >/dev/null || fail "report build failed; run ./report/build.sh to see why"
 
 # --- 1. the bundle must correspond to a commit ------------------------------
 command -v git >/dev/null || fail "git not found"
@@ -94,17 +93,21 @@ PY="${PYTHON:-python3}"
                      $PY -m pip install 'pyperformance==1.14.0'
                    or run ./script_nbody.sh setup, which installs it."
 
-# The archive must carry names and ID numbers even though the repository does
-# not: this repository is public, so the stamped reports exist only under
-# submission/identified/ and are overlaid into the zip below.
+# Names and ID numbers go on their own page, as they did in HW1 and HW2, built
+# here and added to the archive. The repository never holds them: it is public,
+# and git history keeps whatever it is once given.
 [ -s "$IDFILE" ] || fail \
-    "no $IDFILE, so the reports would go out without ID numbers.
-                   printf 'Name 012345678 · Name 087654321\\n' > report/identity.local.txt
+    "no $IDFILE, so the submission would go out without ID numbers.
+                   printf 'MATAN_ID=012345678\\nYUVAL_ID=087654321\\n' > report/ids.local
                    The file is gitignored."
-for f in report_pyflate report_nbody; do
-    [ -s "$IDENT_DIR/$f.pdf" ] && [ -s "$IDENT_DIR/$f.txt" ] || \
-        fail "$IDENT_DIR/$f is missing; ./report/build.sh should have written it"
-done
+# shellcheck source=/dev/null
+. "$IDFILE"
+[ -n "${MATAN_ID:-}" ] && [ -n "${YUVAL_ID:-}" ] || \
+    fail "$IDFILE must set MATAN_ID and YUVAL_ID"
+"${TYPST:-typst}" compile --root "$ROOT" \
+    --input "matan-id=$MATAN_ID" --input "yuval-id=$YUVAL_ID" \
+    "$ROOT/report/ids.typ" "$IDPDF" || fail "could not build the names/IDs page"
+printf '  ok       %-22s %s bytes\n' "report/ids.pdf" "$(wc -c <"$IDPDF" | tr -d ' ')"
 
 echo
 echo "== running tools/check_all.sh"
@@ -122,36 +125,31 @@ ARCHIVE="$OUT/hwsw_submission_${STAMP}_${REV}.zip"
 rm -f "$ARCHIVE"
 git archive --format=zip --prefix="hwsw-project/" -o "$ARCHIVE" HEAD
 
-# Replace the repository's ID-free reports with the stamped ones. zip overwrites
-# entries of the same name, so the archive ends up with exactly one copy of each.
+# Add the names/IDs page. It is the only file in the archive that is not in the
+# commit, and the only one carrying ID numbers.
 stage="$(mktemp -d)"
 mkdir -p "$stage/hwsw-project"
-cp "$IDENT_DIR"/report_*.pdf "$IDENT_DIR"/report_*.txt "$stage/hwsw-project/"
-# zip records each file's mtime, which would make the archive differ on every
-# run. Normalise them to the same date the PDFs are built with, so the whole
-# archive stays byte-reproducible for a given revision.
+cp "$IDPDF" "$stage/hwsw-project/ids.pdf"
+# zip records mtimes, which would make the archive differ on every run; pin it
+# so a given revision still produces the same digest.
 EPOCH="$(git log -1 --format=%ct -- 'report/*.typ')"
-"$PY" - "$stage/hwsw-project" "$EPOCH" <<'NORMALISE'
-import os, sys
-d, epoch = sys.argv[1], int(sys.argv[2])
-for name in sorted(os.listdir(d)):
-    os.utime(os.path.join(d, name), (epoch, epoch))
-NORMALISE
-( cd "$stage" && zip -qX "$ARCHIVE" hwsw-project/report_* )
+"$PY" -c "import os,sys; os.utime(sys.argv[1], (int(sys.argv[2]),)*2)" \
+    "$stage/hwsw-project/ids.pdf" "$EPOCH"
+( cd "$stage" && zip -qX "$ARCHIVE" hwsw-project/ids.pdf )
 rm -rf "$stage"
 
-# Prove it: every report inside the archive must carry an ID number, and the
-# repository's own copies must still not.
-ids_re="$(grep -oE '[0-9]{6,}' "$IDFILE" | paste -sd'|' -)"
-[ -n "$ids_re" ] || fail "no ID numbers found in $IDFILE"
-for f in report_pyflate report_nbody; do
-    unzip -p "$ARCHIVE" "hwsw-project/$f.txt" | grep -qE "$ids_re" || \
-        fail "$f.txt in the archive carries no ID number"
-done
-if grep -rqE "$ids_re" "$ROOT/report_pyflate.txt" "$ROOT/report_nbody.txt" 2>/dev/null; then
-    fail "the repository's own reports contain ID numbers; they must not"
+# Prove it: the archive carries the IDs, and nothing in the repository does.
+ids_re="$MATAN_ID|$YUVAL_ID"
+unzip -p "$ARCHIVE" hwsw-project/ids.pdf > "$OUT/.ids_check.pdf"
+if command -v pdftotext >/dev/null 2>&1; then
+    pdftotext "$OUT/.ids_check.pdf" - 2>/dev/null | grep -qE "$ids_re" || \
+        fail "ids.pdf in the archive carries no ID number"
 fi
-echo "  ok       archive reports carry IDs; repository copies do not"
+rm -f "$OUT/.ids_check.pdf"
+if git ls-files -z | xargs -0 grep -lE "$ids_re" 2>/dev/null | grep -q .; then
+    fail "a tracked file contains an ID number; it must not"
+fi
+echo "  ok       archive carries ids.pdf; no tracked file contains an ID"
 
 echo
 echo "wrote $ARCHIVE"

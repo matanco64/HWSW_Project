@@ -41,29 +41,19 @@ fi
 # both (WSL/Linux for the release build, macOS for a local check).
 _filesize() { stat -c%s "$1" 2>/dev/null || stat -f%z "$1"; }
 
-# `--identified` additionally stamps names + ID numbers onto a SECOND set of
-# copies, in a gitignored directory. It is off by default and only
-# make_submission.sh passes it, so ID-bearing files exist only while an archive
-# is being built and can never be sitting in the tree waiting to be committed.
-# This repository is public and an ID committed once stays in history for good.
-# The text comes from report/identity.local.txt, which .gitignore excludes.
-IDENTIFIED=0
-IDFILE="$HERE/identity.local.txt"
 OUTDIR="$ROOT"
-IDARGS=()
 
 build_one() {
     local base="${1%.typ}"
     local src="$HERE/$base.typ"
     [ -f "$src" ] || { echo "no such source: $src" >&2; return 1; }
-    "$TYPST" compile --root "$ROOT" ${IDARGS[@]+"${IDARGS[@]}"} "$src" "$OUTDIR/$base.pdf"
+    "$TYPST" compile --root "$ROOT" "$src" "$OUTDIR/$base.pdf"
     # The .txt companion comes from a second compilation with txtmode set, in
     # which the flame graphs become a one-line pointer (see style.typ). Prose,
     # tables and diagrams are identical in both.
     local tmpdir
     tmpdir="$(mktemp -d)"
-    "$TYPST" compile --root "$ROOT" --input txtmode=1 ${IDARGS[@]+"${IDARGS[@]}"} \
-        "$src" "$tmpdir/$base.pdf"
+    "$TYPST" compile --root "$ROOT" --input txtmode=1 "$src" "$tmpdir/$base.pdf"
     pdftotext "$TXTMODE" -enc UTF-8 "$tmpdir/$base.pdf" "$OUTDIR/$base.txt"
     rm -rf "$tmpdir"
     echo "wrote $OUTDIR/$base.pdf ($(_filesize "$OUTDIR/$base.pdf") bytes)"
@@ -77,16 +67,6 @@ build_one() {
 if { pdftotext -h 2>&1 || true; } | grep -q -- '-table'; then TXTMODE=-table; else TXTMODE=-layout; fi
 echo "pdftotext mode: $TXTMODE"
 
-# Pull --identified out of the arguments; anything else is a report base name.
-ARGS=()
-for a in "$@"; do
-    case "$a" in
-        --identified) IDENTIFIED=1 ;;
-        *) ARGS+=("$a") ;;
-    esac
-done
-set -- ${ARGS[@]+"${ARGS[@]}"}
-
 python3 "$HERE/make_figures.py"
 python3 "$HERE/check_figures.py"
 
@@ -98,26 +78,5 @@ build_all() {
     fi
 }
 
-# 1. The committed, ID-free reports. This pass is the gated one: the table check
-#    runs against what actually ships in the repository.
 build_all "$@"
 python3 "$HERE/check_txt_tables.py" "$@"
-
-# 2. Optional identified copies, into a gitignored directory.
-if [ "$IDENTIFIED" = 1 ] && [ ! -s "$IDFILE" ]; then
-    echo
-    echo "no $IDFILE, so no stamped copies were built."
-    echo "To make them: printf 'Name 012345678 · Name 087654321\\n' > $IDFILE"
-    IDENTIFIED=0
-fi
-if [ "$IDENTIFIED" = 1 ]; then
-    OUTDIR="$ROOT/submission/identified"
-    mkdir -p "$OUTDIR"
-    IDARGS=(--input "ids=$(tr -d '\n' < "$IDFILE")")
-    echo
-    echo "== identified copies -> $OUTDIR"
-    build_all "$@"
-    echo
-    echo "These carry ID numbers and live under submission/, which is gitignored."
-    echo "Hand them in; do not commit them."
-fi

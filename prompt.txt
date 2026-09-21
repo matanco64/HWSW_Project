@@ -1548,3 +1548,9 @@ Prompt: "ֿI want you to make the default report build identified, also ensure i
 
 2026-09-21T15:41:15Z — Claude Code session (auto-logged)
 Prompt: "I think I was mistaken, maybe we should revert build.sh to non-identity build so it will only happen in make_submission and wont be commited"
+
+2026-09-21T15:46:12Z — Claude Code session (auto-logged)
+Prompt: "the names appear now both at the top of the report and at the ID line below, they should appear only once. take a look at @~/projects/HWSW_HW2/"
+
+2026-09-21T15:48:33Z — Claude Code session (auto-logged)
+Prompt: "continue"

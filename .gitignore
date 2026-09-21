@@ -32,10 +32,12 @@ hw/**/sim_build_icarus/
 hw/common/synth/area.txt
 
 # local-only notes (Technion infra detail) and identity data - never commit.
-# report/identity.local.txt holds names + ID numbers for `build.sh --identified`;
-# this repository is public and git history would keep them permanently.
+# report/ids.local holds the ID numbers and report/ids.pdf is the page built
+# from them; this repository is public and git history would keep them for good.
 *.local.md
 *.local.txt
+report/ids.local
+report/ids.pdf
 tmp/*
 
 # Private working notes and self-assessment, not part of the submission

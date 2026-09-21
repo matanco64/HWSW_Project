@@ -213,18 +213,21 @@ The reports carry names only. This repository is public, so ID numbers are kept
 out of every committed file; git history would keep them even after a later
 deletion, and the course brief does not ask for them.
 
-Create the identity file once:
+ID numbers live on their own page, `report/ids.typ`, which is the convention
+HW1 and HW2 used: HW1's report said "Names / IDs — see separate PDF", and HW2
+built a separate `ids.pdf` from a gitignored `ids.local`. The reports
+themselves name the authors once, in the byline, and carry no numbers.
+
+Create the local file once:
 
 ```bash
-printf 'Matan Cohen 012345678 · Yuval Kogan 087654321\n' > report/identity.local.txt
+printf 'MATAN_ID=012345678\nYUVAL_ID=087654321\n' > report/ids.local
 ```
 
-It is gitignored (`*.local.txt`). Nothing else changes: `./report/build.sh`
-still produces only the ID-free reports. `make_submission.sh` is the one caller
-that asks for the stamped pass, so ID-bearing files exist only while an archive
-is being built, and they go to `submission/identified/`, which is gitignored
-too. The reports you hand in carry the IDs; the ones on GitHub do not. HW1 used
-the same separation: its report said "Names / IDs — see separate PDF".
+`make_submission.sh` sources it, compiles `report/ids.pdf` and adds that page to
+the archive. Both the file and the generated PDF are gitignored, so ID numbers
+exist only while an archive is being built. `./report/build.sh` is unaffected
+and never touches them.
 
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
 
@@ -317,18 +320,17 @@ platform.
 ./make_submission.sh            # ...then write submission/<date>_<rev>.zip
 ```
 
-The archive is `git archive HEAD` with the ID-stamped reports overlaid on top,
-so it is the committed tree plus exactly those: no `results/runs/`, no build
-artifacts, nothing uncommitted. A dirty working tree is refused for that reason.
+The archive is `git archive HEAD` plus the generated `ids.pdf`, so it is the
+committed tree and one page that deliberately is not in it: no `results/runs/`,
+no build artifacts, nothing else uncommitted. A dirty working tree is refused for that reason.
 It stays byte-reproducible for a given revision, because the PDFs and the
 overlaid entries are both stamped with a fixed date, so the printed digest is
 enough to tell whether an archive matches a commit.
 
 The script rebuilds the reports before it checks anything, so a stale report
-shows up as a dirty tree rather than shipping quietly. It also refuses to
-package when `report/identity.local.txt` is missing, and then proves the
-result: every report inside the zip carries an ID number, and the repository's
-own copies still do not. Before packaging it requires the named deliverables
+shows up as a dirty tree rather than shipping quietly. It refuses to package
+when `report/ids.local` is missing, and then proves the result: the archive's
+`ids.pdf` carries the numbers, and no tracked file does. Before packaging it requires the named deliverables
 to exist and be non-empty, the two run scripts to be executable and to parse,
 committed SystemVerilog under `hw/*/rtl/`, and `tools/check_all.sh` to pass.
 

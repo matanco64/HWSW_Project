@@ -31,20 +31,14 @@
   show table: set text(size: 10pt)
   show figure.caption: set text(size: 9.5pt)
   set figure(gap: 6pt)
-  // Identity line. Empty unless the build passes `--input ids=...`, which only
-  // `report/build.sh --identified` does, reading a gitignored local file. The
-  // committed PDFs and .txt therefore never carry ID numbers: this repository
-  // is public, and git history would keep them even after a later deletion.
-  let ids = sys.inputs.at("ids", default: "")
+  // Names only. ID numbers live on their own page, report/ids.typ, exactly as
+  // HW1 and HW2 did -- repeating the names under the byline said them twice in
+  // one document, and this repository is public, so an ID committed once would
+  // stay in its history for good.
   align(center)[
     #text(size: 21pt, weight: "bold", fill: ink)[#title] #linebreak()
     #v(3pt) #text(size: 12pt)[#subtitle] #linebreak()
     #v(4pt) #text(size: 9pt)[Matan Cohen · Yuval Kogan | Technion | HWSW Final Project]
-    #if ids != "" {
-      linebreak()
-      v(2pt)
-      text(size: 9pt)[#ids]
-    }
   ]
   v(9pt)
   body
