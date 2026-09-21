@@ -126,7 +126,17 @@ git archive --format=zip --prefix="hwsw-project/" -o "$ARCHIVE" HEAD
 stage="$(mktemp -d)"
 mkdir -p "$stage/hwsw-project"
 cp "$IDENT_DIR"/report_*.pdf "$IDENT_DIR"/report_*.txt "$stage/hwsw-project/"
-( cd "$stage" && zip -q "$ARCHIVE" hwsw-project/report_* )
+# zip records each file's mtime, which would make the archive differ on every
+# run. Normalise them to the same date the PDFs are built with, so the whole
+# archive stays byte-reproducible for a given revision.
+EPOCH="$(git log -1 --format=%ct -- 'report/*.typ')"
+"$PY" - "$stage/hwsw-project" "$EPOCH" <<'NORMALISE'
+import os, sys
+d, epoch = sys.argv[1], int(sys.argv[2])
+for name in sorted(os.listdir(d)):
+    os.utime(os.path.join(d, name), (epoch, epoch))
+NORMALISE
+( cd "$stage" && zip -qX "$ARCHIVE" hwsw-project/report_* )
 rm -rf "$stage"
 
 # Prove it: every report inside the archive must carry an ID number, and the
