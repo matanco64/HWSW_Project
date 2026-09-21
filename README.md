@@ -213,19 +213,19 @@ The reports carry names only. This repository is public, so ID numbers are kept
 out of every committed file; git history would keep them even after a later
 deletion, and the course brief does not ask for them.
 
-To produce copies stamped with names and IDs for handing in:
+Create the identity file once:
 
 ```bash
 printf 'Matan Cohen 012345678 · Yuval Kogan 087654321\n' > report/identity.local.txt
-./report/build.sh --identified
 ```
 
-`report/identity.local.txt` is gitignored (`*.local.txt`). The flag builds the
-committed, ID-free reports first, table checks included, and then writes a second
-stamped set to `submission/identified/`, which is gitignored too. The committed
-PDFs and `.txt` files are never touched by it, and `make_submission.sh` packages
-from `git archive HEAD`, so the stamped copies cannot reach the archive either.
-HW1 used the same separation: its report said "Names / IDs — see separate PDF".
+It is gitignored (`*.local.txt`). From then on `./report/build.sh` writes the
+stamped set to `submission/identified/` as well, which is gitignored too, and
+`make_submission.sh` puts *those* in the archive. So the reports you hand in
+carry the IDs and the ones on GitHub do not. Without the file the stamped pass
+is skipped with a note, so CI and fresh clones are unaffected; `--no-identity`
+skips it explicitly. HW1 used the same separation: its report said
+"Names / IDs — see separate PDF".
 
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
 
@@ -318,11 +318,18 @@ platform.
 ./make_submission.sh            # ...then write submission/<date>_<rev>.zip
 ```
 
-The archive is `git archive HEAD`, so it is exactly the committed tree: no
-`results/runs/`, no build artifacts, nothing uncommitted. A dirty working tree
-is refused for that reason. It is also byte-reproducible for a given revision --
-two runs of the same commit give the same SHA-256 (checked on the course VM) --
-so the printed digest is enough to tell whether an archive matches a commit. Before packaging it requires the named deliverables
+The archive is `git archive HEAD` with the ID-stamped reports overlaid on top,
+so it is the committed tree plus exactly those: no `results/runs/`, no build
+artifacts, nothing uncommitted. A dirty working tree is refused for that reason.
+It stays byte-reproducible for a given revision, because the PDFs and the
+overlaid entries are both stamped with a fixed date, so the printed digest is
+enough to tell whether an archive matches a commit.
+
+The script rebuilds the reports before it checks anything, so a stale report
+shows up as a dirty tree rather than shipping quietly. It also refuses to
+package when `report/identity.local.txt` is missing, and then proves the
+result: every report inside the zip carries an ID number, and the repository's
+own copies still do not. Before packaging it requires the named deliverables
 to exist and be non-empty, the two run scripts to be executable and to parse,
 committed SystemVerilog under `hw/*/rtl/`, and `tools/check_all.sh` to pass.
 
