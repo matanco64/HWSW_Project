@@ -104,7 +104,10 @@ PY="${PYTHON:-python3}"
 . "$IDFILE"
 [ -n "${MATAN_ID:-}" ] && [ -n "${YUVAL_ID:-}" ] || \
     fail "$IDFILE must set MATAN_ID and YUVAL_ID"
-"${TYPST:-typst}" compile --root "$ROOT" \
+# Same pinned creation date the reports use, or this page alone would make the
+# archive differ on every run.
+EPOCH="$(git log -1 --format=%ct -- 'report/*.typ')"
+SOURCE_DATE_EPOCH="$EPOCH" "${TYPST:-typst}" compile --root "$ROOT" \
     --input "matan-id=$MATAN_ID" --input "yuval-id=$YUVAL_ID" \
     "$ROOT/report/ids.typ" "$IDPDF" || fail "could not build the names/IDs page"
 printf '  ok       %-22s %s bytes\n' "report/ids.pdf" "$(wc -c <"$IDPDF" | tr -d ' ')"
@@ -132,7 +135,6 @@ mkdir -p "$stage/hwsw-project"
 cp "$IDPDF" "$stage/hwsw-project/ids.pdf"
 # zip records mtimes, which would make the archive differ on every run; pin it
 # so a given revision still produces the same digest.
-EPOCH="$(git log -1 --format=%ct -- 'report/*.typ')"
 "$PY" -c "import os,sys; os.utime(sys.argv[1], (int(sys.argv[2]),)*2)" \
     "$stage/hwsw-project/ids.pdf" "$EPOCH"
 ( cd "$stage" && zip -qX "$ARCHIVE" hwsw-project/ids.pdf )
