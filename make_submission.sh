@@ -42,7 +42,8 @@ IDFILE="$ROOT/report/identity.local.txt"
 # report/, so an unchanged document rebuilds byte-identically. A report that
 # comes back modified is therefore genuinely stale, not just re-run.
 echo "== rebuilding the reports"
-./report/build.sh >/dev/null || fail "report build failed; run ./report/build.sh to see why"
+./report/build.sh --identified >/dev/null \
+    || fail "report build failed; run ./report/build.sh --identified to see why"
 
 # --- 1. the bundle must correspond to a commit ------------------------------
 command -v git >/dev/null || fail "git not found"

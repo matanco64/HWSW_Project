@@ -41,13 +41,13 @@ fi
 # both (WSL/Linux for the release build, macOS for a local check).
 _filesize() { stat -c%s "$1" 2>/dev/null || stat -f%z "$1"; }
 
-# Stamped copies carrying names + ID numbers are built BY DEFAULT, into a
-# gitignored directory. The committed reports are never touched by them: this
-# repository is public, and an ID committed once stays in history for good. The
-# identity text comes from report/identity.local.txt, which .gitignore excludes;
-# without that file the stamped pass is skipped, so CI and fresh clones are fine.
-# `--no-identity` skips it explicitly.
-IDENTIFIED=1
+# `--identified` additionally stamps names + ID numbers onto a SECOND set of
+# copies, in a gitignored directory. It is off by default and only
+# make_submission.sh passes it, so ID-bearing files exist only while an archive
+# is being built and can never be sitting in the tree waiting to be committed.
+# This repository is public and an ID committed once stays in history for good.
+# The text comes from report/identity.local.txt, which .gitignore excludes.
+IDENTIFIED=0
 IDFILE="$HERE/identity.local.txt"
 OUTDIR="$ROOT"
 IDARGS=()
@@ -81,8 +81,7 @@ echo "pdftotext mode: $TXTMODE"
 ARGS=()
 for a in "$@"; do
     case "$a" in
-        --identified) IDENTIFIED=1 ;;          # accepted; it is now the default
-        --no-identity) IDENTIFIED=0 ;;
+        --identified) IDENTIFIED=1 ;;
         *) ARGS+=("$a") ;;
     esac
 done
