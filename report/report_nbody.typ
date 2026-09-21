@@ -40,7 +40,9 @@ pyperformance 1.14.0; 120 measured values per configuration, every timed run pin
 CPU 0, measured from revision 2c8c754 through the documented runner scripts. Source:
 `results/vm_canonical_20260910_2c8c754/suite/{baseline,optimized}_nbody.json`, which also record the backend and CPU
 affinity (Appendix A7). SD denotes sample standard deviation,
-not a confidence interval. Profiling is separate from timing; the shared appendix records
+not a confidence interval. A later commit removed a dead store from the generated
+`advance()` and widened the optional-import fallback; both pass the same bit-exactness oracle
+but were not re-timed. Profiling is separate from timing; the shared appendix records
 methods and provenance.]
 
 Worker processes account for much of the timing variation. Appendix A5 reports medians,
