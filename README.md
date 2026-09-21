@@ -219,13 +219,12 @@ Create the identity file once:
 printf 'Matan Cohen 012345678 · Yuval Kogan 087654321\n' > report/identity.local.txt
 ```
 
-It is gitignored (`*.local.txt`). From then on `./report/build.sh` writes the
-stamped set to `submission/identified/` as well, which is gitignored too, and
-`make_submission.sh` puts *those* in the archive. So the reports you hand in
-carry the IDs and the ones on GitHub do not. Without the file the stamped pass
-is skipped with a note, so CI and fresh clones are unaffected; `--no-identity`
-skips it explicitly. HW1 used the same separation: its report said
-"Names / IDs — see separate PDF".
+It is gitignored (`*.local.txt`). Nothing else changes: `./report/build.sh`
+still produces only the ID-free reports. `make_submission.sh` is the one caller
+that asks for the stamped pass, so ID-bearing files exist only while an archive
+is being built, and they go to `submission/identified/`, which is gitignored
+too. The reports you hand in carry the IDs; the ones on GitHub do not. HW1 used
+the same separation: its report said "Names / IDs — see separate PDF".
 
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
 
