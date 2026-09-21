@@ -36,13 +36,25 @@ fail() { echo "SUBMISSION NOT READY: $*" >&2; exit 1; }
 IDFILE="$ROOT/report/ids.local"
 IDPDF="$ROOT/report/ids.pdf"
 
-# --- 0. rebuild the reports, so what ships is what the sources say ----------
-# This runs FIRST, and the dirty-tree check below is what makes it meaningful:
-# report/build.sh pins the PDF creation date to the last commit touching
-# report/, so an unchanged document rebuilds byte-identically. A report that
-# comes back modified is therefore genuinely stale, not just re-run.
-echo "== rebuilding the reports"
-./report/build.sh >/dev/null || fail "report build failed; run ./report/build.sh to see why"
+# --- 0. the built reports must not be older than their sources --------------
+# Asked from git history rather than by rebuilding and diffing. A rebuild only
+# reproduces the committed bytes on the machine that made them: Typst and
+# pdftotext differ between our laptops, and build.sh even picks xpdf's `-table`
+# over poppler's `-layout` when it finds it, so a rebuild elsewhere reports
+# every report as stale when nothing is wrong. History is the same everywhere.
+REPORT_OUT="report_nbody.pdf report_pyflate.pdf report_appendix.pdf
+            report_nbody.txt report_pyflate.txt report_appendix.txt"
+# shellcheck disable=SC2086
+out_commit="$(git log -1 --format=%H -- $REPORT_OUT)"
+if [ -n "$out_commit" ]; then
+    stale="$(git log --oneline "$out_commit"..HEAD -- 'report/*.typ' report/fig)"
+    if [ -n "$stale" ]; then
+        echo "Report sources changed after the reports were last built:" >&2
+        echo "$stale" >&2
+        fail "run ./report/build.sh and commit the result"
+    fi
+fi
+echo "  ok       reports are newer than their sources"
 
 # --- 1. the bundle must correspond to a commit ------------------------------
 command -v git >/dev/null || fail "git not found"
@@ -50,7 +62,6 @@ git rev-parse --git-dir >/dev/null 2>&1 || fail "not a git repository"
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     echo "Uncommitted changes to tracked files:" >&2
     git status --short --untracked-files=no >&2
-    echo "(the reports were just rebuilt; if they are listed above they were stale)" >&2
     fail "commit or stash them first; the archive is built from HEAD"
 fi
 REV="$(git rev-parse --short HEAD)"
