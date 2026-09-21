@@ -327,10 +327,20 @@ It stays byte-reproducible for a given revision, because the PDFs and the
 overlaid entries are both stamped with a fixed date, so the printed digest is
 enough to tell whether an archive matches a commit.
 
-The script rebuilds the reports before it checks anything, so a stale report
-shows up as a dirty tree rather than shipping quietly. It refuses to package
-when `report/ids.local` is missing, and then proves the result: the archive's
-`ids.pdf` carries the numbers, and no tracked file does. Before packaging it requires the named deliverables
+The script does not rebuild the reports to decide whether they are current; it
+asks git. If any commit after the one that last built them touched
+`report/*.typ` or `report/fig`, it names that commit and stops. Rebuilding to
+compare only works on the machine that produced the committed files: Typst
+versions differ, and `build.sh` prefers xpdf's `-table` over poppler's
+`-layout` when it finds it, so the `.txt` and the PDF bytes change between
+laptops for reasons unrelated to whether a report matches its source.
+`check_txt_tables.py` gates whichever exporter ran, so either is correct; only
+the bytes differ. If you do rebuild, commit the result, and expect a diff in
+all three reports if your toolchain is not the one that built them last.
+
+It also refuses to package when `report/ids.local` is missing, and then proves
+the result: the archive's `ids.pdf` carries the numbers, and no tracked file
+does. Before packaging it requires the named deliverables
 to exist and be non-empty, the two run scripts to be executable and to parse,
 committed SystemVerilog under `hw/*/rtl/`, and `tools/check_all.sh` to pass.
 
