@@ -207,6 +207,26 @@ functions without installing benchmark dependencies.
 block holds the detailed report-revision requests and per-improvement instructions.
 [Measurement history](report/history/README.md) preserves the superseded appendix.
 
+### Names and ID numbers
+
+The reports carry names only. This repository is public, so ID numbers are kept
+out of every committed file; git history would keep them even after a later
+deletion, and the course brief does not ask for them.
+
+To produce copies stamped with names and IDs for handing in:
+
+```bash
+printf 'Matan Cohen 012345678 · Yuval Kogan 087654321\n' > report/identity.local.txt
+./report/build.sh --identified
+```
+
+`report/identity.local.txt` is gitignored (`*.local.txt`). The flag builds the
+committed, ID-free reports first, table checks included, and then writes a second
+stamped set to `submission/identified/`, which is gitignored too. The committed
+PDFs and `.txt` files are never touched by it, and `make_submission.sh` packages
+from `git archive HEAD`, so the stamped copies cannot reach the archive either.
+HW1 used the same separation: its report said "Names / IDs — see separate PDF".
+
 Build on Linux/WSL with `./report/build.sh` (optionally set `TYPST`), or on Windows:
 
 ```powershell
