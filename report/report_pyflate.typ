@@ -470,5 +470,4 @@ timing, not a run of Python attached to hardware.
 
 #text(size: 9pt)[*Evidence:* `hw/huffman_engine/docs/{ppa,integration}.md`,
 `hw/mtf_cam/docs/{ppa,integration}.md`,
-`hw/pyflate_accel/README.md`, `hw/docs/hardware_report.md`. Methods and profiles: *report_appendix.pdf*.
-Repository: #link("https://github.com/matanco64/HWSW_Project")[HWSW_Project].]
+`hw/pyflate_accel/README.md`, `hw/docs/hardware_report.md`. Methods and profiles: *report_appendix.pdf*.]

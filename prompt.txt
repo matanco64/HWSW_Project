@@ -1557,3 +1557,9 @@ Prompt: "continue"
 
 2026-09-21T15:59:05Z — Claude Code session (auto-logged)
 Prompt: "when running now make_submission, the reports are marked as stale for YUVAL"
+
+2026-09-21T16:10:40Z — Claude Code session (auto-logged)
+Prompt: "I want you to add the github link to each report and the id page, so it can be reached, also to the readme file"
+
+2026-09-21T16:11:33Z — Claude Code session (auto-logged)
+Prompt: "it should be very clear"

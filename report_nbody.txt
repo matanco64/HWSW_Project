@@ -2,6 +2,8 @@
            Five bodies, twenty thousand steps, and an interpreter between every calculation
                                Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
 
+                               Repository: github.com/matanco64/HWSW_Project
+
 A probe is falling toward Neptune, and somebody has to know where it will be in six hours.
 Predicting motion means repeatedly adding up gravitational forces. This benchmark captures that
 computational core in miniature: the Sun and four gas giants, ten interacting pairs, and twenty thousand
@@ -362,7 +364,7 @@ bound at 12.3 cycles per pair, where the schedule model projects 4.4 at N = 100 
 only with four to eight times the arithmetic units. The measured cycle/area trade-off shows why a fast
 schedule alone is insufficient: the parallelism that saves cycles also lengthens the clock path.
 Evidence: hw/grape_pipeline/docs/uarch.md, prd.md, testplan.md, ppa.md and integration.md; hw/docs/
-hardware_report.md. Reproduction and supporting profiles: report_appendix.pdf. Repository: HWSW_Project.
+hardware_report.md. Reproduction and supporting profiles: report_appendix.pdf.
 
 
 

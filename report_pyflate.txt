@@ -2,6 +2,8 @@
              A small link budget, a compressed payload, and a lot of work between the bits
                                 Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
 
+                                Repository: github.com/matanco64/HWSW_Project
+
 Somewhere between a spacecraft and a ground station there is a link budget measured in kilobits.
 Compression makes the most of it; decompression turns the arriving bits back into useful data. This
 benchmark gives that quiet half of the job to Python: read a bit stream, recover symbols, and undo several
@@ -53,14 +55,16 @@ exceed the course’s 7% improvement requirement and match bz2.decompress byte f
 unchanged MD5 check. Rust handles the stage labeled Rust extension above; block headers, inverse BWT and
 RLE4 remain in Python.
 
- Measurement scope: Course QEMU/KVM virtual machine (VM), Ubuntu 22.04, release CPython 3.10.12;
- 120 values per configuration, pinned to guest CPU 0, from revision 2c8c754 through the documented
- scripts and its own Rust build. Source: results/vm_canonical_20260910_2c8c754/suite/ (Appendix
+
+
 
                                                            1
 HWSW Final Project                                                                                       Benchmark Report: pyflate
 
 
+  Measurement scope: Course QEMU/KVM virtual machine (VM), Ubuntu 22.04, release CPython 3.10.12;
+  120 values per configuration, pinned to guest CPU 0, from revision 2c8c754 through the documented
+  scripts and its own Rust build. Source: results/vm_canonical_20260910_2c8c754/suite/ (Appendix
   A7). Development profiles and ablations are labeled separately. Later commits trimmed comments, moved
   the BWT histogram to collections.Counter and lowered the Rust code-length cap from 23 to 20; they
   pass the same byte-exact checks but were not re-timed.
@@ -110,9 +114,6 @@ Symbol decoding is the largest optimized function (32.79% self), while whole inv
 • Improve the back end: replace comparison sorting with counting-sort BWT construction; reverse the
   MTF list so updates move O(rank) entries; use regex-assisted RLE4 expansion to reduce Python loop
   iterations. The byte scan/output work is still linear overall.
-
-
-
 
                                                                  2
 HWSW Final Project                                                                                          Benchmark Report: pyflate
@@ -442,7 +443,6 @@ for both routes. The hardware figures are projections from RTL simulation and st
 Python attached to hardware.
 Evidence: hw/huffman_engine/docs/{ppa,integration}.md, hw/mtf_cam/docs/{ppa,integration}.md,
 hw/pyflate_accel/README.md, hw/docs/hardware_report.md. Methods and profiles: report_appendix.pdf.
-Repository: HWSW_Project.
 
 
 

@@ -3,6 +3,8 @@
 Benchmark optimization, analysis, and hardware acceleration proposal for
 pyperformance benchmarks. Course: Hardware/Software Integration, Technion.
 
+Repository: <https://github.com/matanco64/HWSW_Project>
+
 **The project and submission cover pyflate and nbody.**
 
 | Benchmark | What it is | Baseline | Optimized | Speedup | |

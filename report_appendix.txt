@@ -2,6 +2,7 @@
                      Reproduction, evidence scope, and the limits of the measurements
                               Matan Cohen · Yuval Kogan | Technion | HWSW Final Project
 
+                              Repository: github.com/matanco64/HWSW_Project
 
 
 A1. Timing and provenance
@@ -50,7 +51,6 @@ Correctness contracts
   vector and ending bit position. Output validation is outside headline timing.
 Equality is specific to the tested inputs and build. Numerical equality differs from byte identity for signed
 zeros; consult each checker’s selected contract and output log.
-
 
 
 

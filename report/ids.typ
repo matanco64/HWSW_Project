@@ -11,6 +11,7 @@
 
 #set page(paper: "a4", margin: 2cm)
 #set text(font: "Libertinus Serif", size: 11pt, lang: "en")
+#show link: set text(fill: rgb("#185b87"))
 
 #align(center + horizon)[
   #text(size: 18pt, weight: "bold", fill: ink)[HWSW Final Project] \
@@ -25,5 +26,7 @@
     Yuval Kogan — ID: #yuval-id
   ] \
   #v(2.4em)
-  #text(size: 10pt)[Technion — Israel Institute of Technology]
+  #text(size: 10pt)[Technion — Israel Institute of Technology] \
+  #v(1.1em)
+  #text(size: 12pt)[*Repository:* #link("https://github.com/matanco64/HWSW_Project")[github.com/matanco64/HWSW_Project]]
 ]

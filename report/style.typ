@@ -38,7 +38,8 @@
   align(center)[
     #text(size: 21pt, weight: "bold", fill: ink)[#title] #linebreak()
     #v(3pt) #text(size: 12pt)[#subtitle] #linebreak()
-    #v(4pt) #text(size: 9pt)[Matan Cohen · Yuval Kogan | Technion | HWSW Final Project]
+    #v(4pt) #text(size: 9pt)[Matan Cohen · Yuval Kogan | Technion | HWSW Final Project] #linebreak()
+    #v(5pt) #text(size: 10.5pt)[*Repository:* #link("https://github.com/matanco64/HWSW_Project")[github.com/matanco64/HWSW_Project]]
   ]
   v(9pt)
   body

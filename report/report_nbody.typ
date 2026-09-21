@@ -405,5 +405,4 @@ insufficient: the parallelism that saves cycles also lengthens the clock path.
 
 #text(size: 9pt)[*Evidence:* `hw/grape_pipeline/docs/uarch.md`, `prd.md`,
 `testplan.md`, `ppa.md` and `integration.md`; `hw/docs/hardware_report.md`.
-Reproduction and supporting profiles: *report_appendix.pdf*.
-Repository: #link("https://github.com/matanco64/HWSW_Project")[HWSW_Project].]
+Reproduction and supporting profiles: *report_appendix.pdf*.]
