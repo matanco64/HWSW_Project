@@ -33,12 +33,24 @@ done
 
 fail() { echo "SUBMISSION NOT READY: $*" >&2; exit 1; }
 
+IDENT_DIR="$ROOT/submission/identified"
+IDFILE="$ROOT/report/identity.local.txt"
+
+# --- 0. rebuild the reports, so what ships is what the sources say ----------
+# This runs FIRST, and the dirty-tree check below is what makes it meaningful:
+# report/build.sh pins the PDF creation date to the last commit touching
+# report/, so an unchanged document rebuilds byte-identically. A report that
+# comes back modified is therefore genuinely stale, not just re-run.
+echo "== rebuilding the reports"
+./report/build.sh >/dev/null || fail "report build failed; run ./report/build.sh to see why"
+
 # --- 1. the bundle must correspond to a commit ------------------------------
 command -v git >/dev/null || fail "git not found"
 git rev-parse --git-dir >/dev/null 2>&1 || fail "not a git repository"
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     echo "Uncommitted changes to tracked files:" >&2
     git status --short --untracked-files=no >&2
+    echo "(the reports were just rebuilt; if they are listed above they were stale)" >&2
     fail "commit or stash them first; the archive is built from HEAD"
 fi
 REV="$(git rev-parse --short HEAD)"
@@ -81,6 +93,18 @@ PY="${PYTHON:-python3}"
                      $PY -m pip install 'pyperformance==1.14.0'
                    or run ./script_nbody.sh setup, which installs it."
 
+# The archive must carry names and ID numbers even though the repository does
+# not: this repository is public, so the stamped reports exist only under
+# submission/identified/ and are overlaid into the zip below.
+[ -s "$IDFILE" ] || fail \
+    "no $IDFILE, so the reports would go out without ID numbers.
+                   printf 'Name 012345678 · Name 087654321\\n' > report/identity.local.txt
+                   The file is gitignored."
+for f in report_pyflate report_nbody; do
+    [ -s "$IDENT_DIR/$f.pdf" ] && [ -s "$IDENT_DIR/$f.txt" ] || \
+        fail "$IDENT_DIR/$f is missing; ./report/build.sh should have written it"
+done
+
 echo
 echo "== running tools/check_all.sh"
 ./tools/check_all.sh || fail "correctness checks failed"
@@ -94,7 +118,29 @@ fi
 # --- 5. package --------------------------------------------------------------
 mkdir -p "$OUT"
 ARCHIVE="$OUT/hwsw_submission_${STAMP}_${REV}.zip"
+rm -f "$ARCHIVE"
 git archive --format=zip --prefix="hwsw-project/" -o "$ARCHIVE" HEAD
+
+# Replace the repository's ID-free reports with the stamped ones. zip overwrites
+# entries of the same name, so the archive ends up with exactly one copy of each.
+stage="$(mktemp -d)"
+mkdir -p "$stage/hwsw-project"
+cp "$IDENT_DIR"/report_*.pdf "$IDENT_DIR"/report_*.txt "$stage/hwsw-project/"
+( cd "$stage" && zip -q "$ARCHIVE" hwsw-project/report_* )
+rm -rf "$stage"
+
+# Prove it: every report inside the archive must carry an ID number, and the
+# repository's own copies must still not.
+ids_re="$(grep -oE '[0-9]{6,}' "$IDFILE" | paste -sd'|' -)"
+[ -n "$ids_re" ] || fail "no ID numbers found in $IDFILE"
+for f in report_pyflate report_nbody; do
+    unzip -p "$ARCHIVE" "hwsw-project/$f.txt" | grep -qE "$ids_re" || \
+        fail "$f.txt in the archive carries no ID number"
+done
+if grep -rqE "$ids_re" "$ROOT/report_pyflate.txt" "$ROOT/report_nbody.txt" 2>/dev/null; then
+    fail "the repository's own reports contain ID numbers; they must not"
+fi
+echo "  ok       archive reports carry IDs; repository copies do not"
 
 echo
 echo "wrote $ARCHIVE"

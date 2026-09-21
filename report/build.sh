@@ -22,15 +22,32 @@ fi
 command -v "$TYPST" >/dev/null 2>&1 || [ -x "$TYPST" ] || {
     echo "typst not found at '$TYPST' (set TYPST=...)" >&2; exit 1; }
 
+# Typst stamps a creation date into every PDF, so an unpinned rebuild changed the
+# bytes of an unchanged document and `git status` could never tell a stale report
+# from a re-run. Pinning it to the commit's own date makes a given revision build
+# byte-identical PDFs, which is what lets make_submission.sh treat a dirty tree
+# after a rebuild as real staleness.
+# Dated from the last commit touching the Typst sources, not from HEAD and not
+# from report/ as a whole. The PDFs live at the repository root, so committing
+# them cannot move this date, and neither can editing a build script -- either
+# would change the timestamp, hence the bytes, hence the next build, and
+# make_submission could never reach a clean tree.
+if [ -z "${SOURCE_DATE_EPOCH:-}" ]; then
+    SOURCE_DATE_EPOCH="$(git -C "$ROOT" log -1 --format=%ct -- 'report/*.typ' 2>/dev/null || true)"
+    [ -n "$SOURCE_DATE_EPOCH" ] && export SOURCE_DATE_EPOCH
+fi
+
 # stat(1) takes different flags on GNU and BSD userlands, and this builds on
 # both (WSL/Linux for the release build, macOS for a local check).
 _filesize() { stat -c%s "$1" 2>/dev/null || stat -f%z "$1"; }
 
-# `--identified` stamps names + ID numbers on a SECOND set of copies, written to
-# a gitignored directory. The committed reports are never touched by it: this
-# repository is public, and an ID committed once stays in history. The identity
-# text is read from report/identity.local.txt, which .gitignore excludes.
-IDENTIFIED=0
+# Stamped copies carrying names + ID numbers are built BY DEFAULT, into a
+# gitignored directory. The committed reports are never touched by them: this
+# repository is public, and an ID committed once stays in history for good. The
+# identity text comes from report/identity.local.txt, which .gitignore excludes;
+# without that file the stamped pass is skipped, so CI and fresh clones are fine.
+# `--no-identity` skips it explicitly.
+IDENTIFIED=1
 IDFILE="$HERE/identity.local.txt"
 OUTDIR="$ROOT"
 IDARGS=()
@@ -64,7 +81,8 @@ echo "pdftotext mode: $TXTMODE"
 ARGS=()
 for a in "$@"; do
     case "$a" in
-        --identified) IDENTIFIED=1 ;;
+        --identified) IDENTIFIED=1 ;;          # accepted; it is now the default
+        --no-identity) IDENTIFIED=0 ;;
         *) ARGS+=("$a") ;;
     esac
 done
@@ -87,12 +105,13 @@ build_all "$@"
 python3 "$HERE/check_txt_tables.py" "$@"
 
 # 2. Optional identified copies, into a gitignored directory.
+if [ "$IDENTIFIED" = 1 ] && [ ! -s "$IDFILE" ]; then
+    echo
+    echo "no $IDFILE, so no stamped copies were built."
+    echo "To make them: printf 'Name 012345678 · Name 087654321\\n' > $IDFILE"
+    IDENTIFIED=0
+fi
 if [ "$IDENTIFIED" = 1 ]; then
-    [ -s "$IDFILE" ] || {
-        echo "--identified needs $IDFILE" >&2
-        echo "one line, e.g.: Matan Cohen 012345678 · Yuval Kogan 087654321" >&2
-        echo "The file is gitignored. Create it and re-run." >&2
-        exit 1; }
     OUTDIR="$ROOT/submission/identified"
     mkdir -p "$OUTDIR"
     IDARGS=(--input "ids=$(tr -d '\n' < "$IDFILE")")
