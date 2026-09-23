@@ -1,0 +1,44 @@
+# Archive hygiene: `git archive` (make_submission.sh) drops these. The public
+# repository keeps them; the graded archive carries deliverables and evidence only.
+.claude/                         export-ignore
+skills-lock.json                 export-ignore
+.github/                         export-ignore
+.gitattributes                   export-ignore
+make_submission.sh               export-ignore
+project_instructions.md          export-ignore
+project_instructions.pdf         export-ignore
+report/FOR_MATAN.md              export-ignore
+report/CLOSEOUT.md               export-ignore
+report/CHECKPOINT.md             export-ignore
+report/REPORT_DELTAS.md          export-ignore
+report/defense_guide.md          export-ignore
+report/history/                  export-ignore
+research/hw-agent-skills-and-toolchain.md export-ignore
+hw/FLOW.md                       export-ignore
+hw/PLAN.md                       export-ignore
+hw/STATUS.json                   export-ignore
+hw/PROGRESS.md                   export-ignore
+hw/CONTEXT.md                    export-ignore
+hw/docs/lessons.md               export-ignore
+hw/*/docs/review_*.md            export-ignore
+hw/**/synth/yosys*.log           export-ignore
+hw/**/synth/openlane_run.log     export-ignore
+hw/**/synth/openlane_tight.log   export-ignore
+hw/**/synth/*.gen.ys             export-ignore
+hw/**/synth/formal*/model/       export-ignore
+hw/**/synth/formal*/engine_0/    export-ignore
+hw/**/synth/formal*/src/         export-ignore
+hw/**/synth/formal*/status.sqlite export-ignore
+hw/**/synth/formal*/*.xml        export-ignore
+# raw per-run counter dumps (24 x csv/stdout/stderr, 25 per-run json, 1 log);
+# summary.json stays -- it is what the reports cite. gitattributes has no
+# negation, so the raw files are matched by their own name patterns.
+results/native_counters_20260907/*.perf.csv     export-ignore
+results/native_counters_20260907/*.stdout       export-ignore
+results/native_counters_20260907/*.stderr       export-ignore
+results/native_counters_20260907/*.log          export-ignore
+results/native_counters_20260907/nbody_*.json   export-ignore
+results/native_counters_20260907/pyflate_*.json export-ignore
+tools/hw/*_hook.py               export-ignore
+tools/log_prompt_hook.py         export-ignore
+**/__pycache__/                  export-ignore

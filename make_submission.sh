@@ -43,11 +43,13 @@ IDPDF="$ROOT/report/ids.pdf"
 # over poppler's `-layout` when it finds it, so a rebuild elsewhere reports
 # every report as stale when nothing is wrong. History is the same everywhere.
 REPORT_OUT="report_nbody.pdf report_pyflate.pdf report_appendix.pdf
-            report_nbody.txt report_pyflate.txt report_appendix.txt"
+            report_nbody.txt report_pyflate.txt report_appendix.txt
+            hw/docs/hardware_report.pdf"
 # shellcheck disable=SC2086
 out_commit="$(git log -1 --format=%H -- $REPORT_OUT)"
 if [ -n "$out_commit" ]; then
-    stale="$(git log --oneline "$out_commit"..HEAD -- 'report/*.typ' report/fig)"
+    stale="$(git log --oneline "$out_commit"..HEAD -- 'report/*.typ' report/fig \
+             hw/docs/hardware_report.md)"
     if [ -n "$stale" ]; then
         echo "Report sources changed after the reports were last built:" >&2
         echo "$stale" >&2

@@ -5,6 +5,31 @@ pyperformance benchmarks. Course: Hardware/Software Integration, Technion.
 
 Repository: <https://github.com/matanco64/HWSW_Project>
 
+## Start here
+
+Deliverables, in reading order: `report_nbody.txt` and `report_pyflate.txt` (the PDF
+editions carry the figures), `report_appendix.txt` (methods, provenance and the limits of
+every measurement), `hw/docs/hardware_report.md` (the three accelerators against §7 of the
+brief, with the toolchain and a source for every number), and `prompt.txt` (every AI prompt
+used). Reproduce the headline comparisons with one command per benchmark, inside the course
+VM:
+
+```bash
+./script_nbody.sh all      # setup → baseline → profile → optimized → compare (→ native)
+./script_pyflate.sh all
+```
+
+**How AI tools were used.** Claude Code (Anthropic) throughout and, for one report-revision
+pass, OpenAI Codex; every prompt is in `prompt.txt`, auto-logged by a hook from 2026-08-24.
+Yuval Kogan directed the hardware flow (PRD → architecture → RTL → verification → PPA),
+reviewed each stage gate, and wrote and edited the reports' hardware sections; Matan Cohen
+designed and measured the software optimization ladder, ran the course-VM measurements, and
+wrote the reports' software sections. The agent drafted RTL, testbenches, flow documents and
+report text under those directions; every number in the reports is regenerated from files in
+`results/` and `hw/`. The submission archive is the repository minus agent tooling,
+flow-gate documents and tool logs (`.gitattributes` `export-ignore`); the public repository
+keeps them.
+
 **The project and submission cover pyflate and nbody.**
 
 | Benchmark | What it is | Baseline | Optimized | Speedup | |
@@ -34,10 +59,11 @@ separate simulation cycles, mapped area and timing evidence from design targets:
 |---|---|---|---:|---:|---:|
 | `grape_pipeline` | nbody | 584,454 | 4.08 mm² | 19.5 MHz | 9/9 |
 | `huffman_engine` | pyflate | 151,058 | 1.63 mm² | 39.9 MHz | 17/17 |
-| `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.6 MHz | 16/16 |
+| `mtf_cam` | pyflate | 18,814 | 0.19 mm² | 37.5 MHz | 16/16 |
 
 All three frequencies are **post-CTS** static-timing estimates (cells and the clock tree
-placed, signal wires not routed); none has completed 50 MHz routed sign-off. The grape area
+placed, signal wires not routed) from runs that met their constraint; none has completed 50 MHz
+routed sign-off, and each module's 50 MHz run is kept as the second evidence point. The grape area
 is a plain Yosys figure from before the final rewrite of its issue-selection logic; the OpenLane
 synthesis of the final RTL gives 446,932 cells / 4.66 mm²
 (`hw/grape_pipeline/synth/evidence/area_openlane.txt`). The two pyflate
@@ -317,44 +343,13 @@ platform.
 
 ## Packaging the submission
 
-```bash
-./make_submission.sh --check    # verify only
-./make_submission.sh            # ...then write submission/<date>_<rev>.zip
-```
-
-The archive is `git archive HEAD` plus the generated `ids.pdf`, so it is the
-committed tree and one page that deliberately is not in it: no `results/runs/`,
-no build artifacts, nothing else uncommitted. A dirty working tree is refused for that reason.
-It stays byte-reproducible for a given revision, because the PDFs and the
-overlaid entries are both stamped with a fixed date, so the printed digest is
-enough to tell whether an archive matches a commit.
-
-The script does not rebuild the reports to decide whether they are current; it
-asks git. If any commit after the one that last built them touched
-`report/*.typ` or `report/fig`, it names that commit and stops. Rebuilding to
-compare only works on the machine that produced the committed files: Typst
-versions differ, and `build.sh` prefers xpdf's `-table` over poppler's
-`-layout` when it finds it, so the `.txt` and the PDF bytes change between
-laptops for reasons unrelated to whether a report matches its source.
-`check_txt_tables.py` gates whichever exporter ran, so either is correct; only
-the bytes differ. If you do rebuild, commit the result, and expect a diff in
-all three reports if your toolchain is not the one that built them last.
-
-It also refuses to package when `report/ids.local` is missing, and then proves
-the result: the archive's `ids.pdf` carries the numbers, and no tracked file
-does. Before packaging it requires the named deliverables
-to exist and be non-empty, the two run scripts to be executable and to parse,
-committed SystemVerilog under `hw/*/rtl/`, and `tools/check_all.sh` to pass.
-
-It also requires `pyperf` to be importable. `check_all.sh` skips the
-bit-exactness oracles without it, which is right for a bare checkout and wrong
-when packaging: a submission whose central correctness claim was never
-exercised should not be shipped. `./script_<bench>.sh setup` installs it.
-
-Staleness is caught by those checks rather than by timestamps, which say nothing
-in a fresh clone: `check_txt_tables.py` reads the table rows out of the Typst
-sources and requires them in the shipped `.txt`, and `verify_examples.py` runs
-the reports' worked examples against the shipped functions.
+`./make_submission.sh` (or `--check` to verify only) writes
+`submission/hwsw_submission_<date>_<rev>.zip`: `git archive HEAD` minus the paths listed in
+`.gitattributes` as `export-ignore` (agent tooling, flow-gate documents, tool logs, formal
+intermediates and raw counter dumps), plus the generated `ids.pdf`. It refuses a dirty tree,
+reports older than their sources (asked from git history, not timestamps), a missing
+`report/ids.local`, or a failing `tools/check_all.sh`; the header comment of the script has
+the full rationale.
 
 ## How to reproduce
 
@@ -369,7 +364,7 @@ python3-dbg, perf, pyperformance 1.14.0):
 Stages can be run individually:
 `setup | baseline | profile | optimized | compare | wheel | native`.
 
-All three runners are thin wrappers over one implementation,
+Both runners are thin wrappers over one implementation,
 `tools/runner_common.sh`. They used to be three copies of the same 130 lines and
 had drifted apart — one pinned the back end while profiling and one did not, and
 their build instructions pointed at different directories — which changed what a
@@ -405,8 +400,9 @@ reader would actually measure depending on which script they ran.
   file*, same interpreter and same rigor, so `HWSW_BACKEND` is the only
   difference. Not run through `pyperformance`, which builds its own venv that has
   no extension wheel in it.
-- **Evidence** = `results/compare_<bench>.txt`: mean ± std dev for both runs,
-  the speedup factor, and pyperf's t-test significance verdict.
+- **Evidence** = `results/compare_<bench>.txt`: pyperf's `compare_to --table` output
+  (mean per run and the speedup factor); the per-run JSONs carry the 120 values
+  and their metadata.
   `results/compare_<bench>_native.txt` is the same for the native tier.
 
 ### Driving the VM remotely
