@@ -1,39 +1,144 @@
 
 nbody stock (C frames, python3-dbg)
   source: results/perf_report_nbody_stock.txt
-  function                            self %     incl %
-  _PyEval_EvalFrameDefault            44.10%     99.31%
-  binary_op1                           4.90%     20.07%
-  PyFloat_FromDouble                   4.03%      5.82%
-  float_mul.lto_priv.0                 3.86%      3.86%
-  float_dealloc.lto_priv.0             3.48%      3.48%
-  list_ass_subscript.lto_priv.0        2.55%      2.55%
-  float_add.lto_priv.0                 2.38%      2.38%
-  PyNumber_AsSsize_t                   2.22%      4.87%
-  float_sub.lto_priv.0                 2.01%      2.01%
-  _Py_CheckSlotResult                  1.96%      1.96%
+  function                                     self %     incl %
+  _PyEval_EvalFrameDefault                     44.10%     99.31%
+  binary_op1                                    4.90%     20.07%
+  PyFloat_FromDouble                            4.03%      5.82%
+  float_mul.lto_priv.0                          3.86%      3.86%
+  float_dealloc.lto_priv.0                      3.48%      3.48%
+  list_ass_subscript.lto_priv.0                 2.55%      2.55%
+  float_add.lto_priv.0                          2.38%      2.38%
+  PyNumber_AsSsize_t                            2.22%      4.87%
+  float_sub.lto_priv.0                          2.01%      2.01%
+  _Py_CheckSlotResult                           1.96%      1.96%
+  list_ass_item.lto_priv.0                      1.78%      1.78%
+  PyTuple_GetItem                               1.76%      1.76%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 11.26% of self time, from 12 symbols
-    list_ass_subscript.lto_priv.0      2.55%
-    PyNumber_AsSsize_t                 2.22%
-    list_ass_item.lto_priv.0           1.78%
-    list_subscript.lto_priv.0          1.58%
-    PyLong_AsSsize_t                   1.04%
-    list_item.lto_priv.0               0.94%
-    listiter_next.lto_priv.0           0.77%
-    list_iter.lto_priv.0               0.16%
-    listiter_dealloc.lto_priv.0        0.15%
-    list_dealloc.lto_priv.0            0.03%
-    list_resize                        0.02%
-    list_sort_impl                     0.02%
+    list_ass_subscript.lto_priv.0               2.55%
+    PyNumber_AsSsize_t                          2.22%
+    list_ass_item.lto_priv.0                    1.78%
+    list_subscript.lto_priv.0                   1.58%
+    PyLong_AsSsize_t                            1.04%
+    list_item.lto_priv.0                        0.94%
+    listiter_next.lto_priv.0                    0.77%
+    list_iter.lto_priv.0                        0.16%
+    listiter_dealloc.lto_priv.0                 0.15%
+    list_dealloc.lto_priv.0                     0.03%
+    list_resize                                 0.02%
+    list_sort_impl                              0.02%
 
   group 'float objects' matches /^(float_|PyFloat_)/: 16.25% of self time, from 6 symbols
-    PyFloat_FromDouble                 4.03%
-    float_mul.lto_priv.0               3.86%
-    float_dealloc.lto_priv.0           3.48%
-    float_add.lto_priv.0               2.38%
-    float_sub.lto_priv.0               2.01%
-    float_pow.lto_priv.0               0.49%
+    PyFloat_FromDouble                          4.03%
+    float_mul.lto_priv.0                        3.86%
+    float_dealloc.lto_priv.0                    3.48%
+    float_add.lto_priv.0                        2.38%
+    float_sub.lto_priv.0                        2.01%
+    float_pow.lto_priv.0                        0.49%
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 6.03% of self time, from 6 symbols
+    binary_op1                                  4.90%
+    PyLong_AsSsize_t                            1.04%
+    _PyLong_New                                 0.03%
+    long_mul.lto_priv.0                         0.02%
+    _PyLong_FromByteArray                       0.02%
+    long_hash.lto_priv.0                        0.02%
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 2.11% of self time, from 20 symbols
+    read_size_t                                 0.39%
+    _PyMem_DebugCheckAddress                    0.31%
+    __memset_avx2_unaligned_erms                0.21%
+    _PyObject_Malloc                            0.20%
+    pthread_getspecific@@GLIBC_2.34             0.18%
+    arena_map_get                               0.16%
+    _PyMem_DebugRawAlloc                        0.10%
+    _PyMem_DebugMalloc                          0.08%
+    PyGILState_Check                            0.08%
+    arena_map_is_used                           0.07%
+    write_size_t                                0.07%
+    _PyMem_DebugRawFree                         0.05%
+    _PyObject_GC_Alloc                          0.05%
+    _PyMem_DebugFree                            0.03%
+    PyObject_Free                               0.03%
+    _PyObject_GC_Malloc                         0.02%
+    _PyMem_DebugRawMalloc                       0.02%
+    _PyObject_Free                              0.02%
+    pymalloc_pool_extend                        0.02%
+    _PyMem_DebugRawRealloc                      0.02%
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 0.35% of self time, from 8 symbols
+    lookdict_unicode_nodummy                    0.10%
+    lookdict_unicode                            0.08%
+    _PyFunction_Vectorcall                      0.05%
+    _PyObject_VectorcallTstate.lto_priv.10      0.03%
+    call_function.lto_priv.0                    0.03%
+    _PyObject_VectorcallTstate.lto_priv.23      0.02%
+    _PyObject_VectorcallTstate.lto_priv.11      0.02%
+    lookdict_split.lto_priv.0                   0.02%
+
+nbody optimized (C frames, python3-dbg)
+  source: results/perf_report_nbody_opt.txt
+  function                                     self %     incl %
+  _PyEval_EvalFrameDefault                     40.66%     98.81%
+  binary_op1                                    8.97%     29.98%
+  PyFloat_FromDouble                            5.62%      8.66%
+  float_mul.lto_priv.0                          5.09%      5.09%
+  float_dealloc.lto_priv.0                      4.37%      4.37%
+  __ieee754_pow_fma                             3.13%      3.13%
+  float_add.lto_priv.0                          3.10%      3.10%
+  float_sub.lto_priv.0                          2.44%      2.44%
+  _Py_NewReference                              2.30%      2.30%
+  get_float_state                               2.27%      2.27%
+  _Py_Dealloc                                   2.24%      9.74%
+  _Py_CheckSlotResult                           2.21%      2.21%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.06% of self time, from 2 symbols
+    PyNumber_AsSsize_t                          0.03%
+    list_iter.lto_priv.0                        0.03%
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 21.62% of self time, from 7 symbols
+    PyFloat_FromDouble                          5.62%
+    float_mul.lto_priv.0                        5.09%
+    float_dealloc.lto_priv.0                    4.37%
+    float_add.lto_priv.0                        3.10%
+    float_sub.lto_priv.0                        2.44%
+    float_pow.lto_priv.0                        0.97%
+    float_richcompare.lto_priv.0                0.03%
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 9.05% of self time, from 2 symbols
+    binary_op1                                  8.97%
+    PyLong_FromLong                             0.08%
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 2.38% of self time, from 19 symbols
+    _PyMem_DebugCheckAddress                    0.44%
+    __memset_avx2_unaligned_erms                0.28%
+    pthread_getspecific@@GLIBC_2.34             0.25%
+    arena_map_get                               0.25%
+    PyGILState_Check                            0.22%
+    read_size_t                                 0.22%
+    _PyObject_Malloc                            0.17%
+    _PyMem_DebugRawAlloc                        0.11%
+    arena_map_is_used                           0.08%
+    _PyMem_DebugRawFree                         0.06%
+    _PyMem_DebugMalloc                          0.06%
+    PyObject_Free                               0.03%
+    _PyObject_GC_Malloc                         0.03%
+    _PyObject_GC_Alloc                          0.03%
+    PyObject_Malloc                             0.03%
+    _PyMem_DebugRawMalloc                       0.03%
+    _PyObject_Free                              0.03%
+    pymalloc_pool_extend                        0.03%
+    _PyMem_DebugRealloc                         0.03%
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 0.83% of self time, from 7 symbols
+    lookdict_unicode_nodummy                    0.44%
+    call_function.lto_priv.0                    0.11%
+    lookdict_unicode                            0.11%
+    _PyObject_VectorcallTstate.lto_priv.10      0.08%
+    _PyFunction_Vectorcall                      0.03%
+    method_vectorcall_FASTCALL_KEYWORDS         0.03%
+    _PyObject_VectorcallTstate.lto_priv.23      0.03%
 
 nbody optimized (Python frames, py-spy)
   source: results/pyspy_nbody_opt_full.svg  (210 samples)
@@ -48,10 +153,211 @@ nbody optimized (Python frames, py-spy)
   <setcomp> (enum.py)                                             0.48%      0.48%
   _get_spec (<frozen importlib._bootstrap_external>)              0.48%      0.48%
   <dictcomp> (enum.py)                                            0.48%      0.48%
+  _is_private (enum.py)                                           0.48%      0.48%
+  _parse (sre_parse.py)                                           0.48%      0.48%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 
   group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 0.00% of self time, from 0 symbols
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 0.00% of self time, from 0 symbols
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 0.00% of self time, from 0 symbols
+
+pyflate stock (C frames, python3-dbg)
+  source: results/perf_report_pyflate_stock.txt
+  function                                     self %     incl %
+  _PyEval_EvalFrameDefault                     23.10%     99.50%
+  _PyMem_DebugCheckAddress                      3.83%      5.51%
+  read_size_t                                   3.06%      3.06%
+  __memset_avx2_unaligned_erms                  2.81%      3.52%
+  call_function.lto_priv.0                      2.44%      2.44%
+  list_dealloc.lto_priv.0                       2.29%      2.29%
+  list_ass_slice                                2.05%      2.89%
+  _PyObject_Malloc                              1.78%      4.96%
+  pthread_getspecific@@GLIBC_2.34               1.76%      1.76%
+  lookdict_unicode_nodummy                      1.72%      1.72%
+  binary_op1                                    1.57%     18.39%
+  arena_map_get                                 1.47%      1.47%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 9.93% of self time, from 20 symbols
+    list_dealloc.lto_priv.0                     2.29%
+    list_ass_slice                              2.05%
+    list_item.lto_priv.0                        1.38%
+    list_slice                                  1.09%
+    list_concat.lto_priv.0                      1.07%
+    PyNumber_AsSsize_t                          0.49%
+    PyLong_AsSsize_t                            0.44%
+    listiter_next.lto_priv.0                    0.32%
+    list_subscript.lto_priv.0                   0.24%
+    list_ass_item.lto_priv.0                    0.20%
+    list_ass_subscript.lto_priv.0               0.11%
+    list_resize                                 0.04%
+    list_extend.lto_priv.0                      0.04%
+    list_iter.lto_priv.0                        0.04%
+    list_new_prealloc                           0.03%
+    list_sort_impl                              0.03%
+    list_repeat.lto_priv.0                      0.03%
+    list_append.lto_priv.0                      0.02%
+    list_traverse.lto_priv.0                    0.01%
+    listiter_dealloc.lto_priv.0                 0.01%
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 0.01% of self time, from 1 symbols
+    PyFloat_FromDouble                          0.01%
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 6.30% of self time, from 20 symbols
+    binary_op1                                  1.57%
+    long_richcompare.lto_priv.0                 0.69%
+    _PyLong_New                                 0.65%
+    long_bitwise                                0.57%
+    PyLong_FromLong                             0.44%
+    PyLong_AsSsize_t                            0.44%
+    long_compare.lto_priv.0                     0.39%
+    long_lshift1                                0.31%
+    long_normalize.lto_priv.0                   0.28%
+    long_sub.lto_priv.0                         0.28%
+    long_add.lto_priv.0                         0.22%
+    PyLong_FromSsize_t                          0.12%
+    long_rshift1                                0.11%
+    long_lshift.lto_priv.0                      0.09%
+    long_rshift.lto_priv.0                      0.05%
+    long_and.lto_priv.0                         0.04%
+    long_mul.lto_priv.0                         0.02%
+    PyLong_FromLongLong                         0.01%
+    long_divrem.lto_priv.0                      0.01%
+    long_invert.lto_priv.0                      0.01%
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 23.37% of self time, from 23 symbols
+    _PyMem_DebugCheckAddress                    3.83%
+    read_size_t                                 3.06%
+    __memset_avx2_unaligned_erms                2.81%
+    _PyObject_Malloc                            1.78%
+    pthread_getspecific@@GLIBC_2.34             1.76%
+    arena_map_get                               1.47%
+    _PyMem_DebugRawAlloc                        1.41%
+    PyGILState_Check                            1.26%
+    write_size_t                                1.14%
+    arena_map_is_used                           0.90%
+    _PyObject_Free                              0.87%
+    _PyMem_DebugMalloc                          0.85%
+    _PyMem_DebugRawFree                         0.65%
+    _PyMem_DebugFree                            0.54%
+    PyObject_Malloc                             0.34%
+    _PyMem_DebugRawMalloc                       0.24%
+    PyObject_Free                               0.21%
+    pymalloc_pool_extend                        0.15%
+    _PyObject_GC_New                            0.03%
+    _PyMem_RawFree                              0.03%
+    _PyObject_GC_Alloc                          0.02%
+    _PyObject_GC_Malloc                         0.01%
+    __memset_avx2_unaligned_erms                0.01%
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 9.45% of self time, from 14 symbols
+    call_function.lto_priv.0                    2.44%
+    lookdict_unicode_nodummy                    1.72%
+    _PyObject_VectorcallTstate.lto_priv.10      1.46%
+    _PyObject_GetMethod                         1.33%
+    lookdict_split.lto_priv.0                   0.76%
+    _PyEval_Vector                              0.62%
+    _PyFunction_Vectorcall                      0.61%
+    method_vectorcall_O                         0.32%
+    method_vectorcall_FASTCALL                  0.09%
+    lookdict_unicode                            0.06%
+    PyObject_GetAttr                            0.01%
+    _PyObject_VectorcallTstate.lto_priv.23      0.01%
+    lookdict_index                              0.01%
+    lookdict                                    0.01%
+
+pyflate optimized (C frames, python3-dbg)
+  source: results/perf_report_pyflate_opt.txt
+  function                                     self %     incl %
+  _PyEval_EvalFrameDefault                     20.82%     98.13%
+  _PyMem_DebugCheckAddress                      6.42%      8.08%
+  list_item.lto_priv.0                          4.55%      4.55%
+  read_size_t                                   3.21%      3.21%
+  _PyObject_Malloc                              2.72%      5.15%
+  __memset_avx2_unaligned_erms                  2.65%      2.89%
+  pthread_getspecific@@GLIBC_2.34               2.54%      2.54%
+  _PyMem_DebugRawAlloc                          2.12%     10.16%
+  sre_ucs1_match.lto_priv.0                     2.12%      2.12%
+  arena_map_get                                 1.91%      1.91%
+  PyGILState_Check                              1.62%      6.56%
+  write_size_t                                  1.59%      1.59%
+
+  group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 9.91% of self time, from 16 symbols
+    list_item.lto_priv.0                        4.55%
+    PyNumber_AsSsize_t                          1.09%
+    PyLong_AsSsize_t                            0.85%
+    list_subscript.lto_priv.0                   0.81%
+    list_ass_item.lto_priv.0                    0.78%
+    list_dealloc.lto_priv.0                     0.56%
+    list_ass_subscript.lto_priv.0               0.32%
+    list_ass_slice                              0.25%
+    list_append.lto_priv.0                      0.18%
+    list_pop_impl                               0.14%
+    list_repeat.lto_priv.0                      0.11%
+    list_pop.lto_priv.0                         0.11%
+    list_resize                                 0.04%
+    list_slice                                  0.04%
+    listiter_dealloc.lto_priv.0                 0.04%
+    listiter_next.lto_priv.0                    0.04%
+
+  group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 8.04% of self time, from 18 symbols
+    binary_op1                                  1.48%
+    _PyLong_New                                 1.09%
+    long_bitwise                                1.09%
+    PyLong_AsSsize_t                            0.85%
+    PyLong_FromLong                             0.74%
+    long_normalize.lto_priv.0                   0.49%
+    long_add.lto_priv.0                         0.42%
+    long_richcompare.lto_priv.0                 0.42%
+    PyLong_AsLongAndOverflow                    0.28%
+    PyLong_FromSsize_t                          0.21%
+    long_rshift1                                0.18%
+    long_compare.lto_priv.0                     0.18%
+    long_and.lto_priv.0                         0.18%
+    long_rshift.lto_priv.0                      0.14%
+    long_sub.lto_priv.0                         0.11%
+    long_lshift1                                0.07%
+    long_lshift.lto_priv.0                      0.07%
+    _PyLong_FromByteArray                       0.04%
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 30.95% of self time, from 21 symbols
+    _PyMem_DebugCheckAddress                    6.42%
+    read_size_t                                 3.21%
+    _PyObject_Malloc                            2.72%
+    __memset_avx2_unaligned_erms                2.65%
+    pthread_getspecific@@GLIBC_2.34             2.54%
+    _PyMem_DebugRawAlloc                        2.12%
+    arena_map_get                               1.91%
+    PyGILState_Check                            1.62%
+    write_size_t                                1.59%
+    _PyMem_DebugRawFree                         1.13%
+    _PyObject_Free                              1.09%
+    _PyMem_DebugMalloc                          1.06%
+    arena_map_is_used                           1.02%
+    _PyMem_DebugFree                            0.56%
+    PyObject_Malloc                             0.42%
+    pymalloc_pool_extend                        0.35%
+    PyObject_Free                               0.25%
+    _PyMem_DebugRawMalloc                       0.11%
+    _PyObject_GC_NewVar                         0.07%
+    pthread_getspecific@@GLIBC_2.34             0.07%
+    _PyMem_DebugRawRealloc                      0.04%
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 2.13% of self time, from 8 symbols
+    call_function.lto_priv.0                    0.92%
+    lookdict_unicode_nodummy                    0.56%
+    _PyObject_VectorcallTstate.lto_priv.10      0.42%
+    lookdict_unicode                            0.07%
+    _PyFunction_Vectorcall                      0.04%
+    PyObject_GetAttr                            0.04%
+    method_vectorcall_VARARGS                   0.04%
+    lookdict_split.lto_priv.0                   0.04%
 
 pyflate stock (Python frames, py-spy)
   source: results/pyspy_pyflate_stock_full.svg  (372 samples)
@@ -66,10 +372,18 @@ pyflate stock (Python frames, py-spy)
   _mask (run_benchmark.py)                     5.91%      5.91%
   _more (run_benchmark.py)                     2.42%      3.49%
   bzip2_main (run_benchmark.py)                1.08%     98.39%
+  _read (run_benchmark.py)                     1.08%      1.08%
+  needbits (run_benchmark.py)                  0.81%      4.30%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 
   group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 0.00% of self time, from 0 symbols
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 0.00% of self time, from 0 symbols
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 0.00% of self time, from 0 symbols
 
 pyflate optimized (Python frames, py-spy)
   source: results/pyspy_pyflate_opt_full.svg  (122 samples)
@@ -84,10 +398,18 @@ pyflate optimized (Python frames, py-spy)
   decode_huffman_block (run_benchmark.py)                         1.64%     82.79%
   _call_with_frames_removed (<frozen importlib._bootstrap>)       1.64%     15.57%
   bench_pyflake (run_benchmark.py)                                0.82%     83.61%
+  _load_unlocked (<frozen importlib._bootstrap>)                  0.82%     15.57%
+  compute_selectors_list (run_benchmark.py)                       0.82%      4.10%
 
   group 'list access' matches /^(list_|listiter_|PyNumber_AsSsize_t|PyLong_AsSsize_t)/: 0.00% of self time, from 0 symbols
 
   group 'float objects' matches /^(float_|PyFloat_)/: 0.00% of self time, from 0 symbols
+
+  group 'int arithmetic' matches /^(long_|PyLong_|_PyLong_|binary_op1)/: 0.00% of self time, from 0 symbols
+
+  group 'allocation' matches /^(_PyObject_Malloc|_PyObject_Free|_PyMem_|pymalloc_|arena_map|read_size_t|write_size_t|PyObject_Malloc|PyObject_Free|_PyObject_GC_|PyGILState_Check|pthread_getspecific|__memset)/: 0.00% of self time, from 0 symbols
+
+  group 'attribute and call' matches /^(_PyObject_GetMethod|PyObject_GetAttr|_PyObject_Vectorcall|_PyFunction_Vectorcall|method_vectorcall|call_function|_PyEval_Vector|lookdict)/: 0.00% of self time, from 0 symbols
 
 self % = time in the function itself; incl % = time in it and everything it calls.
 Shares are of a profile's own total, so they compare call paths

@@ -52,7 +52,10 @@ NS = '{http://www.w3.org/2000/svg}'
 # The profiles the reports actually show, in report order.
 PROFILES = [
     ('nbody stock (C frames, python3-dbg)', 'perf', 'perf_report_nbody_stock.txt'),
+    ('nbody optimized (C frames, python3-dbg)', 'perf', 'perf_report_nbody_opt.txt'),
     ('nbody optimized (Python frames, py-spy)', 'flame', 'pyspy_nbody_opt_full.svg'),
+    ('pyflate stock (C frames, python3-dbg)', 'perf', 'perf_report_pyflate_stock.txt'),
+    ('pyflate optimized (C frames, python3-dbg)', 'perf', 'perf_report_pyflate_opt.txt'),
     ('pyflate stock (Python frames, py-spy)', 'flame', 'pyspy_pyflate_stock_full.svg'),
     ('pyflate optimized (Python frames, py-spy)', 'flame', 'pyspy_pyflate_opt_full.svg'),
 ]

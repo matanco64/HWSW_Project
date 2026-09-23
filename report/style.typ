@@ -5,10 +5,37 @@
 // deliverable. `--input txtmode=1` swaps them for a one-line pointer. Diagrams
 // are not routed through this: their labels read fine as text.
 #let text_edition = sys.inputs.at("txtmode", default: "0") == "1"
-#let flamefig(path, ..args) = if text_edition {
-  align(center, text(size: 9.5pt, style: "italic")[
-    (flame graph omitted from the text companion \u{2014} see the PDF edition)
-  ])
+
+// The flat function tables behind every flame graph, written by
+// report/summarize_profiles.py from the same SVGs and perf reports the figures
+// are drawn from. Keyed by the profile's source file name.
+#let profiles = json("fig/profile_functions.json")
+#let profile_by_source(src) = profiles.find(p => p.source.ends-with(src))
+
+// Text edition: the .txt is a named deliverable, so a figure must not vanish
+// into a one-line pointer. The flame graph becomes its widest frames, read
+// from the JSON above so the numbers cannot drift from the tables. PDF
+// edition: the picture. `source:` names the profile; without it the old
+// pointer line is emitted.
+#let flamefig(path, source: none, top: 10, ..args) = if text_edition {
+  let p = if source != none { profile_by_source(source) } else { none }
+  if p == none {
+    align(center, text(size: 9.5pt, style: "italic")[
+      (flame graph omitted from the text companion \u{2014} see the PDF edition)
+    ])
+  } else {
+    let rows = p.functions.slice(0, calc.min(top, p.functions.len()))
+    let n = if p.total_samples == none { "perf flat report, 999 Hz" } else {
+      str(p.total_samples) + " samples" }
+    block(width: 100%, inset: (y: 4pt))[
+      #text(size: 9.5pt)[Flame graph #raw(path) (#n), widest frames:]
+      #table(columns: (2.4fr, 1fr, 1fr), align: (left, right, right),
+        table.header([*Frame*], [*Inclusive*], [*Self*]),
+        ..rows.map(r => ([#raw(r.name)],
+          [#calc.round(r.inclusive_pct, digits: 2)%],
+          [#calc.round(r.self_pct, digits: 2)%])).flatten())
+    ]
+  }
 } else {
   image(path, ..args)
 }
