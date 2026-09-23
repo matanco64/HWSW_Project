@@ -88,7 +88,7 @@ dominates, so shrinking the datapath barely moves total area while it does cost 
 
 - **Fmax is W-independent.** The critical path (§3.1) is inside the W-invariant
   `mtf_list` CAM read/shift, so the operating frequency does not change across these
-  points — the W knob trades **area ↔ K3 cycles**, not Fmax. The 37.6 MHz below applies
+  points — the W knob trades **area ↔ K3 cycles**, not Fmax. The 37.5 MHz below applies
   to all three points.
 
 ### 2.1 K5/K6 soft area ceiling (1.0 mm²)
@@ -122,19 +122,24 @@ is closed on the real post-CTS STA below.
 
 ### 3.1 Operating frequency — OpenROAD post-CTS STA
 
-Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
-`Fmax = 1/(period − ws)`. Source:
-`synth/runs/signoff/31-openroad-stamidpnr-1/ws.max.rpt`.
+Worst setup slack, propagated (post-CTS) clock, `Fmax = 1/(period − ws)`. Two runs:
+the 20 ns (50 MHz) target, which the design **did not meet**, and a 27 ns confirmation
+run at which it does — the operating frequency is quoted from the run that met its
+constraint. Sources: `synth/evidence/tight27_ws.max.rpt` (27 ns) and
+`synth/evidence/ws.max.rpt` (20 ns), copied from
+`synth/runs/{signoff_tight,signoff}/31-openroad-stamidpnr-1/`.
 
-| Stage | Worst setup slack (tt) | Achievable period | Fmax | Note |
-|---|---:|---:|:--:|---|
-| **post-CTS STA** (`31-openroad-stamidpnr-1`) | **−6.5964 ns** | **26.596 ns** | **≈ 37.6 MHz** | **the operating point** — real clock tree |
-| pre-CTS STA (`26-openroad-stamidpnr`) | −217.487 ns | 237.5 ns | ≈ 4.2 MHz | ideal/unbuffered-clock wireload artifact, resolved by CTS — not used |
+| Stage | Constraint | Worst setup slack (tt) | Achievable period | Fmax | Note |
+|---|---:|---:|---:|:--:|---|
+| **post-CTS STA** (`31-openroad-stamidpnr-1`, tag `signoff_tight`) | 27 ns | **+0.3066 ns** (met; hold +0.195 ns) | **26.693 ns** | **≈ 37.5 MHz** | **the operating point** — real clock tree, constraint met |
+| post-CTS STA (`31-openroad-stamidpnr-1`, tag `signoff`) | 20 ns | −6.5964 ns (violated) | 26.596 ns | ≈ 37.6 MHz | the 50 MHz target run; back-computed Fmax agrees with the met run within 0.4 % |
+| pre-CTS STA (`26-openroad-stamidpnr`) | 20 ns | −217.487 ns | 237.5 ns | ≈ 4.2 MHz | ideal/unbuffered-clock wireload artifact, resolved by CTS — not used |
 
-- **Defined operating frequency: ≈ 37.6 MHz (tt, post-CTS).** The 20 ns / 50 MHz uArch
-  §6 target is **missed by ~1.33×**. This is a *real* post-CTS number (propagated clock,
-  placed cells), stronger evidence than grape's or huffman's — it is an upper bound only
-  in that detailed routing would add net RC.
+- **Defined operating frequency: ≈ 37.5 MHz (tt, post-CTS, 27 ns run with positive
+  slack).** The 20 ns / 50 MHz uArch §6 target is **missed by ~1.33×**: that run failed by
+  6.6 ns, and the number it back-computes is quoted only as a cross-check. Both are *real*
+  post-CTS numbers (propagated clock, placed cells); they are upper bounds only in that
+  detailed routing would add net RC.
 - **Critical path** (`31-openroad-stamidpnr-1/checks.rpt`): startpoint `u_ctrl._238_`
   (`state_q[0]`, the init-fill FSM) → `init_start` → a **`u_list` `mux2` chain** (the
   256-entry CAM) → endpoint `u_list._22678_/D` (a CAM flop). Data arrival ≈ 26.6 ns
@@ -142,12 +147,12 @@ Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
   the shift-register CAM** that uArch §6 flagged as the worst path (and its S6 caveat
   that the read-mux fanout / wire load across the 2,048-flop array — not the ~18-gate
   logic depth — would dominate). The optimistic ~100 MHz gate-depth stretch in §6
-  becomes **37.6 MHz** once the real fanout, CAM wire load and clock tree are placed —
-  the caveat, confirmed.
+  becomes **37.5 MHz** once the real fanout, CAM wire load and clock tree are placed —
+  the caveat, confirmed (the 27 ns run reports the same startpoint and endpoint).
 - **Fmax vs K3.** K3 (cycles/symbol) is frequency-independent; at the chosen W=8 the
   full-benchmark block is 157,560 cycles (`testplan.md §2`, K3 = 1.063). At the 50 MHz
-  target that is 3.15 ms (PRD K5, ≈ 25× vs the original MTF); at the **measured 37.6 MHz** it is
-  **4.19 ms**. The documented RTL follow-up to reach 50 MHz is to **register the CAM
+  target that is 3.15 ms (PRD K5, ≈ 25× vs the original MTF); at the **measured 37.5 MHz** it is
+  **4.21 ms**. The documented RTL follow-up to reach 50 MHz is to **register the CAM
   read-mux** (pipeline `byte_out = list[r]` into a second stage) — a datapath change
   deferred to a future RTL iteration, not a PPA-stage fix, and it is the same block
   (`mtf_list`) that dominates area, so the area and timing follow-ups coincide.
@@ -170,7 +175,7 @@ Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
 | Yosys+Liberty area + cell counts | **done** (§1: 18,814 cells, 0.187 mm²) |
 | OpenLane synthesis | **done** (clean; config verified in resolved.json) |
 | OpenLane placement + CTS | **done** (no GRT-0607; deepest run in this project) |
-| Fmax | **post-CTS STA** — ≈ 37.6 MHz tt (§3.1); post-CTS resizer non-convergent, closed before routing |
+| Fmax | **post-CTS STA** — ≈ 37.5 MHz tt (§3.1, 27 ns run, +0.31 ns slack; the 20 ns run violated by 6.6 ns); closed before routing |
 | Area (OpenLane placed) | not reported — use Yosys 0.187 mm² (§1) |
 | Power | **post-CTS indicative** ≈ 13.7 mW (§3.2, default activity) |
 | Die shot | **not obtained** (no GDS; not §7-required, not invented) |
@@ -179,9 +184,9 @@ Worst setup slack at the 20 ns target, propagated (post-CTS) clock,
 
 | project_instructions.md §7 bullet | This document |
 |---|---|
-| Performance / area / power trade-offs | §1 (0.187 mm², 18,814 cells), §1.1 (per-module: CAM = 68 %), §2 (W-sweep trade-off table + K5/K6), §3 (OpenLane/STA operating frequency 37.6 MHz + power) |
+| Performance / area / power trade-offs | §1 (0.187 mm², 18,814 cells), §1.1 (per-module: CAM = 68 %), §2 (W-sweep trade-off table + K5/K6), §3 (OpenLane/STA operating frequency 37.5 MHz + power) |
 
 Performance (K3 = 1.063 cyc/sym at W=8, block 157,560 cycles) is carried in
 `docs/testplan.md §2`; the speedup (≈ 25× vs the original MTF) in the PRD K5 / `hw-integrate`.
-Operating frequency ≈ 37.6 MHz (post-CTS STA) here in §3.1, critical path the 256-way
+Operating frequency ≈ 37.5 MHz (post-CTS STA, constraint met at 27 ns) here in §3.1, critical path the 256-way
 CAM read-mux (uArch §6), fix = register the read-mux path.
