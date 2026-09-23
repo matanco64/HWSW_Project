@@ -1,8 +1,8 @@
 # Shared stage library for script_<bench>.sh. Sourced, never executed.
 #
-# The three runners used to be three copies of the same 130 lines and had
-# drifted in ways that changed what a reader would measure. One library, three
-# thin wrappers, so a fix lands everywhere at once.
+# The runners used to be separate copies of the same 130 lines and had
+# drifted in ways that changed what a reader would measure. One library, thin
+# wrappers, so a fix lands everywhere at once.
 #
 # A wrapper sets BENCH (and optionally PROFILE_LOOPS / PROFILE_VALUES) and
 # then calls `run_stage "$@"`.
@@ -193,7 +193,9 @@ _pip_install() {
 }
 
 setup() {
-    sudo apt-get install -y python3-dbg linux-tools-generic git >/dev/null || true
+    # A bare Ubuntu image has no pip; the stages below call `python3 -m pip`.
+    sudo apt-get update -qq || _warn "apt-get update failed; using the cached package index"
+    sudo apt-get install -y python3-pip python3-dbg linux-tools-generic git >/dev/null || true
     # The course VM ships pyperformance; a fresh host does not, and
     # check_prereqs exits without it -- so "setup installs the prerequisites"
     # has to be true rather than merely intended. Pinned, because a different
@@ -204,9 +206,11 @@ setup() {
     # py-spy supplies the Python-frame flame graphs in the profile stage; perf
     # covers the C frames whether or not this succeeds.
     command -v py-spy >/dev/null 2>&1 || _pip_install py-spy || true
-    [ -d "$HOME/FlameGraph" ] || git clone --depth 1 https://github.com/brendangregg/FlameGraph "$HOME/FlameGraph"
+    [ -d "$HOME/FlameGraph" ] || git clone --depth 1 https://github.com/brendangregg/FlameGraph "$HOME/FlameGraph" \
+        || _warn "could not clone FlameGraph; the profile stage will not render flame graphs"
     # KVM guest quirks: allow perf sampling; NOTE not persisted across VM reboots.
-    sudo sysctl -w kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0
+    sudo sysctl -w kernel.perf_event_paranoid=-1 kernel.kptr_restrict=0 \
+        || _warn "sysctl failed (no sudo?); perf record may refuse to sample"
     sudo python3 -m pyperf system tune || true
 }
 
@@ -232,6 +236,8 @@ _profile_one() {
     # frame-pointer unwinding walks into freed memory and yields chains of
     # 0xfdfdfd.. (Py_DEBUG fill bytes) -- an unusable flame graph.
     local l="$PROFILE_LOOPS" n="$PROFILE_VALUES"
+    [ -x "$HOME/FlameGraph/stackcollapse-perf.pl" ] || {
+        echo "FlameGraph is missing: run ./script_$BENCH.sh setup" >&2; exit 1; }
     pinned python perf record -F 999 --call-graph dwarf,16384 -e cpu-clock \
         -o "$RES/${BENCH}_$1.perf.data" -- \
         python3-dbg "$2" --worker -l"$l" -w0 -n"$n"
