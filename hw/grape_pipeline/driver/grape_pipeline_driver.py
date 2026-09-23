@@ -13,9 +13,11 @@ Backends
 DONE, W1C, ERR_PARAM) and reports CYCLES = K1 * NSTEPS with K1 = 124
 (the measured, signed-off cycles/step — docs/ppa.md trade-off point 2), so
 the driver and the speedup model can be exercised without a simulator. The
-bit-exact physics lives in the frozen golden model + RTL; wiring this driver
-to the pyuvm `axi_lite_agent` (SimBackend) is the RTL-cosim extension and
-reuses the identical register constants below.
+bit-exact physics lives in the frozen golden model + RTL.
+`SimBackend` is the RTL-cosim path: it wires the identical register constants
+below to the pyuvm `axi_lite_agent` through a running sequence's async
+`rd`/`wr`, and `AsyncGrapeDriver` is the same API awaited per bus access.
+Exercised by `tb/test_driver_model.py` (`make sim MODULE=test_driver_model`).
 """
 from __future__ import annotations
 
@@ -262,3 +264,131 @@ class ModelBus(MMIO):
         self.steps_done = nsteps
         self.sticky |= ST_DONE                    # model completes instantly
         self.busy = False
+
+
+# =============================================================================
+# SimBackend + AsyncGrapeDriver — RTL-cosim over the pyuvm axi_lite_agent
+# (cocotb only; tb/test_driver_model.py).
+# =============================================================================
+class SimBackend(MMIO):
+    """Drives the identical register constants through the DUT in cocotb.
+
+    Construct with a running `uvm_sequence` (a `GrapeBaseSeq`, or anything with
+    async `wr(addr, data)` / `rd(addr)` that go through the AXI-Lite agent's
+    sequencer). Every access is monitored, so the env scoreboard checks each
+    read-back against the golden `emulation.advance` while the driver runs.
+    """
+
+    def __init__(self, seq):
+        self.seq = seq                     # provides async wr(addr, data) / rd(addr)
+
+    async def read32(self, addr: int) -> int:
+        return await self.seq.rd(addr)
+
+    async def write32(self, addr: int, value: int) -> None:
+        await self.seq.wr(addr, value & 0xFFFFFFFF)
+
+
+class AsyncGrapeDriver(GrapeDriver):
+    """`GrapeDriver` with every bus access awaited (for `SimBackend`).
+
+    Each method is the sync body of its `GrapeDriver`/`AccelDriver` namesake
+    with `await` on the bus calls; register constants and semantics are
+    identical, so `check_regmap.py` covers this class too.
+    """
+
+    async def _rd(self, off: int) -> int:
+        return await self.bus.read32(self.base + off)
+
+    async def _wr(self, off: int, val: int) -> None:
+        await self.bus.write32(self.base + off, val & 0xFFFFFFFF)
+
+    # -- AccelDriver
+    async def status(self) -> int:
+        return await self._rd(STATUS)
+
+    async def start(self) -> bool:
+        """Doorbell. Returns False if the doorbell was rejected (ERR_PARAM)."""
+        await self._wr(CTRL, CTRL_DOORBELL)
+        s = await self.status()
+        if s & ST_ERR_PARAM:
+            return False
+        return True
+
+    async def abort(self) -> None:
+        await self._wr(CTRL, CTRL_ABORT)
+
+    async def wait_done(self, max_polls: int) -> int:
+        """Poll STATUS until DONE|ABORTED. Raises on timeout or on
+        ERR_PARAM/ERR_BUSY. FP_* flags are returned, never raised."""
+        for _ in range(max_polls):
+            s = await self.status()
+            if s & (ST_ERR_PARAM | ST_ERR_BUSY):
+                raise RuntimeError(f"invocation error: STATUS=0x{s:05x}")
+            if s & (ST_DONE | ST_ABORTED):
+                return s
+        raise TimeoutError(f"wait_done: no DONE after {max_polls} polls")
+
+    async def clear(self, bits: int = ST_STICKY_MASK) -> None:
+        await self._wr(STATUS, bits)
+
+    async def counters(self) -> dict:
+        lo, hi = await self._rd(CYCLES_LO), await self._rd(CYCLES_HI)
+        return {"cycles": (hi << 32) | lo, "steps_done": await self._rd(STEPS_DONE)}
+
+    # -- GrapeDriver
+    async def load_bodies(self, bodies) -> None:
+        """bodies: [[r[3], v[3], m], ...] in benchmark layout."""
+        for i, (r, v, m) in enumerate(bodies):
+            base = BODY_BASE + i * BODY_STRIDE
+            for name, val in zip(("x", "y", "z"), r):
+                lo, hi = f2words(val)
+                await self._wr(base + BODY_FIELDS[name],     lo)
+                await self._wr(base + BODY_FIELDS[name] + 4, hi)
+            for name, val in zip(("vx", "vy", "vz"), v):
+                lo, hi = f2words(val)
+                await self._wr(base + BODY_FIELDS[name],     lo)
+                await self._wr(base + BODY_FIELDS[name] + 4, hi)
+            lo, hi = f2words(m)
+            await self._wr(base + BODY_FIELDS["m"],     lo)
+            await self._wr(base + BODY_FIELDS["m"] + 4, hi)
+
+    async def load_pairs(self, index_pairs) -> None:
+        """index_pairs: list of (i, j); validated < N_BODIES before writing."""
+        for i, j in index_pairs:
+            if not (0 <= i < self.N_BODIES and 0 <= j < self.N_BODIES):
+                raise ValueError(f"pair index out of range: ({i}, {j})")
+        await self._wr(NPAIRS, len(index_pairs))
+        for k, (i, j) in enumerate(index_pairs):
+            await self._wr(PAIR_BASE + k * PAIR_STRIDE, ((j & 0xFF) << 8) | (i & 0xFF))
+
+    async def configure(self, dt: float, nsteps: int) -> None:
+        lo, hi = f2words(dt)
+        await self._wr(DT_LO, lo)
+        await self._wr(DT_HI, hi)
+        await self._wr(NSTEPS, nsteps)
+
+    async def read_bodies(self, bodies) -> None:
+        """Writes committed r and v back into the same lists; mass untouched."""
+        for i, (r, v, _m) in enumerate(bodies):
+            base = BODY_BASE + i * BODY_STRIDE
+            for idx, name in enumerate(("x", "y", "z")):
+                r[idx] = words2f(await self._rd(base + BODY_FIELDS[name]),
+                                 await self._rd(base + BODY_FIELDS[name] + 4))
+            for idx, name in enumerate(("vx", "vy", "vz")):
+                v[idx] = words2f(await self._rd(base + BODY_FIELDS[name]),
+                                 await self._rd(base + BODY_FIELDS[name] + 4))
+
+    async def advance(self, dt, n, bodies, pairs) -> None:
+        """Benchmark signature. `pairs` are (body, body) tuples of the same list
+        objects -> resolved to indices by identity (i = first, j = second)."""
+        ids = {id(b): k for k, b in enumerate(bodies)}
+        index_pairs = [(ids[id(a)], ids[id(b)]) for (a, b) in pairs]
+        await self.load_bodies(bodies)
+        await self.load_pairs(index_pairs)
+        await self.configure(dt, n)
+        if not await self.start():
+            raise RuntimeError("doorbell rejected (ERR_PARAM)")
+        await self.wait_done(max_polls=n * K1_CYCLES_PER_STEP + 64)
+        await self.read_bodies(bodies)
+        await self.clear()

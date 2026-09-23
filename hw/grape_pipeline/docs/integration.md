@@ -23,9 +23,13 @@ measured baseline. Numbers are cited by file; the achievable clock from `docs/pp
     physics) that honours the invocation protocol (doorbell → BUSY → DONE, W1C,
     ERR_PARAM/ERR_BUSY) and returns `CYCLES = K1·NSTEPS` with the measured **K1 = 124**
     (docs/ppa.md trade-off point 2). It lets the driver + speedup model run without a
-    simulator. Bit-exact physics lives in the frozen golden model + RTL; wiring the same
-    register constants to the pyuvm `axi_lite_agent` (SimBackend) is the RTL-cosim
-    extension.
+    simulator. Bit-exact physics lives in the frozen golden model + RTL.
+  - `SimBackend` + `AsyncGrapeDriver`: the RTL-cosim path, exercised by
+    `tb/test_driver_model.py` (`make -C hw/grape_pipeline sim MODULE=test_driver_model`):
+    the same register constants through the pyuvm `axi_lite_agent`, one full
+    `advance(0.01, 2, bodies, pairs)` (5 bodies, all 10 pairs) against the DUT, state read
+    back bit-exact vs `emulation.advance` (35/35 components) and CYCLES = 250 for 2 steps
+    (125/step, within the scoreboard's <= 128 tolerance on K1 = 124).
 - **Tests:** `driver/test_driver.py` — `python3 hw/grape_pipeline/driver/test_driver.py`
   → **ALL 4 DRIVER TESTS PASS**: register-map consistency (0 diffs), ID/FP round-trip,
   a full `advance(0.01, 20000)` invocation (**cycles = 2,480,000 = 124 × 20000**,
@@ -60,7 +64,7 @@ Inputs, all cited:
 | **Achievable clock** | **19.46 MHz** (post-CTS STA, parallel-prefix netlist) | `docs/ppa.md` Addendum (2026-09-14); `synth/runs/grape_prefix2/35-openroad-stamidpnr-1/ws.max.rpt` |
 | Driver/bus overhead | ≈ 600 bus cyc/invocation (< 0.03 %) | mas.md §5 |
 
-> **Baseline note.** `T` is the pyperf **mean** (231.20 ms), matching `report_nbody` §1 and
+> **Baseline note.** `T` is the pyperf **mean** (231.20 ms), matching `report_nbody` §4 and
 > the canonical VM suite. The **median** is 229 ms (what `prd.md`/`STATUS.json` quote for the
 > KPI check); the two differ only by mean-vs-median on a right-skewed distribution
 > (`baseline_nbody_stats.txt:16-19`). Speedups here use the mean; using the median moves every
@@ -82,7 +86,7 @@ HW compute time `t_hw = 2.48e6 / f_clk`; new total `= (1−f)·T + t_hw`; Amdahl
 
 - **Compute-only upper bounds** (residual → 0, the headline the report quotes): `t_hw` alone
   is 127.4 ms, so **231.20 / 127.4 = 1.81× vs the original** and **143.13 / 127.4 = 1.12× vs the
-  143.13 ms optimized-Python tier** (`report_nbody` §1/§3). These bound `S` from above; the
+  143.13 ms optimized-Python tier** (`report_nbody` §4). These bound `S` from above; the
   Amdahl rows include the 5 % residual.
 - **Ideal bound** `1/(1−f) = 20×` (infinite-speed accelerator; the 5 % residual caps it).
 - **Sensitivity — residual:** retaining 1–5 % of the original runtime gives **1.66–1.78×** at
@@ -116,7 +120,7 @@ path the latest PPA STA flags — the speedup story and the timing story point t
 | Block diagram | `docs/mas.md` §7 / `docs/block_diagram.svg` |
 | Performance / area / power trade-offs | `docs/ppa.md` (Yosys 4.075 mm², 584,454 cells; K1 trade-off table; post-CTS STA Fmax **19.46 MHz** parallel-prefix netlist, was 11.15 MHz linear-scan) |
 
-## 5. Text for `report_nbody` §5
+## 5. Text for `report_nbody` §6
 
 > The nbody `advance()` kernel is offloaded to `grape_pipeline`, a memory-mapped FP64
 > pairwise-gravity accelerator (584,454 sky130 cells, 4.075 mm²; docs/ppa.md). Software
