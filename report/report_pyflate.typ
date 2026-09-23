@@ -58,24 +58,27 @@ measurements support a large improvement on this input; one bzip2 fixture does n
 the same speedup for every file, compression setting or interpreter.
 = 2. Initial analysis: profiling the whole decoding pipeline
 
-Profiles were recorded on the VM with py-spy on release CPython (Python frames), rendered with
-FlameGraph. The brief's `perf record -F 999` on `python3-dbg` shows only interpreter C frames
-(`_PyEval_EvalFrameDefault` 99.50% inclusive; `results/perf_report_pyflate_stock.txt`), so it
-locates no Python-level hotspot. The original Python-frame profile highlights Huffman decoding and bit-buffer work, with
+Two profilers answer two different questions. The brief's `perf record -F 999` on `python3-dbg`
+records interpreter C frames (`_PyEval_EvalFrameDefault` 99.50% inclusive;
+`results/perf_report_pyflate_stock.txt`): it cannot name a Python function, but it shows what
+the interpreter spends its time on, and the table at the end of this section reads it before
+and after the optimizations. py-spy on release CPython (Python frames), rendered with
+FlameGraph, names the functions. The original Python-frame profile highlights Huffman decoding and bit-buffer work, with
 move-to-front and inverse BWT alongside them. Development instrumentation found a mean of
-about five entries visited by the symbol matcher, despite its table capacity of 258.
+about five entries visited by the symbol matcher, despite its table capacity of 258
+(`dev/pyflate/instrument.py`; `dev/pyflate/FINDINGS.md`: mean scan length 5.0 entries).
 A lookup table can remove this scan, but the measured scan is short; per-symbol interpreter
 work and the later transformations also deserve attention.
 
-#figure(flamefig("fig/print_pyflate_stock.svg", width: 90%),
-  caption: [Full original Python-frame flame graph, retaining startup and harness context.
+#figure(kind: image, flamefig("fig/print_pyflate_stock.svg", source: "pyspy_pyflate_stock_full.svg", width: 90%),
+  caption: [Full original Python-frame flame graph (372 samples), retaining startup and harness context.
   Numbered outlines identify exactly the call paths enlarged on the right. Inclusive
   percentages use the original whole-profile denominator; nested shares overlap.
   Original: `results/pyspy_pyflate_stock_full.svg`.])
 
 #result-table(columns: (1.6fr, 0.8fr, 0.8fr, 0.8fr, 0.8fr),
   align: (left, right, right, right, right),
-  table.header([*Function*], [*Original self*], [*Original incl.*],
+  table.header([*Function (py-spy; 372 / 122 samples)*], [*Original self*], [*Original incl.*],
     [*Opt. self*], [*Opt. incl.*]),
   [`decode_huffman_block`], [26.08%], [97.31%], [1.64%], [82.79%],
   [`_decode_symbols_python`], [--], [--], [32.79%], [32.79%],
@@ -94,11 +97,43 @@ so percentages locate remaining work rather than measure absolute speedup. The o
 symbol loop incorporates the old matcher, bit reader and most MTF handling; residual
 `readbits` / `move_to_front` calls parse header selectors. Figure labels aggregate a
 function's per-line frames, matching the table within rounding; outlines mark one frame.
+These are 372- and 122-sample profiles: a 1% cell is one to four samples, so the tables locate
+work; they do not resolve differences below a few percent.
 
 Symbol decoding is the largest optimized function (32.79% self), while whole inverse BWT
 accounts for 38.52% inclusive. Both matter for the next offload decision. These sparse
 profiles identify candidates; Section 4 explains why they cannot supply a precise Amdahl
 fraction for the separately measured native timing pair.
+
+*What the interpreter is doing:* the C-frame profiles (`perf`, 999 Hz `cpu-clock`, debug build)
+of the original and the optimized decoder, self time per symbol family. The grouped rows sum
+self time over the regexes in `results/profile_functions.txt` (`report/summarize_profiles.py`).
+
+#result-table(columns: (2.6fr, 1fr, 1fr), align: (left, right, right),
+  table.header([*C-frame profile, self time*], [*Original*], [*Optimized*]),
+  [`_PyEval_EvalFrameDefault` (bytecode dispatch)], [23.10%], [20.82%],
+  [`_PyMem_DebugCheckAddress` (debug allocator)], [3.83%], [6.42%],
+  [`read_size_t` (allocator bookkeeping)], [3.06%], [3.21%],
+  [`call_function`], [2.44%], [0.92%],
+  [`list_dealloc`], [2.29%], [0.56%],
+  [`list_ass_slice` (the original MTF update)], [2.05%], [0.25%],
+  [`list_item`], [1.38%], [4.55%],
+  [`binary_op1` (generic arithmetic dispatch)], [1.57%], [1.48%],
+  [`sre_ucs1_match` (regex, RLE4)], [--], [2.12%],
+  [Allocation and object lifetime, all symbols], [*23.37%*], [*30.95%*],
+  [List access and index conversion, all symbols], [*9.93%*], [*9.91%*],
+  [Attribute lookup and call machinery, all symbols], [*9.45%*], [*2.13%*],
+  [Integer arithmetic (the bit window), all symbols], [*6.30%*], [*8.04%*],
+)
+
+Each profile has its own denominator. The original decoder spends a quarter of its time
+allocating and freeing objects (a per-byte `int` and list slice for every symbol) and almost a
+tenth in call machinery; the optimizations remove the call and slicing families (`call_function`
+2.44% → 0.92%, `list_ass_slice` 2.05% → 0.25%, calls 9.45% → 2.13%) and leave a flatter loop
+whose remaining cost is the interpreter itself, `int` arithmetic on the bit window and the
+allocator. Those three do not shrink by rewriting Python; they are why the native decoder in
+Section 4 pays off. The debug build overstates the allocator share (`_PyMem_DebugCheckAddress`
+exists only in `python3-dbg`), so these are shapes to read, not release-build costs.
 
 = 3. Optimizations: changes that shipped
 
@@ -136,8 +171,8 @@ depends on the interpreter and platform, not only on the algorithms. What surviv
 that no single change dominates: the pipeline, not the matcher alone, had to be optimized.
 Raw output: `results/vm_rerun_20260910_3697a63/`.
 
-#figure(flamefig("fig/print_pyflate_opt.svg", width: 100%),
-  caption: [Full optimized *Python* profile, before native offload. Inverse BWT and its
+#figure(kind: image, flamefig("fig/print_pyflate_opt.svg", source: "pyspy_pyflate_opt_full.svg", width: 100%),
+  caption: [Full optimized *Python* profile (122 samples), before native offload. Inverse BWT and its
   index-table construction remain visible beside `_decode_symbols_python`, the single
   symbol-decode loop that replaced the original matcher and bit-reader frames.
   Original: `results/pyspy_pyflate_opt_full.svg`.])
@@ -299,7 +334,8 @@ implements this protocol; it is not a deployed device driver.
 
 *Why two modules:* the two jobs want different hardware. Huffman decoding is table-driven and
 its cost is storage (table and register storage is 95% of `huffman_engine`); move-to-front is a
-wide list update whose risk is the output rate (73% of the output bytes come from runs).
+wide list update whose risk is the output rate (246,347 of the 336,184 L-vector bytes,
+73.3%, come from run groups; `hw/mtf_cam/docs/prd.md` §1).
 Separate modules are verified against separate golden models and sized by separate trade-offs,
 and the Huffman block stays reusable (it also implements DEFLATE). They are chained on chip so
 the 148,271 intermediate symbols never cross to software; leaving move-to-front in software
@@ -354,7 +390,7 @@ toolchain is entirely open source, so every number can be regenerated from the r
   [Cells (synthesis)], [151,058], [18,814],
   [Area (synthesis)], [1.634 mm²], [0.187 mm²],
   [Largest area share], [tables + registers, 95%], [move-to-front list, 68%],
-  [Timing-derived frequency (post-CTS)], [≈ 39.9 MHz], [≈ 37.6 MHz],
+  [Timing-derived frequency (post-CTS)], [≈ 39.9 MHz], [≈ 37.5 MHz],
   [Power estimate (post-CTS)], [≈ 283 mW], [≈ 13.7 mW],
   [Cycles per symbol (simulation)], [1.0068], [1.0686],
   [Directed + random tests], [17 / 17], [16 / 16],
@@ -363,12 +399,19 @@ toolchain is entirely open source, so every number can be regenerated from the r
 
 *Evidence levels:* both frequencies come from post-CTS static timing at the typical corner:
 39.9 MHz for Huffman (40 ns constraint, +14.94 ns worst setup slack; a tighter 27 ns run also
-meets timing and gives 39.5 MHz) and 37.6 MHz for MTF.
+meets timing and gives 39.5 MHz) and 37.5 MHz for MTF (27 ns constraint, +0.31 ns worst setup
+slack). Each module's 50 MHz run did not meet timing; MTF's 20 ns run failed by 6.6 ns, and the
+37.6 MHz it back-computes agrees with the met run within 0.4%. The quoted frequencies are from
+runs that met their constraint.
 They are estimates, not demonstrated silicon operating frequencies; routing may change either,
 and neither completed 50 MHz sign-off or produced a final layout (GDS). The power figures are tool estimates
 using default switching activity at each run's own clock constraint (40 ns for Huffman, 20 ns
 for MTF), so they are not comparable with each other, are not workload power, and cannot
-support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops.
+support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops, and
+its 283 mW has the same cause: the estimate toggles the 1,728-entry symbol table and the 288-word
+length window (54% of its cells are flops) at default activity on every cycle, whereas in the
+benchmark a table is written once per block and read one entry per symbol; an SRAM version
+would pay per access, not per cycle.
 Coverage percentages use the documented exclusions. Three MTF list invariants are proven
 for unbounded time by induction on a 16-entry list. At the production 256-entry width the general
 check is bounded to depth 6; a second run that starts from a valid filled list with 8 live entries
@@ -380,7 +423,7 @@ regression counts are recorded results.
 *Clocking and the link between the modules:* both modules are single-clock synchronous designs
 and the chain uses *one shared clock; there is no clock-domain crossing*. The link is an
 AXI4-Stream valid/ready handshake carrying one symbol per beat. A shared clock runs at the
-slower module's frequency, 37.6 MHz, set by `mtf_cam`. We preferred this to two clocks joined
+slower module's frequency, 37.5 MHz, set by `mtf_cam`. We preferred this to two clocks joined
 by an asynchronous FIFO because the two estimates are 6% apart, so a crossing would add area,
 latency and verification burden for no benefit. The modules differ in cycles per symbol, not
 in clock: `mtf_cam` needs 1.0686 against the decoder's 1.0068, so it back-pressures the decoder
@@ -399,14 +442,15 @@ the hardware's time plus the cost of moving data, `T_new = T_sw - T_stage + T_hw
 stage. `T_hw` is the simulated chain cycle count divided by the clock frequency. `T_if` is the
 interface time: configuration, DMA setup and copies for the compressed input and the 336,184
 L-vector bytes. It is not measured here, and transfers overlap compute only if buffers and
-bandwidth sustain it. The replaced stage is timed on its own in Appendix A3: the native decode
-phase takes 3.30 ms.
+bandwidth sustain it. The replaced stage was timed on its own: `dev/pyflate/phase_cpi.py`
+repeats the native decode phase 300 times after preparing its input and reports 3.304 ms per
+decode on the VM (`results/pyflate_phase_cpi.txt`; method and limits in Appendix A3).
 
 #result-table(columns: (1.9fr, 0.7fr, 1.6fr), align: (left, right, left),
   table.header([*Replaced stage only*], [*Time*], [*Evidence*]),
   [Optimized Python loop], [≈ 117 ms], [derived: 283.88 − 170.01 + 3.30 ms],
   [Rust kernel], [3.30 ms], [measured, Appendix A3],
-  [Hardware chain at 37.6 MHz (achievable)], [≈ 4.24 ms], [159,303 simulated cycles ÷ clock],
+  [Hardware chain at 37.5 MHz (achievable)], [≈ 4.25 ms], [159,303 simulated cycles ÷ clock],
   [Hardware chain at 50 MHz (design target)], [≈ 3.19 ms], [same cycles ÷ target clock],
 )
 
@@ -415,7 +459,7 @@ phase takes 3.30 ms.
   [Original Python], [1,123.49 ms], [1.00×],
   [Optimized Python], [281.16 ms], [4.00×],
   [Python + Rust kernel], [170.01 ms], [6.61×],
-  [Python + hardware chain at 37.6 MHz], [≈ 171 ms], [≈ 6.6× (projected)],
+  [Python + hardware chain at 37.5 MHz], [≈ 171 ms], [≈ 6.6× (projected)],
   [Python + hardware chain at 50 MHz], [≈ 170 ms], [≈ 6.6× (projected)],
 )
 
@@ -430,6 +474,20 @@ sets the floor for both the native and the hardware route. The cycle count is me
 simulation; the clock is a static-timing estimate and the interface time is unmeasured, so these are
 projections, not a run of Python attached to hardware. The 117 ms figure combines separate
 experiments and is approximate.
+
+*Why the symbol stage and not inverse BWT:* after the Python optimizations the largest
+remaining stage is inverse BWT, so the choice needs a reason. The inverse transform is one
+serial pointer chase, `end = T[end]`, executed once per output byte over a 336,184-entry
+traversal table: every step depends on the previous load, so parallel arithmetic units gain
+nothing, and a hardware walker is bound by the latency of a random access into a table that
+does not fit a small on-chip memory (336 kB as bytes, 1.3 MB as Python `int` objects). About
+336,000 dependent loads at main-memory latency is tens of milliseconds, the same order as the
+software it would replace. Table construction (the counting sort) is streaming and would
+accelerate well, but it is the smaller half (the traversal alone measured 47.8 ms against
+137.7 ms for the whole transform, Appendix A3). The symbol stage, by contrast, streams through
+a 256-entry state, which is why both the Rust kernel and the accelerators take that boundary.
+A BWT engine would need an on-chip 336 kB SRAM for the traversal table, or a different
+transform; that is the next experiment, not this one.
 
 == Area and throughput trade-offs
 
@@ -460,7 +518,7 @@ decoder adds 1.67×, leaving BWT and RLE4 as the next software targets.
 
 In hardware, `huffman_engine` and `mtf_cam` implement the same symbol-decode boundary as the
 Rust kernel. Simulated together on the real benchmark block they are byte-exact over all
-336,184 output bytes and need 159,303 clock cycles, about 4.2 ms at the 37.6 MHz clock that
+336,184 output bytes and need 159,303 clock cycles, about 4.25 ms at the 37.5 MHz clock that
 static timing supports. That is about 28× faster than the optimized Python loop and about 1.3×
 slower than the Rust kernel (parity at the 50 MHz design target), for 1.8 mm² of 130 nm
 standard cells. End to end this ties the delivered 170 ms path: once the symbol stage leaves
