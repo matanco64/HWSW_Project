@@ -36,7 +36,7 @@ hot boundary of one benchmark:
 
 | Module | Benchmark | Offloaded boundary | Report |
 |---|---|---|---|
-| `grape_pipeline` | nbody | the whole `advance(dt, n)` integration kernel | `report_nbody` §5 |
+| `grape_pipeline` | nbody | the whole `advance(dt, n)` integration kernel | `report_nbody` §6 |
 | `huffman_engine` | pyflate (bzip2) | bit-reader + canonical-Huffman symbol decode | `report_pyflate` §5 |
 | `mtf_cam` | pyflate (bzip2) | move-to-front + RUNA/RUNB run expansion | `report_pyflate` §5 |
 
@@ -131,14 +131,26 @@ dependencies (pairs sharing a body serialize their velocity updates) before posi
 commit; steps stay serial. There is no FMA — multiply and accumulate round separately
 (matches the benchmark's `pow`-free arithmetic contract, `docs/testplan.md §4`).
 
+**Generality.** The RTL is generated for `N_BODIES = 5` (`rtl/grape_regs.sv`: body window
+`N_BODIES × 7` FP64 words in flops; pair list ≤ 10; the 290-op schedule is a ROM emitted by
+`docs/gen_reservation.py` for that pair list). Larger N keeps the datapath, the register
+interface and the ordered accumulation but moves body state to SRAM, regenerates the schedule
+and — §1.5's model — wants more units. The brief's preference for hardware that is "not too
+workload-specific" is met at the level of the operation (pairwise force + ordered accumulate,
+the GRAPE recipe), not of this instance.
+
 ### 1.4 HW/SW interface
 - MMIO only, no DMA (`docs/mas.md §5`, ADR-0001). ≈ 150 AXI-Lite transactions per
   invocation (70 body + 10 pair + 4 config in; 60 state + 3 counter out), **once per
   20,000-step invocation** — < 0.03 % of compute (`docs/integration.md §1`).
 - Driver model `driver/grape_pipeline_driver.py` verified register-for-register vs
-  `docs/mas.md §4` (`driver/check_regmap.py` → **0 differences**) and against a
+  `docs/mas.md §4` (`driver/check_regmap.py` → **0 differences**), against a
   full-invocation cycle model (`driver/test_driver.py` → 4/4 pass; 2,480,000 cycles =
-  124 × 20,000).
+  124 × 20,000), and **co-simulated against the RTL** through the pyuvm AXI-Lite agent
+  (`tb/test_driver_model.py`, `make -C hw/grape_pipeline sim MODULE=test_driver_model`):
+  a full `advance(0.01, 2)` over the register protocol on the benchmark's five bodies and
+  ten pairs reads back all 35 state components bit-identical to the golden model, CYCLES =
+  250 (125/step for a 2-step run; 124 is the 20,000-step asymptote), DONE cleared by W1C.
 
 ### 1.5 Acceleration justification + estimate
 - **Baseline** `T` = **231.20 ms** (pyperf mean; median 229 ms), `results/timing_distributions.txt:2` (231.204), rounded in `results/baseline_nbody_stats.txt`.
@@ -151,7 +163,7 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
     1.81× vs the original / 1.12× vs the 143.13 ms optimized-Python tier). Does **not** beat the
     9.53 ms native-software tier. (`docs/integration.md §3`.)
 - **Bottom line vs the software tiers** (hardware rows are *projections*: RTL cycles ÷ STA
-  clock + 5 % Python residual; software rows are VM measurements, `report_nbody` §1/§3):
+  clock + 5 % Python residual; software rows are VM measurements, `report_nbody` §4):
 
   | Tier | Time / run | vs original |
   |---|---:|---:|
@@ -233,16 +245,22 @@ register sets pre-loaded). Decodes 1 symbol/cycle.
 
 ### 2.5 Acceleration justification + estimate
 - **Baseline** `T` = **1,123.49 ms** (≈ 1.12 s mean; median 1.12 s), `results/timing_distributions.txt:6` (1123.488), rounded in `results/baseline_pyflate_stats.txt:18`.
-- **Fraction** `f` = **0.496** (Huffman decode 12.0 % + bit reader 37.6 %, `docs/prd.md §1`).
+- **Fraction** `f` ≈ **0.40** on the VM py-spy profile that `report_pyflate` §2 uses
+  (`find_next_symbol` 12.63 % + `readbits` 9.95 % + `snoopbits` 9.41 % + `_mask` 5.91 % +
+  `_more` 2.42 % of 372 samples, `results/profile_functions.txt`). The PRD sized the module from
+  a local cProfile run (`docs/prd.md §1`: f = 0.496, 12.0 % decode + 37.6 % bit reader);
+  cProfile's per-call overhead inflates the share of the many tiny bit-reader calls, so the
+  sampled VM profile is the fraction used here and in the reports, and `mtf_cam` (§3.5) is
+  sized on the same profile.
 - **HW cost** 149,276 cycles for 148,271 symbols → **K1 = 1.0068** cyc/sym, trace-exact vs
   golden over every beat (`docs/ppa.md`, `docs/uarch.md §7`).
-- Amdahl (residual 50.4 % of T = **566.2 ms**):
-  - **50 MHz:** t_hw = 2.99 ms → **≈ 1.97×** (essentially the 1.98× ideal bound).
-  - **39.9 MHz** (achievable, post-CTS): t_hw = 3.74 ms → **≈ 1.97×**.
-- **Key finding — clock-insensitive.** Unlike grape, huffman is **Amdahl-fraction-bound,
-  not clock-bound**: S stays **1.89–1.97×** across a 10× clock range (even 5 MHz → 1.89×),
-  because the software Huffman path is ~566 ms and the hardware decode is milliseconds. The
-  realized clock does not gate the result; `f` does (`docs/integration.md §3`).
+- Amdahl ceiling at f = 0.40: **1/(1 − 0.40) = 1.67×** standalone, for any clock at which the
+  decode takes milliseconds (t_hw = 3.74 ms at 39.9 MHz against a 674 ms residual). The
+  earlier cProfile fraction gave 1.98×; the difference is the profiler, not the hardware.
+- **This standalone figure is superseded** by the chain analysis in §3.8: the two pyflate
+  modules ship together, the replaced stage is measured at the Rust boundary (3.30 ms), and the
+  end-to-end projection is **≈ 6.6× vs the original — a tie with the delivered Python + Rust
+  path**, because once the symbol stage leaves the interpreter it is ≈ 2 % of what remains.
 
 ### 2.6 Block diagram
 ![huffman_engine block diagram](../huffman_engine/docs/block_diagram.svg)
@@ -258,7 +276,12 @@ miss: ~34 kbit of flops (no SRAM macro was integrated in our flow; OpenRAM sky13
 move the 17.3 kbit symtab + 8.6 kbit length window into SRAM macros → projected ~0.75 mm²
 std cells + 2 macros (**not synthesized**). Fmax **39.9 MHz** (post-CTS, 40 ns constraint).
 Power **≈ 283 mW** post-CTS (default switching activity at the 40 ns constraint — indicative,
-scales with clock, not workload power). Die shot: not obtained.
+scales with clock, not workload power). It is ≈ 15× the other two modules for the same reason
+the area is: the 1,728 × 10-bit symbol table and the 6 × 288 × 5-bit length window are flops
+(54 % of cells sequential), and the estimate toggles every one of them at default activity on
+each 40 ns cycle, whereas in the benchmark a table is written once per block and read one entry
+per symbol. The SRAM path above would move both into macros whose read energy is per access,
+not per cycle; that number is not estimated here. Die shot: not obtained.
 
 ---
 
@@ -276,11 +299,12 @@ Single clock, `rst_n`.
   (`docs/mas.md §2`): 32-bit AXI4-Lite control/status window; 32-bit AXI4-Stream symbol beats in
   (`s_axis_sym`, TLAST on the end-of-block beat); 64-bit (8·W, W = 8) AXI4-Stream out
   (`m_axis_l`) with 8-bit TKEEP and TLAST; 1-bit interrupt.
-- **Operating frequency:** target **50 MHz** (uArch §6). Achievable **≈ 37.6 MHz** —
-  *post-CTS STA* (tt, evidence `synth/evidence/ws.max.rpt`: −6.5964 ns setup slack @ 20 ns →
-  26.60 ns). This is the **tightest-constrained** measurement of the three (the constraint is
-  within 1.33× of the result, so the tool optimised the critical path hard). Missed 50 MHz by
-  ~1.33×.
+- **Operating frequency:** target **50 MHz** (uArch §6). Achievable **≈ 37.5 MHz** —
+  *post-CTS STA* at a 27 ns constraint that the design **meets** (tt, evidence
+  `synth/evidence/tight27_ws.max.rpt`: +0.3066 ns worst setup slack, +0.195 ns hold →
+  26.69 ns). The 20 ns (50 MHz) run **failed** by 6.5964 ns (`synth/evidence/ws.max.rpt`);
+  the 37.6 MHz that run back-computes agrees with the met run within 0.4 % and is quoted only
+  as a cross-check. Missed 50 MHz by ~1.33×.
 
 ### 3.3 Architecture
 `docs/uarch.md`: a 256×8 shift-register CAM with a 256:1 rank read-mux and a parallel
@@ -295,11 +319,15 @@ feeds a W=8-lane packer. K3 = **1.063** cyc/sym (model) / **1.0686** measured on
 ### 3.5 Acceleration justification + estimate
 - **Baseline** `T` = **1,123.49 ms** (mean ≈ 1.12 s), `results/timing_distributions.txt:6`.
 - **Fraction** `f` = **0.1344** (`move_to_front` self-time share, `results/profile_functions.txt:60`, `report_pyflate` §2).
-- **HW cost:** DUT-measured **158,441 cycles** (K3 = 1.0686) → **≈ 4.21 ms** @ 37.6 MHz;
+- **HW cost:** DUT-measured **158,441 cycles** (K3 = 1.0686) → **≈ 4.23 ms** @ 37.5 MHz;
   model 157,560 cycles (K3 = 1.063) at W=8 (`docs/ppa.md §3.1`, `docs/integration.md`). Both
   cycle figures are disclosed; the DUT number carries implementation overhead over the model.
-- Standalone end-to-end: **≈ 1.15×** (small stage share). The isolated-stage ratio (80.4 ms
-  original MTF microbench → 19.1× @ 37.6 MHz / 25.4× @ 50 MHz, PRD K5) is a **different
+- Standalone Amdahl ceiling at f = 0.1344: 1.16× — the stage share is small, which is the
+  argument for chaining it on chip rather than for a separate accelerator. **Superseded by
+  §3.8:** measured as a chain at the Rust boundary, the hardware replaces the optimized Python
+  symbol loop ≈ 28× faster and runs ≈ 1.3× slower than the Rust kernel at the achievable clock;
+  end to end ≈ 6.6× vs the original (a tie with Python + Rust). The isolated-stage ratio (80.4 ms
+  original MTF microbench → 19.0× @ 37.5 MHz / 25.4× @ 50 MHz, PRD K5) is a **different
   experiment** from the whole-decoder profile and must not be substituted for it.
 
 ### 3.6 Block diagram
@@ -318,7 +346,7 @@ and is **W-invariant**. Measured W-sweep:
 | **8** | **0.187** | **1.063** | **chosen** (knee) |
 | 16 | 0.208 | 1.023 | +10.9 % area for 3.9 % throughput (3.8 % fewer cycles) — not needed |
 
-Soft 1.0 mm² area ceiling (K6) **met with 5.3× headroom**. Fmax **37.6 MHz** (post-CTS, W-independent). Power
+Soft 1.0 mm² area ceiling (K6) **met with 5.3× headroom**. Fmax **37.5 MHz** (post-CTS at a met 27 ns constraint, W-independent). Power
 **≈ 13.7 mW** post-CTS (default switching activity — indicative, not workload power). Die
 shot: not obtained.
 
@@ -339,13 +367,13 @@ there is no content search.
 | Area driver | code tables 95 %; decode cascade 1.3 % | 256-entry list 68 % |
 | Size | 151,058 cells / 1.634 mm² | 18,814 cells / 0.187 mm² (8.7× smaller) |
 | Cycles / symbol | 1.0068 | 1.0686 |
-| Post-CTS clock | 39.9 MHz | 37.6 MHz |
+| Post-CTS clock | 39.9 MHz | 37.5 MHz |
 | Limits the chain by | — | both: the slower clock *and* the higher cycles/symbol |
 
 **Clocking of the chain.** Both modules are single-clock synchronous (`docs/mas.md`: "one clock
 domain, no CDC"); the chain is specified on **one shared clock, no clock-domain crossing**,
 linked by an AXI4-Stream valid/ready handshake (beat format ADR-0006). Shared clock ⇒ the chain
-runs at the slower module's frequency, **37.6 MHz (mtf-limited)**; huffman's 39.9 MHz estimate
+runs at the slower module's frequency, **37.5 MHz (mtf-limited)**; huffman's 39.9 MHz estimate
 leaves it a little headroom. The modules differ in *cycles per symbol* (1.0068 vs 1.0686), handled by `tready`
 back-pressure: the chain advances at mtf's rate (159,303 cycles/block, measured). **Verification status:**
 each side is verified standalone against the same beat contract and golden symbol stream
@@ -359,7 +387,7 @@ projection (decoder table-build start-up). 148,271 link beats, 0 malformed; deco
 mtf on 10,013 cycles, mtf starved on 873 — the chain runs at mtf's rate.
 
 **Same boundary as the Rust kernel** (148,271 symbols → 336,184 bytes). Hardware rows are
-**measured chain RTL cycles** ÷ post-CTS clock (shared 37.6 MHz), not including DMA/interface time — the
+**measured chain RTL cycles** ÷ post-CTS clock (shared 37.5 MHz), not including DMA/interface time — the
 cycle count is measured, the clock is a static-timing estimate; the Rust figure is a phase-isolated VM measurement (`report_appendix` A3,
 `results/pyflate_phase_cpi.txt`); the Python figure is derived across separate experiments.
 
@@ -367,14 +395,29 @@ cycle count is measured, the clock is a static-timing estimate; the Rust figure 
 |---|---:|---|---|---:|---:|
 | Optimized Python loop | ≈ 117 ms | | Original Python | 1,123.49 ms | 1.00× |
 | Rust kernel | 3.30 ms | | Optimized Python | 281.16 ms | 4.00× |
-| HW chain @ 37.6 MHz (159,303 cyc, measured) | ≈ 4.24 ms | | Python + Rust kernel | 170.01 ms | 6.61× |
-| HW chain @ 50 MHz | ≈ 3.19 ms | | Python + HW chain @ 37.6 / 50 MHz | ≈ 171 / 170 ms | ≈ 6.6× / 6.6× |
+| HW chain @ 37.5 MHz (159,303 cyc, measured) | ≈ 4.25 ms | | Python + Rust kernel | 170.01 ms | 6.61× |
+| HW chain @ 50 MHz | ≈ 3.19 ms | | Python + HW chain @ 37.5 / 50 MHz | ≈ 171 / 170 ms | ≈ 6.6× / 6.6× |
 
 **Verdict.** ≈ 28× over the Python loop, ≈ 1.3× slower than the Rust kernel at the achievable
 clock (parity at target). End to end a tie with the delivered 170 ms path: off the interpreter
 this stage is ≈ 2 % of what remains, and inverse BWT (137.7 ms, ≈ 80 %) sets the floor for both
-routes. The 1.97× / 1.15× figures in §2.5/§3.5 (against the original Python) are profile-share projections, not
-this matched comparison.
+routes.
+
+**Why the symbol stage and not inverse BWT.** After the software optimizations inverse BWT is
+the largest remaining stage, so the target needs a reason. The inverse transform is one serial
+pointer chase, `end = T[end]`, once per output byte over a 336,184-entry table: each step
+depends on the previous load, parallel units gain nothing, and a hardware walker is bound by
+the latency of a random access into a table that does not fit a small on-chip memory (336 kB).
+≈ 336 k dependent loads at DRAM latency is tens of milliseconds — the order of the software it
+would replace. Table construction (counting sort) streams and would accelerate, but it is the
+smaller half (traversal 47.8 ms vs 137.7 ms whole, `report_appendix` A3). The symbol stage
+streams through a 256-entry state, which is why the Rust kernel and the accelerators share that
+boundary. A BWT engine needs an on-chip 336 kB SRAM or a different transform: the next
+experiment, not this one.
+
+The standalone Amdahl ceilings in §2.5/§3.5 (1.67× and 1.16× against the original
+Python, from profile shares) bound each module alone; this matched chain comparison is the
+figure the reports quote.
 
 ---
 
@@ -382,15 +425,21 @@ this matched comparison.
 
 | Metric | grape_pipeline | huffman_engine | mtf_cam |
 |---|---:|---:|---:|
-| Cells (sky130 HD) | 584,454 | 151,058 | 18,814 |
-| Area | 4.075 mm² | 1.634 mm² | 0.187 mm² |
+| Cells, plain Yosys (sky130 HD) | 584,454 ‡ | 151,058 | 18,814 |
+| Area, plain Yosys | 4.075 mm² ‡ | 1.634 mm² | 0.187 mm² |
+| Cells, OpenLane synthesis of the final RTL | 446,932 | not rerun | not rerun |
+| Area, OpenLane synthesis of the final RTL | 4.66 mm² (5.65 mm² placed) | not rerun | not rerun |
 | Cyc/symbol or /step | 124 /step | 1.0068 /sym | 1.0686 /sym |
-| **Fmax** | **19.46 MHz** | **39.9 MHz** | **37.6 MHz** |
+| **Fmax** | **19.46 MHz** | **39.9 MHz** | **37.5 MHz** |
 | **Fmax evidence stage** | **post-CTS** | **post-CTS** | **post-CTS** |
 | Power | ≈ 19.2 mW (indic., 150 ns) | ≈ 283 mW (indic., 40 ns) | ≈ 13.7 mW (indic., 20 ns) |
 | Directed + random tests | 9/9 | 17/17 | 16/16 |
 | Line / toggle coverage | 91.7 % / 96.0 % | 90.4 % / 90.3 %† | 92.0 % / 93.8 %† |
-| End-to-end estimate | ~1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ~1.97× vs the original (clock-insensitive) | ~1.15× vs the original |
+| End-to-end estimate | ≈ 1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ≈ 6.6× vs the original as a chain with mtf_cam (§3.8); replaced stage ≈ 28× vs the optimized Python loop, ≈ 1.3× slower than Rust | same chain figure (the two modules are only meaningful together) |
+
+‡ grape's plain-Yosys figures predate the final issue-selection rewrite; the OpenLane row is
+the netlist the 19.46 MHz timing was measured on. The two recipes are not comparable with each
+other (§1.7); the plain-Yosys row is the one comparable across the three modules.
 
 † huffman and mtf toggle coverage is measured over the **control-signal subset** (signals ≤ 4 bits
 wide); wide data buses whose upper bits the benchmark cannot toggle are waived, with the width
@@ -413,12 +462,20 @@ as workload-energy numbers.
   single benchmark input; the on-chip chain is co-simulated (§3.8), but the platform
   DMA/host-interface cost is **not measured** (module + driver tests do not exercise it).
 - huffman's SRAM-macro sub-1 mm² path is **projected, not synthesized**.
+- grape's end-to-end projection assumes a 5 % Python residual (harness + energy evaluation,
+  11.6 ms); it is an assumption, not a matched measurement. The measurement is one pyperf run
+  of the harness with `advance` stubbed out, listed as the next measurement.
+- The Amdahl fractions in §2.5 and §3.5 now both come from the VM py-spy profile
+  (`results/profile_functions.txt`). Earlier drafts of §2.5 used the PRD's local cProfile
+  fraction (0.496), which gave a 1.97× standalone ceiling; on the sampled profile the
+  huffman slice is ≈ 0.40 and the ceiling 1.67×. Neither standalone figure is a report
+  claim — the reports quote the chain comparison of §3.8.
 - mtf_cam's formal move-to-front invariants are proven **unbounded @ N_LIST=16**. At the
   production **N_LIST=256** the general check (`bmc`) is bounded to **depth 6**; the depth-24
   result (`bmc256moves`) is **fill-abstracted**: it starts from a valid filled list with 8 live
   entries and shows 24 consecutive moves preserve the permutation (`hw/mtf_cam/synth/formal.sby`;
   general unbounded-256 is SAT-intractable — honestly a wall, not skipped).
-- all three miss 50 MHz post-CTS (grape 2.6×, mtf 1.33×, huffman 1.25×); documented RTL follow-ups
+- all three miss 50 MHz post-CTS (grape 2.6×, mtf 1.33×, huffman 1.25×); every quoted Fmax now comes from a run whose constraint was met (grape 150 ns, huffman 40 ns and 27 ns, mtf 27 ns), with each module's failed 50 MHz run kept as the second evidence point; documented RTL follow-ups
   (pipeline the integrate-multiply path; pipeline the table build + register the symtab mux)
   are datapath changes deferred beyond the PPA stage.
 

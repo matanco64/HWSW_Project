@@ -79,4 +79,17 @@ build_all() {
 }
 
 build_all "$@"
+
+# Consolidated hardware report: hw/docs/hardware_report.md is the source that
+# gets edited; the Typst file is generated from it and committed alongside so
+# the shipped PDF has a reproducible origin. Built with every full build (no
+# argument), skipped when a single report was named.
+if [ $# -eq 0 ]; then
+    python3 "$ROOT/tools/md2typ.py" "$ROOT/hw/docs/hardware_report.md" \
+        "$ROOT/hw/docs/hardware_report.typ"
+    "$TYPST" compile --root "$ROOT" "$ROOT/hw/docs/hardware_report.typ" \
+        "$ROOT/hw/docs/hardware_report.pdf"
+    echo "built hw/docs/hardware_report.pdf"
+fi
+
 python3 "$HERE/check_txt_tables.py" "$@"
