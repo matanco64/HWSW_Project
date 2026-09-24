@@ -267,36 +267,37 @@ unmeasured. hw/docs/hardware_report.md maps every required hardware item to its 
 
 
                                                         5
-HWSW Final Project                                                                                 Appendix: Measurement Methodology
+HWSW Final Project                                                                                      Appendix: Measurement Methodology
 
 worked software examples are checked by report/verify_examples.py; defense questions and an evidence
 map are in report/defense_guide.md.
- Step                        Tool (version)                             Why this tool
- Design language             SystemVerilog, synthesizable               the same source passes Verilator and Yosys
+ Step                        Tool (version)                              Why this tool
+ Design language             SystemVerilog, synthesizable                the same source passes Verilator and Yosys
                              subset
- Lint, main simulation       Verilator 5.051                            compiled simulation is fast enough to run the whole
-                                                                        benchmark input per test; line/toggle coverage
- Cross-check                 Icarus Verilog 14.0                        4-state: shows X-propagation after reset, which 2-state
- simulation                                                             Verilator cannot
- Testbench                   cocotb 2.0.1, pyuvm 4.0.1,                 golden models are Python, so a Python testbench calls
-                             cocotbext-axi 0.1.28                       them directly as the scoreboard oracle; AXI bus models
-                                                                        with back-pressure
- Driver and unit tests       pytest 9.1.1                               register-map checks and driver models without a
-                                                                        simulator
- Formal                      SymbiYosys 0.68                            proves control properties simulation only samples: FSM
-                                                                        arcs, handshakes, list invariants
- Synthesis, area             Yosys 0.68, sky130 high-density            open synthesis onto real standard cells gives cell count
-                             cells (tt, 25 °C, 1.8 V)                   and area
- Process                     SkyWater sky130                            the fully open 130 nm PDK, reproducible without an
-                                                                        NDA; no SRAM macros, so all storage is flip-flops
- Place, clock tree,          OpenLane 2.3.10 (OpenROAD)                 floorplan, placement, clock-tree synthesis, static timing
- timing, power                                                          and power estimate; routing not reached
- Tool bundle                 OSS CAD Suite 2026-08-26                   one pinned archive gives identical versions on any
-                                                                        machine
-References: Python profile semantics version-specific bytecode repository and raw data.
+ Lint, main simulation       Verilator 5.051                             compiled simulation is fast enough to run the whole
+                                                                         benchmark input per test; line/toggle coverage
+ Cross-check                 Icarus Verilog 14.0                         4-state: shows X-propagation after reset, which 2-state
+ simulation                                                              Verilator cannot
+ Testbench                   cocotb 2.0.1, pyuvm 4.0.1,                  golden models are Python, so a Python testbench calls
+                             cocotbext-axi 0.1.28                        them directly as the scoreboard oracle; AXI bus models
+                                                                         with back-pressure
+ Driver and unit tests       pytest 9.1.1                                register-map checks and driver models without a
+                                                                         simulator
+ Formal                      SymbiYosys 0.68                             proves control properties simulation only samples: FSM
+                                                                         arcs, handshakes, list invariants
+ Synthesis, area             Yosys 0.68, sky130 high-density             open synthesis onto real standard cells gives cell count
+                             cells (tt, 25 °C, 1.8 V)                    and area
+ Process                     SkyWater sky130                             the fully open 130 nm PDK, reproducible without an
+                                                                         NDA; no SRAM macros, so all storage is flip-flops
+ Place, clock tree,          OpenLane 2.3.10 (OpenROAD)                  floorplan, placement, clock-tree synthesis, static timing
+ timing, power                                                           and power estimate; routing not reached
+ Tool bundle                 OSS CAD Suite 2026-08-26                    one pinned archive gives identical versions on any
+                                                                         machine
+References: Python profile semantics — docs.python.org/3.10/library/profile.html. Version-specific bytecode — docs.python.org/3/library/
+dis.html. Repository and raw data — github.com/matanco64/HWSW_Project.
 
 
 
 
-                                                                    6
+                                                                     6
 

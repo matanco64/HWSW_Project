@@ -331,7 +331,9 @@ defense questions and an evidence map are in `report/defense_guide.md`.
   [Tool bundle], [OSS CAD Suite 2026-08-26], [one pinned archive gives identical versions on any machine],
 )
 
-#text(size: 8.5pt)[*References:* Python
-#link("https://docs.python.org/3.10/library/profile.html")[profile semantics];
-#link("https://docs.python.org/3/library/dis.html")[version-specific bytecode];
-#link("https://github.com/matanco64/HWSW_Project")[repository and raw data].]
+#text(size: 8.5pt)[*References:* Python profile semantics —
+#link("https://docs.python.org/3.10/library/profile.html")[docs.python.org/3.10/library/profile.html].
+Version-specific bytecode —
+#link("https://docs.python.org/3/library/dis.html")[docs.python.org/3/library/dis.html].
+Repository and raw data —
+#link("https://github.com/matanco64/HWSW_Project")[github.com/matanco64/HWSW\_Project].]
