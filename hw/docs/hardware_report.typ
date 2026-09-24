@@ -82,8 +82,8 @@ Everything is open-source and version-pinned (#raw("hw/setup.sh") installs it; #
   [Place, clock tree, timing, power], [#strong[OpenLane 2.3.10] (OpenROAD), via Nix], [open RTL-to-layout flow; we use floorplan → placement → clock-tree synthesis → static timing + power estimate (post-CTS); routing/GDS not reached],
   [Tool bundle], [#strong[OSS CAD Suite nightly 2026-08-26]], [one pinned archive for Verilator, Icarus, Yosys, SymbiYosys, GTKWave → identical versions on any machine],
   [Waveform debug], [GTKWave / Surfer, #raw("hw/common/tb/vcd2csv.py")], [FST waves; CSV export so failures can be analysed in Python],
-  [Flow tracking, diagrams], [#raw("tools/hw/status.py"), #raw("tools/hw/blockdiag.py") (ours)], [stage-gate evidence in #raw("hw/STATUS.json"); block diagrams generated from a JSON spec, no external renderer],
-  [AI assistance], [Claude Code], [drafting RTL, testbenches and documents inside the stage-gated flow (#raw("hw/FLOW.md")) with human approval at every checkpoint; prompts logged in #raw("prompt.txt") (brief §10)],
+  [Flow tracking, diagrams], [#raw("tools/hw/status.py"), #raw("tools/hw/blockdiag.py") (ours)], [stage-gate evidence recorded in the repository's flow tracker (not shipped); block diagrams generated from a JSON spec, no external renderer],
+  [AI assistance], [Claude Code], [drafting RTL, testbenches and documents inside a stage-gated flow (its contract is in the public repository) with human approval at every checkpoint; prompts logged in #raw("prompt.txt") (brief §10)],
 )
 
 
@@ -98,7 +98,7 @@ Everything is open-source and version-pinned (#raw("hw/setup.sh") installs it; #
 )
 
 
-No module reached GDS (no die shot). A post-CTS power estimate exists for all three — #raw("grape_pipeline") 19.2 mW, #raw("huffman_engine") 283 mW, #raw("mtf_cam") 13.7 mW — each with #strong[default switching activity] at its own run clock (150 / 40 / 20 ns): indicative only, not workload power, and not comparable with each other.
+No module reached GDS (no die shot). A post-CTS power estimate exists for all three — #raw("grape_pipeline") 19.2 mW, #raw("huffman_engine") 283 mW, #raw("mtf_cam") 10.2 mW — each with #strong[default switching activity] at its own run clock (150 / 40 / 20 ns): indicative only, not workload power, and not comparable with each other.
 
 
 #line(length: 100%, stroke: 0.4pt + gray)
@@ -281,7 +281,7 @@ Source #raw("hw/mtf_cam/docs/block_diagram.json"). System view of the chain: #ra
 )
 
 
-Soft 1.0 mm² area ceiling (K6) #strong[met with 5.3× headroom]. Fmax #strong[37.5 MHz] (post-CTS at a met 27 ns constraint, W-independent). Power #strong[≈ 13.7 mW] post-CTS (default switching activity — indicative, not workload power). Die shot: not obtained.
+Soft 1.0 mm² area ceiling (K6) #strong[met with 5.3× headroom]. Fmax #strong[37.5 MHz] (post-CTS at a met 27 ns constraint, W-independent). Power #strong[≈ 10.2 mW] post-CTS at the 27 ns operating point (default switching activity — indicative, not workload power; the failed 20 ns run reported 13.7 mW). Die shot: not obtained.
 
 
 === 3.8 pyflate bottom line — the two modules vs each other and vs software
@@ -340,7 +340,7 @@ The standalone Amdahl ceilings in §2.5/§3.5 (1.67× and 1.16× against the ori
   [Cyc/symbol or /step], [124 /step], [1.0068 /sym], [1.0686 /sym],
   [#strong[Fmax]], [#strong[19.46 MHz]], [#strong[39.9 MHz]], [#strong[37.5 MHz]],
   [#strong[Fmax evidence stage]], [#strong[post-CTS]], [#strong[post-CTS]], [#strong[post-CTS]],
-  [Power], [≈ 19.2 mW (indic., 150 ns)], [≈ 283 mW (indic., 40 ns)], [≈ 13.7 mW (indic., 20 ns)],
+  [Power], [≈ 19.2 mW (indic., 150 ns)], [≈ 283 mW (indic., 40 ns)], [≈ 10.2 mW (indic., 27 ns)],
   [Directed + random tests], [9/9], [17/17], [16/16],
   [Line / toggle coverage], [91.7 % / 96.0 %], [90.4 % / 90.3 %†], [92.0 % / 93.8 %†],
   [End-to-end estimate], [≈ 1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95)], [≈ 6.6× vs the original as a chain with mtf\_cam (§3.8); replaced stage ≈ 28× vs the optimized Python loop, ≈ 1.3× slower than Rust], [same chain figure (the two modules are only meaningful together)],
@@ -353,13 +353,13 @@ The standalone Amdahl ceilings in §2.5/§3.5 (1.67× and 1.16× against the ori
 † huffman and mtf toggle coverage is measured over the #strong[control-signal subset] (signals ≤ 4 bits wide); wide data buses whose upper bits the benchmark cannot toggle are waived, with the width sweep as evidence (#raw("hw/<module>/docs/coverage_waivers.md")). grape's is over all signals. Branch coverage: 94.8 % / 91.7 % / 96.8 %. Sources: #raw("hw/<module>/tb/cov/coverage.txt") and #raw("hw/<module>/tb/cov/func_cov.txt") (59 / 34 / 129 functional bins, all hit).
 
 
-#strong[All three Fmax numbers are post-CTS STA] (real placed clock tree) — the same evidence stage — so they are comparable on that axis. None completed routed GDS sign-off (no die shot). Power figures use #strong[default switching activity] at each run's own clock constraint (19.2 mW \@ 150 ns, 283 mW \@ 40 ns, 13.7 mW \@ 20 ns), so they are indicative and #strong[not] comparable to each other or usable as workload-energy numbers.
+#strong[All three Fmax numbers are post-CTS STA] (real placed clock tree) — the same evidence stage — so they are comparable on that axis. None completed routed GDS sign-off (no die shot). Power figures use #strong[default switching activity] at each run's own clock constraint (19.2 mW \@ 150 ns, 283 mW \@ 40 ns, 10.2 mW \@ 27 ns), so they are indicative and #strong[not] comparable to each other or usable as workload-energy numbers.
 
 
 == 5. Honest limitations (self-declared)
 
 
-- No module reached routed GDS → no die shot; post-CTS power estimates (grape 19.2 mW, huffman 283 mW, mtf 13.7 mW) use default activity at three different run clocks — they cannot support an energy-savings claim or a cross-module power comparison.
+- No module reached routed GDS → no die shot; post-CTS power estimates (grape 19.2 mW, huffman 283 mW, mtf 10.2 mW) use default activity at three different run clocks — they cannot support an energy-savings claim or a cross-module power comparison.
 - Every end-to-end speedup is a #strong[conditional projection] using a profiled fraction and a single benchmark input; the on-chip chain is co-simulated (§3.8), but the platform DMA/host-interface cost is #strong[not measured] (module + driver tests do not exercise it).
 - huffman's SRAM-macro sub-1 mm² path is #strong[projected, not synthesized].
 - grape's end-to-end projection assumes a 5 % Python residual (harness + energy evaluation, 11.6 ms); it is an assumption, not a matched measurement. The measurement is one pyperf run of the harness with #raw("advance") stubbed out, listed as the next measurement.

@@ -391,7 +391,7 @@ toolchain is entirely open source, so every number can be regenerated from the r
   [Area (synthesis)], [1.634 mm²], [0.187 mm²],
   [Largest area share], [tables + registers, 95%], [move-to-front list, 68%],
   [Timing-derived frequency (post-CTS)], [≈ 39.9 MHz], [≈ 37.5 MHz],
-  [Power estimate (post-CTS)], [≈ 283 mW], [≈ 13.7 mW],
+  [Power estimate (post-CTS)], [≈ 283 mW], [≈ 10.2 mW],
   [Cycles per symbol (simulation)], [1.0068], [1.0686],
   [Directed + random tests], [17 / 17], [16 / 16],
   [Line / toggle coverage], [90.4% / 90.3%], [92.0% / 93.8%],
@@ -405,7 +405,7 @@ slack). Each module's 50 MHz run did not meet timing; MTF's 20 ns run failed by 
 runs that met their constraint.
 They are estimates, not demonstrated silicon operating frequencies; routing may change either,
 and neither completed 50 MHz sign-off or produced a final layout (GDS). The power figures are tool estimates
-using default switching activity at each run's own clock constraint (40 ns for Huffman, 20 ns
+using default switching activity at each run's own clock constraint (40 ns for Huffman, 27 ns
 for MTF), so they are not comparable with each other, are not workload power, and cannot
 support energy savings. Huffman is 8.7× the area of MTF because its code tables are flops, and
 its 283 mW has the same cause: the estimate toggles the 1,728-entry symbol table and the 288-word

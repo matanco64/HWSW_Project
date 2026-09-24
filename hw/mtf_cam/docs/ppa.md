@@ -160,11 +160,14 @@ constraint. Sources: `synth/evidence/tight27_ws.max.rpt` (27 ns) and
 ### 3.2 Power
 
 - **Indicative, not a sign-off figure.** OpenROAD `report_power` at post-CTS (tt) reports
-  **≈ 13.7 mW** (`31-openroad-stamidpnr-1/power.rpt`, `power__total: 0.013695`): 49.9 %
-  sequential + 46.5 % clock + 3.6 % combinational. With a placed clock tree this is more
+  **≈ 10.2 mW** at the 27 ns operating point (`synth/evidence/tight27_power.rpt`,
+  `power__total: 0.010174`): 49.7 % sequential + 46.6 % clock + 3.7 % combinational. The
+  20 ns run reports 13.7 mW (`31-openroad-stamidpnr-1/power.rpt`,
+  `power__total: 0.013695`), but that run **missed its constraint by 6.6 ns** (§3.1), so it
+  is not the operating point; the two differ by about the clock ratio, as expected. With a placed clock tree this is more
   meaningful than a pre-PnR estimate, but it uses **default switching activity** (no
   real VCD), so it is indicative only. Per the task, no power number is invented beyond
-  this measured post-CTS report; `ppa.power_mw ≈ 13.7` (post-CTS, default activity).
+  this measured post-CTS report; `ppa.power_mw ≈ 10.2` (post-CTS, default activity).
 - **Die shot:** **not obtained** — no GDS was produced (run closed before detailed
   routing), same as grape/huffman.
 
@@ -177,7 +180,7 @@ constraint. Sources: `synth/evidence/tight27_ws.max.rpt` (27 ns) and
 | OpenLane placement + CTS | **done** (no GRT-0607; deepest run in this project) |
 | Fmax | **post-CTS STA** — ≈ 37.5 MHz tt (§3.1, 27 ns run, +0.31 ns slack; the 20 ns run violated by 6.6 ns); closed before routing |
 | Area (OpenLane placed) | not reported — use Yosys 0.187 mm² (§1) |
-| Power | **post-CTS indicative** ≈ 13.7 mW (§3.2, default activity) |
+| Power | **post-CTS indicative** ≈ 10.2 mW @ 27 ns (§3.2, default activity; 13.7 mW at the failed 20 ns run) |
 | Die shot | **not obtained** (no GDS; not §7-required, not invented) |
 
 ## 4. Report §7 mapping

@@ -75,8 +75,8 @@ it), so every hardware number in this project can be regenerated from the reposi
 | Place, clock tree, timing, power | **OpenLane 2.3.10** (OpenROAD), via Nix | open RTL-to-layout flow; we use floorplan → placement → clock-tree synthesis → static timing + power estimate (post-CTS); routing/GDS not reached |
 | Tool bundle | **OSS CAD Suite nightly 2026-08-26** | one pinned archive for Verilator, Icarus, Yosys, SymbiYosys, GTKWave → identical versions on any machine |
 | Waveform debug | GTKWave / Surfer, `hw/common/tb/vcd2csv.py` | FST waves; CSV export so failures can be analysed in Python |
-| Flow tracking, diagrams | `tools/hw/status.py`, `tools/hw/blockdiag.py` (ours) | stage-gate evidence in `hw/STATUS.json`; block diagrams generated from a JSON spec, no external renderer |
-| AI assistance | Claude Code | drafting RTL, testbenches and documents inside the stage-gated flow (`hw/FLOW.md`) with human approval at every checkpoint; prompts logged in `prompt.txt` (brief §10) |
+| Flow tracking, diagrams | `tools/hw/status.py`, `tools/hw/blockdiag.py` (ours) | stage-gate evidence recorded in the repository's flow tracker (not shipped); block diagrams generated from a JSON spec, no external renderer |
+| AI assistance | Claude Code | drafting RTL, testbenches and documents inside a stage-gated flow (its contract is in the public repository) with human approval at every checkpoint; prompts logged in `prompt.txt` (brief §10) |
 
 **Evidence-stage legend (used for every Fmax below).** OpenLane physical estimates come
 at different depths of the flow, and they are *not* interchangeable. Per
@@ -91,7 +91,7 @@ operating frequency**, which each module has.
 | **GDS sign-off** | fully routed, DRC/LVS-clean | ground truth — **not reached** by any module |
 
 No module reached GDS (no die shot). A post-CTS power estimate exists for all three —
-`grape_pipeline` 19.2 mW, `huffman_engine` 283 mW, `mtf_cam` 13.7 mW — each with **default
+`grape_pipeline` 19.2 mW, `huffman_engine` 283 mW, `mtf_cam` 10.2 mW — each with **default
 switching activity** at its own run clock (150 / 40 / 20 ns): indicative only, not workload
 power, and not comparable with each other.
 
@@ -349,7 +349,7 @@ and is **W-invariant**. Measured W-sweep:
 | 16 | 0.208 | 1.023 | +10.9 % area for 3.9 % throughput (3.8 % fewer cycles) — not needed |
 
 Soft 1.0 mm² area ceiling (K6) **met with 5.3× headroom**. Fmax **37.5 MHz** (post-CTS at a met 27 ns constraint, W-independent). Power
-**≈ 13.7 mW** post-CTS (default switching activity — indicative, not workload power). Die
+**≈ 10.2 mW** post-CTS at the 27 ns operating point (default switching activity — indicative, not workload power; the failed 20 ns run reported 13.7 mW). Die
 shot: not obtained.
 
 ### 3.8 pyflate bottom line — the two modules vs each other and vs software
@@ -434,7 +434,7 @@ figure the reports quote.
 | Cyc/symbol or /step | 124 /step | 1.0068 /sym | 1.0686 /sym |
 | **Fmax** | **19.46 MHz** | **39.9 MHz** | **37.5 MHz** |
 | **Fmax evidence stage** | **post-CTS** | **post-CTS** | **post-CTS** |
-| Power | ≈ 19.2 mW (indic., 150 ns) | ≈ 283 mW (indic., 40 ns) | ≈ 13.7 mW (indic., 20 ns) |
+| Power | ≈ 19.2 mW (indic., 150 ns) | ≈ 283 mW (indic., 40 ns) | ≈ 10.2 mW (indic., 27 ns) |
 | Directed + random tests | 9/9 | 17/17 | 16/16 |
 | Line / toggle coverage | 91.7 % / 96.0 % | 90.4 % / 90.3 %† | 92.0 % / 93.8 %† |
 | End-to-end estimate | ≈ 1.66× (19.46 MHz) / 3.78× (50 MHz, f = 0.95) | ≈ 6.6× vs the original as a chain with mtf_cam (§3.8); replaced stage ≈ 28× vs the optimized Python loop, ≈ 1.3× slower than Rust | same chain figure (the two modules are only meaningful together) |
@@ -452,13 +452,13 @@ coverage: 94.8 % / 91.7 % / 96.8 %. Sources: `hw/<module>/tb/cov/coverage.txt` a
 **All three Fmax numbers are post-CTS STA** (real placed clock tree) — the same evidence
 stage — so they are comparable on that axis. None completed routed GDS sign-off (no die shot).
 Power figures use **default switching activity** at each run's own clock constraint (19.2 mW @
-150 ns, 283 mW @ 40 ns, 13.7 mW @ 20 ns), so they are indicative and **not** comparable to each other or usable
+150 ns, 283 mW @ 40 ns, 10.2 mW @ 27 ns), so they are indicative and **not** comparable to each other or usable
 as workload-energy numbers.
 
 ## 5. Honest limitations (self-declared)
 
 - No module reached routed GDS → no die shot; post-CTS power estimates (grape 19.2 mW,
-  huffman 283 mW, mtf 13.7 mW) use default activity at three different run clocks — they
+  huffman 283 mW, mtf 10.2 mW) use default activity at three different run clocks — they
   cannot support an energy-savings claim or a cross-module power comparison.
 - Every end-to-end speedup is a **conditional projection** using a profiled fraction and a
   single benchmark input; the on-chip chain is co-simulated (§3.8), but the platform

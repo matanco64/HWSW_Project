@@ -3,7 +3,7 @@
 HW/SW interface of the finished accelerator: the Python driver model, the software patch
 points in the pyflate/bzip2 decode, and the cycle-accurate speedup estimate against the
 measured baseline. Numbers are cited by file; the operating frequency from `docs/ppa.md`
-(post-CTS STA, ≈ 37.6 MHz) is carried through honestly alongside the PRD-target 50 MHz.
+(post-CTS STA, ≈ 37.5 MHz) is carried through honestly alongside the PRD-target 50 MHz.
 Reference templates: `hw/grape_pipeline/docs/integration.md`, `hw/huffman_engine/docs/integration.md`.
 
 ## 1. HW/SW interface (APIs, driver, MMIO, DMA)
@@ -82,19 +82,19 @@ Inputs, all cited by file:
 | Baseline `T` (original Python) | **1.12 s** (Mean ± 0.01 s) | `results/baseline_pyflate_stats.txt` ("Mean +- std dev: 1.12 sec") |
 | Accelerated fraction `f` (MTF stage) | **0.1344** (`move_to_front` self-time share) | `results/profile_functions.txt` (pyflate original, `move_to_front` 13.44 %); `results/pyspy_pyflate_stock_full.svg`; `report_pyflate.txt:75` |
 | HW cycles / benchmark block | **158,441** (148,271 symbols, K3 = 1.0686) | `tb/test_mtf_cam.py::test_full_benchmark` (DUT `CYCLES`); model 157,560 / K3 1.063 in `docs/ppa.md §3.1`, `docs/testplan.md §2` |
-| **Achievable clock (Fmax)** | **≈ 37.6 MHz** (post-CTS STA, tt) | `docs/ppa.md §3.1` (`synth/runs/signoff/31-openroad-stamidpnr-1/ws.max.rpt`) |
+| **Achievable clock (Fmax)** | **≈ 37.5 MHz** (post-CTS STA, tt; 27 ns constraint met, +0.31 ns slack) | `docs/ppa.md §3.1` (`synth/evidence/tight27_ws.max.rpt`) |
 | PRD-target clock | 50 MHz (20 ns) | `docs/prd.md` K4; `docs/mas.md §3` |
 | Driver/bus overhead | ≈ 56 bus cyc/block; `m_l` DMA overlapped | `docs/mas.md §5` |
 
 HW compute time `t_hw = 158,441 / f_clk`; new total `= (1 − f)·T + t_hw + overhead`; Amdahl
 `S = T / new_total = 1 / ((1 − f) + t_hw/T)`.
 
-At the achievable **37.6 MHz**: `t_hw = 158,441 / 37.6e6 = ` **4.214 ms**; bus overhead
-`56 / 37.6e6 = ` 1.5 µs (negligible).
+At the achievable **37.5 MHz**: `t_hw = 158,441 / 37.5e6 = ` **4.225 ms**; bus overhead
+`56 / 37.5e6 = ` 1.5 µs (negligible).
 
 | Clock | `t_hw` | Non-accel (86.56 % of T) | New total | **Speedup S** | Ideal 1/(1−f) |
 |---|---:|---:|---:|:--:|:--:|
-| **37.6 MHz (achievable)** | **4.214 ms** | 969.5 ms | 973.7 ms | **≈ 1.150×** | 1.155× |
+| **37.5 MHz (achievable)** | **4.225 ms** | 969.5 ms | 973.7 ms | **≈ 1.150×** | 1.155× |
 | 50 MHz (PRD target) | 3.169 ms | 969.5 ms | 972.7 ms | **≈ 1.151×** | 1.155× |
 
 - **Ideal bound** `1/(1 − f) = 1.155×` (infinite-speed accelerator; the 86.6 % software residual —
@@ -102,7 +102,7 @@ At the achievable **37.6 MHz**: `t_hw = 158,441 / 37.6e6 = ` **4.214 ms**; bus o
   bound**: `t_hw` (≈ 4 ms) is negligible against the ~150 ms of software move-to-front it removes.
 - **Key finding — fraction-bound, clock-insensitive.** Like `huffman_engine` and unlike `grape`
   (compute-bound), mtf_cam standalone is **Amdahl-fraction-bound**: S moves only 1.150 → 1.151
-  between 37.6 MHz and 50 MHz, so the ppa timing miss (37.6 vs 50 MHz, ppa.md §3.1) **does not gate
+  between 37.5 MHz and 50 MHz, so the ppa timing miss (37.5 vs 50 MHz, ppa.md §3.1) **does not gate
   the end-to-end result** — the fraction `f` does.
 - **Sensitivity — `f`:** the profiler cleanly attributes only `move_to_front` (13.44 %); the
   RUNA/RUNB run-expansion mtf_cam also owns is folded into `decode_huffman_block` self-time and not
@@ -111,9 +111,9 @@ At the achievable **37.6 MHz**: `t_hw = 158,441 / 37.6e6 = ` **4.214 ms**; bus o
   (ideal 1.10×, S ≈ 1.10×). Honest range **~1.10–1.19×**, central **1.15×**. The result is
   fraction-driven.
 - **Sensitivity — bus latency:** doubling the per-transaction cost (4 → 8 cyc, ~112 bus cyc/block)
-  adds ~3 µs at 37.6 MHz — negligible vs the ~970 ms software residual; insensitive.
+  adds ~3 µs at 37.5 MHz — negligible vs the ~970 ms software residual; insensitive.
 - **Sensitivity — DMA bandwidth:** `t_hw` already assumes the `m_l` sink sustains **≥ W = 8
-  bytes/cycle** (≈ 300 MB/s at 37.6 MHz), so the 336,184-byte L-vector drains inside the 158,441
+  bytes/cycle** (≈ 300 MB/s at 37.5 MHz), so the 336,184-byte L-vector drains inside the 158,441
   decode cycles (as `test_full_benchmark` does with an always-ready sink). If the DMA sink stalls
   to W/2 bytes/cycle the drain-bound portion roughly doubles `t_hw` to ~8.4 ms — S still
   ≈ 1.145×. Bandwidth-insensitive.
@@ -126,7 +126,7 @@ vs the **isolated original MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs 
 
 - **At 50 MHz** with the DUT 158,441-cycle block (3.169 ms): stage speedup = 80.4 / 3.169 =
   **25.4×** — **meets K5 ≈ 25×** (34.7× against the 110 ms cProfile baseline).
-- **At the achievable 37.6 MHz** (4.214 ms): stage speedup = 80.4 / 4.214 = **19.1×** (80.4 ms
+- **At the achievable 37.5 MHz** (4.225 ms): stage speedup = 80.4 / 4.225 = **19.0×** (80.4 ms
   micro-bench) or 110 / 4.214 = **26.1×** (cProfile) — still ~20–26×, in the K5 band.
 - **Consistency with the end-to-end S:** a ~25× stage speedup on a 13.44 % slice gives, by Amdahl,
   `1/((1 − 0.1344) + 0.1344/25) = ` **1.148×** — i.e. the whole-benchmark **S ≈ 1.15×** and the
@@ -140,7 +140,7 @@ vs the **isolated original MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs 
 > **How this relates to the delivered software (added 2026-09-19).** The speedups in this section
 > are projections against *original* Python. Against the delivered Python + Rust path (170.01 ms) the
 > comparison is made at the matched boundary instead: the `huffman_engine → mtf_cam` chain,
-> co-simulated in 159,303 cycles (≈ 4.24 ms at the shared 37.6 MHz clock), against the Rust
+> co-simulated in 159,303 cycles (≈ 4.25 ms at the shared 37.5 MHz clock), against the Rust
 > kernel's 3.30 ms — end to end a tie (≈ 171 ms). See `hw/docs/hardware_report.md §3.8`.
 
 ## 4. Rubric map (project_instructions.md §7)
@@ -148,12 +148,12 @@ vs the **isolated original MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs 
 | §7 bullet | File / section |
 |---|---|
 | Hardware description (Verilog/SV) | `rtl/*.sv` (mtf_cam, mtf_list, mtf_ctrl, mtf_run, mtf_expand, mtf_pack, item_fifo, mtf_regs) + `../common/rtl/axi_lite_if.sv` |
-| Inputs & outputs, widths, interfaces, frequency | `docs/mas.md §2` (I/O table + widths), §3 (clock/reset); Fmax `docs/ppa.md §3.1` (37.6 MHz) |
+| Inputs & outputs, widths, interfaces, frequency | `docs/mas.md §2` (I/O table + widths), §3 (clock/reset); Fmax `docs/ppa.md §3.1` (37.5 MHz) |
 | Hardware architecture (datapath + control) | `docs/uarch.md` (CAM, FSMs, item FIFO, packer, timing budget) |
 | HW/SW interface (APIs, drivers, MMIO, DMA) | `docs/mas.md §5/§6` + `driver/mtf_cam_driver.py` (this stage; §1 above) |
 | Acceleration justification + estimate | `docs/prd.md` §KPI (K5) + `docs/integration.md §3` (Speedup) |
 | Block diagram | `docs/mas.md §7` / `docs/block_diagram.svg` |
-| Performance / area / power trade-offs | `docs/ppa.md` (Yosys 0.187 mm², 18,814 cells; W-sweep trade-off; post-CTS STA 37.6 MHz, 13.7 mW) |
+| Performance / area / power trade-offs | `docs/ppa.md` (Yosys 0.187 mm², 18,814 cells; W-sweep trade-off; post-CTS STA 37.5 MHz, 10.2 mW) |
 
 ## 5. Text for `report_pyflate.txt` §5
 
@@ -172,7 +172,7 @@ vs the **isolated original MTF** time — "157,560 cycles @ 50 MHz = 3.15 ms vs 
 > 1.155× bound, because the ~4 ms of hardware MTF is negligible against the ~150 ms of software
 > move-to-front it removes. At the **stage** level this is the PRD-K5 ~25× (3.17 ms @ 50 MHz vs
 > 80.4 ms original MTF); the two figures are the same result at different altitudes. Like the Huffman
-> engine the speedup is **clock-insensitive** (1.150× at 37.6 MHz vs 1.151× at the 50 MHz target):
+> engine the speedup is **clock-insensitive** (1.150× at 37.5 MHz vs 1.151× at the 50 MHz target):
 > it is limited by the software residual (Huffman decode, iBWT, RLE4, MD5), not by timing closure.
 > Chaining `mtf_cam` behind `huffman_engine` on chip (`pyflate_accel`) removes both stages from
 > software, lifting the accelerated fraction to ~0.63 and the ceiling to ~2.7×.
