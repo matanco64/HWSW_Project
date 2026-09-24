@@ -1,9 +1,0 @@
-# running in synth/formal_cover/src/
-read -formal grape_step_fsm.sv
-read -formal fsm_arcs.sv
-prep -top fsm_arcs
-
-hierarchy -smtcheck
-rename -witness
-write_jny -no-connections ../model/design.json
-write_rtlil ../model/design.il

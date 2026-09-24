@@ -20,20 +20,9 @@ hw/PROGRESS.md                   export-ignore
 hw/CONTEXT.md                    export-ignore
 hw/docs/lessons.md               export-ignore
 hw/*/docs/review_*.md            export-ignore
-hw/**/synth/yosys*.log           export-ignore
 hw/**/synth/openlane_run.log     export-ignore
 hw/**/synth/openlane_tight.log   export-ignore
 hw/**/synth/*.gen.ys             export-ignore
-hw/**/synth/formal*/model/       export-ignore
-hw/**/synth/formal*/engine_0/    export-ignore
-hw/**/synth/formal*/src/         export-ignore
-hw/**/synth/formal*/status.sqlite export-ignore
-hw/**/synth/formal*/*.xml        export-ignore
-hw/**/synth/formal*/logfile.txt  export-ignore
-hw/**/synth/formal*/status       export-ignore
-hw/**/synth/formal*/status.path  export-ignore
-# formal*/PASS and formal*/config.sby stay -- PASS is the evidence a proof ran
-# and config.sby is what it ran; only SymbiYosys's own scratch output goes.
 # raw per-run counter dumps (24 x csv/stdout/stderr, 25 per-run json, 1 log);
 # summary.json stays -- it is what the reports cite. gitattributes has no
 # negation, so the raw files are matched by their own name patterns.

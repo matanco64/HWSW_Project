@@ -1,9 +1,0 @@
-# running in synth/formal_skid_cover/src/
-read -formal huff_out.sv
-read -formal skid.sv
-prep -top skid
-
-hierarchy -smtcheck
-rename -witness
-write_jny -no-connections ../model/design.json
-write_rtlil ../model/design.il
