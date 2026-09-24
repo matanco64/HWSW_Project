@@ -21,8 +21,8 @@ rather than rounded display values.
 
 Original/optimized use pyperformance; fallback/native use direct pyperf on the optimized benchmark. These
 are different pairs, so their ratios must not be multiplied as one paired experiment. A7 maps backend, affinity
-and binary metadata to the canonical run. Development hosts, older captures and revision history are
-documented in report/history/.
+and binary metadata to the canonical run. Development hosts and older captures are named in A2 and A7
+below; the revision history of this appendix is in the repository’s git log.
 Reproducing the comparisons
 From the repository root, compare the preserved data:
 suite=results/vm_canonical_20260910_2c8c754/suite
@@ -209,7 +209,7 @@ effective sample size.
 
 
                                                         4
-HWSW Final Project                                                                  Appendix: Measurement Methodology
+HWSW Final Project                                                                    Appendix: Measurement Methodology
 
 A6. Flat function tables
 report/summarize_profiles.py aggregates functions across recorded call sites and prints self and inclusive
@@ -223,9 +223,8 @@ companions in report/fig/.
 Text companions
 The build compiles the same prose and tables into a text edition with flame graphs replaced by pointers to the
 PDF. It selects the installed extractor’s table-preserving mode, then report/check_txt_tables.py verifies
-UTF-8 and that each checked row retains its values. The historical exporter issues are documented in
-report/history/.
-
+UTF-8 and that each checked row retains its values. The exporter problems that led to these checks are
+recorded in the repository’s git log.
 
 A7. Verification of the final code path on the course VM
 Canonical pinned run (revision 2c8c754)
@@ -238,16 +237,16 @@ workers and records CPU affinity 0; the optimized, Python and native JSONs also 
 actual back end, and the native JSONs the extension hash, which matches the wheel built in the same run.
 tools/check_all.sh --require-native then passed all six checks, none skipped.
 
- Comparison                                           Before (ms)                After (ms)              Speedup
- Nbody original / optimized                                  231.20                   143.13                  1.62×
- Nbody Python / native                                       145.30                    9.530                15.25×
- Pyflate original / optimized                               1,123.49                  281.16                  4.00×
- Pyflate Python / native                                     283.88                   170.01                  1.67×
- Pyflate original / native                                  1,123.49                  170.01                  6.61×
+ Comparison                                           Before (ms)                 After (ms)               Speedup
+ Nbody original / optimized                                   231.20                   143.13                   1.62×
+ Nbody Python / native                                        145.30                    9.530                 15.25×
+ Pyflate original / optimized                                1,123.49                  281.16                   4.00×
+ Pyflate Python / native                                      283.88                   170.01                   1.67×
+ Pyflate original / native                                   1,123.49                  170.01                   6.61×
 Every native JSON identifies the binary installed from the wheel built in that run; rust/<crate>/wheels/
 PROVENANCE.json accompanies each preserved wheel. Earlier captures remain as cross-checks in their
-original directories, with history in report/history/. This report revision reuses those measurements and
-introduces no new benchmark timing.
+original directories, with their revision history in the repository’s git log. This report revision reuses those
+measurements and introduces no new benchmark timing.
 
 A8. Hardware evidence
 Software times in this report are measured on the course VM (A7). Hardware figures are not: cycle counts
@@ -266,7 +265,7 @@ chain on the benchmark block, byte-exact over 336,184 bytes in 159,303 cycles. P
 overhead, and energy savings, remain unmeasured. hw/docs/hardware_report.md maps every required
 
 
-                                                        5
+                                                         5
 HWSW Final Project                                                                                      Appendix: Measurement Methodology
 
 hardware item to its source file. The worked software examples are checked by report/

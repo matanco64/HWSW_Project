@@ -7,11 +7,7 @@ skills-lock.json                 export-ignore
 make_submission.sh               export-ignore
 project_instructions.md          export-ignore
 project_instructions.pdf         export-ignore
-report/FOR_MATAN.md              export-ignore
 report/CLOSEOUT.md               export-ignore
-report/CHECKPOINT.md             export-ignore
-report/REPORT_DELTAS.md          export-ignore
-report/history/                  export-ignore
 research/hw-agent-skills-and-toolchain.md export-ignore
 hw/FLOW.md                       export-ignore
 hw/PLAN.md                       export-ignore

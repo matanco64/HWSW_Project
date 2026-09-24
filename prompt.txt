@@ -1569,3 +1569,12 @@ Prompt: "I want you to take a look at @judge_v3_kit.md  and @judge_v2_kit.md  su
 
 2026-09-24T14:56:18Z — Claude Code session (auto-logged)
 Prompt: "fix the gitattributes leaks, the ROM wording, and commit prompt.txt"
+
+2026-09-24T16:07:01Z — Claude Code session (auto-logged)
+Prompt: "I now added a Review done by Yuval and an AI assistant @etsion_review_20260924_v2.md, please tell me what you think and let's plan improvements if they are still needed"
+
+2026-09-24T16:17:04Z — Claude Code session (auto-logged)
+Prompt: "API failure since I logged into VPN you should also have access to the machine, can you add a note that maybe we need to add a setup for the machine for the openlane HW toolchain?"
+
+2026-09-24T16:24:29Z — Claude Code session (auto-logged)
+Prompt: "Lets first commit what is done, Let's do the commits cleanly since this is important for the grading"

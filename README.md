@@ -238,7 +238,6 @@ functions without installing benchmark dependencies.
 26 questions with answers, evidence links and demonstration commands.
 [AI prompt log](prompt.txt) is the single prompt log for the project; its "merged log"
 block holds the detailed report-revision requests and per-improvement instructions.
-[Measurement history](report/history/README.md) preserves the superseded appendix.
 
 ### Names and ID numbers
 

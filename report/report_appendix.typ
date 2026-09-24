@@ -20,7 +20,8 @@ to calculate ratios, rather than rounded display values.
 Original/optimized use pyperformance; fallback/native use direct pyperf on the optimized
 benchmark. These are different pairs, so their ratios must not be multiplied as one paired
 experiment. A7 maps backend, affinity and binary metadata to the canonical run. Development
-hosts, older captures and revision history are documented in `report/history/`.
+hosts and older captures are named in A2 and A7 below; the revision history of this
+appendix is in the repository's git log.
 
 == Reproducing the comparisons
 
@@ -265,7 +266,7 @@ JSON companions in `report/fig/`.
 The build compiles the same prose and tables into a text edition with flame graphs replaced
 by pointers to the PDF. It selects the installed extractor's table-preserving mode, then
 `report/check_txt_tables.py` verifies UTF-8 and that each checked row retains its values.
-The historical exporter issues are documented in `report/history/`.
+The exporter problems that led to these checks are recorded in the repository's git log.
 
 = A7. Verification of the final code path on the course VM
 
@@ -293,7 +294,8 @@ native JSONs the extension hash, which matches the wheel built in the same run.
 
 Every native JSON identifies the binary installed from the wheel built in that run;
 `rust/<crate>/wheels/PROVENANCE.json` accompanies each preserved wheel. Earlier captures
-remain as cross-checks in their original directories, with history in `report/history/`.
+remain as cross-checks in their original directories, with their revision history in the
+repository's git log.
 This report revision reuses those measurements and introduces no new benchmark timing.
 
 = A8. Hardware evidence
