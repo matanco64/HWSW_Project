@@ -345,8 +345,10 @@ platform.
 
 `./make_submission.sh` (or `--check` to verify only) writes
 `submission/hwsw_submission_<date>_<rev>.zip`: `git archive HEAD` minus the paths listed in
-`.gitattributes` as `export-ignore` (agent tooling, flow-gate documents, tool logs, formal
-intermediates and raw counter dumps), plus the generated `ids.pdf`. It refuses a dirty tree,
+`.gitattributes` as `export-ignore` (agent tooling, flow-gate documents, tool logs, the
+solver scratch under `hw/**/synth/formal*/` and the counter captures' console spill), plus
+the generated `ids.pdf`. Each proof's `PASS` and `config.sby` are kept, as are the per-run
+`*.json` and `*.perf.csv` that `counters/summary.json` was computed from. It refuses a dirty tree,
 reports older than their sources (asked from git history, not timestamps), a missing
 `report/ids.local`, or a failing `tools/check_all.sh`; the header comment of the script has
 the full rationale.

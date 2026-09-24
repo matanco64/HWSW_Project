@@ -30,6 +30,11 @@ hw/**/synth/formal*/engine_0/    export-ignore
 hw/**/synth/formal*/src/         export-ignore
 hw/**/synth/formal*/status.sqlite export-ignore
 hw/**/synth/formal*/*.xml        export-ignore
+hw/**/synth/formal*/logfile.txt  export-ignore
+hw/**/synth/formal*/status       export-ignore
+hw/**/synth/formal*/status.path  export-ignore
+# formal*/PASS and formal*/config.sby stay -- PASS is the evidence a proof ran
+# and config.sby is what it ran; only SymbiYosys's own scratch output goes.
 # raw per-run counter dumps (24 x csv/stdout/stderr, 25 per-run json, 1 log);
 # summary.json stays -- it is what the reports cite. gitattributes has no
 # negation, so the raw files are matched by their own name patterns.
@@ -39,6 +44,13 @@ results/native_counters_20260907/*.stderr       export-ignore
 results/native_counters_20260907/*.log          export-ignore
 results/native_counters_20260907/nbody_*.json   export-ignore
 results/native_counters_20260907/pyflate_*.json export-ignore
+# The later VM capture, same shape. Here the per-run *.json and *.perf.csv stay:
+# they are the raw evidence summary.json -- which the appendix's counter table cites
+# -- was computed from, and summarize_counters.py reads both. Only the console spill
+# goes: *.stdout duplicates the per-run *.json verbatim and *.stderr is perf's
+# "Events enabled" chatter.
+results/vm_release_20260907/counters/*.stdout export-ignore
+results/vm_release_20260907/counters/*.stderr export-ignore
 tools/hw/*_hook.py               export-ignore
 tools/log_prompt_hook.py         export-ignore
 **/__pycache__/                  export-ignore
