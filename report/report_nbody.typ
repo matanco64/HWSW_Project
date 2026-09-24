@@ -221,7 +221,7 @@ runs); they do not establish a cache bottleneck. Invalid L1 load counts are omit
 = 5. Beyond the benchmark: what changes when N grows?
 
 At five bodies, Barnes-Hut (BH, an O(N log N) tree approximation) is *3.92× slower*: tree setup/traversal does not pay off for ten
-pairs. Development NumPy and struct-of-arrays variants also lose at this size (0.88× and 0.35–0.46× of the original's speed); the fast multipole
+pairs. Development struct-of-arrays and NumPy variants also lose at this size (0.88× and 0.35–0.46× of the original's speed respectively); the fast multipole
 method (FMM) was not measured. Unrolled source grows as O(N²), so the shipped generator falls back to the ordinary (rolled) pair
 loop above 20,000 pairs. Detailed code-size experiments are WSL2/CPython 3.10.21 development
 evidence, distinct from the VM sweep below (`dev/nbody/FINDINGS.md`).
