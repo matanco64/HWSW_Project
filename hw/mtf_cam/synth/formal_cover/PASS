@@ -1,0 +1,14 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+engine_0 (smtbmc boolector) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement mtf_list_inv._witness_.check_1223 at mtf_list_inv.sv:270.13-270.64 step 3
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement mtf_list_inv._witness_.check_1244 at mtf_list_inv.sv:274.13-274.82 step 4
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement mtf_list_inv._witness_.check_1218 at mtf_list_inv.sv:269.13-269.55 step 4
+  reached cover statement mtf_list_inv._witness_.check_1229 at mtf_list_inv.sv:271.13-271.64 step 4
+  reached cover statement mtf_list_inv._witness_.check_1235 at mtf_list_inv.sv:272.13-273.77 step 4

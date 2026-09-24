@@ -122,6 +122,14 @@ FP64 pairwise-gravity accelerator executing a full `advance(dt, n)` on-device. S
   Achievable **≈ 19.46 MHz** — *post-CTS STA* on the parallel-prefix netlist
   (`docs/ppa.md` Addendum 2026-09-14; evidence `synth/evidence/ws.max.rpt`: +98.6212 ns setup
   slack @ 150 ns period → 51.38 ns).
+- **This one figure is extrapolated, and it is the weakest number in this report.** It is
+  back-computed from a run constrained at 150 ns with 98.6 ns of slack — a 2.9× extrapolation
+  from the constraint the tool actually optimized for. `huffman_engine` and `mtf_cam` each
+  have a confirmation run near their quoted result (39.9 MHz confirmed by a 27 ns run at
+  39.5 MHz; 37.5 MHz from a met 27 ns constraint); **grape has none.** A run near 51 ns would
+  settle it, and we did not do one: the design is 584k cells and the last attempt at a grape
+  re-synthesis was abandoned after about seven hours in Yosys ABC. Treat 19.46 MHz as an
+  upper bound from a relaxed run, not as a confirmed operating point.
 
 ### 1.3 Architecture
 `docs/uarch.md`: three FP64 add/sub, three multipliers, one sqrt (radix-4 SRT), one
@@ -476,7 +484,10 @@ as workload-energy numbers.
   production **N_LIST=256** the general check (`bmc`) is bounded to **depth 6**; the depth-24
   result (`bmc256moves`) is **fill-abstracted**: it starts from a valid filled list with 8 live
   entries and shows 24 consecutive moves preserve the permutation (`hw/mtf_cam/synth/formal.sby`;
-  general unbounded-256 is SAT-intractable — honestly a wall, not skipped).
+  general unbounded-256 is SAT-intractable — honestly a wall, not skipped). All seven tasks
+  were re-run on 2026-09-25 under the pinned OSS CAD Suite and **all seven pass**; each run's
+  `PASS` and the `config.sby` that produced it are committed under
+  `hw/mtf_cam/synth/formal_<task>/`, as they already were for grape and huffman.
 - all three miss 50 MHz post-CTS (grape 2.6×, mtf 1.33×, huffman 1.25×); every quoted Fmax now comes from a run whose constraint was met (grape 150 ns, huffman 40 ns and 27 ns, mtf 27 ns), with each module's failed 50 MHz run kept as the second evidence point; documented RTL follow-ups
   (pipeline the integrate-multiply path; pipeline the table build + register the symtab mux)
   are datapath changes deferred beyond the PPA stage.

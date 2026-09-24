@@ -92,25 +92,30 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] H5 Done (`54a738c`, pushed) — commit + push the reading-pass work: REPORT_DELTAS (R1–R21 + triage), hw docs,
       `hw/pyflate_accel/`, this tracker. Send Matan the link.
 
-- [ ] H6 **Open — the HW toolchain has no home.** The three evidence gaps the v2 review
-      leaves open all need tools neither of our machines runs today:
-      re-run `mtf_cam`'s formal proofs (P2-10 — the `synth/formal_*` trees are gitignored
-      *and* absent from disk, so this is a SymbiYosys run, not a `git add`), a grape
-      confirmation OpenLane run near the result (P2-11, ≈ 55 ns), and any further area
-      work of the kind H3 abandoned after ~7 h in Yosys ABC.
+- [x] H6 **Done — the hardware toolchain lives on Matan's Mac.** OSS CAD Suite
+      **2026-08-26** (the exact bundle `hardware_report.md` §0.1 already claims), native
+      `darwin-arm64`, 496 MB, unpacked at `~/tools/oss-cad-suite`. Yosys 0.68+130, SBY 0.68,
+      with yices / boolector / z3 / avy / btormc. No Docker, no nix, no emulation.
 
-      Checked the course VM on 2026-09-25 (VPN up, `ssh hwsw-vm` fine): `yosys`, `sby`,
-      `verilator`, `openlane2`, `docker` and `nix` are all **missing**; 8 CPUs, 7 GB RAM,
-      17 GB free on `/`. So it is not an install-and-go — OpenLane 2 with the sky130 PDK
-      through nix wants more disk than that, and the OSS CAD Suite tarball (the pinned
-      2026-08-26 bundle in hardware_report §0.1) is the lighter option if we only need
-      Yosys + SymbiYosys for P2-10. Decide before promising any of these:
-      - SymbiYosys only, for the mtf proofs → OSS CAD Suite tarball, likely fits.
-      - A full OpenLane point for P2-11 → needs disk we do not have on the VM; would mean
-        pruning `/`, a different host, or dropping P2-11.
-      - Neither → say plainly in `hardware_report.md` §3 that mtf's formal runs are not
-        committed and that grape's 19.46 MHz is an extrapolation with no confirmation run.
-        This is the v2 review's own fallback and costs about a point.
+      ```sh
+      source ~/tools/oss-cad-suite/environment     # per shell; not in .zshrc
+      xattr -dr com.apple.quarantine ~/tools/oss-cad-suite   # once, macOS Gatekeeper
+      make -C hw/mtf_cam formal                    # or: sby -f synth/formal.sby <task>
+      ```
+
+      Pinned deliberately to 2026-08-26 rather than the 2026-09-24 nightly, so the
+      reproducibility claim in the reports stays true.
+
+      The course VM stays unusable for this: checked 2026-09-25 with the VPN up, and
+      `yosys`, `sby`, `verilator`, `openlane2`, `docker` and `nix` are all missing, with
+      only 17 GB free on `/` — not enough for OpenLane 2 plus the sky130 PDK through nix.
+
+- [ ] H7 **OpenLane is still homeless, and P2-11 is not happening.** A grape confirmation
+      run near 51 ns needs OpenLane 2 + sky130, which on arm64 means emulated amd64
+      containers; grape is 584k cells and H3 already lost ~7 h in Yosys ABC. Took the v2
+      review's fallback instead: `hardware_report.md` §1.2 now says outright that grape's
+      19.46 MHz is a 2.9× extrapolation from a 150 ns constraint with no confirmation run,
+      unlike the other two modules. Costs about a point and is honest.
 
 **Gate H:** `git status --porcelain | grep -v synth/formal` empty; no file > 5 MB in the commit.
 
