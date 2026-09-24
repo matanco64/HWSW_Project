@@ -280,7 +280,9 @@ register protocol reads back all 35 state components bit-identical to the golden
 
 *Generality:* the RTL is generated for five bodies (`grape_regs.sv`: the body window is
 `N_BODIES × 7` FP64 words held in flops; the pair list holds at most ten entries; the
-290-operation schedule is a ROM emitted by `docs/gen_reservation.py` for that pair list).
+290-operation step's issue schedule is a 200-event ROM emitted by `docs/gen_reservation.py`
+for that pair list (`rtl/grape_sched_rom.svh`), the remaining accumulate and integrate
+operations being ordered dynamically).
 A larger N keeps the datapath, the interface (`advance(dt, n)` over AXI4-Lite) and the ordered
 accumulation, but moves body state from flops to SRAM, regenerates the schedule, and, as the
 model below shows, wants more arithmetic units. The brief's preference for hardware that is not

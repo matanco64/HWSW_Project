@@ -132,8 +132,10 @@ commit; steps stay serial. There is no FMA — multiply and accumulate round sep
 (matches the benchmark's `pow`-free arithmetic contract, `docs/testplan.md §4`).
 
 **Generality.** The RTL is generated for `N_BODIES = 5` (`rtl/grape_regs.sv`: body window
-`N_BODIES × 7` FP64 words in flops; pair list ≤ 10; the 290-op schedule is a ROM emitted by
-`docs/gen_reservation.py` for that pair list). Larger N keeps the datapath, the register
+`N_BODIES × 7` FP64 words in flops; pair list ≤ 10; the 290-op step's issue schedule is a
+200-event ROM emitted by `docs/gen_reservation.py` for that pair list
+(`rtl/grape_sched_rom.svh`), the remaining accumulate and integrate operations being ordered
+dynamically). Larger N keeps the datapath, the register
 interface and the ordered accumulation but moves body state to SRAM, regenerates the schedule
 and — §1.5's model — wants more units. The brief's preference for hardware that is "not too
 workload-specific" is met at the level of the operation (pairwise force + ordered accumulate,

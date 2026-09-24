@@ -288,12 +288,13 @@ testbench uses (hw/grape_pipeline/tb/test_driver_model.py): one advance(0.01, 2)
 the register protocol reads back all 35 state components bit-identical to the golden model in 250 cycles. It is
 not a deployed device driver or evidence of a physical CPU/accelerator run.
 Generality: the RTL is generated for five bodies (grape_regs.sv: the body window is N_BODIES × 7 FP64
-words held in flops; the pair list holds at most ten entries; the 290-operation schedule is a ROM emitted by
-docs/gen_reservation.py for that pair list). A larger N keeps the datapath, the interface (advance(dt, n)
-over AXI4-Lite) and the ordered accumulation, but moves body state from flops to SRAM, regenerates the
-schedule, and, as the model below shows, wants more arithmetic units. The brief’s preference for hardware
-that is not too workload-specific is met at the level of the operation (pairwise force and ordered accumulate,
-the GRAPE recipe), not of this five-body instance.
+words held in flops; the pair list holds at most ten entries; the 290-operation step’s issue schedule is a 200-
+event ROM emitted by docs/gen_reservation.py for that pair list (rtl/grape_sched_rom.svh), the
+remaining accumulate and integrate operations being ordered dynamically). A larger N keeps the datapath,
+the interface (advance(dt, n) over AXI4-Lite) and the ordered accumulation, but moves body state from
+flops to SRAM, regenerates the schedule, and, as the model below shows, wants more arithmetic units. The
+brief’s preference for hardware that is not too workload-specific is met at the level of the operation (pairwise
+force and ordered accumulate, the GRAPE recipe), not of this five-body instance.
 Dependencies determine the schedule
 Pairs (0, 1) and (0, 2) can form their distance terms from the same step’s positions, but both update body 0′s
 velocity. Its x lane must compute u0a = u0 - dx01*b1m, then u0b = u0a - dx02*b2m; issuing both against
@@ -315,13 +316,15 @@ the next step uses the committed positions.
   Figure 5: Illustrative dependency chain for body 0′s x velocity. Force terms may be prepared independently, while the two
                                            rounded velocity updates remain ordered.
 
-Verification and physical cost
-How these numbers were produced: the accelerator is written in SystemVerilog and simulated cycle by
-cycle (Verilator, cross-checked with Icarus) inside a Python testbench that runs the real 20,000-step
+
+
 
                                                                    6
 HWSW Final Project                                                                                       Benchmark Report: nbody
 
+Verification and physical cost
+How these numbers were produced: the accelerator is written in SystemVerilog and simulated cycle by
+cycle (Verilator, cross-checked with Icarus) inside a Python testbench that runs the real 20,000-step
 benchmark and compares every result against a golden model, a Python reference of the same arithmetic.
 Cycle counts, test results and coverage come from these runs. The design is then synthesized: Yosys translates
 it into a netlist of standard logic cells from sky130, the open-source SkyWater 130 nm process, which gives
@@ -336,9 +339,9 @@ number can be regenerated from the repository.
  Directed + random tests                                    9 of 9 same, Verilator and Icarus
  Line / toggle coverage                              91.7% / 96.0%    same
  Cells                                                    584,454     Yosys synthesis onto sky130 cells
- Area                                                   4.075 mm²     same
- Timing-derived frequency                             ≈ 19.46 MHz     OpenLane: place, clock tree, static timing
- Power estimate                                          ≈ 19 mW      same, default switching activity
+ Area                                                  4.075 mm²      same
+ Timing-derived frequency                            ≈ 19.46 MHz      OpenLane: place, clock tree, static timing
+ Power estimate                                         ≈ 19 mW       same, default switching activity
 Evidence levels: the schedule model predicted 123–127 cycles/step and RTL measured 124. The 19.46 MHz
 estimate derives from a 150 ns constraint and +98.6212 ns worst setup slack at the typical corner; the critical
 path is the integrate-multiplier operand path. It is a preliminary timing estimate rather than measured silicon
@@ -362,21 +365,22 @@ the clock frequency. T_if is the interface time, here about 150 AXI-Lite registe
 is not measured. We assume 5% of the original runtime (harness and energy evaluation) stays in Python; that
 residual is an assumption, not a matched phase measurement (the measurement is one pyperf run of the
 harness with advance stubbed out, and it is the next thing to measure).
- Tier                                                Time / run        vs original    Evidence
- Original Python                                      231.20 ms               1.00× measured
- Optimized Python                                     143.13 ms               1.62× measured
- Native Rust                                            9.53 ms              24.26× measured
- Hardware at 19.46 MHz (achievable)                    ≈ 139 ms              ≈ 1.66× projected: 127.4 ms compute +
-                                                                                     residual
- Hardware at 50 MHz (design target)                     ≈ 61 ms               ≈ 3.8× projected: 49.6 ms compute +
-                                                                                     residual
 
 
 
 
                                                             7
-HWSW Final Project                                                                           Benchmark Report: nbody
+HWSW Final Project                                                                                 Benchmark Report: nbody
 
+
+ Tier                                          Time / run            vs original   Evidence
+ Original Python                                 231.20 ms                 1.00× measured
+ Optimized Python                                143.13 ms                 1.62× measured
+ Native Rust                                        9.53 ms              24.26× measured
+ Hardware at 19.46 MHz (achievable)               ≈ 139 ms               ≈ 1.66× projected: 127.4 ms compute +
+                                                                                 residual
+ Hardware at 50 MHz (design target)                ≈ 61 ms                ≈ 3.8× projected: 49.6 ms compute +
+                                                                                 residual
 Verdict: at the achievable clock the accelerator is a projected 1.66× over the original, level with the optimized
 Python tier (1.03×) and about 15× slower than the native Rust tier; it would still be about 6× slower at the 50
 MHz target. One step costs 124 cycles, 6.4 µs at 19.46 MHz, against 0.48 µs natively. The benchmark’s cost
@@ -395,10 +399,10 @@ accumulate is about 80 cycles, and ten pairs cannot fill it, so the step costs 1
 (12.4 measured). With more pairs the pipelined units stay busy and the cost falls to the unit-bound limit of
 about 4.4 cycles per pair (eleven multiplies and eleven adds per pair over three units of each). The ordered-
 accumulation constraint also fades: 3N independent velocity lanes interleave, so no lane waits on itself.
- Datapath (model, N = 100)                          Cycles/pair              µs/pair   vs native
- As built: 3 add, 3 mul, 1 sqrt, 1 rcp                      4.36                0.224 5.0× slower
- Wider: 12 add, 12 mul                                      1.10                0.056 1.25× slower
- Widest: 24 add, 24 mul, 2 sqrt, 2 rcp                      0.56                0.029 1.6× faster
+ Datapath (model, N = 100)                          Cycles/pair                    µs/pair   vs native
+ As built: 3 add, 3 mul, 1 sqrt, 1 rcp                        4.36                   0.224 5.0× slower
+ Wider: 12 add, 12 mul                                        1.10                   0.056 1.25× slower
+ Widest: 24 add, 24 mul, 2 sqrt, 2 rcp                        0.56                   0.029 1.6× faster
 Times are at the 19.46 MHz clock; rcp is the reciprocal unit; the two wider rows also let square root and
 reciprocal accept a new pair every cycle (as built: every second cycle). The software references are Section 5′s
 VM sweep: 0.98 µs per pair-update for rolled Python and 0.045 µs native. The as-built datapath would
@@ -421,6 +425,10 @@ exactly. Native execution removes far more interpreter work through the same coa
 interface and reaches 9.53 ms, 24.26× over the original.
 In hardware, grape_pipeline executes the whole advance() kernel over that same boundary, bit-exactly
 against its arithmetic model, in 124 cycles per step. At the 19.46 MHz clock that static timing supports this
+
+                                                       8
+HWSW Final Project                                                                          Benchmark Report: nbody
+
 projects to about 139 ms per run: 1.66× over the original, level with the optimized Python, and about 15×
 slower than the native tier (about 6× at the 50 MHz target), for about 4.7 mm² of 130 nm standard cells at
 synthesis (4.1 mm² under plain Yosys before the last rewrite). The benchmark’s cost was interpreter overhead
@@ -430,16 +438,11 @@ bound at 12.3 cycles per pair in the model (12.4 measured), where the schedule m
 and native-class throughput only with four to eight times the arithmetic units. The measured cycle/area
 trade-off shows why a fast schedule alone is insufficient: the parallelism that saves cycles also lengthens the
 clock path.
-
-
-                                                       8
-HWSW Final Project                                                                Benchmark Report: nbody
-
 Evidence: hw/grape_pipeline/docs/uarch.md, prd.md, testplan.md, ppa.md and integration.md; hw/docs/
 hardware_report.md. Reproduction and supporting profiles: report_appendix.pdf.
 
 
 
 
-                                                 9
+                                                       9
 

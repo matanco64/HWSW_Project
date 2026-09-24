@@ -12,6 +12,7 @@ as literal text in the PDF rather than silently vanishing.
 
     python3 tools/md2typ.py hw/docs/hardware_report.md hw/docs/hardware_report.typ
 """
+import os
 import re
 import sys
 
@@ -160,10 +161,12 @@ def main():
     if len(sys.argv) != 3:
         sys.exit('usage: md2typ.py <in.md> <out.typ>')
     src, dst = sys.argv[1], sys.argv[2]
+    # Provenance line goes into a committed file, so keep it machine-independent.
+    rel = os.path.relpath(src, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
     with open(src, encoding='utf-8') as fh:
         md = fh.read()
     with open(dst, 'w', encoding='utf-8') as fh:
-        fh.write(convert(md, src))
+        fh.write(convert(md, rel))
 
 
 if __name__ == '__main__':
