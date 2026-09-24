@@ -92,6 +92,26 @@ Conclusions state a hardware bottom line; every MUST row is applied or explicitl
 - [x] H5 Done (`54a738c`, pushed) — commit + push the reading-pass work: REPORT_DELTAS (R1–R21 + triage), hw docs,
       `hw/pyflate_accel/`, this tracker. Send Matan the link.
 
+- [ ] H6 **Open — the HW toolchain has no home.** The three evidence gaps the v2 review
+      leaves open all need tools neither of our machines runs today:
+      re-run `mtf_cam`'s formal proofs (P2-10 — the `synth/formal_*` trees are gitignored
+      *and* absent from disk, so this is a SymbiYosys run, not a `git add`), a grape
+      confirmation OpenLane run near the result (P2-11, ≈ 55 ns), and any further area
+      work of the kind H3 abandoned after ~7 h in Yosys ABC.
+
+      Checked the course VM on 2026-09-25 (VPN up, `ssh hwsw-vm` fine): `yosys`, `sby`,
+      `verilator`, `openlane2`, `docker` and `nix` are all **missing**; 8 CPUs, 7 GB RAM,
+      17 GB free on `/`. So it is not an install-and-go — OpenLane 2 with the sky130 PDK
+      through nix wants more disk than that, and the OSS CAD Suite tarball (the pinned
+      2026-08-26 bundle in hardware_report §0.1) is the lighter option if we only need
+      Yosys + SymbiYosys for P2-10. Decide before promising any of these:
+      - SymbiYosys only, for the mtf proofs → OSS CAD Suite tarball, likely fits.
+      - A full OpenLane point for P2-11 → needs disk we do not have on the VM; would mean
+        pruning `/`, a different host, or dropping P2-11.
+      - Neither → say plainly in `hardware_report.md` §3 that mtf's formal runs are not
+        committed and that grape's 19.46 MHz is an extrapolation with no confirmation run.
+        This is the v2 review's own fallback and costs about a point.
+
 **Gate H:** `git status --porcelain | grep -v synth/formal` empty; no file > 5 MB in the commit.
 
 ## Phase D — Reproducibility (B, ~30 min, mostly waiting)
