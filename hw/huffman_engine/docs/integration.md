@@ -62,7 +62,7 @@ Inputs, all cited:
 | Symbol | Value | Source |
 |---|---|---|
 | Baseline `T` (original Python) | **1,123.49 ms** (mean ± 0.01 s ≈ 1.12 s; median 1.12 s) | `results/baseline_pyflate_stats.txt:18` ("Mean +- std dev: 1.12 sec"), precise mean from `report_pyflate` §1 canonical run |
-| Accelerated fraction `f` | **0.496** (Huffman decode 12.0 % + bit reader 37.6 %) | `docs/prd.md §1` ("this module's slice = 49.6 %", cProfile self-time table) |
+| Accelerated fraction `f` | **0.40** (`find_next_symbol` 12.63 % + `readbits` 9.95 % + `snoopbits` 9.41 % + `_mask` 5.91 % + `_more` 2.42 % of 372 samples) | `results/profile_functions.txt`, the VM py-spy profile `report_pyflate` §2 uses; see the note below on the PRD's 0.496 |
 | HW decode cycles (full benchmark) | **149,276** (148,271 symbols, K1 = 1.0068) | `docs/decode_model.py`; `docs/uarch.md §7` |
 | PRD-target clock | 50 MHz (20 ns) | `docs/prd.md` K3; `docs/mas.md §6` |
 | Driver/bus overhead | ≈ 628 bus cyc/block, DMA overlapped | `docs/mas.md §5` |
@@ -70,28 +70,37 @@ Inputs, all cited:
 HW compute time `t_hw = 149,276 / f_clk`; new total `= (1 − f)·T + t_hw + overhead`;
 Amdahl `S = T / new_total`.
 
-| Clock | `t_hw` | Non-accel (50.4 % of T) | New total | **Speedup S** | Ideal 1/(1−f) |
+| Clock | `t_hw` | Non-accel (60 % of T) | New total | **Speedup S** | Ideal 1/(1−f) |
 |---|---:|---:|---:|:--:|:--:|
-| **50 MHz (PRD target)** | **2.99 ms** | 566.2 ms | 569.2 ms | **≈ 1.97×** | 1.98× |
-| **≈ 39.9 MHz (post-CTS STA, `docs/ppa.md §3.1`)** | 3.74 ms | 566.2 ms | 570.0 ms | **≈ 1.97×** | 1.98× |
-| 5 MHz (pessimistic) | 29.9 ms | 566.2 ms | 596.1 ms | **≈ 1.89×** | 1.98× |
+| **50 MHz (PRD target)** | **2.99 ms** | 674.1 ms | 677.1 ms | **≈ 1.66×** | 1.67× |
+| **≈ 39.9 MHz (post-CTS STA, `docs/ppa.md §3.1`)** | 3.74 ms | 674.1 ms | 677.8 ms | **≈ 1.66×** | 1.67× |
+| 5 MHz (pessimistic) | 29.9 ms | 674.1 ms | 703.9 ms | **≈ 1.60×** | 1.67× |
 
-- **Ideal bound** `1/(1 − f) = 1.98×` (infinite-speed accelerator; the 50.4 % software
+> **Which fraction, and why this one.** The PRD sized this module from a local cProfile run
+> (`docs/prd.md §1`: f = 0.496, Huffman decode 12.0 % + bit reader 37.6 %), which gave a
+> 1.97× standalone ceiling. cProfile's per-call overhead inflates the share of the many tiny
+> bit-reader calls, so the sampled VM profile above is the fraction used here, in
+> `hw/docs/hardware_report.md` §2.5 and in the reports. The difference — 1.97× against 1.67×
+> — is the profiler, not the hardware. **Both standalone figures are superseded** by the
+> chain analysis in `hardware_report.md` §3.8, which is what the reports actually claim.
+
+- **Ideal bound** `1/(1 − f) = 1.67×` (infinite-speed accelerator; the 60 % software
   residual — MTF/BWT/RLE/CRC — caps it). At the target clock the accelerator sits **right
-  at the bound**: `t_hw` (3 ms) is negligible against the ~560 ms of software Huffman +
+  at the bound**: `t_hw` (3 ms) is negligible against the ~450 ms of software Huffman +
   bit-reader work it removes.
 - **Key finding — clock-insensitive.** Unlike grape (compute-bound, speedup collapses
   when the clock misses target), huffman is **Amdahl-fraction-bound, not clock-bound**:
-  the software Huffman path is ~560 ms and even a **5 MHz** engine decodes it in ~30 ms,
-  so S stays **1.89–1.97×** across a 10× clock range. The realised clock (docs/ppa.md §3)
+  the software Huffman path is ~450 ms and even a **5 MHz** engine decodes it in ~30 ms,
+  so S stays **1.60–1.66×** across a 10× clock range. The realised clock (docs/ppa.md §3)
   therefore does not gate the end-to-end result; the fraction `f` does.
 - **Sensitivity — `f`:** the engine also owns the **selector walk** inside the block-loop
   body (`decode_huffman_block` self 18.9 %, prd.md §1) — counting its selector share pushes
-  `f` toward **0.55** (ideal **2.22×**, S ≈ **2.20×** at 50 MHz). At a strict f = 0.40,
-  S ≈ 1.66×. The result is fraction-driven; the honest range is **~1.9–2.2×**.
+  `f` higher still (at f = 0.55 the ideal is **2.22×**); the PRD's cProfile f = 0.496 gives
+  1.97×. The result is fraction-driven, and the sampled profile is the conservative end:
+  the honest range is **~1.7–2.2×**, quoted here at **1.67×**.
 - **Sensitivity — bus latency:** doubling the per-transaction cost (4 → 8 cyc,
   ~1,256 bus cyc/block) adds well under 1 ms across all blocks at any of the clocks above
-  — negligible against the ~566 ms software residual.
+  — negligible against the ~674 ms software residual.
 - **Bigger picture:** chaining `mtf_cam` on chip (MAS §1, `m_sym → s_sym`) would move the
   ~11 % move-to-front out of software too, lifting `f` and the ceiling further — the
   intended `pyflate_accel` two-block pipeline.
@@ -99,7 +108,7 @@ Amdahl `S = T / new_total`.
 > **How this relates to the delivered software (added 2026-09-19).** The speedups in this section
 > are projections against *original* Python. Against the delivered Python + Rust path (170.01 ms) the
 > comparison is made at the matched boundary instead: the `huffman_engine → mtf_cam` chain,
-> co-simulated in 159,303 cycles (≈ 4.24 ms at the shared 37.6 MHz clock), against the Rust
+> co-simulated in 159,303 cycles (≈ 4.25 ms at the shared 37.5 MHz clock), against the Rust
 > kernel's 3.30 ms — end to end a tie (≈ 171 ms). See `hw/docs/hardware_report.md §3.8`.
 
 ## 4. Rubric map (project_instructions.md §7)
@@ -126,8 +135,8 @@ Amdahl `S = T / new_total`.
 > (149,276 cycles for the 148,271-symbol benchmark, K1 = 1.0068 cyc/sym). The engine
 > decodes 1 symbol/cycle via a 20-wide comparator cascade with a 0-cycle selector switch.
 > Against the 1,123.49 ms (≈ 1.12 s) original-Python baseline, of which **49.6 %** is the Huffman decode plus
-> bit reader (prd.md §1), Amdahl gives **~1.97× at the 50 MHz design target** — essentially
-> the ideal 1.98× bound, because the 3 ms of hardware decode is negligible against the
+> bit reader, Amdahl gives **~1.66× at the 50 MHz design target** — essentially
+> the ideal 1.67× bound, because the 3 ms of hardware decode is negligible against the
 > ~560 ms of software Huffman work it removes. Notably the speedup is **clock-insensitive**
 > (still ~1.9× at 5 MHz): unlike a compute-bound pipeline, it is limited by the software
 > residual (MTF/BWT/RLE), not by timing closure. Chaining the `mtf_cam` block on chip

@@ -306,7 +306,7 @@ denominators are the A7 table above and A3's 3.304 ms native decode phase.
 
 All three modules now record *post-CTS* static timing and a default-activity power estimate in
 `hw/<module>/docs/ppa.md`: `grape_pipeline` 19.46 MHz, `huffman_engine` 39.9 MHz, `mtf_cam`
-37.6 MHz. The timing and power reports those numbers were read from are preserved in
+37.5 MHz — each from a run that met its constraint. The timing and power reports those numbers were read from are preserved in
 `hw/<module>/synth/evidence/`. None is a completed routed sign-off or a physical system
 benchmark. `grape_pipeline`'s synthesis-area table was measured before the final rewrite of
 its issue-selection logic. MTF integration records 158,441 RTL cycles; the W-sweep's
