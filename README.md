@@ -79,18 +79,22 @@ Per-module detail is in `hw/<module>/docs/ppa.md` and `integration.md`.
 
 ## Repository structure
 
+This describes the **public repository**. Entries marked [repo only] are development
+scaffolding that `.gitattributes` keeps out of the submission archive, so they are listed
+here for someone browsing the repository, not for someone reading the zip.
+
 ```
 report_pyflate.txt / report_nbody.txt   Per-benchmark reports (course deliverable, one per
 report_pyflate.pdf / report_nbody.pdf   selected benchmark; .txt is the named deliverable, .pdf
                                         carries the figures; both built from report/)
 script_pyflate.sh / script_nbody.sh     End-to-end runners (course deliverable); thin
                                         wrappers over tools/runner_common.sh
-make_submission.sh                      Verify the deliverables and package them (see below)
+make_submission.sh                      Verify the deliverables and package them (see below)  [repo only]
 prompt.txt                              AI-tool prompt log (course deliverable)
-project_instructions.pdf / .md          Course assignment handout (+ text transcription)
-skills-lock.json                        Pinned sources/hashes of the imported skills (`npx skills update`)
+project_instructions.pdf / .md          Course assignment handout (+ text transcription)  [repo only]
+skills-lock.json                        Pinned sources/hashes of the imported skills  [repo only]
 .claude/                                Claude Code project config: hook wiring + skills (log-prompt,
-                                        and a subset of mattpocock/skills: grilling, teach, research, ...)
+                                        and a subset of mattpocock/skills: grilling, teach, research, ...)  [repo only]
 benchmarks/
   MANIFEST                              pyperformance custom-benchmark manifest (pyflate, nbody)
   bm_pyflate/ bm_nbody/         Benchmark copies — optimizations land here
@@ -113,8 +117,9 @@ tools/
   log_prompt_hook.py                    Claude Code hook: auto-appends session prompts to prompt.txt
   hw/                                   Claude Code hooks + status/progress scripts for the HW flow
 hw/                                     Hardware accelerator designs (SystemVerilog) + the stage-gated
-                                        HW flow: hw/FLOW.md (definition), hw/PLAN.md (steps),
-                                        hw/PROGRESS.md (generated status), hw/setup.sh (toolchain)
+                                        HW flow: FLOW.md (definition), PLAN.md (steps),
+                                        PROGRESS.md (generated status) [all repo only];
+                                        hw/setup.sh (toolchain) ships
 research/                               Cited research notes (agent skills/toolchain, nbody & pyflate algorithms)
 ```
 
@@ -252,8 +257,8 @@ Create the local file once:
 printf 'MATAN_ID=012345678\nYUVAL_ID=087654321\n' > report/ids.local
 ```
 
-`make_submission.sh` sources it, compiles `report/ids.pdf` and adds that page to
-the archive. Both the file and the generated PDF are gitignored, so ID numbers
+The packaging script sources it, compiles the page and adds it to the archive as
+`ids.pdf` at the top level. Both the file and the generated PDF are gitignored, so ID numbers
 exist only while an archive is being built. `./report/build.sh` is unaffected
 and never touches them.
 
@@ -316,7 +321,7 @@ what the stage scripts do not produce — pyflate's crate tests and dispatch che
 against a fresh cargo build, the built wheels with their provenance records,
 timing distributions, and `tools/check_all.sh --require-native`. `status` and
 `fetch` follow the run; connection details are CLI arguments, with private
-access instructions in `VM_GUIDE.local.md`.
+access instructions kept outside the repository in an untracked `*.local.md` note.
 
 ### Checks
 
@@ -336,14 +341,15 @@ hashing maturin's `__init__.py` instead of the compiled extension, a text export
 that shifted table rows, and runner assertions for wrong, unpinned or
 mis-pinned runs.
 
-`.github/workflows/software-checks.yml` runs the same on Ubuntu 22.04 with
+A GitHub Actions workflow (repository only, not in the archive) runs the same on Ubuntu 22.04 with
 CPython 3.10 after building both wheels from the checkout with
 `tools/build_wheel.sh`. It measures nothing: shared runners are not a timing
 platform.
 
 ## Packaging the submission
 
-`./make_submission.sh` (or `--check` to verify only) writes
+Running make_submission.sh from the repository (it is not in the archive; `--check`
+verifies only) writes
 `submission/hwsw_submission_<date>_<rev>.zip`: `git archive HEAD` minus the paths listed in
 `.gitattributes` as `export-ignore` (agent tooling, flow-gate documents, tool logs, the
 solver scratch under `hw/**/synth/formal*/` and the counter captures' console spill), plus
@@ -393,7 +399,9 @@ reader would actually measure depending on which script they ran.
   end in `native || true`, which left an incomplete results directory looking
   complete. A native failure is now named on stderr, recorded in
   `stages_incomplete.txt`, and returned as a nonzero exit status — the
-  original/optimized comparison is still complete and still valid.
+  original/optimized comparison is still complete and still valid. The file is written
+  into the run's results directory by `tools/runner_common.sh`; it does not exist until a
+  native stage has actually been skipped.
 
 - **Baseline** = original benchmark via `pyperformance run --rigorous`.
 - **Optimized** = this repo's `benchmarks/` via `--manifest benchmarks/MANIFEST`

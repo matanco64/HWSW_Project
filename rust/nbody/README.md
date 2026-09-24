@@ -35,8 +35,8 @@ sidesteps manylinux/glibc mismatch entirely. After the first build the
 `~/.cargo` cache makes rebuilds offline; for a fully air-gapped VM run
 `cargo vendor` once and `maturin build --offline`.
 
-To wire it into `pyperformance run --manifest`, add the wheel to
-`benchmarks/bm_nbody/requirements.txt`; pyperformance installs a benchmark's
+To wire it into `pyperformance run --manifest`, create a `requirements.txt` beside
+`benchmarks/bm_nbody/pyproject.toml` and list the wheel in it; pyperformance installs a benchmark's
 requirements into its per-run venv automatically. Note that pyperf runs the
 benchmark in **worker subprocesses**, so the extension has to be pip-installed
 into the measured venv - `PYTHONPATH` will not do, pyperf strips the

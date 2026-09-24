@@ -5,9 +5,9 @@ Verilog/SystemVerilog accelerators for the two profiled benchmarks (logically co
 `mtf_cam` (pyflate move-to-front CAM). Each module is verified with a pyuvm/cocotb testbench
 against a frozen Python golden model wrapping `benchmarks/bm_*`, and sized with Yosys + sky130.
 
-- [FLOW.md](FLOW.md) — the flow contract: stages, gates, skills, hooks, make targets, STATUS.json schema
-- [PLAN.md](PLAN.md) — concrete step list (to be written)
-- [PROGRESS.md](PROGRESS.md) — generated from `STATUS.json`, never hand-edited
+- The stage-gate flow contract, its step list and the generated progress board live in the
+  public repository only (FLOW.md, PLAN.md, PROGRESS.md, STATUS.json); they are
+  development scaffolding and are left out of the submission archive.
 - Algorithm research: [../research/hw-algorithms-nbody.md](../research/hw-algorithms-nbody.md),
   [../research/hw-algorithms-pyflate.md](../research/hw-algorithms-pyflate.md)
 - Shared library: `common/rtl` (skid buffer, FIFO, AXI-Lite regs), `common/tb` (pyuvm base test/env,
