@@ -222,6 +222,7 @@ laptop  --ssh-->  naranja14  --ssh -p 12222-->  guest VM (127.0.0.1:12222)
 Course-VM measurements, and the only numbers to quote:
 
 - `vm_canonical_20260910_2c8c754/` — the pinned canonical run of revision 2c8c754
+  (a pre-rewrite revision ID — see [docs/history-rewrite.md](docs/history-rewrite.md))
   through the documented scripts: source of both headlines (appendix A7)
 - `vm_release_20260907/` — pyflate's earlier pinned capture; its counter data
   (appendix A2) are still quoted
