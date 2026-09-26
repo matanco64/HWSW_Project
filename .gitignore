@@ -67,3 +67,7 @@ hw/**/synth/yosys*.log
 
 # macOS
 .DS_Store
+
+# presentation build products that are large or per-run
+presentation/assets/chain_cosim.log
+presentation/verify/*.png

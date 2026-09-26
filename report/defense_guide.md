@@ -46,8 +46,8 @@ calculation. Leave the required 5–10 minute discussion outside this presentati
 | Nbody compute projection | 2.48 Mcycles / 19.46 MHz | 127.4 ms, before residual and interface |
 | Huffman module simulation | 149,276 cycles / 148,271 symbols | 1.0068 cycles/symbol |
 | MTF module simulation | 158,441 cycles / 148,271 symbols | 1.0686 cycles/symbol |
-| Huffman + MTF chain simulation | 159,303 cycles, 336,184 bytes byte-exact | ≈ 4.24 ms at the shared 37.6 MHz clock |
-| Post-CTS timing estimates | grape 19.46, Huffman 39.9, MTF 37.6 MHz | none has met the 50 MHz target |
+| Huffman + MTF chain simulation | 159,303 cycles, 336,184 bytes byte-exact | ≈ 4.25 ms at the shared 37.5 MHz clock |
+| Post-CTS timing estimates | grape 19.46, Huffman 39.9, MTF 37.5 MHz | none has met the 50 MHz target |
 | Nbody hardware projection | 127.4 ms compute + 11.6 ms residual | ≈ 139 ms: 1.66x vs original, ≈ 15x slower than Rust |
 
 Sources: [canonical suite](../results/vm_canonical_20260910_2c8c754/suite/),
@@ -308,7 +308,7 @@ forwarding and selection logic, which costs area and can lengthen critical paths
 **Short answer:** No, on both benchmarks. Nbody hardware projects to about 139 ms per
 run at the 19.46 MHz clock that static timing supports: 1.66x over the original,
 level with the optimized Python, about 15x slower than the 9.53 ms native Rust tier.
-The pyflate chain takes about 4.24 ms for the stage Rust does in 3.30 ms, and ties
+The pyflate chain takes about 4.25 ms for the stage Rust does in 3.30 ms, and ties
 the delivered 170 ms path end to end.
 
 **If pressed:** Nbody compute is 2.48 Mcycles / 19.46 MHz = 127.4 ms, plus the
@@ -359,7 +359,7 @@ Python attached to hardware, so CPU/DMA interface time is unmeasured.
 **Evidence:** each module's `docs/testplan.md`, `docs/review_signoff.md`,
 `docs/coverage_waivers.md`; `hw/mtf_cam/synth/formal.sby`; `hw/pyflate_accel/README.md`.
 
-### 23. Are 19.46 MHz, 39.9 MHz and 37.6 MHz measured frequencies?
+### 23. Are 19.46 MHz, 39.9 MHz and 37.5 MHz measured frequencies?
 
 **Short answer:** They are derived from static timing reports, not measured on
 silicon and not final routed sign-off. All three are post-CTS.
@@ -368,21 +368,21 @@ silicon and not final routed sign-off. All three are post-CTS.
 are not routed. Each figure is 1/(clock constraint minus worst setup slack) at the
 typical corner, read from the setup (max) report: grape 150 ns with +98.62 ns slack;
 Huffman 40 ns with +14.94 ns slack, confirmed by a tighter 27 ns run that meets
-timing and gives 39.5 MHz; MTF missed its 20 ns constraint by 6.60 ns, so
-1/26.6 ns. Routing can change the results; preliminary timing is not a guaranteed
+timing and gives 39.5 MHz; MTF 27 ns with +0.31 ns slack, so 1/26.69 ns (its
+20 ns run missed by 6.60 ns and back-computes a figure within 0.4% of that). Routing can change the results; preliminary timing is not a guaranteed
 bound. All have a 50 MHz target and none has demonstrated it.
 
 **Evidence:** module `docs/ppa.md`; the small report files are preserved under each
-module's `synth/evidence/` (`ws.max.rpt` for grape and MTF; for Huffman `worst_setup_path.rpt` from the 40 ns setup report plus `tight27_ws.max.rpt`; `power.rpt`). The full
+module's `synth/evidence/` (`ws.max.rpt` for grape, `tight27_ws.max.rpt` for MTF; for Huffman `worst_setup_path.rpt` from the 40 ns setup report plus `tight27_ws.max.rpt`; `power.rpt`). The full
 OpenLane run folders are gitignored; have them available if staff want to inspect.
 
-### 24. Does 13.7 mW establish an energy advantage? Will SRAM fix the area?
+### 24. Does 10.2 mW establish an energy advantage? Will SRAM fix the area?
 
 **Short answer:** Neither conclusion is established. The power figures use default
 tool switching activity, and Huffman's SRAM alternative has not been implemented.
 
 **If pressed:** The estimates are about 19 mW (grape, at its 150 ns constraint),
-about 283 mW (Huffman, 40 ns) and about 13.7 mW (MTF, 20 ns). Each belongs to its
+about 283 mW (Huffman, 40 ns) and about 10.2 mW (MTF, 27 ns). Each belongs to its
 own run constraint, so they are not comparable with each other, are not workload
 power and cannot be paired with a different frequency as measured energy. System
 energy includes CPU, DMA and memory. Huffman's projected 0.75 mm² is remaining
@@ -400,7 +400,7 @@ communication. Only the replaced stage's time can be removed.
 **If pressed:** The report uses T_new = T_sw - T_stage + T_hw + T_if. The replaced
 stage is about 117 ms in the optimized Python loop (derived: 283.88 - 170.01 +
 3.30 ms) and 3.30 ms in the Rust kernel. The chain needs 159,303 cycles: about
-4.24 ms at the shared 37.6 MHz clock, 3.19 ms at 50 MHz. That is about 28x faster
+4.25 ms at the shared 37.5 MHz clock, 3.19 ms at 50 MHz. That is about 28x faster
 than the Python loop and about 1.3x slower than Rust. End to end it projects to
 about 171 ms, a tie with the delivered 170.01 ms path (6.6x over the original),
 because inverse BWT (137.7 ms, about 80% of what remains) sets the floor for both
@@ -415,7 +415,7 @@ streams carry bits and selectors to Huffman, symbols stay on chip, and platform 
 returns L-vector bytes from the MTF packer. Python finishes inverse BWT and RLE4.
 
 **If pressed:** Both modules are single-clock and the chain uses one shared clock,
-37.6 MHz set by MTF, so there is no clock-domain crossing; the two estimates are 6%
+37.5 MHz set by MTF, so there is no clock-domain crossing; the two estimates are 6%
 apart, so an asynchronous FIFO would add area and verification for no benefit. The
 link is a valid/ready stream, one symbol per beat. MTF needs 1.0686 cycles/symbol
 against Huffman's 1.0068, so it back-pressures the decoder and the chain runs at
