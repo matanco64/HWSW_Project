@@ -71,3 +71,5 @@ hw/**/synth/yosys*.log
 # presentation build products that are large or per-run
 presentation/assets/chain_cosim.log
 presentation/verify/*.png
+presentation/verify/*.jpg
+presentation/verify/*:Zone.Identifier

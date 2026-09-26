@@ -1,6 +1,7 @@
 # Slide S00 (title slide)
 
-Layout: "Title slide". This is the first slide of the deck.
+Layout: "Title slide". Use the EXISTING slide 1 (set its layout to "Title slide"); do not insert a
+new slide. After this prompt the deck still has exactly one slide.
 
 Title (exact text): 
 

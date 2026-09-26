@@ -19,6 +19,6 @@ Screenshots are saved here as `<id>.png` (git-ignored); STATUS blocks as `<id>.s
 
 | id | status block | text diff | screenshot | date | note |
 |---|---|---|---|---|---|
-| 00a | | | | | |
+| 00a | done-with-deviation; 4 deviations reviewed, all accepted (four layouts correct; pre-created deck renamed; title box 1.3 in; slide 1 temporarily Title-and-body) | not possible yet: deck is on the Technion account, not visible to the verifier's Drive | theme builder + blank slide viewed: four layouts, dark title, body placeholder, # bottom-right | 2026-09-26 | fonts and transitions not visible in screenshots; 00b status asked to report fonts |
 | 00b | | | | | |
 | 00c | | | | | |

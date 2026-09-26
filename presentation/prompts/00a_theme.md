@@ -5,7 +5,8 @@ Create a new Google Slides presentation (File → New presentation), name it
 will save it to `presentation/SLIDES_URL.txt`. Every later prompt uses that same file.
 
 1. Theme: keep the default "Simple Light". Set the theme font pair to Roboto (titles) and
-   Roboto (body). Accent colour: #1F4E79 for title text and table header fill. No other colours.
+   Roboto (body). Titles and body text dark grey #222222. The accent colour #1F4E79 is used
+   only for table header fills and the highlighted word in the footer tracker. No other colours.
 2. Edit the master (View → Theme builder). On the TITLE AND BODY layout: title box across the
    top, 32 pt, left-aligned, dark grey #222222, allow two lines. One body box below it filling
    the remaining area with 0.4 in margins. Remove the slide-number placeholder from the body

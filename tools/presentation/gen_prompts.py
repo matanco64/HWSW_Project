@@ -71,7 +71,8 @@ Create a new Google Slides presentation (File → New presentation), name it
 will save it to `presentation/SLIDES_URL.txt`. Every later prompt uses that same file.
 
 1. Theme: keep the default "Simple Light". Set the theme font pair to Roboto (titles) and
-   Roboto (body). Accent colour: #1F4E79 for title text and table header fill. No other colours.
+   Roboto (body). Titles and body text dark grey #222222. The accent colour #1F4E79 is used
+   only for table header fills and the highlighted word in the footer tracker. No other colours.
 2. Edit the master (View → Theme builder). On the TITLE AND BODY layout: title box across the
    top, 32 pt, left-aligned, dark grey #222222, allow two lines. One body box below it filling
    the remaining area with 0.4 in margins. Remove the slide-number placeholder from the body
@@ -95,10 +96,13 @@ a footer text box across the bottom (0.3 in from the bottom edge, full width min
 This is the project-flow tracker. On each real slide the current stage word will be made bold
 and coloured #1F4E79; on the master it stays plain grey. Do not add a logo or a date.
 
+Then turn slide numbers on for the deck (Insert → Slide numbers → On, apply to all).
+
 Done when: every new "Title and body" slide shows the grey tracker line at the bottom and the
 slide number bottom-right. Reply with a screenshot of one blank slide, then the STATUS block for
-00b with `tracker: none highlighted` and `title_as_typed` set to the tracker text as it reads on
-the master.
+00b with `tracker: none highlighted`, `title_as_typed` set to the tracker text as it reads on the
+master, and under `deviations` the title and body font names the theme currently uses
+(Slide → Edit theme → click the title box → font menu), even if they are Roboto as requested.
 """,
     "00c_images.md": f"""# Setup 3 of 3: images
 
@@ -138,7 +142,8 @@ def render(s: Slide, idx: int, total: int, prev_id: str | None) -> str:
         lines = [c.split("|")[2].strip() for c in rows]
         return f"""# Slide {s.id} (title slide)
 
-Layout: "Title slide". This is the first slide of the deck.
+Layout: "Title slide". Use the EXISTING slide 1 (set its layout to "Title slide"); do not insert a
+new slide. After this prompt the deck still has exactly one slide.
 
 Title (exact text): 
 
