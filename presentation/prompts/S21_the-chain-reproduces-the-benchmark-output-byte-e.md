@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     The chain reproduces the benchmark output byte-exact: 336,184 bytes in 159,303 cycles, with and without back-pressure
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\chain_cosim.gif`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\chain_cosim.gif`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".

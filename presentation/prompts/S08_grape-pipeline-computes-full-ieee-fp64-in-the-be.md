@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     grape_pipeline computes full IEEE FP64 in the benchmark's own operation order, with 3 adders and 3 multipliers chosen by a cycle model
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\grape_block_diagram.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\grape_block_diagram.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".

@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     Huffman decode is a 0.40 fraction of the original run, a 1.67× ceiling alone, so we chain it with move-to-front on one AXI stream
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\decode_report.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\decode_report.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".

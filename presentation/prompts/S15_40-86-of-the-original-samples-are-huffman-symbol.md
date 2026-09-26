@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     40.86% of the original samples are Huffman symbol decode, 13.44% move-to-front, and about a quarter is the bit reader
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\print_pyflate_stock.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\print_pyflate_stock.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Profile".

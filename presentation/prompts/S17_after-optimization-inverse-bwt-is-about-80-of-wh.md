@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     After optimization inverse BWT is about 80% of what remains; a Rust kernel for symbol decode reaches 170.01 ms, 6.61x end to end
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\print_pyflate_opt.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\print_pyflate_opt.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Optimize".

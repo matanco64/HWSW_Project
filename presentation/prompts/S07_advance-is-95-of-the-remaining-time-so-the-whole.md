@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     advance() is 95% of the remaining time, so the whole step goes on-chip after one doorbell
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\grape_report.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\grape_report.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".

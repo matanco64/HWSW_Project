@@ -30,7 +30,7 @@ differentiator, not decoration.
 | Language | English slides. |
 | Location | `presentation/` on `main`, committed after the submission. |
 | Build cadence | Setup prompts one at a time, each verified; slides in batches of five with one verification pass per batch. |
-| Screenshots | The desktop agent's screenshot for each prompt is saved by Yuval to `presentation/verify/<id>.png` (Windows path `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\verify`); the verifier logs the verdict in `verify/README.md`. |
+| Screenshots | The desktop agent's screenshot for each prompt is saved by Yuval to `presentation/verify/<id>.png` (the desktop agent cannot open WSL paths, so `tools/presentation/sync_win.sh` mirrors `assets/` and `prompts/` to `C:\Users\Kogan\HWSW_presentation\` and pulls `verify\` and the Downloads export back); the verifier logs the verdict in `verify/README.md`. |
 | Notes pass | Build first; Yuval refines the hardware speaker notes afterwards in `deck_parts/hw_*.md`, then the affected prompts are re-issued. |
 
 ## What we will NOT talk about in the main flow

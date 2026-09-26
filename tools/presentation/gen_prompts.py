@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render presentation/prompts/ from presentation/deck.md.
 
-One file per slide plus three setup prompts. Each prompt is self-contained and small enough
+One file per slide plus four setup prompts. Each prompt is self-contained and small enough
 for a desktop agent driving Google Slides to execute without further context.
 Re-running on an unchanged deck produces no diff.
 """
@@ -19,8 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 PRES = ROOT / "presentation"
 OUT = PRES / "prompts"
 STAGES = ["Analyze", "Profile", "Optimize", "Accelerate", "Trade-offs"]
+VERIFY_WIN = r"C:\Users\Kogan\HWSW_presentation\verify"
 ASSET_NAMES = sorted(p.name for p in (PRES / "assets").glob("*") if p.suffix in (".png", ".gif"))
-ASSETS_WIN = r"\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets"
+ASSETS_WIN = r"C:\Users\Kogan\HWSW_presentation\assets"   # mirror kept by tools/presentation/sync_win.sh
 
 BRIEFING = f"""# Standing briefing for the slide-building agent
 
@@ -32,14 +33,17 @@ prompts in this folder. Read this once; every prompt assumes it.
    changed numbers. If something cannot be done as written, stop and say so instead of adapting.
 2. **One prompt, one result.** Do only what the prompt says. Do not touch other slides. If you
    notice a problem elsewhere, report it; do not fix it.
-3. **Images** are on this laptop at `{ASSETS_WIN}` (a WSL path). Insert via Insert → Image →
-   Upload from computer. Never search the web for a figure or generate one.
+3. **Images** are on this laptop at `{ASSETS_WIN}`, a folder attached to your session. Insert them
+   with your direct file-upload tool into the Slides image-upload input (Insert → Image → Upload
+   from computer opens a native picker you cannot drive). Never search the web for a figure or
+   generate one.
 4. **Gemini in Slides.** You may use the Gemini side panel inside Google Slides for mechanical
    formatting work (resize all tables, apply the theme, align boxes) when it is faster than menus.
    You may not let it write, summarize or "polish" any text, and you must check afterwards that
    nothing it touched changed the words or numbers. Never use it to create slides or images.
 5. **Screenshots.** Every prompt ends with a screenshot request. Take it in edit view showing the
-   whole slide and the notes pane if notes were set. The human saves it as `verify/<prompt id>.png`.
+   whole slide and the notes pane if notes were set. The human saves it as `<prompt id>.png` in
+   `{VERIFY_WIN}`.
 6. **Look.** Theme "Simple Light", font Roboto, accent #1F4E79, no transitions, no animations,
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
 7. **Order.** Run `INDEX.md` top to bottom: the four setup prompts first, then slides in the
@@ -47,7 +51,7 @@ prompts in this folder. Read this once; every prompt assumes it.
 8. **STATUS as text.** Write the STATUS block as plain text in your reply (not as an image), so
    the human can copy it. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
    .pptx (and .txt). Chrome saves to the Downloads folder; you cannot drive the native Save
-   dialog, so leave the files there and say so in the STATUS block. The human moves them. Never edit slides during a readback.
+   dialog, so leave the files there and say so in the STATUS block. A sync script collects them. Never edit slides during a readback.
 9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
@@ -67,7 +71,6 @@ prompts in this folder. Read this once; every prompt assumes it.
     screenshot: taken | not taken: <why>
 """
 
-VERIFY_WIN = ASSETS_WIN.rsplit("\\", 1)[0] + "\\verify"
 READBACK = f"""# Readback: export the deck as plain text
 
 Run this whenever a prompt or the human asks for a readback (normally after every batch of five
@@ -75,11 +78,8 @@ slides, and after each setup prompt if asked).
 
 1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
 2. Then File → Download → Plain Text (.txt). Both land in the Windows Downloads folder; if
-   Chrome asks, answer Keep. Do not try to drive the Save dialog. The human moves both files to
-
-       {VERIFY_WIN}
-
-   as `deck_export.pptx` and `deck_export.txt`.
+   Chrome asks, answer Keep. Do not try to drive the Save dialog; leave them in Downloads, a sync
+   script on the WSL side collects the newest export.
 3. Reply with this block only:
 
     STATUS RB
@@ -166,14 +166,11 @@ The figures live on this laptop at:
 
     {ASSETS_WIN}
 
-(Windows path into WSL. If Explorer cannot open it, use the path printed by `wslpath -w
-presentation/assets` in the WSL terminal.)
+This folder is attached to your session by the human ("Add folder" in the desktop app). Do nothing
+with the files yet except list the folder. Each slide prompt names the exact file to insert with
+your direct file-upload tool.
 
-Do nothing with them yet except confirm the folder opens and lists PNG/GIF files. Each slide
-prompt names the exact file to insert via Insert → Image → Upload from computer.
-
-Done when: you can see the folder listing. Reply with a screenshot of the folder in the file
-picker, then the STATUS block for 00c with `deviations` listing the number of files you see and
+Done when: you can list the folder. Reply with the STATUS block for 00c with `deviations` listing the number of files you see and
 any of these names that are missing: {", ".join(sorted(ASSET_NAMES))}.
 """,
 }

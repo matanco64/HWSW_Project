@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     A canonical Huffman code is decoded by comparing the next bits against one threshold per length
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\huffman_tree.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\huffman_tree.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Analyze".

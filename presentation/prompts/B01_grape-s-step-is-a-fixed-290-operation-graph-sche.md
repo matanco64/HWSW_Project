@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     grape's step is a fixed 290-operation graph scheduled onto 3 adders and 3 multipliers
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\grape_uarch.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\grape_uarch.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".

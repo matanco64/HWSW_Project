@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     97.7% of samples sit in advance(); list indexing and float boxing dominate the C frames
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\print_nbody_stock.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\print_nbody_stock.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Profile".

@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     nbody is 5 bodies, 10 pairs and 20,000 steps of pure-Python float arithmetic
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\nbody_pairs.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\nbody_pairs.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Analyze".

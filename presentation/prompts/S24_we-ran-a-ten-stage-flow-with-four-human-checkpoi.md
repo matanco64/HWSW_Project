@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     We ran a ten-stage flow with four human checkpoints: agents pre-reviewed, humans decided
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\hw_flow.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\hw_flow.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".

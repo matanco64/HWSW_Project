@@ -6,7 +6,7 @@ Title (exact text, do not shorten or rephrase):
 
     pyflate is bzip2 decompression in pure Python: Huffman decode, move-to-front, run-length, inverse BWT
 
-Body: Insert → Image → Upload from computer → `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets\pyflate_stages.png`.
+Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\pyflate_stages.png`.
 Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
 
 Do not touch the footer tracker: the layout already highlights "Analyze".

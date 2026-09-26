@@ -5,11 +5,8 @@ slides, and after each setup prompt if asked).
 
 1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
 2. Then File → Download → Plain Text (.txt). Both land in the Windows Downloads folder; if
-   Chrome asks, answer Keep. Do not try to drive the Save dialog. The human moves both files to
-
-       \\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\verify
-
-   as `deck_export.pptx` and `deck_export.txt`.
+   Chrome asks, answer Keep. Do not try to drive the Save dialog; leave them in Downloads, a sync
+   script on the WSL side collects the newest export.
 3. Reply with this block only:
 
     STATUS RB
