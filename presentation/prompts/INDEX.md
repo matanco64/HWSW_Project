@@ -1,10 +1,11 @@
 # Prompt queue
 
-Run in this order. One prompt per message to the desktop agent.
+Give the agent `README_AGENT.md` first, then run in this order, one prompt per message.
 
 - [ ] `00a_theme.md`
 - [ ] `00b_footer.md`
 - [ ] `00c_images.md`
+- [ ] `S00_two-python-benchmarks-measured-end-to-end-profil.md` (M+Y, 0 s)
 - [ ] `S01_two-pure-python-pyperformance-workloads-one-ques.md` (M, 90 s)
 - [ ] `S02_nbody-is-5-bodies-10-pairs-and-20-000-steps-of-p.md` (M, 45 s)
 - [ ] `S03_97-7-of-samples-sit-in-advance-list-indexing-and.md` (M, 60 s)

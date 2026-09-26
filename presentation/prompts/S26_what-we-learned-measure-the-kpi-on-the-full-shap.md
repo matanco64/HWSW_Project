@@ -1,4 +1,4 @@
-# Slide S26 (26 of 26)
+# Slide S26 (27 of 27)
 
 Layout: "Title and body". Insert after slide S25.
 

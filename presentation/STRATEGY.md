@@ -3,7 +3,7 @@
 Course brief §9: 20–25 min talk, then 5–10 min of questions, at a slot the staff schedule.
 Audience: course staff, addressed as a fellow ECE student who did not do the project.
 
-**Date / room:** _TBD (fill in; the last full day before the slot is rehearsal only)._
+**Date:** Monday 6 October 2026, in person, presented from Yuval's laptop (WSL has the simulator for Q&A).
 **Speakers:** Matan (software half), Yuval (hardware half).
 **Deck:** Google Slides, built by a Claude desktop agent from `prompts/`, verified against
 `deck.md` slide by slide. The repo is the source of truth; the Slides file is the output.
@@ -127,15 +127,35 @@ WSL), the exact speaker notes, and a "done when" line ending in "reply with a sc
 Verification per slide: the Drive connector reads the deck back; the title and notes must appear
 verbatim; the screenshot must show the visual without overflow. Results go to `verify/`.
 
+## Schedule to 6 October
+
+| When | What | Who |
+|---|---|---|
+| Sat 27 Sep | Matan reads STRATEGY + his 13 slides; dry run of setup prompt 00a on the desktop agent | M, Y |
+| Sun 28 – Mon 29 Sep | Build session 1: setup 00a–00c verified, slides S00–S12 in batches of five | Y + verifier |
+| Tue 30 Sep – Wed 1 Oct | Build session 2: S13–S26, backup B01–B12; Matan's edits to SW slides applied and re-issued | Y, M |
+| Thu 2 Oct | Yuval's notes pass on hw_*.md; affected prompts re-issued; qa.md answers rehearsed alone | Y |
+| Fri 3 – Sat 4 Oct | Full timed run-through together, trims; terminal demo tested from a cold shell | M, Y |
+| Sun 5 Oct | Rehearsal only. No content changes after noon. | M, Y |
+| Mon 6 Oct | Presentation | |
+
+## Open for Matan
+
+- Agree the decisions table above, or say what to change.
+- Confirm or replace each `owner: M` slide in `deck.md` (13 slides + S26); every number cites a report line.
+- Decide on two shipped-report inconsistencies found while sourcing the slides: `hw/docs/hardware_report.md:94-96`
+  labels the mtf_cam power run as 20 ns while quoting the 27 ns figure (10.2 mW); `hw/huffman_engine/docs/integration.md:80-99`
+  still narrates the cProfile 1.97x ceiling next to the shipped 1.67x. Fix in the repo post-submission, or leave and explain if asked.
+
 ## Progress (2026-09-26)
 
 | Step | State | Evidence |
 |---|---|---|
 | 1 Strategy | written, awaiting Matan's agreement and the date | this file |
-| 2 Storyboard | done | `storyboard.md`: 26 main slides, 1350 s; brief coverage check at the bottom |
-| 3 Spec | done, all slides `DRAFT` | `deck.md` 38/38 pass `check_numbers.py`; `derivations.md` holds the projection arithmetic |
+| 2 Storyboard | done | `storyboard.md`: title + 26 main slides, 1350 s; brief coverage check at the bottom |
+| 3 Spec | done, all slides `DRAFT` | `deck.md` 39/39 pass `check_numbers.py`; `derivations.md` holds the projection arithmetic |
 | 4 Assets | done | 15 files in `assets/` from `make_assets.py`; clip 44 frames / 24.5 s, sim 2/2 PASS byte-exact |
-| 5 Build | not started | `prompts/` generated (3 setup + 38 slides), `verify/` ready |
+| 5 Build | not started | `prompts/` generated (briefing + 3 setup + 39 slides), `verify/` ready |
 | 6 Matan pass | not started | 13 `owner: M` slides + S26 |
 | 7 Rehearsal | not started | `qa.md`: 47 questions, all owned |
 

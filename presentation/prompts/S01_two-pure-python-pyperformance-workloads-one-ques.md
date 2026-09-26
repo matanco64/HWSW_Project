@@ -1,6 +1,6 @@
-# Slide S01 (1 of 26)
+# Slide S01 (2 of 27)
 
-Layout: "Title and body". Insert as the first slide.
+Layout: "Title and body". Insert after slide S00.
 
 Title (exact text, do not shorten or rephrase):
 

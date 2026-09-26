@@ -1,4 +1,4 @@
-# Slide S08 (8 of 26)
+# Slide S08 (9 of 27)
 
 Layout: "Title and body". Insert after slide S07.
 

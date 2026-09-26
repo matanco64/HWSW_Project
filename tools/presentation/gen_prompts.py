@@ -21,6 +21,30 @@ OUT = PRES / "prompts"
 STAGES = ["Analyze", "Profile", "Optimize", "Accelerate", "Trade-offs"]
 ASSETS_WIN = r"\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets"
 
+BRIEFING = f"""# Standing briefing for the slide-building agent
+
+You are building a Google Slides deck for a Technion course presentation from a numbered queue of
+prompts in this folder. Read this once; every prompt assumes it.
+
+1. **Exactness.** Titles, table cells and speaker notes are quoted from a verified spec. Type them
+   exactly as given: no rewording, no "improvements", no added bullets, no extra slides, no
+   changed numbers. If something cannot be done as written, stop and say so instead of adapting.
+2. **One prompt, one result.** Do only what the prompt says. Do not touch other slides. If you
+   notice a problem elsewhere, report it; do not fix it.
+3. **Images** are on this laptop at `{ASSETS_WIN}` (a WSL path). Insert via Insert → Image →
+   Upload from computer. Never search the web for a figure or generate one.
+4. **Gemini in Slides.** You may use the Gemini side panel inside Google Slides for mechanical
+   formatting work (resize all tables, apply the theme, align boxes) when it is faster than menus.
+   You may not let it write, summarize or "polish" any text, and you must check afterwards that
+   nothing it touched changed the words or numbers. Never use it to create slides or images.
+5. **Screenshots.** Every prompt ends with a screenshot request. Take it in edit view showing the
+   whole slide and the notes pane if notes were set. The human saves it as `verify/<prompt id>.png`.
+6. **Look.** Theme "Simple Light", font Roboto, accent #1F4E79, no transitions, no animations,
+   no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
+7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
+   listed order, five at a time, pausing for verification after each batch when asked.
+"""
+
 SETUP = {
     "00a_theme.md": f"""# Setup 1 of 3: theme and master
 
@@ -86,6 +110,27 @@ def render(s: Slide, idx: int, total: int, prev_id: str | None) -> str:
     visual = s.fields.get("visual", "")
     where = "at the end of the deck (backup section)" if s.is_backup else (
         f"after slide {prev_id}" if prev_id else "as the first slide")
+    if visual == "title":
+        rows = [r for r in s.table.splitlines()[2:] if r.startswith("|")]
+        lines = [c.split("|")[2].strip() for c in rows]
+        return f"""# Slide {s.id} (title slide)
+
+Layout: "Title slide". This is the first slide of the deck.
+
+Title (exact text): 
+
+    {s.title}
+
+Subtitle box, one line each, exactly:
+
+    {(chr(10) + '    ').join(lines)}
+
+No footer tracker on this slide. No images. Speaker notes (exact text):
+
+    {s.notes}
+
+Done when: title and the five lines match exactly and nothing overflows. Reply with a screenshot.
+"""
     if visual.startswith("assets/"):
         body = (f"Body: Insert → Image → Upload from computer → `{ASSETS_WIN}\\{visual.split('/', 1)[1]}`.\n"
                 "Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.")
@@ -128,10 +173,11 @@ def main() -> int:
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+    (OUT / "README_AGENT.md").write_text(BRIEFING, encoding="utf-8")
     for name, text in SETUP.items():
         (OUT / name).write_text(text, encoding="utf-8")
     main_slides = [s for s in slides if not s.is_backup]
-    index = ["# Prompt queue", "", "Run in this order. One prompt per message to the desktop agent.", ""]
+    index = ["# Prompt queue", "", "Give the agent `README_AGENT.md` first, then run in this order, one prompt per message.", ""]
     for name in SETUP:
         index.append(f"- [ ] `{name}`")
     prev = None

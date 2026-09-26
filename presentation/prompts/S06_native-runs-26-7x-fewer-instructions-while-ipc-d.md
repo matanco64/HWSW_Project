@@ -1,4 +1,4 @@
-# Slide S06 (6 of 26)
+# Slide S06 (7 of 27)
 
 Layout: "Title and body". Insert after slide S05.
 

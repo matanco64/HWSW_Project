@@ -1,4 +1,4 @@
-# Slide S14 (14 of 26)
+# Slide S14 (15 of 27)
 
 Layout: "Title and body". Insert after slide S13.
 

@@ -1,6 +1,6 @@
 # Storyboard
 
-Main flow: 26 slides, 1350 s (22:30). Backup: 12 slides, shown only on request.
+Main flow: title slide + 26 timed slides, 1350 s (22:30). Backup: 12 slides, shown only on request.
 Stage = footer tracker value. Brief column = the instruction item the slide satisfies
 (§1 analysis, §2 pyperformance, §3 flame graph, §4 bottleneck, §5 improvements, §6 results,
 §7a HW description, §7b I/O, §7c architecture, §7d HW/SW interface, §7e justification,
@@ -10,6 +10,7 @@ Stage = footer tracker value. Brief column = the instruction item the slide sati
 
 | # | Claim title (draft) | Owner | s | Stage | Visual | Brief |
 |---|---|---|---|---|---|---|
+| S00 | (title) Two Python benchmarks, measured end to end: profiling, optimization, and three hardware accelerators | M+Y | 0 | Analyze | title layout: names, course 00460882, date, repo | — |
 | S01 | Two pure-Python pyperformance workloads, one question: where does the time go, and what would it take to move it to hardware? | M | 90 | Analyze | table: canonical runtimes, both benchmarks, original / optimized / native | §1, §2 |
 | S02 | nbody is 5 bodies, 10 pairs and 20,000 steps of pure-Python float arithmetic | M | 45 | Analyze | `nbody_pairs.png` | §1 |
 | S03 | 97.7% of samples sit in advance(); list indexing and float boxing dominate the C frames | M | 60 | Profile | `print_nbody_stock.png` | §3, §4 |

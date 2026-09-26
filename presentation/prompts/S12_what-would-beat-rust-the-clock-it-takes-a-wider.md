@@ -1,4 +1,4 @@
-# Slide S12 (12 of 26)
+# Slide S12 (13 of 27)
 
 Layout: "Title and body". Insert after slide S11.
 

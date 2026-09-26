@@ -1,4 +1,4 @@
-# Slide S16 (16 of 26)
+# Slide S16 (17 of 27)
 
 Layout: "Title and body". Insert after slide S15.
 

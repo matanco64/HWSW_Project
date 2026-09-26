@@ -1,4 +1,4 @@
-# Slide S03 (3 of 26)
+# Slide S03 (4 of 27)
 
 Layout: "Title and body". Insert after slide S02.
 

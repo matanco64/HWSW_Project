@@ -1,4 +1,4 @@
-# Slide S19 (19 of 26)
+# Slide S19 (20 of 27)
 
 Layout: "Title and body". Insert after slide S18.
 

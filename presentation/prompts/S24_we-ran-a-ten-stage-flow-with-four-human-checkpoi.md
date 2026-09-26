@@ -1,4 +1,4 @@
-# Slide S24 (24 of 26)
+# Slide S24 (25 of 27)
 
 Layout: "Title and body". Insert after slide S23.
 
