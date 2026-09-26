@@ -44,7 +44,9 @@ prompts in this folder. Read this once; every prompt assumes it.
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
 7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
-8. **Readback.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
+8. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
+   plain text into the verify folder and report. Never edit slides during a readback.
+9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
    a failure, and "title_as_typed" must be copied from the slide, not from the prompt.
@@ -61,6 +63,36 @@ prompts in this folder. Read this once; every prompt assumes it.
     gemini_used: no | yes: <what for>
     deviations: none | <one line each>
     screenshot: taken | not taken: <why>
+"""
+
+VERIFY_WIN = ASSETS_WIN.rsplit("\\", 1)[0] + "\\verify"
+READBACK = f"""# Readback: export the deck as plain text
+
+Run this whenever a prompt or the human asks for a readback (normally after every batch of five
+slides, and after each setup prompt if asked).
+
+1. In the deck: File → Download → Plain Text (.txt).
+2. Save the file as `deck_export.txt` in
+
+       {VERIFY_WIN}
+
+   overwriting the previous one. If the browser saves to Downloads instead, move it there.
+3. Reply with this block only:
+
+    STATUS RB
+    result: done | blocked
+    deck_url: <URL>
+    slide_url: n/a
+    position: <total slides now in the deck> of <same>
+    title_as_typed: n/a
+    body: n/a
+    notes_set: n/a
+    tracker: n/a
+    gemini_used: no
+    deviations: none | <anything unusual about the export>
+    screenshot: not taken: readback only
+
+Do not edit the export and do not edit any slide during a readback.
 """
 
 SETUP = {
@@ -212,6 +244,7 @@ def main() -> int:
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     (OUT / "README_AGENT.md").write_text(BRIEFING, encoding="utf-8")
+    (OUT / "RB_export.md").write_text(READBACK, encoding="utf-8")
     for name, text in SETUP.items():
         (OUT / name).write_text(text, encoding="utf-8")
     main_slides = [s for s in slides if not s.is_backup]

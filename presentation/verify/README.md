@@ -9,13 +9,16 @@ Protocol per slide:
    After 00a the human also saves the `deck_url` line to `presentation/SLIDES_URL.txt`.
 2. The verifier runs `python3 tools/presentation/check_status.py presentation/verify/<id>.status`,
    which diffs the block against `deck.md` (title_as_typed, body kind, position, tracker stage,
-   notes opening words, gemini_used, deviations, slide_url), and then reads the Slides file back through the Google
-   Drive connector to confirm the title and speaker notes appear verbatim and in the right order.
+   notes opening words, gemini_used, deviations, slide_url). Then the text readback: preferred, the
+   Slides file read through the Google Drive connector (needs the deck's Google account connected);
+   fallback, the agent runs `prompts/RB_export.md` (File → Download → Plain text into this folder) and
+   the verifier runs `python3 tools/presentation/check_export.py presentation/verify/deck_export.txt --through <id>`,
+   which confirms titles verbatim and in order, notes present, and table cells present.
 3. The verifier views the screenshot: visual present, no overflow, tracker highlights the stage.
 4. A deviation is fixed by re-issuing the same prompt (or a one-line correction prompt), never by
    editing `deck.md` to match what the agent produced.
 
-Screenshots are saved here as `<id>.png` (git-ignored); STATUS blocks as `<id>.status` (committed). The table below is committed.
+Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as `<id>.status` (committed); the latest plain-text export as `deck_export.txt` (committed, overwritten each readback). The table below is committed.
 
 | id | status block | text diff | screenshot | date | note |
 |---|---|---|---|---|---|
