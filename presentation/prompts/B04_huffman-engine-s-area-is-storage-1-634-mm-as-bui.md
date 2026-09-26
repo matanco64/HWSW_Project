@@ -1,6 +1,6 @@
 # Slide B04 (BACKUP)
 
-Layout: "Title and body". Insert at the end of the deck (backup section).
+Layout: "Title and body · Trade-offs" (Slide → Apply layout). Insert at the end of the deck (backup section).
 
 Title (exact text, do not shorten or rephrase):
 
@@ -19,15 +19,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | R2 PREP exit misses the build_done pulse | BUSY forever, no error; the real multi-block flow hangs by block 2–3 | build_done became a level |
 | R3 symbol 0 issues before the first selector pop | silent bzip2 corruption from a stale table selector | sel_stall holds C0 until the first selector applies |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   Accelerate   ·   **Trade-offs**
+Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
 Speaker notes (exact text, paste into the notes pane):
 
     The decode datapath is 1.3 % of the design and carries no sequential area; huff_tables plus huff_regs are 95 %. That is the whole area story, so the only real lever is where the tables live. As built they are flip-flops, which is why the 1.0 mm² soft ceiling is missed by 1.63×. Moving the two large single-port arrays into SRAM macros projects ≈ 0.75 mm² of standard cells plus two macros, but no SRAM compiler exists in our open sky130 flow, so it is a projection. Cutting the six table sets to two would save only ≈ 0.1 mm² and re-derive tables at every 50-symbol switch, pushing K1 past 1.1; rejected. The second table is what the agent pre-review found before any simulation: 13 musts in the first RTL pass, the three above being the ones a testbench would have found last, because each needs back-pressure, a second block, or a first-symbol corner. All 13 were fixed and 36/36 unit and smoke tests passed on the fixed RTL.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Trade-offs", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Trade-offs" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for B04 (expected: position end of deck, body table 8x5,
-notes_set yes, tracker Trade-offs highlighted).
+notes_set yes, tracker Trade-offs via layout).

@@ -1,6 +1,6 @@
 # Slide B06 (BACKUP)
 
-Layout: "Title and body". Insert at the end of the deck (backup section).
+Layout: "Title and body · Accelerate" (Slide → Apply layout). Insert at the end of the deck (backup section).
 
 Title (exact text, do not shorten or rephrase):
 
@@ -16,15 +16,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | Golden equivalence on the real input | 20,000 steps, 0 mismatches | 148,271 beats trace-exact | 336,184 bytes byte-exact |
 | Formal (SymbiYosys) | FSM arcs, BMC depth 40 + cover | 4 tasks: ctrl arcs, skid, aligner cap | 7 tasks; unbounded at 16 entries, bounded at 256 |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   **Accelerate**   ·   Trade-offs
+Do not touch the footer tracker: the layout already highlights "Accelerate".
 
 Speaker notes (exact text, paste into the notes pane):
 
     Every module runs its full directed plus constrained-random suite on Verilator and again on Icarus, the 4-state simulator that shows X after reset. The scoreboard oracle is the benchmark's own Python code, and each module is checked on the real benchmark input end to end: grape bit-exact over 20,000 steps, huffman trace-exact over 148,271 beats, mtf byte-exact over 336,184 bytes, and the huffman-to-mtf chain is co-simulated as well. Coverage carries a caveat: huffman and mtf toggle coverage is measured over the control-signal subset, because wide data buses whose upper bits the benchmark cannot toggle are waived with the width sweep as evidence; grape's is over all signals. Formal covers control properties only: grape's FSM arcs at BMC depth 40, huffman's four tasks, and mtf's list invariants, unbounded at 16 entries but only bounded at the production 256.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Accelerate", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Accelerate" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for B06 (expected: position end of deck, body table 6x4,
-notes_set yes, tracker Accelerate highlighted).
+notes_set yes, tracker Accelerate via layout).

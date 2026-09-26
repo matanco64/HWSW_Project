@@ -1,4 +1,4 @@
-# Setup 3 of 3: images
+# Setup 3 of 4: images
 
 The figures live on this laptop at:
 

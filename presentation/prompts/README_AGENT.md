@@ -18,10 +18,12 @@ prompts in this folder. Read this once; every prompt assumes it.
    whole slide and the notes pane if notes were set. The human saves it as `verify/<prompt id>.png`.
 6. **Look.** Theme "Simple Light", font Roboto, accent #1F4E79, no transitions, no animations,
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
-7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
+7. **Order.** Run `INDEX.md` top to bottom: the four setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
-8. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
-   .pptx (and .txt) into the verify folder and report. Never edit slides during a readback.
+8. **STATUS as text.** Write the STATUS block as plain text in your reply (not as an image), so
+   the human can copy it. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
+   .pptx (and .txt). Chrome saves to the Downloads folder; you cannot drive the native Save
+   dialog, so leave the files there and say so in the STATUS block. The human moves them. Never edit slides during a readback.
 9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
@@ -35,7 +37,7 @@ prompts in this folder. Read this once; every prompt assumes it.
     title_as_typed: "<copied from the slide>" | n/a
     body: image <file name> | table <rows>x<cols> | title-lines <n> | n/a
     notes_set: yes (<first six words>) | no | n/a
-    tracker: <stage> highlighted | none | n/a
+    tracker: <stage> via layout | none | n/a
     gemini_used: no | yes: <what for>
     deviations: none | <one line each>
     screenshot: taken | not taken: <why>

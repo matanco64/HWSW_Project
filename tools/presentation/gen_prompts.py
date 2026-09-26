@@ -42,10 +42,12 @@ prompts in this folder. Read this once; every prompt assumes it.
    whole slide and the notes pane if notes were set. The human saves it as `verify/<prompt id>.png`.
 6. **Look.** Theme "Simple Light", font Roboto, accent #1F4E79, no transitions, no animations,
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
-7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
+7. **Order.** Run `INDEX.md` top to bottom: the four setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
-8. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
-   .pptx (and .txt) into the verify folder and report. Never edit slides during a readback.
+8. **STATUS as text.** Write the STATUS block as plain text in your reply (not as an image), so
+   the human can copy it. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
+   .pptx (and .txt). Chrome saves to the Downloads folder; you cannot drive the native Save
+   dialog, so leave the files there and say so in the STATUS block. The human moves them. Never edit slides during a readback.
 9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
@@ -59,7 +61,7 @@ prompts in this folder. Read this once; every prompt assumes it.
     title_as_typed: "<copied from the slide>" | n/a
     body: image <file name> | table <rows>x<cols> | title-lines <n> | n/a
     notes_set: yes (<first six words>) | no | n/a
-    tracker: <stage> highlighted | none | n/a
+    tracker: <stage> via layout | none | n/a
     gemini_used: no | yes: <what for>
     deviations: none | <one line each>
     screenshot: taken | not taken: <why>
@@ -72,12 +74,12 @@ Run this whenever a prompt or the human asks for a readback (normally after ever
 slides, and after each setup prompt if asked).
 
 1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
-2. Save the file as `deck_export.pptx` in
+2. Then File → Download → Plain Text (.txt). Both land in the Windows Downloads folder; if
+   Chrome asks, answer Keep. Do not try to drive the Save dialog. The human moves both files to
 
        {VERIFY_WIN}
 
-   overwriting the previous one. If the browser saves to Downloads instead, move it there.
-   Then also File → Download → Plain Text (.txt) → save as `deck_export.txt` in the same folder.
+   as `deck_export.pptx` and `deck_export.txt`.
 3. Reply with this block only:
 
     STATUS RB
@@ -90,14 +92,15 @@ slides, and after each setup prompt if asked).
     notes_set: n/a
     tracker: n/a
     gemini_used: no
-    deviations: none | <anything unusual about the export>
+    deviations: the two file names as saved in Downloads | <anything unusual>
     screenshot: not taken: readback only
 
 Do not edit the export and do not edit any slide during a readback.
 """
 
+STAGE_LAYOUTS = "\n".join(f'    "Title and body · {s}"' for s in STAGES)
 SETUP = {
-    "00a_theme.md": f"""# Setup 1 of 3: theme and master
+    "00a_theme.md": f"""# Setup 1 of 4: theme and master
 
 Create a new Google Slides presentation (File → New presentation), name it
 "HWSW project — nbody & pyflate", 16:9. Copy its URL: it goes in the STATUS block, and the human
@@ -118,7 +121,7 @@ transitions. Reply with a screenshot of the theme builder and one of a blank "Ti
 slide, then the STATUS block for 00a with `deck_url` filled in, `position: 1 of 1`, and under
 `deviations` the list of layouts that remain (must be exactly the four named above).
 """,
-    "00b_footer.md": f"""# Setup 2 of 3: footer tracker
+    "00b_footer.md": f"""# Setup 2 of 4: footer tracker
 
 Still in the theme builder, on the TITLE AND BODY layout and on the SECTION HEADER layout, add
 a footer text box across the bottom (0.3 in from the bottom edge, full width minus margins),
@@ -126,8 +129,8 @@ a footer text box across the bottom (0.3 in from the bottom edge, full width min
 
     {"   ·   ".join(STAGES)}
 
-This is the project-flow tracker. On each real slide the current stage word will be made bold
-and coloured #1F4E79; on the master it stays plain grey. Do not add a logo or a date.
+This is the project-flow tracker. On the master it stays plain grey; setup prompt 00d
+makes one layout copy per stage with that stage's word highlighted. Do not add a logo or a date.
 
 Then turn slide numbers on for the deck (Insert → Slide numbers → On, apply to all).
 
@@ -137,7 +140,27 @@ slide number bottom-right. Reply with a screenshot of one blank slide, then the 
 master, and under `deviations` the title and body font names the theme currently uses
 (Slide → Edit theme → click the title box → font menu), even if they are Roboto as requested.
 """,
-    "00c_images.md": f"""# Setup 3 of 3: images
+    "00d_stage_layouts.md": f"""# Setup 4 of 4: one layout per tracker stage
+
+The footer tracker lives on the layout, so the current stage is chosen by picking a layout, never by
+editing text on a slide. Create five copies of the "Title and body" layout, one per stage.
+
+1. View → Theme builder. Right-click the "Title and body" layout → Duplicate layout. Repeat until
+   there are five copies. Rename them (Rename button at the top of the editor) exactly:
+
+{STAGE_LAYOUTS}
+
+2. In each copy, edit only the footer tracker text box: make the layout's own stage word bold and
+   coloured #1F4E79; leave the other four words plain grey #888888. Nothing else changes.
+3. Delete the original unrenamed "Title and body" layout, so the layouts are exactly: Title slide,
+   Section header, Blank, and the five above (eight in total).
+4. Close the theme builder.
+
+Done when: Slide → Apply layout lists the eight layouts, and each stage layout shows its own word
+highlighted. Reply with one screenshot of the layout picker showing all eight, then the STATUS block
+for 00d with `deviations` listing the eight layout names as they appear.
+""",
+    "00c_images.md": f"""# Setup 3 of 4: images
 
 The figures live on this laptop at:
 
@@ -213,7 +236,7 @@ then the STATUS block for {s.id} (expected: position 1, body title-lines {len(li
         body_kind = visual
     return f"""# Slide {s.id} ({section})
 
-Layout: "Title and body". Insert {where}.
+Layout: "Title and body · {stage}" (Slide → Apply layout). Insert {where}.
 
 Title (exact text, do not shorten or rephrase):
 
@@ -221,18 +244,16 @@ Title (exact text, do not shorten or rephrase):
 
 {body}
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    {footer(stage)}
+Do not touch the footer tracker: the layout already highlights "{stage}".
 
 Speaker notes (exact text, paste into the notes pane):
 
     {notes.replace(chr(10), chr(10) + '    ')}
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "{stage}", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · {stage}" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for {s.id} (expected: position {pos}, body {body_kind},
-notes_set yes, tracker {stage} highlighted).
+notes_set yes, tracker {stage} via layout).
 """
 
 

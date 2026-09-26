@@ -1,6 +1,6 @@
 # Slide B09 (BACKUP)
 
-Layout: "Title and body". Insert at the end of the deck (backup section).
+Layout: "Title and body · Trade-offs" (Slide → Apply layout). Insert at the end of the deck (backup section).
 
 Title (exact text, do not shorten or rephrase):
 
@@ -24,15 +24,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | Functional bins, all hit | 59 | 34 | 129 |
 | End-to-end estimate | ≈ 1.66× at 19.46 MHz | ≈ 6.6× as a chain; stage ≈ 28× vs the Python loop | same chain figure |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   Accelerate   ·   **Trade-offs**
+Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
 Speaker notes (exact text, paste into the notes pane):
 
     Two footnotes carry the honesty. ‡ grape's plain-Yosys figures predate the final issue-selection rewrite; the OpenLane row is the netlist the 19.46 MHz timing was measured on, and the two recipes are not comparable with each other, so the plain-Yosys row is the one comparable across the three modules. † huffman and mtf toggle coverage is measured over the control-signal subset (signals ≤ 4 bits wide), with the wide data buses waived by a documented width sweep; grape's is over all signals. All three Fmax values are post-CTS static timing, the same stage, so they are comparable on that axis; none completed routed GDS, so there is no die shot. Power uses default switching activity at each run's own constraint, so the three numbers are not comparable with each other and support no energy claim. Every module misses 50 MHz post-CTS (grape 2.6×, mtf 1.33×, huffman 1.25×); the documented follow-ups, pipelining the integrate-multiply path and the table build, are datapath changes deferred beyond the PPA stage.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Trade-offs", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Trade-offs" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for B09 (expected: position end of deck, body table 13x4,
-notes_set yes, tracker Trade-offs highlighted).
+notes_set yes, tracker Trade-offs via layout).

@@ -1,4 +1,4 @@
-# Setup 2 of 3: footer tracker
+# Setup 2 of 4: footer tracker
 
 Still in the theme builder, on the TITLE AND BODY layout and on the SECTION HEADER layout, add
 a footer text box across the bottom (0.3 in from the bottom edge, full width minus margins),
@@ -6,8 +6,8 @@ a footer text box across the bottom (0.3 in from the bottom edge, full width min
 
     Analyze   ·   Profile   ·   Optimize   ·   Accelerate   ·   Trade-offs
 
-This is the project-flow tracker. On each real slide the current stage word will be made bold
-and coloured #1F4E79; on the master it stays plain grey. Do not add a logo or a date.
+This is the project-flow tracker. On the master it stays plain grey; setup prompt 00d
+makes one layout copy per stage with that stage's word highlighted. Do not add a logo or a date.
 
 Then turn slide numbers on for the deck (Insert → Slide numbers → On, apply to all).
 

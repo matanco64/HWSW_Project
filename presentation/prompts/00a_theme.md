@@ -1,4 +1,4 @@
-# Setup 1 of 3: theme and master
+# Setup 1 of 4: theme and master
 
 Create a new Google Slides presentation (File → New presentation), name it
 "HWSW project — nbody & pyflate", 16:9. Copy its URL: it goes in the STATUS block, and the human

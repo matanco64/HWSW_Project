@@ -1,6 +1,6 @@
 # Slide S26 (27 of 27)
 
-Layout: "Title and body". Insert after slide S25.
+Layout: "Title and body · Trade-offs" (Slide → Apply layout). Insert after slide S25.
 
 Title (exact text, do not shorten or rephrase):
 
@@ -16,15 +16,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | Next: a native inverse BWT with an isolated timer and a working-set sweep | 137.7 ms is the floor for both the Rust and the hardware route |
 | Next: matched phase timing and a routed timing run | the residuals are assumptions; the clocks are post-CTS estimates |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   Accelerate   ·   **Trade-offs**
+Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
 Speaker notes (exact text, paste into the notes pane):
 
     Three things we would tell ourselves at the start. First, measure the KPI on the full-shape workload at bring-up: grape read 162 cycles per step at sign-off after every earlier gate was green, because the smoke test used two pairs; the fix landed at 124. Second, removing interpreter overhead and building a fast physical datapath are different problems: software captured almost all of nbody's gain, and the accelerator ties optimized Python. Third, the platform you report on decides the ranking: the pyflate ablation ordered its three changes differently on the development machine and on the VM. Two next experiments: a native inverse BWT with an isolated timer and a working-set sweep, because its 137.7 ms is the floor for both routes; and matched phase timing plus a routed timing run, replacing assumed residuals, post-CTS clocks and the unmeasured interface time.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Trade-offs", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Trade-offs" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for S26 (expected: position 27, body table 6x2,
-notes_set yes, tracker Trade-offs highlighted).
+notes_set yes, tracker Trade-offs via layout).

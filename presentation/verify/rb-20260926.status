@@ -1,0 +1,12 @@
+STATUS RB
+result: blocked
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: n/a
+position: 1 of 1
+title_as_typed: n/a
+body: n/a
+notes_set: n/a
+tracker: n/a
+gemini_used: no
+deviations: Save As dialog is a native Chrome-owned window; desktop control is read-only for Chrome so it cannot be driven; exports exist as C:\Users\Kogan\Downloads\deck_export.pptx and deck_export.txt awaiting manual save/move to verify
+screenshot: not taken: readback only

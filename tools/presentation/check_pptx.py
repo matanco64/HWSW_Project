@@ -58,6 +58,7 @@ class Slide:
         self.notes = ""
         self.fonts: set[str] = set()
         self.layout = ""
+        self.layout_stage = ""   # stage word highlighted (bold or accent) in the layout's tracker box
 
 
 def load(path: Path) -> list[Slide]:
@@ -78,6 +79,17 @@ def load(path: Path) -> list[Slide]:
                 lay = ET.fromstring(z.read("ppt/" + tgt.lstrip("/").removeprefix("ppt/").replace("../", "")))
                 cs = lay.find(f"{{{NS['p']}}}cSld")
                 s.layout = cs.get("name", "") if cs is not None else ""
+                for para in lay.iter(f"{{{NS['a']}}}p"):
+                    ptxt = "".join(x.text or "" for x in para.iter(f"{{{NS['a']}}}t"))
+                    if all(w in ptxt for w in TRACKER):
+                        for r in para.iter(f"{{{NS['a']}}}r"):
+                            rpr = r.find(f"{{{NS['a']}}}rPr")
+                            rt = "".join(x.text or "" for x in r.iter(f"{{{NS['a']}}}t")).strip(" ·")
+                            clr = rpr.find(f".//{{{NS['a']}}}srgbClr") if rpr is not None else None
+                            hot = rpr is not None and (rpr.get("b") == "1" or (clr is not None and clr.get("val", "").upper() == "1F4E79"))
+                            if hot and rt in TRACKER:
+                                s.layout_stage = rt
+                        s.texts.append("[layout] " + ptxt)
             if typ == "notesSlide":
                 notes = ET.fromstring(z.read("ppt/" + tgt.replace("../", "")))
                 bodies = []
@@ -136,10 +148,14 @@ def check(found: Slide, spec) -> list[str]:
             errs.append(f"notes do not start with the spec's words: {found.notes[:50]!r}")
     body = " ".join(found.texts)
     has_tracker = all(w.lower() in body.lower() for w in TRACKER)
+    stage = spec.fields.get("stage", "")
     if visual == "title" and has_tracker:
         errs.append("tracker present on the title slide")
-    if visual != "title" and not has_tracker:
-        errs.append("footer tracker text missing")
+    if visual != "title":
+        if not has_tracker:
+            errs.append("footer tracker text missing (slide and layout)")
+        elif stage and not (stage in found.layout or found.layout_stage == stage):
+            errs.append(f"layout {found.layout!r} highlights {found.layout_stage or 'nothing'!r}, spec stage is {stage!r}")
     odd = {f for f in found.fonts if not f.startswith("+") and "roboto" not in f.lower()}
     if odd:
         errs.append("non-Roboto fonts on slide: " + ", ".join(sorted(odd)))
@@ -157,7 +173,7 @@ def main(argv: list[str]) -> int:
         spec = spec[: ids.index(argv[argv.index("--through") + 1]) + 1]
     if "--dump" in argv:
         for n, s in enumerate(deck, 1):
-            print(f"[{n}] layout={s.layout!r} title={s.title!r} pics={s.pictures} tables={len(s.tables)} fonts={sorted(s.fonts)}")
+            print(f"[{n}] layout={s.layout!r} stage={s.layout_stage!r} title={s.title!r} pics={s.pictures} tables={len(s.tables)} fonts={sorted(s.fonts)}")
             print(f"     texts={[t[:40] for t in s.texts]}\n     notes={s.notes[:80]!r}")
         return 0
     bad = 0

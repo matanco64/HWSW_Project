@@ -4,12 +4,12 @@ Run this whenever a prompt or the human asks for a readback (normally after ever
 slides, and after each setup prompt if asked).
 
 1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
-2. Save the file as `deck_export.pptx` in
+2. Then File → Download → Plain Text (.txt). Both land in the Windows Downloads folder; if
+   Chrome asks, answer Keep. Do not try to drive the Save dialog. The human moves both files to
 
        \\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\verify
 
-   overwriting the previous one. If the browser saves to Downloads instead, move it there.
-   Then also File → Download → Plain Text (.txt) → save as `deck_export.txt` in the same folder.
+   as `deck_export.pptx` and `deck_export.txt`.
 3. Reply with this block only:
 
     STATUS RB
@@ -22,7 +22,7 @@ slides, and after each setup prompt if asked).
     notes_set: n/a
     tracker: n/a
     gemini_used: no
-    deviations: none | <anything unusual about the export>
+    deviations: the two file names as saved in Downloads | <anything unusual>
     screenshot: not taken: readback only
 
 Do not edit the export and do not edit any slide during a readback.

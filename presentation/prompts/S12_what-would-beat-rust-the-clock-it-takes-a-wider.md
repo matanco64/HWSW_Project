@@ -1,6 +1,6 @@
 # Slide S12 (13 of 27)
 
-Layout: "Title and body". Insert after slide S11.
+Layout: "Title and body · Trade-offs" (Slide → Apply layout). Insert after slide S11.
 
 Title (exact text, do not shorten or rephrase):
 
@@ -16,15 +16,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | Rust host + same hardware at 19.46 MHz | 127.4 + 0.48 ms = 127.9 ms | 13.4x slower | residual scales to 5% of the Rust run |
 | N = 100 with 24 add + 24 mul + 2 sqrt + 2 rcp | 0.029 µs/pair at 19.46 MHz | 1.6x faster | clock survives 8x wider issue; SRAM state |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   Accelerate   ·   **Trade-offs**
+Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
 Speaker notes (exact text, paste into the notes pane):
 
     Everything on this slide is a projection from the schedule model and the report's numbers; derivations.md holds the arithmetic. Clock: the datapath alone matches Rust at about 260 MHz, 13.4 times what post-CTS timing supports; at the 50 MHz target the system would still be 6.42x slower. Width: a fourth multiplier saves 6 cycles per step in the model, 123 to 117, because at N = 5 one pair's 80-cycle chain bounds the step. Host: swapping Python for Rust around the same device trims the residual from 11.6 ms to about 0.48 ms, an 8% change. Only more bodies change the verdict: at N = 100 the model needs 24 adders and 24 multipliers to run 1.6x faster than native, assuming the clock survives the wider issue logic, which our own 1-wide versus 3-wide data says it does not.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Trade-offs", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Trade-offs" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for S12 (expected: position 13, body table 6x4,
-notes_set yes, tracker Trade-offs highlighted).
+notes_set yes, tracker Trade-offs via layout).

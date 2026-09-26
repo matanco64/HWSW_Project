@@ -73,8 +73,13 @@ def check(path: Path, slides) -> list[str]:
         errs.append("missing fields: " + ", ".join(missing))
     if not f.get("result", "").startswith("done"):
         errs.append(f"result is {f.get('result')!r}")
+    setup = pid.startswith("00") or pid.startswith("RB")
     if f.get("result") == "done-with-deviation" or norm(f.get("deviations", "none")) != "none":
-        errs.append("deviations reported: " + f.get("deviations", "").replace("\n", " | "))
+        line = "deviations reported: " + f.get("deviations", "").replace("\n", " | ")
+        if setup:
+            print(f"     review {pid}: {line}")   # setup prompts report findings here by design
+        else:
+            errs.append(line)
     if not f.get("deck_url", "").startswith("https://docs.google.com/presentation/"):
         errs.append("deck_url is not a Google Slides URL")
     if not f.get("screenshot", "").startswith("taken"):

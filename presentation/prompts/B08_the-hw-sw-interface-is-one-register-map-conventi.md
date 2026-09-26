@@ -1,6 +1,6 @@
 # Slide B08 (BACKUP)
 
-Layout: "Title and body". Insert at the end of the deck (backup section).
+Layout: "Title and body · Accelerate" (Slide → Apply layout). Insert at the end of the deck (backup section).
 
 Title (exact text, do not shorten or rephrase):
 
@@ -17,15 +17,13 @@ Body: insert this table exactly (Insert → Table), header row bold with #1F4E79
 | 0x104 | START_BIT | RW | first code bit inside the s_bits buffer |
 | 0x400 + 4·w | LEN[w] | RW | length window, 288 words of six 5-bit fields |
 
-Footer tracker on this slide: make the current stage bold and #1F4E79, leave the others grey:
-
-    Analyze   ·   Profile   ·   Optimize   ·   **Accelerate**   ·   Trade-offs
+Do not touch the footer tracker: the layout already highlights "Accelerate".
 
 Speaker notes (exact text, paste into the notes pane):
 
     Every module owns a 4 KB AXI4-Lite window with the same header (ID, VERSION, CTRL, STATUS, IRQ_EN, counters at 0x040, module registers from 0x100), so three Python drivers share one base class and one testbench register agent (ADR-0005). Bulk data never goes through registers: huffman takes the compressed bytes and selectors as AXI4-Stream, hands symbols to mtf_cam as 32-bit beats, and mtf_cam's 64-bit L-vector stream goes to platform DMA (ADR-0001). Each driver's offsets and fields are generated from its MAS §4 and check_regmap.py reports 0 diffs for all three. How far each driver was exercised, honestly: grape's is co-simulated against the RTL through the AXI-Lite agent, reading back all 35 state components bit-identical with CYCLES = 250; mtf's passes 16/16 in RTL co-simulation; huffman's is checked against the signed-off cycle model, not the RTL. Per block the huffman configuration is ≈ 157 AXI-Lite transactions, ≈ 628 cycles, with the streams overlapped by DMA; the DMA sink is assumed to sustain W = 8 bytes per cycle, ≈ 300 MB/s at 37.5 MHz. What remains unmeasured is T_if: configuration, DMA setup and the copies of the input and the 336,184 L-vector bytes. No software calls the hardware yet.
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
-clipping, the tracker highlights "Accelerate", and the notes are saved. Reply with a screenshot of
+clipping, the slide uses the "Title and body · Accelerate" layout, and the notes are saved. Reply with a screenshot of
 the slide in edit view, then the STATUS block for B08 (expected: position end of deck, body table 7x4,
-notes_set yes, tracker Accelerate highlighted).
+notes_set yes, tracker Accelerate via layout).
