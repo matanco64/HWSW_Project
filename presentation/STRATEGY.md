@@ -29,6 +29,9 @@ differentiator, not decoration.
 | SW slides | Drafted in full from the reports, owner `M`, status `DRAFT`, every number cited to `file:line`. Matan confirms or replaces; he never starts from blank. |
 | Language | English slides. |
 | Location | `presentation/` on `main`, committed after the submission. |
+| Build cadence | Setup prompts one at a time, each verified; slides in batches of five with one verification pass per batch. |
+| Screenshots | The desktop agent's screenshot for each prompt is saved by Yuval to `presentation/verify/<id>.png` (Windows path `\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\verify`); the verifier logs the verdict in `verify/README.md`. |
+| Notes pass | Build first; Yuval refines the hardware speaker notes afterwards in `deck_parts/hw_*.md`, then the affected prompts are re-issued. |
 
 ## What we will NOT talk about in the main flow
 
