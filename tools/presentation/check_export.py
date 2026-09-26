@@ -32,11 +32,14 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().lower()
 
 
-def cells(table: str) -> list[str]:
+def cells(table: str, values_only: bool = False) -> list[str]:
     out = []
-    for row in table.splitlines():
-        if row.startswith("|") and not set(row) <= set("|-: "):
-            out += [c.strip() for c in row.strip("|").split("|") if c.strip() and c.strip() != "—"]
+    rows = [r for r in table.splitlines() if r.startswith("|") and not set(r) <= set("|-: ")]
+    for row in rows[1:] if values_only else rows:
+        cs = [c.strip() for c in row.strip("|").split("|")]
+        if values_only:
+            cs = cs[1:2]
+        out += [c for c in cs if c and c != "—"]
     return out
 
 
@@ -71,7 +74,7 @@ def main(argv: list[str]) -> int:
             if head not in seg:
                 errs.append(f"{sid}: notes opening not found after the title ({head[:30]!r}...)")
         if s.fields.get("visual") in ("table", "title") and s.table:
-            lost = [c for c in cells(s.table) if norm(c) not in seg]
+            lost = [c for c in cells(s.table, values_only=(s.fields.get("visual") == "title")) if norm(c) not in seg]
             if lost:
                 errs.append(f"{sid}: table cells missing: " + "; ".join(lost[:6]) + (" ..." if len(lost) > 6 else ""))
     print(f"{len(found)} of {len(slides)} slide titles found in the export")

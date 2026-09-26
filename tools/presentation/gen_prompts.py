@@ -45,7 +45,7 @@ prompts in this folder. Read this once; every prompt assumes it.
 7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
 8. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
-   plain text into the verify folder and report. Never edit slides during a readback.
+   .pptx (and .txt) into the verify folder and report. Never edit slides during a readback.
 9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
@@ -71,12 +71,13 @@ READBACK = f"""# Readback: export the deck as plain text
 Run this whenever a prompt or the human asks for a readback (normally after every batch of five
 slides, and after each setup prompt if asked).
 
-1. In the deck: File → Download → Plain Text (.txt).
-2. Save the file as `deck_export.txt` in
+1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
+2. Save the file as `deck_export.pptx` in
 
        {VERIFY_WIN}
 
    overwriting the previous one. If the browser saves to Downloads instead, move it there.
+   Then also File → Download → Plain Text (.txt) → save as `deck_export.txt` in the same folder.
 3. Reply with this block only:
 
     STATUS RB

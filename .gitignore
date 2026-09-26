@@ -73,3 +73,4 @@ presentation/assets/chain_cosim.log
 presentation/verify/*.png
 presentation/verify/*.jpg
 presentation/verify/*:Zone.Identifier
+presentation/verify/deck_export.*

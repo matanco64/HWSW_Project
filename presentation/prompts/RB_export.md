@@ -3,12 +3,13 @@
 Run this whenever a prompt or the human asks for a readback (normally after every batch of five
 slides, and after each setup prompt if asked).
 
-1. In the deck: File → Download → Plain Text (.txt).
-2. Save the file as `deck_export.txt` in
+1. In the deck: File → Download → Microsoft PowerPoint (.pptx).
+2. Save the file as `deck_export.pptx` in
 
        \\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\verify
 
    overwriting the previous one. If the browser saves to Downloads instead, move it there.
+   Then also File → Download → Plain Text (.txt) → save as `deck_export.txt` in the same folder.
 3. Reply with this block only:
 
     STATUS RB

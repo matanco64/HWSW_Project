@@ -11,14 +11,16 @@ Protocol per slide:
    which diffs the block against `deck.md` (title_as_typed, body kind, position, tracker stage,
    notes opening words, gemini_used, deviations, slide_url). Then the text readback: preferred, the
    Slides file read through the Google Drive connector (needs the deck's Google account connected);
-   fallback, the agent runs `prompts/RB_export.md` (File → Download → Plain text into this folder) and
-   the verifier runs `python3 tools/presentation/check_export.py presentation/verify/deck_export.txt --through <id>`,
-   which confirms titles verbatim and in order, notes present, and table cells present.
+   the deck's Google account cannot be connected (Technion Workspace policy), so the readback is the
+   agent running `prompts/RB_export.md` (File → Download → .pptx and .txt into this folder) and the
+   verifier running `python3 tools/presentation/check_pptx.py presentation/verify/deck_export.pptx --through <id>`,
+   which checks per slide: title verbatim, picture present or table cells present, notes opening words,
+   footer tracker, and fonts. `check_export.py` does the same on the .txt as a cross-check.
 3. The verifier views the screenshot: visual present, no overflow, tracker highlights the stage.
 4. A deviation is fixed by re-issuing the same prompt (or a one-line correction prompt), never by
    editing `deck.md` to match what the agent produced.
 
-Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as `<id>.status` (committed); the latest plain-text export as `deck_export.txt` (committed, overwritten each readback). The table below is committed.
+Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as `<id>.status` (committed); the latest exports as `deck_export.pptx` / `deck_export.txt` (git-ignored, overwritten each readback). The table below is committed.
 
 | id | status block | text diff | screenshot | date | note |
 |---|---|---|---|---|---|

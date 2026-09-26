@@ -21,7 +21,7 @@ prompts in this folder. Read this once; every prompt assumes it.
 7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
 8. **Export on request.** When asked for a readback, follow `RB_export.md`: download the deck as
-   plain text into the verify folder and report. Never edit slides during a readback.
+   .pptx (and .txt) into the verify folder and report. Never edit slides during a readback.
 9. **STATUS block.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
    shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
    and against the deck read back through the Drive API; a missing or paraphrased field counts as
