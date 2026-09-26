@@ -1,7 +1,8 @@
 # Setup 1 of 3: theme and master
 
-Open the Google Slides file named in `presentation/SLIDES_URL.txt` (create it if missing:
-File → New presentation, name "HWSW project — nbody & pyflate", 16:9).
+Create a new Google Slides presentation (File → New presentation), name it
+"HWSW project — nbody & pyflate", 16:9. Copy its URL: it goes in the STATUS block, and the human
+will save it to `presentation/SLIDES_URL.txt`. Every later prompt uses that same file.
 
 1. Theme: keep the default "Simple Light". Set the theme font pair to Roboto (titles) and
    Roboto (body). Accent colour: #1F4E79 for title text and table header fill. No other colours.
@@ -14,4 +15,5 @@ File → New presentation, name "HWSW project — nbody & pyflate", 16:9).
 
 Done when: the master has the four layouts, Roboto fonts, the accent colour on titles, and no
 transitions. Reply with a screenshot of the theme builder and one of a blank "Title and body"
-slide.
+slide, then the STATUS block for 00a with `deck_url` filled in, `position: 1 of 1`, and under
+`deviations` the list of layouts that remain (must be exactly the four named above).

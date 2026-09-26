@@ -24,4 +24,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "Analyze", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for S01 (expected: position 2, body table 4x3,
+notes_set yes, tracker Analyze highlighted).

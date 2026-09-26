@@ -19,4 +19,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "Analyze", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for S14 (expected: position 15, body image huffman_tree.png,
+notes_set yes, tracker Analyze highlighted).

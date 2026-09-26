@@ -20,3 +20,20 @@ prompts in this folder. Read this once; every prompt assumes it.
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
 7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
+8. **Readback.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
+   shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
+   and against the deck read back through the Drive API; a missing or paraphrased field counts as
+   a failure, and "title_as_typed" must be copied from the slide, not from the prompt.
+
+    STATUS <prompt id>
+    result: done | done-with-deviation | blocked
+    deck_url: <full URL of the presentation>
+    slide_url: <URL with #slide=id.… while this slide is selected> | n/a
+    position: <index> of <total slides now in the deck> | n/a
+    title_as_typed: "<copied from the slide>" | n/a
+    body: image <file name> | table <rows>x<cols> | title-lines <n> | n/a
+    notes_set: yes (<first six words>) | no | n/a
+    tracker: <stage> highlighted | none | n/a
+    gemini_used: no | yes: <what for>
+    deviations: none | <one line each>
+    screenshot: taken | not taken: <why>

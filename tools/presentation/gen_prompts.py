@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PRES = ROOT / "presentation"
 OUT = PRES / "prompts"
 STAGES = ["Analyze", "Profile", "Optimize", "Accelerate", "Trade-offs"]
+ASSET_NAMES = sorted(p.name for p in (PRES / "assets").glob("*") if p.suffix in (".png", ".gif"))
 ASSETS_WIN = r"\\wsl.localhost\Ubuntu\home\yuvalk\HWSW\HWSW_Proj\presentation\assets"
 
 BRIEFING = f"""# Standing briefing for the slide-building agent
@@ -43,13 +44,31 @@ prompts in this folder. Read this once; every prompt assumes it.
    no logos, no clip art. Footer tracker on every content slide as the setup prompt defines it.
 7. **Order.** Run `INDEX.md` top to bottom: the three setup prompts first, then slides in the
    listed order, five at a time, pausing for verification after each batch when asked.
+8. **Readback.** Every prompt ends with a STATUS block. Fill it in completely, in this exact
+   shape, as the last thing in your reply. A verifier on the other side diffs it against the spec
+   and against the deck read back through the Drive API; a missing or paraphrased field counts as
+   a failure, and "title_as_typed" must be copied from the slide, not from the prompt.
+
+    STATUS <prompt id>
+    result: done | done-with-deviation | blocked
+    deck_url: <full URL of the presentation>
+    slide_url: <URL with #slide=id.… while this slide is selected> | n/a
+    position: <index> of <total slides now in the deck> | n/a
+    title_as_typed: "<copied from the slide>" | n/a
+    body: image <file name> | table <rows>x<cols> | title-lines <n> | n/a
+    notes_set: yes (<first six words>) | no | n/a
+    tracker: <stage> highlighted | none | n/a
+    gemini_used: no | yes: <what for>
+    deviations: none | <one line each>
+    screenshot: taken | not taken: <why>
 """
 
 SETUP = {
     "00a_theme.md": f"""# Setup 1 of 3: theme and master
 
-Open the Google Slides file named in `presentation/SLIDES_URL.txt` (create it if missing:
-File → New presentation, name "HWSW project — nbody & pyflate", 16:9).
+Create a new Google Slides presentation (File → New presentation), name it
+"HWSW project — nbody & pyflate", 16:9. Copy its URL: it goes in the STATUS block, and the human
+will save it to `presentation/SLIDES_URL.txt`. Every later prompt uses that same file.
 
 1. Theme: keep the default "Simple Light". Set the theme font pair to Roboto (titles) and
    Roboto (body). Accent colour: #1F4E79 for title text and table header fill. No other colours.
@@ -62,7 +81,8 @@ File → New presentation, name "HWSW project — nbody & pyflate", 16:9).
 
 Done when: the master has the four layouts, Roboto fonts, the accent colour on titles, and no
 transitions. Reply with a screenshot of the theme builder and one of a blank "Title and body"
-slide.
+slide, then the STATUS block for 00a with `deck_url` filled in, `position: 1 of 1`, and under
+`deviations` the list of layouts that remain (must be exactly the four named above).
 """,
     "00b_footer.md": f"""# Setup 2 of 3: footer tracker
 
@@ -76,7 +96,9 @@ This is the project-flow tracker. On each real slide the current stage word will
 and coloured #1F4E79; on the master it stays plain grey. Do not add a logo or a date.
 
 Done when: every new "Title and body" slide shows the grey tracker line at the bottom and the
-slide number bottom-right. Reply with a screenshot of one blank slide.
+slide number bottom-right. Reply with a screenshot of one blank slide, then the STATUS block for
+00b with `tracker: none highlighted` and `title_as_typed` set to the tracker text as it reads on
+the master.
 """,
     "00c_images.md": f"""# Setup 3 of 3: images
 
@@ -91,7 +113,8 @@ Do nothing with them yet except confirm the folder opens and lists PNG/GIF files
 prompt names the exact file to insert via Insert → Image → Upload from computer.
 
 Done when: you can see the folder listing. Reply with a screenshot of the folder in the file
-picker.
+picker, then the STATUS block for 00c with `deviations` listing the number of files you see and
+any of these names that are missing: {", ".join(sorted(ASSET_NAMES))}.
 """,
 }
 
@@ -129,7 +152,8 @@ No footer tracker on this slide. No images. Speaker notes (exact text):
 
     {s.notes}
 
-Done when: title and the five lines match exactly and nothing overflows. Reply with a screenshot.
+Done when: title and the five lines match exactly and nothing overflows. Reply with a screenshot,
+then the STATUS block for {s.id} (expected: position 1, body title-lines {len(lines)}, tracker none).
 """
     if visual.startswith("assets/"):
         body = (f"Body: Insert → Image → Upload from computer → `{ASSETS_WIN}\\{visual.split('/', 1)[1]}`.\n"
@@ -141,6 +165,14 @@ Done when: title and the five lines match exactly and nothing overflows. Reply w
         body = f"Body: {visual}"
     notes = s.notes or "(none)"
     section = "BACKUP" if s.is_backup else f"{idx} of {total}"
+    pos = "end of deck" if s.is_backup else str(idx)
+    if visual.startswith("assets/"):
+        body_kind = f"image {visual.split('/', 1)[1]}"
+    elif visual == "table" and s.table:
+        rows = [r for r in s.table.splitlines() if r.startswith("|") and not set(r) <= set("|-: ")]
+        body_kind = f"table {len(rows)}x{rows[0].count('|') - 1}" if rows else "table"
+    else:
+        body_kind = visual
     return f"""# Slide {s.id} ({section})
 
 Layout: "Title and body". Insert {where}.
@@ -161,7 +193,8 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "{stage}", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for {s.id} (expected: position {pos}, body {body_kind},
+notes_set yes, tracker {stage} highlighted).
 """
 
 

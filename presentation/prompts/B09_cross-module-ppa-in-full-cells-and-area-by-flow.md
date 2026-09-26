@@ -34,4 +34,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "Trade-offs", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for B09 (expected: position end of deck, body table 13x4,
+notes_set yes, tracker Trade-offs highlighted).

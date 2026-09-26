@@ -19,4 +19,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "Accelerate", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for S21 (expected: position 22, body image chain_cosim.gif,
+notes_set yes, tracker Accelerate highlighted).

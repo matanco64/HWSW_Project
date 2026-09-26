@@ -19,4 +19,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the tracker highlights "Profile", and the notes are saved. Reply with a screenshot of
-the slide in edit view.
+the slide in edit view, then the STATUS block for S15 (expected: position 16, body image print_pyflate_stock.png,
+notes_set yes, tracker Profile highlighted).
