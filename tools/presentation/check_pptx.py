@@ -33,6 +33,8 @@ NS = {
     "rel": "http://schemas.openxmlformats.org/package/2006/relationships",
 }
 TRACKER = ["Analyze", "Profile", "Optimize", "Accelerate", "Trade-offs"]
+SLIDE_W, SLIDE_H = 10.0, 5.63
+MIN_PIC_FRACTION = 0.75   # a figure narrower than this share of the slide width is undersized
 
 
 def norm(s: str) -> str:
@@ -55,6 +57,7 @@ class Slide:
         self.texts: list[str] = []
         self.tables: list[list[str]] = []
         self.pictures = 0
+        self.pic_sizes: list[tuple[float, float, float, float]] = []   # (x, y, w, h) in inches
         self.notes = ""
         self.fonts: set[str] = set()
         self.layout = ""
@@ -64,6 +67,9 @@ class Slide:
 def load(path: Path) -> list[Slide]:
     z = zipfile.ZipFile(path)
     pres = ET.fromstring(z.read("ppt/presentation.xml"))
+    sz = pres.find(f"{{{NS['p']}}}sldSz")
+    global SLIDE_W, SLIDE_H
+    SLIDE_W, SLIDE_H = (round(int(sz.get("cx")) / 914400, 2), round(int(sz.get("cy")) / 914400, 2)) if sz is not None else (10.0, 5.63)
     rels = ET.fromstring(z.read("ppt/_rels/presentation.xml.rels"))
     rid2target = {r.get("Id"): r.get("Target") for r in rels}
     order = [rid2target[s.get(f"{{{NS['r']}}}id")] for s in pres.iter(f"{{{NS['p']}}}sldId")]
@@ -110,6 +116,12 @@ def load(path: Path) -> list[Slide]:
                 s.fonts.add(latin.get("typeface"))
         for tbl in root.iter(f"{{{NS['a']}}}tbl"):
             s.tables.append([text_of(tc) for tc in tbl.iter(f"{{{NS['a']}}}tc")])
+        for pic in root.iter(f"{{{NS['p']}}}pic"):
+            off = pic.find(f".//{{{NS['a']}}}off")
+            ext = pic.find(f".//{{{NS['a']}}}ext")
+            if off is not None and ext is not None:
+                emu = 914400.0
+                s.pic_sizes.append(tuple(round(int(v) / emu, 2) for v in (off.get("x"), off.get("y"), ext.get("cx"), ext.get("cy"))))
         s.pictures = sum(1 for _ in root.iter(f"{{{NS['p']}}}pic"))
         out.append(s)
     return out
@@ -134,6 +146,10 @@ def check(found: Slide, spec) -> list[str]:
     visual = spec.fields.get("visual", "")
     if visual.startswith("assets/") and found.pictures == 0:
         errs.append(f"no picture on the slide; spec expects {visual}")
+    elif visual.startswith("assets/") and found.pic_sizes:
+        x, y, w, h = max(found.pic_sizes, key=lambda p: p[2] * p[3])
+        if w < MIN_PIC_FRACTION * SLIDE_W and h < 0.55 * SLIDE_H:
+            errs.append(f"figure undersized: {w} x {h} in on a {SLIDE_W} x {SLIDE_H} in slide (at x={x}, y={y})")
     if visual in ("table", "title") and spec.table:
         hay = norm(" ".join(c for t in found.tables for c in t) + " " + " ".join(found.texts))
         lost = [c for c in spec_cells(spec.table, values_only=(visual == "title")) if norm(c) not in hay]
@@ -173,7 +189,7 @@ def main(argv: list[str]) -> int:
         spec = spec[: ids.index(argv[argv.index("--through") + 1]) + 1]
     if "--dump" in argv:
         for n, s in enumerate(deck, 1):
-            print(f"[{n}] layout={s.layout!r} stage={s.layout_stage!r} title={s.title!r} pics={s.pictures} tables={len(s.tables)} fonts={sorted(s.fonts)}")
+            print(f"[{n}] layout={s.layout!r} stage={s.layout_stage!r} title={s.title!r} pics={s.pictures} {s.pic_sizes} tables={len(s.tables)} fonts={sorted(s.fonts)}")
             print(f"     texts={[t[:40] for t in s.texts]}\n     notes={s.notes[:80]!r}")
         return 0
     bad = 0

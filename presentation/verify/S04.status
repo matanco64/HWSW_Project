@@ -1,0 +1,12 @@
+STATUS S04
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.h53cb298650771a08_2_74#slide=id.h53cb298650771a08_2_74
+position: 5 of 5
+title_as_typed: "Specializing advance() to the fixed pair list removes the list traffic: 231.20 → 143.13 ms, 1.62x, bit-identical state"
+body: image print_nbody_opt.png
+notes_set: yes (At import time we emit an)
+tracker: Optimize via layout
+gemini_used: no
+deviations: title wraps to three lines at 32 pt (title box auto-grew); image inserted via staged file + simulated drop, sized 5.34 x 3.00 in at y 2.0 to clear the three-line title and the tracker; empty body placeholder deleted
+screenshot: taken
