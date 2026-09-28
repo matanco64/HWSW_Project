@@ -5,6 +5,7 @@ Give the agent `README_AGENT.md` first, then run in this order, one prompt per m
 - [ ] `00a_theme.md`
 - [ ] `00b_footer.md`
 - [ ] `00d_stage_layouts.md`
+- [ ] `00e_title_size.md`
 - [ ] `00c_images.md`
 - [ ] `S00_two-python-benchmarks-measured-end-to-end-profil.md` (M+Y, 0 s)
 - [ ] `S01_two-pure-python-pyperformance-workloads-one-ques.md` (M, 90 s)

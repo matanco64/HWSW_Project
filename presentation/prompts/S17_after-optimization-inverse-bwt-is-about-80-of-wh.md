@@ -6,8 +6,10 @@ Title (exact text, do not shorten or rephrase):
 
     After optimization inverse BWT is about 80% of what remains; a Rust kernel for symbol decode reaches 170.01 ms, 6.61x end to end
 
-Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\print_pyflate_opt.png`.
-Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\print_pyflate_opt_slide.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
 
 Do not touch the footer tracker: the layout already highlights "Optimize".
 
@@ -17,5 +19,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the slide uses the "Title and body · Optimize" layout, and the notes are saved. Reply with a screenshot of
-the slide in edit view, then the STATUS block for S17 (expected: position 18, body image print_pyflate_opt.png,
+the slide in edit view, then the STATUS block for S17 (expected: position 18, body image print_pyflate_opt_slide.png,
 notes_set yes, tracker Optimize via layout).

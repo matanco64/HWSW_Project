@@ -6,8 +6,10 @@ Title (exact text, do not shorten or rephrase):
 
     97.7% of samples sit in advance(); list indexing and float boxing dominate the C frames
 
-Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\print_nbody_stock.png`.
-Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\print_nbody_stock_slide.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
 
 Do not touch the footer tracker: the layout already highlights "Profile".
 
@@ -17,5 +19,5 @@ Speaker notes (exact text, paste into the notes pane):
 
 Done when: the title matches exactly, the body content is fully visible without overflow or
 clipping, the slide uses the "Title and body · Profile" layout, and the notes are saved. Reply with a screenshot of
-the slide in edit view, then the STATUS block for S03 (expected: position 4, body image print_nbody_stock.png,
+the slide in edit view, then the STATUS block for S03 (expected: position 4, body image print_nbody_stock_slide.png,
 notes_set yes, tracker Profile via layout).

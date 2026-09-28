@@ -6,8 +6,10 @@ Title (exact text, do not shorten or rephrase):
 
     mtf_cam in full: K3 1.0686 measured against a 1.063 model, 0.187 mm² with 5.3× headroom, 37.5 MHz from a run that met 27 ns, and list invariants proven unbounded at 16 entries
 
-Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\mtf_block_diagram.png`.
-Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\mtf_block_diagram.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".
 

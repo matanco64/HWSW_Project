@@ -6,8 +6,10 @@ Title (exact text, do not shorten or rephrase):
 
     grape's step is a fixed 290-operation graph scheduled onto 3 adders and 3 multipliers
 
-Body: Insert → Image → Upload from computer → `C:\Users\Kogan\HWSW_presentation\assets\grape_uarch.png`.
-Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\grape_uarch.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
 
 Do not touch the footer tracker: the layout already highlights "Accelerate".
 

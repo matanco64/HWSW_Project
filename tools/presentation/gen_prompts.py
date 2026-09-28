@@ -160,6 +160,25 @@ Done when: Slide → Apply layout lists the eight layouts, and each stage layout
 highlighted. Reply with one screenshot of the layout picker showing all eight, then the STATUS block
 for 00d with `deviations` listing the eight layout names as they appear.
 """,
+    "00e_title_size.md": f"""# Setup correction 00e: two-line titles, full-width figures
+
+Batch 1 showed that claim titles wrap to three lines at 32 pt on the 10 x 5.63 in page and leave
+too little room for the figure. Fix it once, on the layouts, so every slide inherits it.
+
+1. View → Theme builder. On EACH of the five "Title and body · <stage>" layouts and on the
+   Section header layout: set the title placeholder to 26 pt, left-aligned, dark grey #222222,
+   box from y = 0.25 in to y = 1.35 in (two lines of 26 pt fit; a third must not be needed).
+   Turn OFF autofit/shrink on the title box (Format options → Text fitting → Do not autofit).
+2. On the same layouts: the body placeholder spans x = 0.4 in to 9.6 in and y = 1.5 in to 5.0 in.
+   The footer tracker stays where it is (bottom 0.3 in); the slide number stays bottom-right.
+3. Close the theme builder. Check slides 2 to 5: their titles must now be at most two lines. If any
+   title still wraps to three lines, report it under deviations with the slide number; do not
+   edit the title text.
+
+Done when: the six layouts have the 26 pt two-line title box and the 9.2 x 3.5 in body box, and
+slides 2 to 5 show two-line titles. Reply with a screenshot of slide 5 and the STATUS block for 00e,
+listing under deviations any slide whose title still needs three lines.
+""",
     "00c_images.md": f"""# Setup 3 of 4: images
 
 The figures live on this laptop at:
@@ -214,8 +233,10 @@ Done when: title and the five lines match exactly and nothing overflows. Reply w
 then the STATUS block for {s.id} (expected: position 1, body title-lines {len(lines)}, tracker none).
 """
     if visual.startswith("assets/"):
-        body = (f"Body: Insert → Image → Upload from computer → `{ASSETS_WIN}\\{visual.split('/', 1)[1]}`.\n"
-                "Fit it inside the body box, keep aspect ratio, centre it. No caption, no border.")
+        body = (f"Body: insert the image `{ASSETS_WIN}\\{visual.split('/', 1)[1]}` with your direct upload tool.\n"
+                "Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the\n"
+                "aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.\n"
+                "It must not overlap the title or the footer tracker. No caption, no border, no crop.")
     elif visual == "table" and s.table:
         body = ("Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and "
                 "white text, body rows 16 pt, columns auto-fit, no other formatting:\n\n" + s.table)
@@ -254,14 +275,44 @@ notes_set yes, tracker {stage} via layout).
 """
 
 
+def render_fix(s: Slide, pos: int) -> str:
+    visual = s.fields.get("visual", "")
+    fname = visual.split("/", 1)[1] if visual.startswith("assets/") else ""
+    return f"""# Correction for slide {s.id} (deck slide {pos})
+
+Go to slide {pos}. Its title and speaker notes are correct; do not touch them. The figure must be
+replaced and resized after the 00e layout change.
+
+1. Delete the existing image on the slide.
+2. Insert `{ASSETS_WIN}\\{fname}` with your direct upload tool (it is a NEW file, re-upload it).
+3. Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
+   aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+   It must not overlap the title or the footer tracker. No crop, no border.
+
+Done when: the new figure fills the body box width (or height) and nothing overlaps. Reply with a
+screenshot of the slide in edit view, then the STATUS block for {s.id} (expected: position {pos},
+body image {fname}, notes_set yes, tracker {s.fields.get('stage', '')} via layout).
+"""
+
+
 def main() -> int:
     slides = parse(PRES / "deck.md")
+    if "--fix" in sys.argv:
+        ids = sys.argv[sys.argv.index("--fix") + 1].split(",")
+        main_ids = [s.id for s in slides if not s.is_backup]
+        (OUT / "fix").mkdir(parents=True, exist_ok=True)
+        for s in slides:
+            if s.id in ids:
+                (OUT / "fix" / f"fix_{s.id}.md").write_text(render_fix(s, main_ids.index(s.id) + 1), encoding="utf-8")
+        print(f"wrote {len(ids)} correction prompts to {OUT.relative_to(ROOT)}/fix")
+        return 0
     if not slides:
         print("no slides in deck.md")
         return 1
     if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir(parents=True)
+        for f in OUT.glob("*.md"):
+            f.unlink()
+    OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "README_AGENT.md").write_text(BRIEFING, encoding="utf-8")
     (OUT / "RB_export.md").write_text(READBACK, encoding="utf-8")
     for name, text in SETUP.items():

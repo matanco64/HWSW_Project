@@ -62,7 +62,7 @@ sources:
 - status: DRAFT
 - stage: Profile
 - seconds: 60
-- visual: assets/print_nbody_stock.png
+- visual: assets/print_nbody_stock_slide.png
 
 notes:
 Two profilers, two views. py-spy on release CPython puts 97.7% of 310 samples in advance(); everything else is start-up and imports. perf at 999 Hz on the debug build shows what the interpreter does inside it: one tower under _PyEval_EvalFrameDefault at 99.31% inclusive, with binary_op1, the generic arithmetic dispatch, at 20.07%, float object handling at 16.25% of self time and list access and index conversion at 11.26%. There is no second hotspot. The list traffic is the part pure Python can remove: the per-pair unpacking and the read-modify-write of each velocity list. The float boxing it cannot remove, because every operation still allocates a Python float. Debug-build percentages locate the costs; release-build timing establishes the benefit.
@@ -80,7 +80,7 @@ sources:
 - status: DRAFT
 - stage: Optimize
 - seconds: 60
-- visual: assets/print_nbody_opt.png
+- visual: assets/print_nbody_opt_slide.png
 
 notes:
 At import time we emit an advance() with the pair loop unrolled, coordinates in locals and masses as literals; state is loaded before the step loop and written back afterwards, so energy still observes the original body objects. The arithmetic is untouched: mag = dt * (dsq ** -1.5) in the same order, so final state and energy compare exactly equal after 20,000 steps, not merely within a tolerance. Under pyperformance the run goes from 231.20 ± 7.85 to 143.13 ± 1.56 ms, 1.62x, 38.1% less time; the 88.1 ms reduction is about 70 times the clustered standard error. The optimized profile confirms the mechanism: list access and index conversion fall from 11.26% to 0.06% of self time, float handling does not fall, and advance() still holds 91.4% of 210 samples. That residue is what the native tier removes.
@@ -197,7 +197,7 @@ sources:
 - status: DRAFT
 - stage: Profile
 - seconds: 60
-- visual: assets/print_pyflate_stock.png
+- visual: assets/print_pyflate_stock_slide.png
 
 notes:
 Two profilers answer two questions. perf on the debug build says the interpreter sits in _PyEval_EvalFrameDefault at 99.50% inclusive, but it cannot name a Python function. py-spy on release CPython can, from 372 samples: find_next_symbol, the Huffman matcher, is 40.86% inclusive; move_to_front 13.44%; the bit-reader functions snoopbits, readbits and _mask are 9.41%, 9.95% and 5.91% of self time, together about a quarter; bwt_reverse is 14.52% inclusive. The surprise is that the matcher visits only 5.0 entries on average out of 258, so a lookup table cannot be the whole answer. The C-frame view explains the rest: a quarter of the time allocates and frees objects, a per-byte int and a list slice per symbol, and 9.45% is call machinery. These are sparse profiles: a 1% cell is one to four samples.
@@ -255,7 +255,7 @@ sources:
 - status: DRAFT
 - stage: Optimize
 - seconds: 90
-- visual: assets/print_pyflate_opt.png
+- visual: assets/print_pyflate_opt_slide.png
 
 notes:
 After the Python work the profile changes shape. From 122 samples, _decode_symbols_python, the loop that replaced the matcher, is 32.79% self; inverse BWT is 38.52% inclusive and rle4_expand 5.74%. The Rust/PyO3 BlockDecoder takes that symbol loop in one call per block; headers, inverse BWT, RLE4 and MD5 stay in Python. Under direct pyperf that is 283.88 ± 3.34 to 170.01 ± 2.30 ms, 1.67x; against the original, 6.61x and 84.9% less time. The kernel itself takes 3.304 ms per decode where the Python loop took about 117 ms. What remains is inverse BWT: 137.7 ms for the whole transform, about 80% of the remaining time; the traversal alone is 47.8 ms, never add the two. Caveat: a 32.79% share would cap the gain at 1.49x, below the measured 1.67x, so 122 samples locate work but do not calibrate Amdahl.

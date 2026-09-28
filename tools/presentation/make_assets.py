@@ -4,7 +4,7 @@
   make_assets.py            # SVG figures -> PNG (typst), two typst-drawn diagrams -> PNG
   make_assets.py clip [--from-log]   # record `make -C hw/pyflate_accel sim` (or reuse the log) -> chain_cosim.gif
 
-Every PNG is 1920x1080 on a white page with the figure fitted inside; nothing is redrawn,
+Every figure PNG is rendered at its natural aspect ratio, 12 in wide at 120 ppi (1440 px), with no padding;
 so a slide shows exactly the figure the report shows. Needs: typst, Pillow (GIF). The clip needs the HW toolchain (source hw/env.sh).
 """
 from __future__ import annotations
@@ -36,14 +36,32 @@ SVGS = {
     "mtf_block_diagram.png": "hw/mtf_cam/docs/block_diagram.svg",
 }
 
+# Slide editions of the flame-graph prints: the report figure stacks three enlarged panels, which
+# is unreadable in a 3.5 in slide body. The slide edition keeps the overview at left and shows ONE
+# panel (the headline hotspot) large at right; the other panels stay in the report.
+FLAME_SLIDE = {
+    "print_nbody_stock_slide.png": ("report/fig/print_nbody_stock.svg", 0),
+    "print_nbody_opt_slide.png": ("report/fig/print_nbody_opt.svg", 0),
+    "print_pyflate_stock_slide.png": ("report/fig/print_pyflate_stock.svg", 0),
+    "print_pyflate_opt_slide.png": ("report/fig/print_pyflate_opt.svg", 0),
+}
+FLAME_TYP = """#set page(width: auto, height: auto, margin: 0.05in, fill: white)
+#stack(dir: ltr, spacing: 0.3in,
+  image("overview.svg", width: {ow}),
+  image("panel.svg", width: {pw}),
+)
+"""
+
 # Diagrams drawn in typst (no network needed): presentation/src/<name>.typ -> assets/<name>.png
 TYPST_SRC = {
     "hw_flow.png": "presentation/src/hw_flow.typ",
     "grape_uarch.png": "presentation/src/grape_uarch.typ",
 }
 
-PAGE = '#set page(width: 16in, height: 9in, margin: 0.25in, fill: white)\n' \
-       '#align(center + horizon)[#image("{name}", width: 100%, height: 100%, fit: "contain")]\n'
+# Natural aspect ratio, no 16:9 padding: the slide agent fits the image to the body box, so any
+# white margin baked into the PNG only makes the figure smaller on the slide.
+PAGE = '#set page(width: auto, height: auto, margin: 0.05in, fill: white)\n' \
+       '#image("{name}", width: 12in)\n'
 
 
 def typst_png(svg: Path, png: Path) -> None:
@@ -56,11 +74,43 @@ def typst_png(svg: Path, png: Path) -> None:
         shutil.copy(d / "fig.png", png)
 
 
+def svg_crop(text: str, x: float, y: float, w: float, h: float) -> str:
+    """Return the SVG with its root viewBox/width/height set to the given region."""
+    return re.sub(r'<svg([^>]*?) width="[\d.]+" height="[\d.]+" viewBox="[^"]*"',
+                  lambda m: f'<svg{m.group(1)} width="{w:.1f}" height="{h:.1f}" viewBox="{x:.1f} {y:.1f} {w:.1f} {h:.1f}"',
+                  text, count=1)
+
+
+def flame_slide(svg: Path, panel: int, png: Path) -> None:
+    text = svg.read_text(encoding="utf-8")
+    ov_h = float(re.search(r'<svg x="8" y="38" width="205" height="([\d.]+)"', text).group(1))
+    panels = re.findall(r'<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#fafbfc"', text)
+    labels = re.findall(r'<text x="240" y="(\d+)" font-family="sans-serif" font-size="14" font-weight="bold"', text)
+    px, py, pw, ph = (float(v) for v in panels[panel])
+    ly = float(labels[panel])
+    # panel region: from just above its label line to the panel's bottom edge
+    cx, cy, cw, ch = 236.0, ly - 14.0, pw + 12.0, (py + ph + 3.0) - (ly - 14.0)
+    ox, oy, ow, oh = 0.0, 0.0, 228.0, 38.0 + ov_h + 4.0
+    panel_w_in = 6.6                                  # 12 px Verdana -> about 11 pt on a 9.2 in body
+    panel_h_in = ch * panel_w_in / cw
+    ov_w_in = min(2.6, panel_h_in * ow / oh)          # overview no wider than 2.6 in, no taller than the panel
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "overview.svg").write_text(svg_crop(text, ox, oy, ow, oh), encoding="utf-8")
+        (d / "panel.svg").write_text(svg_crop(text, cx, cy, cw, ch), encoding="utf-8")
+        (d / "fig.typ").write_text(FLAME_TYP.format(ow=f"{ov_w_in:.3f}in", pw=f"{panel_w_in:.3f}in"), encoding="utf-8")
+        subprocess.run(["typst", "compile", "--format", "png", "--ppi", "150", "fig.typ", "fig.png"], cwd=d, check=True)
+        shutil.copy(d / "fig.png", png)
+
+
 def build_figures() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for png, rel in SVGS.items():
         typst_png(ROOT / rel, OUT / png)
         print(f"  {png:28s} <- {rel}")
+    for png, (rel, panel) in FLAME_SLIDE.items():
+        flame_slide(ROOT / rel, panel, OUT / png)
+        print(f"  {png:28s} <- {rel} panel {panel + 1} (slide edition)")
     for png, rel in TYPST_SRC.items():
         subprocess.run(["typst", "compile", "--format", "png", "--ppi", "120", "--root", str(ROOT),
                         str(ROOT / rel), str(OUT / png)], check=True)

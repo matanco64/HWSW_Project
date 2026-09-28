@@ -30,3 +30,9 @@ Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as 
 | 00b | done; fonts reported Roboto/Roboto | pptx: tracker text on TITLE_AND_BODY and SECTION_HEADER layouts, Roboto on both, slide-number placeholder present | blank slide shows grey tracker + slide number 1 | 2026-09-26 | readback RB: agent blocked on Chrome's Save dialog, files moved by hand from Downloads; procedure updated |
 | 00c | first attempt blocked (WSL path); done after the Windows mirror: 16 files, none missing | n/a | n/a | 2026-09-26 | assets now served from C:\Users\Kogan\HWSW_presentation |
 | 00d | done-with-deviation: eight layouts named exactly as specified; slide 1 back to Title slide (wanted) | pending: highlighted word per stage layout to be confirmed from the batch-1 pptx | not saved to verify | 2026-09-26 | layout fix would propagate to all slides, so batch 1 not blocked |
+| S00 | done-with-deviation (subtitle box enlarged; accidental Gemini chip click cancelled) | no export yet (RB blocked: extension disconnected) | title + 5 lines + notes correct; title slide layout | 2026-09-28 | accepted |
+| S01 | done-with-deviation (3-line title; table font forced to Roboto; autocorrect off) | no export yet | table 4x3 correct, tracker Analyze | 2026-09-28 | accepted; 3-line title fixed by 00e |
+| S02 | done-with-deviation (image 5.70 x 3.20 in) | no export yet | figure far too small: padded 16:9 PNG shrunk to half width | 2026-09-28 | REDO via fix_S02 after 00e; asset re-rendered without padding |
+| S03 | done-with-deviation (image 5.70 x 3.20 in) | no export yet | three stacked panels unreadable | 2026-09-28 | REDO via fix_S03 with print_nbody_stock_slide.png (overview + panel 1) |
+| S04 | done-with-deviation (3-line title; image 5.34 x 3.00 in) | no export yet | figure unreadable | 2026-09-28 | REDO via fix_S04 with print_nbody_opt_slide.png |
+| RB-1 | blocked: Chrome extension not connected | — | — | 2026-09-28 | re-run after the fixes |
