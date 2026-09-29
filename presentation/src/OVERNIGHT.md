@@ -30,8 +30,14 @@ Before touching the deck, send the human ONE message listing what you need, wait
 Once you have "go", run a five-minute preflight and record its result in your notes for the final
 report: open the deck URL, count the slides (expected 13), then trigger File → Download → Plain Text
 (.txt) and check within two minutes whether a file appears in Downloads. The .txt export is the
-required readback and is known to work; run it after every task. The .pptx export is a bonus:
-attempt it once at the end (T7), do not wait for it, and do not retry.
+required readback; run it after every task. If the file does not appear, use the no-download
+route instead: with the deck tab active, run in the page with your JavaScript tool
+
+    fetch(location.pathname.replace(/\/edit.*$/, '/export/txt')).then(r => r.text()).then(t => console.log('EXPORT_BEGIN\n' + t + '\nEXPORT_END'))
+
+then read the console (pattern `EXPORT_`) and paste the whole text between the markers into your
+report inside a code block. That is the same content as the .txt file. The .pptx export is a
+bonus: attempt it once at the end (T7), do not wait for it, and do not retry.
 
 ## The per-slide checklist (the verification cycle)
 
@@ -110,5 +116,6 @@ write the final report and stop.
 2. A table with one row per slide 1–40: `pos | id | layout stage | title ok | body (image name or
    table RxC, size, bottom y) | notes ok | font pt | deviations`.
 3. Blocked items and exactly what the human must do about each.
-4. `STATUS RB` block for the final export attempt, and the names of the files in Downloads if any.
+4. `STATUS RB` block for the final export attempt, the names of the files in Downloads if any, and,
+   if the download route failed, the full text export pasted in a code block.
 5. Anything you changed that a prompt did not ask for.
