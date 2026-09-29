@@ -19,17 +19,19 @@ Before touching the deck, send the human ONE message listing what you need, wait
 3. The folder `C:\Users\Kogan\HWSW_presentation` attached to this session, so you can read
    `prompts\` and upload from `assets\`.
 4. Chrome Downloads set to save automatically to the Downloads folder, with "Ask where to save each
-   file" OFF, and any pending or blocked entries in `chrome://downloads` cleared. Ask the human to
-   open `chrome://downloads` now and resolve anything waiting there.
+   file" OFF. The plain-text export downloads fine; the .pptx one has been held as a .tmp file,
+   probably by Chrome's download scanning. Ask the human whether Safe Browsing is on "Enhanced
+   protection" (Settings → Privacy and security → Security) and, if so, to switch to "Standard"
+   for the night; if they decline, the .txt export is enough.
 5. The laptop kept awake: sleep and screen lock disabled for the night, lid open, on mains power.
 6. Confirmation that no one will use the mouse or keyboard until the final report.
 7. Permission to insert one extra slide, a Section header titled "Backup slides", before B01.
 
 Once you have "go", run a five-minute preflight and record its result in your notes for the final
-report: open the deck URL, count the slides (expected 13), open `chrome://downloads`, then trigger
-File → Download → Plain Text (.txt) and check within two minutes whether a file appears in
-Downloads. If it does, exports work and you run them after every task. If it does not, write
-"exports unavailable" and rely on the checklist; do not try more than twice.
+report: open the deck URL, count the slides (expected 13), then trigger File → Download → Plain Text
+(.txt) and check within two minutes whether a file appears in Downloads. The .txt export is the
+required readback and is known to work; run it after every task. The .pptx export is a bonus:
+attempt it once at the end (T7), do not wait for it, and do not retry.
 
 ## The per-slide checklist (the verification cycle)
 
@@ -87,8 +89,8 @@ carries a transition; the slide number shows on every slide but the first.
 Done when: the checklist table in your final report has a pass mark for every slide, or a named
 deviation.
 
-**T7 Evidence and report.** If exports work: File → Download → .pptx, then .txt; leave them in
-Downloads. Take grid-view screenshots (View → Grid view) that together show all 40 slides. Then
+**T7 Evidence and report.** File → Download → Plain Text (.txt), then one attempt at .pptx;
+leave both in Downloads. Take grid-view screenshots (View → Grid view) that together show all 40 slides. Then
 write the final report and stop.
 
 ## If something breaks
