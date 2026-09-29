@@ -1,0 +1,36 @@
+Two Python benchmarks, measured end to end: profiling, optimization, and three hardware accelerators
+nbody and pyflate from pyperformance
+Matan Cohen · Yuval Kogan
+00460882 HW/SW Co-design, Technion, Final Project
+6 October 2026
+github.com/matanco64/HWSW_Project
+1
+Title slide, shown while the staff settle. Matan opens. No ID numbers anywhere on the deck; names as they appear on the reports.
+
+Two pure-Python pyperformance workloads, one question: where does the time go, and what would it take to move it to hardware?
+2
+Tier
+nbody
+pyflate
+Original Python (pyperformance)
+231.20 ms, 1.00x
+1,123.49 ms, 1.00x
+Optimized Python (pyperformance)
+143.13 ms, 1.62x
+281.16 ms, 4.00x
+Python + Rust (direct pyperf)
+9.530 ms, 24.26x vs original
+170.01 ms, 6.61x vs original
+Both workloads ship in pyperformance and are pure Python: nbody integrates five bodies for 20,000 steps, pyflate decompresses a 67,562-byte bzip2 file into 399,360 bytes. The course question is where the time goes and what it would take to move that work into hardware. This table is the whole software result, measured on the course VM with 120 pyperf values per configuration, pinned to one guest CPU. Two routes produced it, with different denominators. Original versus optimized ran through pyperformance: 231.20 to 143.13 ms for nbody, 1.62x, and 1,123.49 to 281.16 ms for pyflate, 4.00x. The Rust tiers ran under direct pyperf against the same file's Python back end, so nbody's kernel ratio of 15.25x sits on a 145.30 ms denominator; against the original it is 24.26x. pyflate's Rust decoder reaches 170.01 ms, 6.61x. Every later slide names its denominator.
+
+nbody is 5 bodies, 10 pairs and 20,000 steps of pure-Python float arithmetic
+3
+The state is the Sun and four gas giants: 35 Python floats in nested lists, a position, a velocity and a mass per body. pairs is a list of ten tuples aliasing those same lists, built once. One timed iteration evaluates the energy, calls advance(0.01, 20000), and evaluates the energy again. Every step visits the same ten pairs, forms dx, dy and dz, computes mag = dt * (dsq ** -1.5) and updates both bodies' velocities in place. Ten pairs times 20,000 steps is 200,000 pair-force evaluations, and between every one of them sits the interpreter. The physics is compact; the machinery around each calculation is what we go looking for.
+
+97.7% of samples sit in advance(); list indexing and float boxing dominate the C frames
+4
+Two profilers, two views. py-spy on release CPython puts 97.7% of 310 samples in advance(); everything else is start-up and imports. perf at 999 Hz on the debug build shows what the interpreter does inside it: one tower under _PyEval_EvalFrameDefault at 99.31% inclusive, with binary_op1, the generic arithmetic dispatch, at 20.07%, float object handling at 16.25% of self time and list access and index conversion at 11.26%. There is no second hotspot. The list traffic is the part pure Python can remove: the per-pair unpacking and the read-modify-write of each velocity list. The float boxing it cannot remove, because every operation still allocates a Python float. Debug-build percentages locate the costs; release-build timing establishes the benefit.
+
+Specializing advance() to the fixed pair list removes the list traffic: 231.20 → 143.13 ms, 1.62x, bit-identical state
+5
+At import time we emit an advance() with the pair loop unrolled, coordinates in locals and masses as literals; state is loaded before the step loop and written back afterwards, so energy still observes the original body objects. The arithmetic is untouched: mag = dt * (dsq ** -1.5) in the same order, so final state and energy compare exactly equal after 20,000 steps, not merely within a tolerance. Under pyperformance the run goes from 231.20 ± 7.85 to 143.13 ± 1.56 ms, 1.62x, 38.1% less time; the 88.1 ms reduction is about 70 times the clustered standard error. The optimized profile confirms the mechanism: list access and index conversion fall from 11.26% to 0.06% of self time, float handling does not fall, and advance() still holds 91.4% of 210 samples. That residue is what the native tier removes.

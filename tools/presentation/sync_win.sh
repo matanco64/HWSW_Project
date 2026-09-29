@@ -29,7 +29,7 @@ pull() {
   fi
   # newest deck export in Downloads, whatever Google named it (deck_export.* or the deck title)
   for ext in pptx txt; do
-    newest="$(ls -t "$DL"/deck_export.$ext "$DL"/HWSW*project*.$ext 2>/dev/null | head -1 || true)"
+    newest="$(ls -t "$DL"/deck_export.$ext "$DL"/HWSW*.$ext "$MIRROR"/verify/deck_export.$ext "$MIRROR"/verify/HWSW*.$ext 2>/dev/null | head -1 || true)"
     if [ -n "$newest" ]; then
       cp "$newest" "$VERIFY/deck_export.$ext"
       echo "pulled $(basename "$newest") ($(date -r "$newest" '+%H:%M:%S')) -> verify/deck_export.$ext"

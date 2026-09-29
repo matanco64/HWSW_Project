@@ -179,6 +179,20 @@ Done when: the six layouts have the 26 pt two-line title box and the 9.2 x 3.5 i
 slides 2 to 5 show two-line titles. Reply with a screenshot of slide 5 and the STATUS block for 00e,
 listing under deviations any slide whose title still needs three lines.
 """,
+    "00f_three_line_titles.md": f"""# Setup correction 00f: three-line titles at 22 pt
+
+Half of the claim titles need three lines even at 26 pt. Settle it on the layouts once more:
+
+1. View → Theme builder. On EACH "Title and body · <stage>" layout and on Section header: title
+   placeholder 22 pt, left-aligned, #222222, box from y = 0.25 in to y = 1.45 in, autofit OFF
+   (three lines of 22 pt fit with room to spare).
+2. Same layouts: body placeholder from y = 1.6 in to y = 5.0 in, x = 0.4 in to 9.6 in.
+3. Close the theme builder. On slides 3, 4 and 5 move the existing image down so its top is at
+   y = 1.6 in (keep its size). Nothing else changes.
+
+Done when: slide 5's title fits in its box with no overlap, and slides 3 to 5 show the image
+starting at y = 1.6 in. Reply with a screenshot of slide 5 and the STATUS block for 00f.
+""",
     "00c_images.md": f"""# Setup 3 of 4: images
 
 The figures live on this laptop at:
@@ -234,8 +248,8 @@ then the STATUS block for {s.id} (expected: position 1, body title-lines {len(li
 """
     if visual.startswith("assets/"):
         body = (f"Body: insert the image `{ASSETS_WIN}\\{visual.split('/', 1)[1]}` with your direct upload tool.\n"
-                "Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the\n"
-                "aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.\n"
+                "Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the\n"
+                "aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.\n"
                 "It must not overlap the title or the footer tracker. No caption, no border, no crop.")
     elif visual == "table" and s.table:
         body = ("Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and "
@@ -285,8 +299,8 @@ replaced and resized after the 00e layout change.
 
 1. Delete the existing image on the slide.
 2. Insert `{ASSETS_WIN}\\{fname}` with your direct upload tool (it is a NEW file, re-upload it).
-3. Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
-   aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+3. Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+   aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
    It must not overlap the title or the footer tracker. No crop, no border.
 
 Done when: the new figure fills the body box width (or height) and nothing overlaps. Reply with a
@@ -295,8 +309,58 @@ body image {fname}, notes_set yes, tracker {s.fields.get('stage', '')} via layou
 """
 
 
+def render_batch(batch: list, all_main: list, total: int) -> str:
+    first, last = batch[0].id, batch[-1].id
+    parts = [f"""# Batch {first}–{last}: build {len(batch)} slides autonomously, then export
+
+Work through the slides below in order without stopping between them. For each slide follow its
+block exactly as if it were a single prompt. Do not take a screenshot per slide; instead, at the
+end, (1) run the readback export (File → Download → .pptx, then .txt; leave them in Downloads),
+(2) take ONE screenshot of the slide-sorter/grid view (View → Grid view) showing all slides, and
+(3) reply with one STATUS block per slide, in order, followed by the STATUS RB block.
+
+Rules that apply to every slide in this batch:
+- Layout by name ("Title and body · <stage>"); never edit the footer tracker.
+- Images: insert the named file from `{ASSETS_WIN}` with your direct upload tool, size to
+  width 9.2 in (or height 3.4 in if that binds first), place at x = 0.4 in, y = 1.6 in, centred.
+  Delete the layout's empty body placeholder afterwards.
+- Tables: header row bold, fill #1F4E79, white text; body 16 pt Roboto (set it, the default is
+  Arial); no other formatting. If a table does not fit the 9.2 x 3.4 in body at 16 pt, reduce
+  body rows to 14 pt and say so under deviations; never drop or merge cells.
+- Titles and notes exactly as written. If a title needs three lines, keep it and report it under
+  deviations with the slide id; do not shorten it.
+- If a slide cannot be completed, leave it as far as you got, write `result: blocked` in its
+  STATUS block, and continue with the next slide.
+"""]
+    for s in batch:
+        idx = all_main.index(s) + 1 if s in all_main else 0
+        prev = None
+        pos_in_all = [x.id for x in all_main + [y for y in batch if y.is_backup]]
+        parts.append("\n---\n\n" + render(s, idx, total, s_prev(s, all_main)))
+    parts.append("\n---\n\n" + READBACK)
+    return "".join(parts)
+
+
+def s_prev(s: Slide, all_main: list):
+    """id of the slide that precedes s in the deck order (None for the first)."""
+    order = [x.id for x in parse(PRES / "deck.md")]
+    i = order.index(s.id)
+    return order[i - 1] if i > 0 else None
+
+
 def main() -> int:
     slides = parse(PRES / "deck.md")
+    if "--batch" in sys.argv:
+        spec = sys.argv[sys.argv.index("--batch") + 1]          # e.g. S05-S09 or B01-B06
+        first, last = spec.split("-")
+        ids = [s.id for s in slides]
+        batch = slides[ids.index(first): ids.index(last) + 1]
+        all_main = [s for s in slides if not s.is_backup]
+        OUT.mkdir(parents=True, exist_ok=True)
+        path = OUT / f"batch_{first}-{last}.md"
+        path.write_text(render_batch(batch, all_main, len(all_main)), encoding="utf-8")
+        print(f"wrote {path.relative_to(ROOT)} ({len(batch)} slides)")
+        return 0
     if "--fix" in sys.argv:
         ids = sys.argv[sys.argv.index("--fix") + 1].split(",")
         main_ids = [s.id for s in slides if not s.is_backup]
@@ -311,7 +375,8 @@ def main() -> int:
         return 1
     if OUT.exists():
         for f in OUT.glob("*.md"):
-            f.unlink()
+            if not f.name.startswith("batch_"):
+                f.unlink()
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "README_AGENT.md").write_text(BRIEFING, encoding="utf-8")
     (OUT / "RB_export.md").write_text(READBACK, encoding="utf-8")

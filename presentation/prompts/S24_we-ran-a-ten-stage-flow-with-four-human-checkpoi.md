@@ -7,8 +7,8 @@ Title (exact text, do not shorten or rephrase):
     We ran a ten-stage flow with four human checkpoints: agents pre-reviewed, humans decided
 
 Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\hw_flow.png` with your direct upload tool.
-Size it to fill the body box: width 9.2 in, or height 3.5 in if that binds first, keeping the
-aspect ratio; place it at x = 0.4 in, y = 1.5 in and centre it horizontally in the body box.
+Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
 It must not overlap the title or the footer tracker. No caption, no border, no crop.
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".

@@ -36,3 +36,6 @@ Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as 
 | S03 | done-with-deviation (image 5.70 x 3.20 in) | no export yet | three stacked panels unreadable | 2026-09-28 | REDO via fix_S03 with print_nbody_stock_slide.png (overview + panel 1) |
 | S04 | done-with-deviation (3-line title; image 5.34 x 3.00 in) | no export yet | figure unreadable | 2026-09-28 | REDO via fix_S04 with print_nbody_opt_slide.png |
 | RB-1 | blocked: Chrome extension not connected | — | — | 2026-09-28 | re-run after the fixes |
+| 00e | done | export: TITLE_AND_BODY_n layouts, stage word highlighted per layout | 26 pt titles; S04 still three lines | 2026-09-29 | superseded by 00f (22 pt, three-line box) |
+| S02–S04 fix | done | export 5/5 pass through S04; figures 9.2 in wide at y 1.5 | S02 diagram fills body; S03/S04 slide editions legible | 2026-09-29 | accepted; S04 title/figure collision resolved by 00f |
+| RB-2 | done (files landed in the mirror's verify folder under the deck's name; pull now finds them) | 5/5 | grid | 2026-09-29 | first successful mechanical readback |
