@@ -8,13 +8,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Metric | Value | Evidence level |
+| Metric | Value | Evidence |
 |---|---|---|
-| Cells / area, plain Yosys | 584,454 / 4.075 mm² | synthesis before the final picker rewrite |
-| Cells / area, OpenLane recipe, final RTL | 446,932 / 4.66 mm² | different recipe, not comparable with the row above |
-| Fmax, post-CTS STA | 11.15 → 19.46 MHz (1.75x), bit-exact | extrapolated from a 150 ns run with 98.6 ns slack |
-| Power | ≈ 19.2 mW | tool estimate, default activity, indicative only |
-| Clock target | 50 MHz, missed 2.6x | next limiter: integrate-multiplier operand path |
+| Cells / area (Yosys) | 584,454 / 4.075 mm² | pre-final-rewrite netlist |
+| Cells / area (OpenLane) | 446,932 / 4.66 mm² | other recipe, not comparable |
+| Fmax, post-CTS | 11.15 → 19.46 MHz (1.75x) | extrapolated from a 150 ns run |
+| Power | ≈ 19.2 mW | default activity, indicative |
+| Target | 50 MHz, missed 2.6x | integrate-multiplier path next |
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".
 

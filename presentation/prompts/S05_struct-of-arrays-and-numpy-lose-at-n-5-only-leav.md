@@ -8,13 +8,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Variant | Result | Denominator | Evidence |
+| Variant | Result | Against | Where |
 |---|---|---|---|
-| Struct-of-arrays (development) | 0.88x | original's speed | development host, not the VM |
-| NumPy (development) | 0.35–0.46x | original's speed | development host, not the VM |
-| Barnes-Hut at N = 5 | 3.92x slower (0.077 vs 0.020 ms) | direct summation | VM force sweep |
-| Native Rust, 9.530 ms | 15.25x | optimized Python under direct pyperf, 145.30 ms | VM canonical run |
-| Native Rust, 9.530 ms | 24.26x | original under pyperformance, 231.20 ms | VM canonical run |
+| Struct-of-arrays | 0.88x | original | dev host |
+| NumPy | 0.35–0.46x | original | dev host |
+| Barnes-Hut, N = 5 | 3.92x slower | direct sum | VM |
+| Rust, 9.530 ms | 15.25x | optimized Python, 145.30 ms | VM |
+| Rust, 9.530 ms | 24.26x | original, 231.20 ms | VM |
 
 Do not touch the footer tracker: the layout already highlights "Optimize".
 

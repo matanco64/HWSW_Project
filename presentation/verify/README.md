@@ -39,3 +39,5 @@ Screenshots are saved here as `<id>.png`/`.jpg` (git-ignored); STATUS blocks as 
 | 00e | done | export: TITLE_AND_BODY_n layouts, stage word highlighted per layout | 26 pt titles; S04 still three lines | 2026-09-29 | superseded by 00f (22 pt, three-line box) |
 | S02–S04 fix | done | export 5/5 pass through S04; figures 9.2 in wide at y 1.5 | S02 diagram fills body; S03/S04 slide editions legible | 2026-09-29 | accepted; S04 title/figure collision resolved by 00f |
 | RB-2 | done (files landed in the mirror's verify folder under the deck's name; pull now finds them) | 5/5 | grid | 2026-09-29 | first successful mechanical readback |
+| 00f | done (22 pt three-line title box; images on 3–5 moved to y 1.6) | — | 00f.jpg | 2026-09-30 | accepted |
+| S05–S12 | all done; self-reported overflow on S05, S10, S12 tables (too tall even at 14 pt), narrow columns on S09/S11 | .txt export: 13/13 titles, notes and cells verbatim; .pptx export blocked (downloads stuck as .tmp) | S05-S12-grid.jpg | 2026-09-30 | tables S05/S10/S12 shortened in the spec → fix prompts; column-width rule added; overnight run takes it from here |

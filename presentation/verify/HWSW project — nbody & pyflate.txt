@@ -34,3 +34,158 @@ Two profilers, two views. py-spy on release CPython puts 97.7% of 310 samples in
 Specializing advance() to the fixed pair list removes the list traffic: 231.20 → 143.13 ms, 1.62x, bit-identical state
 5
 At import time we emit an advance() with the pair loop unrolled, coordinates in locals and masses as literals; state is loaded before the step loop and written back afterwards, so energy still observes the original body objects. The arithmetic is untouched: mag = dt * (dsq ** -1.5) in the same order, so final state and energy compare exactly equal after 20,000 steps, not merely within a tolerance. Under pyperformance the run goes from 231.20 ± 7.85 to 143.13 ± 1.56 ms, 1.62x, 38.1% less time; the 88.1 ms reduction is about 70 times the clustered standard error. The optimized profile confirms the mechanism: list access and index conversion fall from 11.26% to 0.06% of self time, float handling does not fall, and advance() still holds 91.4% of 210 samples. That residue is what the native tier removes.
+
+Struct-of-arrays and NumPy lose at N = 5; only leaving Python wins: the Rust tier runs in 9.530 ms
+6
+Variant
+Result
+Denominator
+Evidence
+Struct-of-arrays (development)
+0.88x
+original’s speed
+development host, not the VM
+NumPy (development)
+0.35–0.46x
+original’s speed
+development host, not the VM
+Barnes-Hut at N = 5
+3.92x slower (0.077 vs 0.020 ms)
+direct summation
+VM force sweep
+Native Rust, 9.530 ms
+15.25x
+optimized Python under direct pyperf, 145.30 ms
+VM canonical run
+Native Rust, 9.530 ms
+24.26x
+original under pyperformance, 231.20 ms
+VM canonical run
+Before leaving Python we tried the obvious alternatives, and at ten pairs they lose. A struct-of-arrays layout runs at 0.88x of the original's speed and NumPy at 0.35–0.46x: array setup and per-call overhead exceed the work. Barnes-Hut is 3.92x slower at N = 5 in the VM force sweep, 0.077 against 0.020 ms; it only crosses over near N = 300, which is a backup slide. What wins is leaving the interpreter. The Rust/PyO3 System runs all 20,000 steps and both energy evaluations in one call, 9.530 ± 0.050 ms, bit-identical in state and energy at 5, 10 and 31 bodies. Watch the denominators: 15.25x is against the same file's Python back end under direct pyperf, 145.30 ms; against the pyperformance original of 231.20 ms it is 24.26x. The two ratios must not be multiplied.
+
+Native runs 26.7x fewer instructions while IPC drops from 3.28 to 1.83: the win is instruction count, not the pipeline
+7
+Per iteration
+Optimized Python
+Native Rust
+Ratio
+Elapsed time
+141.08 ms
+9.462 ms
+Instructions
+1,103.62 M
+41.32 M
+26.7x fewer
+Cycles
+336.24 M
+22.55 M
+14.9x fewer
+IPC
+3.28
+1.83
+lower
+Branches
+185.97 M
+3.92 M
+This is a separate pinned warm-loop experiment, 64 iterations per run, medians of three runs, user-mode counters only. Native retires 26.7x fewer instructions and 14.9x fewer cycles, yet its IPC falls from 3.28 to 1.83. That is not a contradiction: runtime is cycles over clock, and IPC counts retired instructions, not useful force updates. Interpreter bookkeeping pipelines beautifully and is still work. Cache misses are 59.6 against 2.5 per iteration, far too few to matter. So nbody's cost was instruction count from the interpreter, not the memory system and not the pipeline, which is the fact the hardware half has to live with: there is no memory stall for an accelerator to hide.
+
+advance() is 95% of the remaining time, so the whole step goes on-chip after one doorbell
+8
+Amdahl first, hardware second. The profile says 95% of the original run is inside advance(), so f = 0.95 and the ceiling for any accelerator is 20x; at the 50 MHz design target the model gives 3.78x, which is why the PRD asked for at least 4x. The boundary follows from the loop shape: 20,000 serial steps over five bodies and ten pairs. If the host called the device once per step, the register traffic would dwarf the arithmetic, so software loads the body state and the pair list, rings one doorbell, and reads the state back after all 20,000 steps. That costs about 150 AXI-Lite transactions per run, under 0.03% of the compute. ADR-0001 therefore chose MMIO only: no DMA, no stream ports, because a few hundred bytes per invocation do not justify a DMA engine and its verification.
+
+grape_pipeline computes full IEEE FP64 in the benchmark's own operation order, with 3 adders and 3 multipliers chosen by a cycle model
+9
+Inputs and outputs: a 32-bit AXI4-Lite slave with a 12-bit address inside a 4 KB window, plus one interrupt. Through that window software writes FP64 body state as word pairs, DT, a 32-bit NSTEPS, and the pair list; it reads back state, counters and status. The register map is 15 rows. Inside, the datapath is our own FP64 units: three 3-stage adders, three 3-stage multipliers, one radix-4 SRT square root of about 30 cycles and one Newton reciprocal of about 22 cycles. Deliberately no FMA: the Python trajectory rounds after every multiply and every add, and fusing them would break bit-exactness against the emulation model. A step is a fixed 290-operation graph; the cycle model list-scheduled it onto candidate unit mixes and 3 add plus 3 mul was the smallest mix under the 128-cycle budget. Clock target 50 MHz.
+
+K1 is 124 cycles per step against a budget of 128, found only after the full-shape test exposed 162
+10
+Design point
+Cells (Yosys)
+Area
+K1 cycles/step
+Verdict
+1-wide accumulate, 1-port RF
+393,367
+2.938 mm²
+162
+fails K1 ≤ 128
+3-wide accumulate, 3-port RF
+584,454
+4.075 mm²
+124
+chosen: +38.7% area, −23.5% cycles
+The uArch model predicted 123 cycles per step, and the bring-up smoke test measured 126, so every gate was green until sign-off. The sign-off test runs the real workload, all ten pairs for 20,000 steps, and there K1 was 162: the smoke test used only two pairs, a shape in which the static schedule hides the accumulate phase, and the RTL had implemented the ordered velocity accumulate as single-issue. Widening it to three ops per cycle, with a per-lane integrate and a 3-port body register file, brought K1 to 124, inside the model's 123 to 127 window. Both design points are fully synthesized, so the trade-off is measured: 38.7% more area for 23.5% fewer cycles. Renegotiating K1 to 162 was offered and declined at the sign-off checkpoint.
+
+Post-CTS timing gives 19.46 MHz against a 50 MHz target; the accumulate picker set the clock and a parallel-prefix rewrite bought 1.75x
+11
+Metric
+Value
+Evidence level
+Cells / area, plain Yosys
+584,454 / 4.075 mm²
+synthesis before the final picker rewrite
+Cells / area, OpenLane recipe, final RTL
+446,932 / 4.66 mm²
+different recipe, not comparable with the row above
+Fmax, post-CTS STA
+11.15 → 19.46 MHz (1.75x), bit-exact
+extrapolated from a 150 ns run with 98.6 ns slack
+Power
+≈ 19.2 mW
+tool estimate, default activity, indicative only
+Clock target
+50 MHz, missed 2.6x
+next limiter: integrate-multiplier operand path
+The area figures come from two synthesis recipes: plain Yosys on the netlist before the final rewrite, and OpenLane's own synthesis of the final RTL; they are not comparable with each other. The clock story is the interesting one. The first post-CTS run gave 11.15 MHz, and the critical path was the 3-wide accumulate issue picker, a 60-deep combinational scan. Rewriting the two prefix operations as balanced trees removed that path without adding a cycle: 19.46 MHz, 1.75x, K1 still 124, every output bit-exact. That number is an extrapolation: the run was constrained at 150 ns and back-computes 51.38 ns from 98.6 ns of slack, and unlike the other two modules grape has no confirmation run near the result. The 50 MHz target is missed 2.6x; the new limiter is the integrate-multiplier operand path.
+
+At 19.46 MHz grape ties optimized Python and is about 15x slower than Rust
+12
+Tier
+Time / run
+vs original
+Evidence
+Original Python
+231.20 ms
+1.00x
+measured, course VM
+Optimized Python
+143.13 ms
+1.62x
+measured, course VM
+grape @ 19.46 MHz
+≈ 139 ms = 127.4 ms compute + 11.6 ms residual
+≈ 1.66x
+projected
+Native Rust
+9.530 ms
+24.26x
+measured, course VM
+This is the honest result. Compute is 2.48 million measured RTL cycles divided by the 19.46 MHz post-CTS clock, 127.4 ms. We add an assumed 5% Python residual for the harness and the two energy evaluations, 11.6 ms; nobody has measured that residual, and no software has ever called this hardware, so the interface time is unmeasured and can only make the row slower. The projection lands at about 139 ms: 1.66x over the original, a tie with optimized Python at 1.03x, and about 15x slower than the 9.53 ms Rust tier. Per step that is 124 cycles or 6.4 µs against 0.48 µs natively. The cause is the clock, not the interface; the residual alone already exceeds the whole Rust run.
+
+What would beat Rust: the clock it takes, a wider unit mix, and a Rust host around the same hardware
+13
+Projection (not a measurement)
+Compute time
+vs Rust 9.530 ms
+What it assumes
+Clock at which grape compute alone matches Rust
+2.48 Mcycles / 9.530 ms ≈ 260 MHz
+parity
+13.4x the post-CTS clock; zero residual
+grape at the 50 MHz target
+49.6 ms (+11.6 ms residual = 61.16 ms, 3.78x vs original)
+6.42x slower
+timing closure we did not reach
+3 add + 4 mul, schedule model
+117 cycles/step → 120.2 ms at 19.46 MHz
+12.6x slower
+model only; needs 245 MHz for parity
+Rust host + same hardware at 19.46 MHz
+127.4 + 0.48 ms = 127.9 ms
+13.4x slower
+residual scales to 5% of the Rust run
+N = 100 with 24 add + 24 mul + 2 sqrt + 2 rcp
+0.029 µs/pair at 19.46 MHz
+1.6x faster
+clock survives 8x wider issue; SRAM state
+Everything on this slide is a projection from the schedule model and the report's numbers; derivations.md holds the arithmetic. Clock: the datapath alone matches Rust at about 260 MHz, 13.4 times what post-CTS timing supports; at the 50 MHz target the system would still be 6.42x slower. Width: a fourth multiplier saves 6 cycles per step in the model, 123 to 117, because at N = 5 one pair's 80-cycle chain bounds the step. Host: swapping Python for Rust around the same device trims the residual from 11.6 ms to about 0.48 ms, an 8% change. Only more bodies change the verdict: at N = 100 the model needs 24 adders and 24 multipliers to run 1.6x faster than native, assuming the clock survives the wider issue logic, which our own 1-wide versus 3-wide data says it does not.

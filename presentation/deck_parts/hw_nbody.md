@@ -96,13 +96,13 @@ sources:
 - exempt: 3
 
 table:
-| Metric | Value | Evidence level |
+| Metric | Value | Evidence |
 |---|---|---|
-| Cells / area, plain Yosys | 584,454 / 4.075 mm² | synthesis before the final picker rewrite |
-| Cells / area, OpenLane recipe, final RTL | 446,932 / 4.66 mm² | different recipe, not comparable with the row above |
-| Fmax, post-CTS STA | 11.15 → 19.46 MHz (1.75x), bit-exact | extrapolated from a 150 ns run with 98.6 ns slack |
-| Power | ≈ 19.2 mW | tool estimate, default activity, indicative only |
-| Clock target | 50 MHz, missed 2.6x | next limiter: integrate-multiplier operand path |
+| Cells / area (Yosys) | 584,454 / 4.075 mm² | pre-final-rewrite netlist |
+| Cells / area (OpenLane) | 446,932 / 4.66 mm² | other recipe, not comparable |
+| Fmax, post-CTS | 11.15 → 19.46 MHz (1.75x) | extrapolated from a 150 ns run |
+| Power | ≈ 19.2 mW | default activity, indicative |
+| Target | 50 MHz, missed 2.6x | integrate-multiplier path next |
 
 notes:
 The area figures come from two synthesis recipes: plain Yosys on the netlist before the final rewrite, and OpenLane's own synthesis of the final RTL; they are not comparable with each other. The clock story is the interesting one. The first post-CTS run gave 11.15 MHz, and the critical path was the 3-wide accumulate issue picker, a 60-deep combinational scan. Rewriting the two prefix operations as balanced trees removed that path without adding a cycle: 19.46 MHz, 1.75x, K1 still 124, every output bit-exact. That number is an extrapolation: the run was constrained at 150 ns and back-computes 51.38 ns from 98.6 ns of slack, and unlike the other two modules grape has no confirmation run near the result. The 50 MHz target is missed 2.6x; the new limiter is the integrate-multiplier operand path.
@@ -165,13 +165,13 @@ sources:
 - exempt: 3, 4, 5, 6, 12, 24
 
 table:
-| Projection (not a measurement) | Compute time | vs Rust 9.530 ms | What it assumes |
+| Projection | Result | vs Rust | Assumes |
 |---|---|---|---|
-| Clock at which grape compute alone matches Rust | 2.48 Mcycles / 9.530 ms ≈ 260 MHz | parity | 13.4x the post-CTS clock; zero residual |
-| grape at the 50 MHz target | 49.6 ms (+11.6 ms residual = 61.16 ms, 3.78x vs original) | 6.42x slower | timing closure we did not reach |
-| 3 add + 4 mul, schedule model | 117 cycles/step → 120.2 ms at 19.46 MHz | 12.6x slower | model only; needs 245 MHz for parity |
-| Rust host + same hardware at 19.46 MHz | 127.4 + 0.48 ms = 127.9 ms | 13.4x slower | residual scales to 5% of the Rust run |
-| N = 100 with 24 add + 24 mul + 2 sqrt + 2 rcp | 0.029 µs/pair at 19.46 MHz | 1.6x faster | clock survives 8x wider issue; SRAM state |
+| Clock for compute parity | ≈ 260 MHz | parity | 13.4x today's clock, no residual |
+| At the 50 MHz target | 61.16 ms | 6.42x slower | timing closure |
+| 3 add + 4 mul (model) | 117 cycles/step, 120.2 ms | 12.6x slower | model only |
+| Rust host + same HW | 127.9 ms | 13.4x slower | residual 5% of the Rust run |
+| N = 100, 24 add + 24 mul | 0.029 µs/pair | 1.6x faster | clock survives 8x issue |
 
 notes:
 Everything on this slide is a projection from the schedule model and the report's numbers; derivations.md holds the arithmetic. Clock: the datapath alone matches Rust at about 260 MHz, 13.4 times what post-CTS timing supports; at the 50 MHz target the system would still be 6.42x slower. Width: a fourth multiplier saves 6 cycles per step in the model, 123 to 117, because at N = 5 one pair's 80-cycle chain bounds the step. Host: swapping Python for Rust around the same device trims the residual from 11.6 ms to about 0.48 ms, an 8% change. Only more bodies change the verdict: at N = 100 the model needs 24 adders and 24 multipliers to run 1.6x faster than native, assuming the clock survives the wider issue logic, which our own 1-wide versus 3-wide data says it does not.

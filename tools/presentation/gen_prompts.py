@@ -289,9 +289,32 @@ notes_set yes, tracker {stage} via layout).
 """
 
 
+def expected_body_kind(s: Slide) -> str:
+    rows = [r for r in s.table.splitlines() if r.startswith("|") and not set(r) <= set("|-: ")]
+    return f"table {len(rows)}x{rows[0].count('|') - 1}" if rows else "table"
+
+
 def render_fix(s: Slide, pos: int) -> str:
     visual = s.fields.get("visual", "")
     fname = visual.split("/", 1)[1] if visual.startswith("assets/") else ""
+    if visual == "table":
+        return f"""# Correction for slide {s.id} (deck slide {pos}): replace the table
+
+Go to slide {pos}. Its title and speaker notes are correct; do not touch them. The table was too
+tall; the spec table has been shortened. Replace it.
+
+1. Delete the existing table.
+2. Insert this table exactly (paste as a styled HTML table is fine): header row bold, fill #1F4E79,
+   white text; body rows Roboto 16 pt (14 pt if 16 pt does not fit, 12 pt as the last resort):
+
+{s.table}
+
+3. Table at x = 0.4 in, y = 1.6 in, width 9.2 in; set column widths so that no header word breaks
+   mid-word and the longest column gets the most width; bottom edge at or above y = 5.0 in.
+
+Done when: the table's bottom edge is at or above 5.0 in, no cell text is cut, no header wraps
+mid-word. Reply with the STATUS block for {s.id} (expected: position {pos}, body {expected_body_kind(s)}).
+"""
     return f"""# Correction for slide {s.id} (deck slide {pos})
 
 Go to slide {pos}. Its title and speaker notes are correct; do not touch them. The figure must be
@@ -325,8 +348,10 @@ Rules that apply to every slide in this batch:
   width 9.2 in (or height 3.4 in if that binds first), place at x = 0.4 in, y = 1.6 in, centred.
   Delete the layout's empty body placeholder afterwards.
 - Tables: header row bold, fill #1F4E79, white text; body 16 pt Roboto (set it, the default is
-  Arial); no other formatting. If a table does not fit the 9.2 x 3.4 in body at 16 pt, reduce
-  body rows to 14 pt and say so under deviations; never drop or merge cells.
+  Arial); no other formatting. Table at x = 0.4 in, y = 1.6 in, width 9.2 in. Set column widths
+  yourself: no header word may break mid-word, and the column with the longest text gets the most
+  width. If the table does not fit above y = 5.0 in at 16 pt, use 14 pt, then 12 pt, then reduce
+  cell padding; say which under deviations. Never drop, merge or reword cells.
 - Titles and notes exactly as written. If a title needs three lines, keep it and report it under
   deviations with the slide id; do not shorten it.
 - If a slide cannot be completed, leave it as far as you got, write `result: blocked` in its
@@ -379,6 +404,9 @@ def main() -> int:
                 f.unlink()
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "README_AGENT.md").write_text(BRIEFING, encoding="utf-8")
+    ov = PRES / "src" / "OVERNIGHT.md"
+    if ov.exists():
+        (OUT / "OVERNIGHT.md").write_text(ov.read_text(encoding="utf-8"), encoding="utf-8")
     (OUT / "RB_export.md").write_text(READBACK, encoding="utf-8")
     for name, text in SETUP.items():
         (OUT / name).write_text(text, encoding="utf-8")

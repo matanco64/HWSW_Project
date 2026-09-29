@@ -8,13 +8,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Projection (not a measurement) | Compute time | vs Rust 9.530 ms | What it assumes |
+| Projection | Result | vs Rust | Assumes |
 |---|---|---|---|
-| Clock at which grape compute alone matches Rust | 2.48 Mcycles / 9.530 ms ≈ 260 MHz | parity | 13.4x the post-CTS clock; zero residual |
-| grape at the 50 MHz target | 49.6 ms (+11.6 ms residual = 61.16 ms, 3.78x vs original) | 6.42x slower | timing closure we did not reach |
-| 3 add + 4 mul, schedule model | 117 cycles/step → 120.2 ms at 19.46 MHz | 12.6x slower | model only; needs 245 MHz for parity |
-| Rust host + same hardware at 19.46 MHz | 127.4 + 0.48 ms = 127.9 ms | 13.4x slower | residual scales to 5% of the Rust run |
-| N = 100 with 24 add + 24 mul + 2 sqrt + 2 rcp | 0.029 µs/pair at 19.46 MHz | 1.6x faster | clock survives 8x wider issue; SRAM state |
+| Clock for compute parity | ≈ 260 MHz | parity | 13.4x today's clock, no residual |
+| At the 50 MHz target | 61.16 ms | 6.42x slower | timing closure |
+| 3 add + 4 mul (model) | 117 cycles/step, 120.2 ms | 12.6x slower | model only |
+| Rust host + same HW | 127.9 ms | 13.4x slower | residual 5% of the Rust run |
+| N = 100, 24 add + 24 mul | 0.029 µs/pair | 1.6x faster | clock survives 8x issue |
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".
 

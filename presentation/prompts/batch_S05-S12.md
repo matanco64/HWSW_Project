@@ -12,8 +12,10 @@ Rules that apply to every slide in this batch:
   width 9.2 in (or height 3.4 in if that binds first), place at x = 0.4 in, y = 1.6 in, centred.
   Delete the layout's empty body placeholder afterwards.
 - Tables: header row bold, fill #1F4E79, white text; body 16 pt Roboto (set it, the default is
-  Arial); no other formatting. If a table does not fit the 9.2 x 3.4 in body at 16 pt, reduce
-  body rows to 14 pt and say so under deviations; never drop or merge cells.
+  Arial); no other formatting. Table at x = 0.4 in, y = 1.6 in, width 9.2 in. Set column widths
+  yourself: no header word may break mid-word, and the column with the longest text gets the most
+  width. If the table does not fit above y = 5.0 in at 16 pt, use 14 pt, then 12 pt, then reduce
+  cell padding; say which under deviations. Never drop, merge or reword cells.
 - Titles and notes exactly as written. If a title needs three lines, keep it and report it under
   deviations with the slide id; do not shorten it.
 - If a slide cannot be completed, leave it as far as you got, write `result: blocked` in its
@@ -31,13 +33,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Variant | Result | Denominator | Evidence |
+| Variant | Result | Against | Where |
 |---|---|---|---|
-| Struct-of-arrays (development) | 0.88x | original's speed | development host, not the VM |
-| NumPy (development) | 0.35–0.46x | original's speed | development host, not the VM |
-| Barnes-Hut at N = 5 | 3.92x slower (0.077 vs 0.020 ms) | direct summation | VM force sweep |
-| Native Rust, 9.530 ms | 15.25x | optimized Python under direct pyperf, 145.30 ms | VM canonical run |
-| Native Rust, 9.530 ms | 24.26x | original under pyperformance, 231.20 ms | VM canonical run |
+| Struct-of-arrays | 0.88x | original | dev host |
+| NumPy | 0.35–0.46x | original | dev host |
+| Barnes-Hut, N = 5 | 3.92x slower | direct sum | VM |
+| Rust, 9.530 ms | 15.25x | optimized Python, 145.30 ms | VM |
+| Rust, 9.530 ms | 24.26x | original, 231.20 ms | VM |
 
 Do not touch the footer tracker: the layout already highlights "Optimize".
 
@@ -173,13 +175,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Metric | Value | Evidence level |
+| Metric | Value | Evidence |
 |---|---|---|
-| Cells / area, plain Yosys | 584,454 / 4.075 mm² | synthesis before the final picker rewrite |
-| Cells / area, OpenLane recipe, final RTL | 446,932 / 4.66 mm² | different recipe, not comparable with the row above |
-| Fmax, post-CTS STA | 11.15 → 19.46 MHz (1.75x), bit-exact | extrapolated from a 150 ns run with 98.6 ns slack |
-| Power | ≈ 19.2 mW | tool estimate, default activity, indicative only |
-| Clock target | 50 MHz, missed 2.6x | next limiter: integrate-multiplier operand path |
+| Cells / area (Yosys) | 584,454 / 4.075 mm² | pre-final-rewrite netlist |
+| Cells / area (OpenLane) | 446,932 / 4.66 mm² | other recipe, not comparable |
+| Fmax, post-CTS | 11.15 → 19.46 MHz (1.75x) | extrapolated from a 150 ns run |
+| Power | ≈ 19.2 mW | default activity, indicative |
+| Target | 50 MHz, missed 2.6x | integrate-multiplier path next |
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
@@ -234,13 +236,13 @@ Title (exact text, do not shorten or rephrase):
 
 Body: insert this table exactly (Insert → Table), header row bold with #1F4E79 fill and white text, body rows 16 pt, columns auto-fit, no other formatting:
 
-| Projection (not a measurement) | Compute time | vs Rust 9.530 ms | What it assumes |
+| Projection | Result | vs Rust | Assumes |
 |---|---|---|---|
-| Clock at which grape compute alone matches Rust | 2.48 Mcycles / 9.530 ms ≈ 260 MHz | parity | 13.4x the post-CTS clock; zero residual |
-| grape at the 50 MHz target | 49.6 ms (+11.6 ms residual = 61.16 ms, 3.78x vs original) | 6.42x slower | timing closure we did not reach |
-| 3 add + 4 mul, schedule model | 117 cycles/step → 120.2 ms at 19.46 MHz | 12.6x slower | model only; needs 245 MHz for parity |
-| Rust host + same hardware at 19.46 MHz | 127.4 + 0.48 ms = 127.9 ms | 13.4x slower | residual scales to 5% of the Rust run |
-| N = 100 with 24 add + 24 mul + 2 sqrt + 2 rcp | 0.029 µs/pair at 19.46 MHz | 1.6x faster | clock survives 8x wider issue; SRAM state |
+| Clock for compute parity | ≈ 260 MHz | parity | 13.4x today's clock, no residual |
+| At the 50 MHz target | 61.16 ms | 6.42x slower | timing closure |
+| 3 add + 4 mul (model) | 117 cycles/step, 120.2 ms | 12.6x slower | model only |
+| Rust host + same HW | 127.9 ms | 13.4x slower | residual 5% of the Rust run |
+| N = 100, 24 add + 24 mul | 0.029 µs/pair | 1.6x faster | clock survives 8x issue |
 
 Do not touch the footer tracker: the layout already highlights "Trade-offs".
 
