@@ -1,0 +1,13 @@
+=== T1_VARIANTS_RERUN
+hygiene: affinity={0}, posix tuning partial: PermissionError(1, 'Operation not permitted')
+variant                best ms    med ms   speedup
+stock                   226.58    227.23    1.000x
+A pow->sqrt             227.46    228.11    0.996x
+B flat+subscript        245.58    246.12    0.923x
+C flat+unpack           228.67    229.31    0.991x
+D vel-locals            204.21    204.96    1.110x
+E for_ only (control)    227.14    227.62    0.998x
+F vel-locals, pow       205.23    205.86    1.104x
+G vel-locals, flat      205.09    205.90    1.105x
+ALL_DONE
+
