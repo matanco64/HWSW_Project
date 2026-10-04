@@ -1,0 +1,94 @@
+Python 3.10.12
+=== LADDER
+python 3.10.12   data=interpreter.tar.bz2   repeats=7 (interleaved)
+tier           best(s)    median(s)  vs T0(best)  correctness
+t0_stock       1.1269     1.1334     1.000x       OK (md5+bz2)
+t1_micro       0.6757     0.6783     1.668x       OK (md5+bz2)
+t2_canonical   0.4549     0.4571     2.477x       OK (md5+bz2)
+t3_table       0.2736     0.2746     4.119x       OK (md5+bz2)
+=== MICRO
+BWT input L: 336184 bytes, pointer 141652 ; post-BWT nt: 336184 bytes
+
+-- histogram of L (256 bins) --
+   stock: bytes(sorted(L)) + 256 x F.find()          27.42 ms
+   collections.Counter(L)                            19.16 ms
+   [L.count(i) for i in range(256)]                  74.23 ms
+
+-- T-vector fill (400k iterations) --
+   plain  T[b] = i                                   55.13 ms
+   packed C[b] = (i<<8)|sym                          79.58 ms
+
+-- inverse-BWT chain walk --
+   stock: list.append(L[end]) + bytes()              54.87 ms
+   bytearray slot assign                             49.35 ms
+   packed single-lookup walk                         72.48 ms
+
+-- RLE4 expansion --
+   stock: per-byte slice + join                     126.50 ms
+   regex span copy                                   23.78 ms
+
+-- move-to-front, 89837 calls, real rank distribution --
+   (mean rank 7.17, p50 3, list length 147)
+   stock 3-slice l[:] = l[c:c+1]+l[:c]+l[c+1:]      155.29 ms
+   l.insert(0, l.pop(c))                             17.91 ms
+   reversed list: l.append(l.pop(-1-c))              11.44 ms
+=== PROFILE_T0
+### cProfile: t0_stock (T0 stock)  python 3.10.12
+### correctness: OK
+         3185456 function calls in 2.199 seconds
+
+   Ordered by: internal time
+   List reduced from 41 to 18 due to restriction <18>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.497    0.497    2.181    2.181 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:380(decode_huffman_block)
+   148271    0.341    0.000    1.088    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:210(find_next_symbol)
+   341601    0.230    0.000    0.501    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:98(snoopbits)
+    92803    0.212    0.000    0.212    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:274(move_to_front)
+   156708    0.197    0.000    0.262    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:103(readbits)
+   655017    0.134    0.000    0.134    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:40(_mask)
+        1    0.117    0.117    0.248    0.248 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:292(bwt_reverse)
+        1    0.078    0.078    0.102    0.102 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:278(bwt_transform)
+    67562    0.075    0.000    0.164    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:92(_more)
+   766811    0.072    0.000    0.072    0.000 {method 'append' of 'list' objects}
+   674570    0.069    0.000    0.069    0.000 {built-in method builtins.len}
+    67562    0.058    0.000    0.079    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:29(_read)
+    67526    0.038    0.000    0.202    0.000 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:36(needbits)
+        2    0.022    0.011    0.022    0.011 {method 'join' of 'bytes' objects}
+        1    0.022    0.022    0.022    0.022 {built-in method builtins.sorted}
+    67562    0.012    0.000    0.012    0.000 {method 'read' of '_io.BufferedReader' objects}
+    76108    0.011    0.000    0.011    0.000 {built-in method builtins.ord}
+        1    0.004    0.004    0.019    0.019 /tmp/pyflate_ladder/dev/pyflate/t0_stock.py:341(compute_selectors_list)
+
+
+=== PROFILE_T3
+### cProfile: t3_table (T3 table)  python 3.10.12
+### correctness: OK
+         423177 function calls in 0.457 seconds
+
+   Ordered by: internal time
+   List reduced from 41 to 18 due to restriction <18>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.205    0.205    0.457    0.457 /tmp/pyflate_ladder/dev/pyflate/t3_table.py:133(decode_huffman_block)
+        1    0.131    0.131    0.150    0.150 /tmp/pyflate_ladder/dev/pyflate/t3_table.py:88(bwt_reverse)
+     8543    0.019    0.000    0.019    0.000 {method 'search' of 're.Pattern' objects}
+        1    0.019    0.019    0.019    0.019 {built-in method _collections._count_elements}
+    89837    0.015    0.000    0.015    0.000 {method 'pop' of 'list' objects}
+   111853    0.013    0.000    0.013    0.000 {method 'append' of 'list' objects}
+        1    0.012    0.012    0.034    0.034 /tmp/pyflate_ladder/dev/pyflate/t3_table.py:115(rle4_expand)
+    89837    0.011    0.000    0.011    0.000 {method 'append' of 'bytearray' objects}
+    34664    0.007    0.000    0.007    0.000 {method 'extend' of 'bytearray' objects}
+    50129    0.006    0.000    0.006    0.000 {built-in method builtins.len}
+     8437    0.006    0.000    0.006    0.000 /tmp/pyflate_ladder/dev/pyflate/t1_micro.py:53(readbits)
+        1    0.004    0.004    0.011    0.011 /tmp/pyflate_ladder/dev/pyflate/t1_micro.py:199(compute_selectors_list)
+    16891    0.003    0.000    0.003    0.000 {built-in method from_bytes}
+     2966    0.002    0.000    0.002    0.000 /tmp/pyflate_ladder/dev/pyflate/t1_micro.py:155(move_to_front)
+        6    0.001    0.000    0.002    0.000 /tmp/pyflate_ladder/dev/pyflate/t2_canonical.py:31(build_canonical)
+     8542    0.001    0.000    0.001    0.000 {method 'start' of 're.Match' objects}
+        1    0.001    0.001    0.004    0.004 /tmp/pyflate_ladder/dev/pyflate/t3_table.py:73(compute_tables)
+      278    0.001    0.000    0.001    0.000 /tmp/pyflate_ladder/dev/pyflate/t1_micro.py:30(_fill)
+
+
+ALL_DONE
+
