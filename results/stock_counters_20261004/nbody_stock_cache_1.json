@@ -1,0 +1,11 @@
+{
+  "benchmark": "nbody",
+  "backend": "stock",
+  "loops": 64,
+  "cpu": 0,
+  "elapsed_s": 14.620189378969371,
+  "ms_per_iteration": 228.44045904639643,
+  "output_sha256": "31fa324f991b94c10b2bdcfa676af60b4c57dc8d734398c1fcff21dd2e1aedfa",
+  "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+  "source_sha256": "d1385e816d7cfea361b7915e2cf70138cd6b84f40df8bd5152638851f7bcac2b"
+}
