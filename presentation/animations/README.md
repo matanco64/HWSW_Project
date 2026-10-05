@@ -1,6 +1,6 @@
 # Explainer animations for the pyflate slides
 
-Three short GIFs built with [Manim Community](https://www.manim.community/) 0.21, using the same
+Short GIFs built with [Manim Community](https://www.manim.community/) 0.21, using the same
 examples as the slides:
 
 | GIF | Shows | Size (px) |
@@ -8,10 +8,12 @@ examples as the slides:
 | `mtf.gif` | Move-to-front: decoding `2 0 0 1` with the list `[a b c d]` gives `c c c a` | 627x409 |
 | `bwt.gif` | BWT: the six rotations of `banana`, sorted; the last column is `nnbaaa`, and row 3 is the original word | 860x348 |
 | `inverse_bwt.gif` | Inverse BWT: start at row 3, follow `T` (2, 5, 1, 4, 0, 3), read one letter of `nnbaaa` per jump | 831x421 |
+| `two_chains.gif` | Inverse BWT from both ends (post-submission experiment, branch `experiment/bwt-rust`): `T` forward and its inverse backward from row 3; one chain needs 6 rounds, two chains finish in 3 | 1019x536 |
+| `huffman.gif` | The same bits `1100010111` (d a c e) decoded twice: the original scans the code list (13 checks), the shipped decoder peeks 3 bits and reads a flat table (4 reads); pyflate peeks 11 bits | 1003x627 |
 
 The GIFs are only the diagram: no title, subtitle or caption, because they sit on slides that already
-have them (DRAFT copies of the MTF, BWT and inverse-BWT slides in the deck). Each is cropped to its
-content, has a pure white background, loops, runs 11-17 s at 15 fps and is 160-290 KB. Deck colours:
+have them (the pyflate algorithm, Huffman and experiment slides). Each is cropped to its
+content, has a pure white background, loops, runs 11-23 s at 15 fps and is 160-500 KB. Deck colours:
 navy `#1E3A5F`, accent `#E07A1F`.
 
 Each GIF opens on the finished diagram (the closing pause is moved to the front), so a thumbnail,
@@ -25,7 +27,7 @@ brew install gifsicle                                     # or your package mana
 
 # PNG frames, not Manim's own GIF writer: Manim dithers every frame separately,
 # so nothing stays still and the GIFs come out at 7-12 MB.
-for s in MTF BWT InverseBWT; do
+for s in MTF BWT InverseBWT TwoChains Huffman; do
   venv/bin/manim --format png -r 1280,720 --fps 15 --disable_caching scenes.py $s
 done
 
@@ -34,6 +36,8 @@ done
 venv/bin/python build_gif.py MTF mtf.raw.gif 64        && gifsicle -O3 mtf.raw.gif -o mtf.gif
 venv/bin/python build_gif.py BWT bwt.raw.gif 64        && gifsicle -O3 bwt.raw.gif -o bwt.gif
 venv/bin/python build_gif.py InverseBWT ibwt.raw.gif 64 && gifsicle -O3 ibwt.raw.gif -o inverse_bwt.gif
+venv/bin/python build_gif.py TwoChains tc.raw.gif 64 && gifsicle -O3 tc.raw.gif -o two_chains.gif
+venv/bin/python build_gif.py Huffman huff.raw.gif 64 && gifsicle -O3 huff.raw.gif -o huffman.gif
 ```
 
 Every `wait()` in `scenes.py` passes `frozen_frame=False`; otherwise PNG output writes a pause as a

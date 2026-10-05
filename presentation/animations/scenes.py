@@ -162,3 +162,196 @@ class InverseBWT(Scene):
         done = txt("banana, back again", 26, NAVY).move_to([2.95, -0.2, 0])
         self.play(FadeIn(done), run_time=0.4)
         self.wait(2.5, frozen_frame=False)
+
+
+class TwoChains(Scene):
+    """Inverse BWT from both ends: T forward and its inverse backward, both from row 3."""
+
+    def construct(self):
+        L = "nnbaaa"
+        T = sorted(range(6), key=lambda i: (L[i], i))      # [3, 4, 5, 2, 0, 1]
+        LF = [0] * 6                                         # inverse of T
+        for slot, i in enumerate(T):
+            LF[i] = slot
+        fwd, x = [], 3                                       # forward: jump, then read
+        for _ in range(6):
+            x = T[x]
+            fwd.append(x)
+        bwd, x = [], 3                                       # backward: read, then jump
+        for _ in range(3):
+            bwd.append(x)
+            x = LF[x]
+        assert "".join(L[r] for r in fwd) == "banana"
+        assert "".join(L[r] for r in bwd) == "ana"           # banana from the end
+
+        rh, top = 0.62, 1.55
+        y = lambda r: top - r * rh
+        xr, xl = -5.6, -4.6
+        hdr = VGroup(txt("row", 22, GREY).move_to([xr, top + 0.6, 0]),
+                     txt("L", 24, GREY, font=MONO).move_to([xl, top + 0.6, 0]))
+        rows_n = VGroup(*[txt(str(r), 26, GREY).move_to([xr, y(r), 0]) for r in range(6)])
+        Ls = VGroup(*[cell(L[r], 0.55, 28).move_to([xl, y(r), 0]) for r in range(6)])
+
+        key_f = VGroup(Square(0.28, color=NAVY, stroke_width=4), txt("forward: follow T", 22, NAVY)).arrange(RIGHT, buff=0.15)
+        key_b = VGroup(Square(0.28, color=ACCENT, stroke_width=4), txt("backward: follow the inverse of T", 22, ACCENT)).arrange(RIGHT, buff=0.15)
+        keys = VGroup(key_f, key_b).arrange(DOWN, aligned_edge=LEFT, buff=0.18).move_to([-4.3, -2.75, 0])
+
+        x0, sw = -1.0, 0.75
+        slot = lambda row_y, k: np.array([x0 + k * sw, row_y, 0])
+        y1, y2 = 1.2, -0.9
+        def slots(row_y):
+            return VGroup(*[Square(0.62, stroke_color=GREY, stroke_width=2).move_to(slot(row_y, k)) for k in range(6)])
+        s1, s2 = slots(y1), slots(y2)
+        lab1 = txt("one chain", 26).next_to(s1, UP, buff=0.25, aligned_edge=LEFT)
+        lab2 = txt("two chains", 26).next_to(s2, UP, buff=0.25, aligned_edge=LEFT)
+        rnd = txt("round 0", 26, GREY).move_to([3.4, y1 + 0.72, 0])
+
+        self.play(FadeIn(hdr), FadeIn(rows_n), FadeIn(Ls), FadeIn(keys), FadeIn(s1), FadeIn(s2),
+                  FadeIn(lab1), FadeIn(lab2), FadeIn(rnd), run_time=0.8)
+
+        mark = lambda r, c: SurroundingRectangle(VGroup(rows_n[r], Ls[r]), color=c, buff=0.1, stroke_width=4)
+        mf, mb = mark(3, NAVY), mark(3, ACCENT).scale(1.12)
+        start = txt("start", 22, INK).next_to(mf, LEFT, buff=0.25)
+        self.play(Create(mf), Create(mb), FadeIn(start), run_time=0.6)
+        self.wait(0.3, frozen_frame=False)
+        self.play(FadeOut(start), run_time=0.2)
+
+        def put(letter_cell, target, color):
+            g = txt(letter_cell[1].text, 34, color, font=MONO)
+            g.move_to(letter_cell[1].get_center())
+            return g, g.animate.move_to(target.get_center() + DOWN * 0.14, aligned_edge=DOWN)
+
+        for k in range(6):
+            new_rnd = txt(f"round {k + 1}", 26, INK).move_to(rnd)
+            anims = [Transform(rnd, new_rnd), Transform(mf, mark(fwd[k], NAVY))]
+            if k < 3 and k > 0:
+                anims.append(Transform(mb, mark(bwd[k], ACCENT).scale(1.12)))
+            self.play(*anims, run_time=0.45)
+            flies, objs = [], []
+            g, a = put(Ls[fwd[k]], s1[k], NAVY); objs.append(g); flies.append(a)
+            if k < 3:
+                g, a = put(Ls[fwd[k]], s2[k], NAVY); objs.append(g); flies.append(a)
+                g, a = put(Ls[bwd[k]], s2[5 - k], ACCENT); objs.append(g); flies.append(a)
+            self.add(*objs)
+            self.play(*flies, run_time=0.55)
+            if k == 2:
+                done = txt("done after 3 rounds", 24, ACCENT).next_to(s2, DOWN, buff=0.3)
+                self.play(FadeIn(done), FadeOut(mb), run_time=0.4)
+        done1 = txt("6 rounds, each waits for the last", 24, NAVY).next_to(s1, DOWN, buff=0.3)
+        self.play(FadeIn(done1), run_time=0.4)
+        self.wait(2.5, frozen_frame=False)
+
+
+class Huffman(Scene):
+    """Decode the same bits twice: scan the code list (original) vs one table read (shipped)."""
+
+    def construct(self):
+        codes = [("00", "a"), ("01", "b"), ("10", "c"), ("110", "d"), ("111", "e")]
+        bits = "1100010111"                                   # d a c e
+        PB = 3                                                # pyflate peeks 11 bits
+
+        bw = 0.5
+        bx0 = -2.9
+        bit_cells = VGroup(*[cell(b, 0.46, 26, fill=WHITE, stroke=GREY).move_to([bx0 + i * bw, 2.75, 0])
+                             for i, b in enumerate(bits)])
+        bits_lbl = txt("bits", 24, GREY).next_to(bit_cells, LEFT, buff=0.4)
+        out_lbl = txt("symbols out", 24, GREY).move_to([-3.75, 1.85, 0])
+        out_x0 = -2.25
+        self.play(FadeIn(bit_cells), FadeIn(bits_lbl), FadeIn(out_lbl), run_time=0.6)
+
+        def window(pos, n):
+            return SurroundingRectangle(bit_cells[pos:pos + n], color=ACCENT, buff=0.05, stroke_width=4)
+
+        def run(part_title, panel, step, count_word):
+            title_m = txt(part_title, 28, NAVY, weight=BOLD).move_to([0, 1.1, 0])
+            counter = txt(f"{count_word}: 0", 26, INK).move_to([2.4, -0.6, 0], aligned_edge=LEFT)
+            self.play(FadeIn(title_m), FadeIn(panel), FadeIn(counter), run_time=0.6)
+            pos, n_out, total, outs = 0, 0, 0, []
+            win = None
+            while pos < len(bits):
+                pos, sym, total, win, counter = step(pos, total, win, counter)
+                o = txt(sym, 34, font=MONO).move_to([out_x0 + n_out * 0.6, 1.72, 0], aligned_edge=DOWN)
+                outs.append(o)
+                self.play(FadeIn(o, shift=UP * 0.2), run_time=0.3)
+                n_out += 1
+            self.wait(1.2, frozen_frame=False)
+            totals.append(total)
+            return VGroup(title_m, panel, counter, *outs, *([win] if win else []))
+
+        totals = []
+
+        def consume(pos, n):
+            return [bit_cells[i].animate.set_opacity(0.25) for i in range(pos, pos + n)]
+
+        # ---- original: scan the code list, one check (a method call) per entry
+        rows = VGroup(*[VGroup(txt(c, 28, font=MONO), txt(s, 28, font=MONO)) for c, s in codes])
+        for j, r in enumerate(rows):                         # fixed columns, shared baseline
+            base = -0.55 - j * 0.48
+            r[0].move_to([-2.1, base, 0], aligned_edge=DOWN + LEFT)
+            r[1].move_to([0.0, base, 0], aligned_edge=DOWN)
+        list_hdr = VGroup(txt("code", 20, GREY).move_to([-2.1, -0.05, 0], aligned_edge=LEFT),
+                          txt("symbol", 20, GREY).move_to([0.0, -0.05, 0]))
+        panel_a = VGroup(rows, list_hdr)
+
+        def scan_step(pos, total, win, counter):
+            for j, (c, s) in enumerate(codes):
+                total += 1
+                cur = SurroundingRectangle(rows[j], color=NAVY, buff=0.08, stroke_width=3)
+                new_win = window(pos, len(c))
+                new_counter = txt(f"checks: {total}", 26, INK).move_to(counter, aligned_edge=LEFT)
+                anims = [Transform(counter, new_counter)]
+                anims.append(Transform(win, new_win) if win else Create(new_win))
+                if win is None:
+                    win = new_win
+                self.play(Create(cur), *anims, run_time=0.28)
+                if bits[pos:pos + len(c)] == c:
+                    self.play(rows[j].animate.set_color(ACCENT), run_time=0.25)
+                    self.play(*consume(pos, len(c)), rows[j].animate.set_color(INK), FadeOut(cur), run_time=0.3)
+                    return pos + len(c), s, total, win, counter
+                self.play(FadeOut(cur), run_time=0.12)
+            raise ValueError("no code matched")
+
+        part_a = run("Original: check the code list, one call per entry", panel_a, scan_step, "checks")
+        self.play(FadeOut(part_a), *[b.animate.set_opacity(1) for b in bit_cells], run_time=0.6)
+
+        # ---- shipped: peek PB bits, one array index gives symbol and length
+        table = []
+        for v in range(1 << PB):
+            key = format(v, f"0{PB}b")
+            c, s = next((c, s) for c, s in codes if key.startswith(c))
+            table.append((key, s, len(c)))
+        trows = VGroup(*[VGroup(txt(k, 24, font=MONO), txt(s, 24, font=MONO), txt(f"{n} bits", 20, GREY))
+                         for k, s, n in table])
+        for v, r in enumerate(trows):
+            base = -0.45 - v * 0.33
+            r[0].move_to([-2.1, base, 0], aligned_edge=DOWN + LEFT)
+            r[1].move_to([0.0, base, 0], aligned_edge=DOWN)
+            r[2].move_to([0.75, base, 0], aligned_edge=DOWN + LEFT)
+        thdr = VGroup(txt(f"next {PB} bits", 20, GREY).move_to([-2.1, 0.0, 0], aligned_edge=LEFT),
+                      txt("symbol", 20, GREY).move_to([0.0, 0.0, 0]),
+                      txt("uses", 20, GREY).move_to([0.75, 0.0, 0], aligned_edge=LEFT),
+                      txt("(pyflate peeks 11 bits)", 18, GREY).move_to([-2.1, -3.25, 0], aligned_edge=LEFT))
+        panel_b = VGroup(trows, thdr)
+
+        def table_step(pos, total, win, counter):
+            total += 1
+            peek = bits[pos:pos + PB].ljust(PB, "0")
+            idx = int(peek, 2)
+            new_win = window(pos, min(PB, len(bits) - pos))
+            new_counter = txt(f"table reads: {total}", 26, INK).move_to(counter, aligned_edge=LEFT)
+            anims = [Transform(counter, new_counter), Transform(win, new_win) if win else Create(new_win)]
+            if win is None:
+                win = new_win
+            self.play(*anims, run_time=0.35)
+            hit = SurroundingRectangle(trows[idx], color=ACCENT, buff=0.06, stroke_width=4)
+            self.play(Create(hit), run_time=0.35)
+            n = table[idx][2]
+            self.play(*consume(pos, n), FadeOut(hit), run_time=0.35)
+            return pos + n, table[idx][1], total, win, counter
+
+        part_b = run("Shipped: one table read per symbol", panel_b, table_step, "table reads")
+        cmp_ = VGroup(txt("same 4 symbols:", 24, NAVY),
+                      txt(f"{totals[0]} checks vs {totals[1]} reads", 26, NAVY, weight=BOLD)
+                      ).arrange(DOWN, aligned_edge=LEFT, buff=0.12).move_to([2.4, -1.6, 0], aligned_edge=LEFT)
+        self.play(FadeIn(cmp_, shift=UP * 0.2), run_time=0.5)
+        self.wait(2.0, frozen_frame=False)
