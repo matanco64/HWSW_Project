@@ -156,10 +156,62 @@ fn decode_block<'py>(
     dec.decode(py, bit_pos)
 }
 
+fn bwt_variant(l: &[u8], end: usize, variant: u8) -> PyResult<Vec<u8>> {
+    if !l.is_empty() && end >= l.len() {
+        return Err(PyValueError::new_err("BWT pointer out of range"));
+    }
+    Ok(match variant {
+        1 => crate::bwt::naive(l, end),
+        2 => crate::bwt::packed(l, end),
+        3 => crate::bwt::two_chain(l, end),
+        _ => return Err(PyValueError::new_err("variant must be 1, 2 or 3")),
+    })
+}
+
+/// EXPERIMENT: inverse BWT only.  variant 1 = port, 2 = packed, 3 = two chains.
+#[pyfunction]
+#[pyo3(signature = (l, end, variant=3))]
+fn bwt_reverse<'py>(py: Python<'py>, l: &[u8], end: usize, variant: u8) -> PyResult<Bound<'py, PyBytes>> {
+    let out = py.allow_threads(|| bwt_variant(l, end, variant))?;
+    Ok(PyBytes::new_bound(py, &out))
+}
+
+/// EXPERIMENT: inverse BWT followed by RLE4, returning the block's final bytes.
+#[pyfunction]
+#[pyo3(signature = (l, end, variant=3))]
+fn bwt_rle4<'py>(py: Python<'py>, l: &[u8], end: usize, variant: u8) -> PyResult<Bound<'py, PyBytes>> {
+    let out = py.allow_threads(|| bwt_variant(l, end, variant).map(|nt| crate::bwt::rle4(&nt)))?;
+    Ok(PyBytes::new_bound(py, &out))
+}
+
+/// EXPERIMENT: best-of-`reps` kernel time in ns, measured inside Rust.
+/// variant 0 times RLE4 alone on the inverse-BWT output.
+#[pyfunction]
+fn bwt_bench(py: Python<'_>, l: &[u8], end: usize, variant: u8, reps: u32) -> PyResult<u64> {
+    py.allow_threads(|| {
+        let nt = bwt_variant(l, end, 2)?;
+        let mut best = u64::MAX;
+        for _ in 0..reps {
+            let t = std::time::Instant::now();
+            let len = if variant == 0 {
+                crate::bwt::rle4(&nt).len()
+            } else {
+                bwt_variant(l, end, variant)?.len()
+            };
+            best = best.min(t.elapsed().as_nanos() as u64);
+            std::hint::black_box(len);
+        }
+        Ok(best)
+    })
+}
+
 #[pymodule]
 fn pyflate_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<BlockDecoder>()?;
     m.add_function(wrap_pyfunction!(decode_block, m)?)?;
+    m.add_function(wrap_pyfunction!(bwt_reverse, m)?)?;
+    m.add_function(wrap_pyfunction!(bwt_rle4, m)?)?;
+    m.add_function(wrap_pyfunction!(bwt_bench, m)?)?;
     m.add("PRIMARY_BITS", PRIMARY_BITS)?;
     Ok(())
 }

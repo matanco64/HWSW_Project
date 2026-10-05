@@ -11,6 +11,7 @@
 
 mod bindings;
 mod bit_reader;
+mod bwt;
 mod decoder;
 mod huffman;
 mod trace;

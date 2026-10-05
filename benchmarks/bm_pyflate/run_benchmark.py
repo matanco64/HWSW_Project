@@ -784,6 +784,14 @@ def decode_huffman_block(b, out):
               else _decode_symbols_python)
     buffer = decode(b, code_lengths, selectors_list, symbols_in_use, used)
 
+    if (os.environ.get("HWSW_BWT", "rust") == "rust"
+            and hasattr(pyflate_rs, "bwt_rle4")):
+        # EXPERIMENT (branch only, not part of the submission): inverse BWT
+        # (two chains meeting in the middle) + RLE4 in Rust; see
+        # rust/pyflate/src/bwt.rs and report_bwt_rust.md.  HWSW_BWT=python
+        # keeps the submitted Python path.
+        out.append(pyflate_rs.bwt_rle4(bytes(buffer), pointer))
+        return
     nearly_there = bwt_reverse(bytes(buffer), pointer)
     # Pointless/irritating run-length encoding step
     out.append(rle4_expand(nearly_there))
