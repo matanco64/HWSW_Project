@@ -1,0 +1,37 @@
+=== ENV
+Mon Oct  5 16:01:51 UTC 2026
+Python 3.10.12
+Model name:                              Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz
+branch rev 2a00336
+=== BUILD
+📦 Built wheel for CPython 3.10 to /tmp/bwt_exp/wheels/pyflate_rs-0.1.0-cp310-cp310-manylinux_2_34_x86_64.whl
+experimental: /tmp/bwt_exp/site/pyflate_rs/__init__.py True
+system (submitted): /usr/local/lib/python3.10/dist-packages/pyflate_rs/__init__.py False
+=== CHECK
+benchmark tarball        n=399360   python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+periodic X*1020          n=1020     python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+periodic ab*5000         n=10000    python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+periodic abc*333 (odd)   n=999      python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+one byte                 n=1        python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+two bytes                n=2        python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+source text              n=37679    python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+random 400k              n=400000   python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+runs of 300              n=600000   python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+3 blocks (2.2 MB)        n=1507160  python ok | rust v1 ok | rust v2 ok | rust v3 ok | rust bwt+rle4 ok
+ALL OK
+=== STAGES submitted (system pyflate_rs, Python inverse BWT)
+backend: native
+TOTAL                      159.48 ms  100.0%
+bwt_reverse                124.75 ms   78.2%
+bwt_transform               73.25 ms   45.9%
+rle4_expand                 23.73 ms   14.9%
+_decode_symbols_native       3.09 ms    1.9%
+=== STAGES experiment
+backend: native
+TOTAL                       16.64 ms  100.0%
+_decode_symbols_native       3.12 ms   18.7%
+=== KERNELS
+Traceback (most recent call last):
+  File "/tmp/bwt_exp/dev/pyflate/bwt_experiment/bwt_time.py", line 12, in <module>
+    decode(bench); Lb, eb = cap[-1]
+IndexError: list index out of range

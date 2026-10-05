@@ -1,0 +1,11 @@
+=== PHASES
+n=336184: histogram 1-way 0.543 4-way 0.238 | build 0.840 | 2 chains walk 2.639 | x2 tables: extra build 1.359 walk 1.895 (walk+extra 3.254) | best total 3.718
+n=809797: histogram 1-way 1.548 4-way 0.590 | build 2.245 | 2 chains walk 11.512 | x2 tables: extra build 3.474 walk 8.836 (walk+extra 12.310) | best total 14.348
+=== PYPERF
+pyflate: Mean +- std dev: 161 ms +- 1 ms
+pyflate: Mean +- std dev: 14.6 ms +- 0.1 ms
++-----------+--------------+------------------------+
+| Benchmark | pf_submitted | pf_experiment          |
++===========+==============+========================+
+| pyflate   | 161 ms       | 14.6 ms: 11.06x faster |
++-----------+--------------+------------------------+

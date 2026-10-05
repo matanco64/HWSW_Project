@@ -1,0 +1,20 @@
+יום ב׳ אוק׳ 05 2026 16:03:53 UTC rev cd9730c (scripts only changed)
+=== KERNELS
+== benchmark block: n = 336184
+  Python bwt_reverse (shipped)        124.531 ms
+  Python rle4_expand (shipped)         23.299 ms
+  Rust v1 port                          6.071 ms   (21x vs Python)
+  Rust v2 packed                        5.042 ms   (25x vs Python)
+  Rust v3 two chains                    3.908 ms   (32x vs Python)
+  Rust rle4 alone                       0.738 ms
+  bwt_rle4() call from Python, v3       4.698 ms
+== max-size block: n = 809797
+  Python bwt_reverse (shipped)        368.596 ms
+  Python rle4_expand (shipped)         55.369 ms
+  Rust v1 port                         20.725 ms   (18x vs Python)
+  Rust v2 packed                       18.193 ms   (20x vs Python)
+  Rust v3 two chains                   14.836 ms   (25x vs Python)
+  Rust rle4 alone                       1.598 ms
+  bwt_rle4() call from Python, v3      16.549 ms
+=== PHASES
+rest.sh: line 4: rustc: command not found
