@@ -1,4 +1,6 @@
 import bz2, importlib.util, io, os, sys, time
+# Capture L by hooking the Python bwt_reverse, so force the Python path.
+os.environ["HWSW_BWT"] = "python"
 d = sys.argv[1]; sys.argv = sys.argv[:1]
 spec = importlib.util.spec_from_file_location("rb", os.path.join(d, "run_benchmark.py"))
 rb = importlib.util.module_from_spec(spec); spec.loader.exec_module(rb)
