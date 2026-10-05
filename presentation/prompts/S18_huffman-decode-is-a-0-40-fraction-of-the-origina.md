@@ -1,0 +1,23 @@
+# Slide S18 (19 of 27)
+
+Layout: "Title and body · Accelerate" (Slide → Apply layout). Insert after slide S17.
+
+Title (exact text, do not shorten or rephrase):
+
+    Huffman decode is a 0.40 fraction of the original run, a 1.67× ceiling alone, so we chain it with move-to-front on one AXI stream
+
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\decode_report.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
+
+Do not touch the footer tracker: the layout already highlights "Accelerate".
+
+Speaker notes (exact text, paste into the notes pane):
+
+    On the VM py-spy profile, Huffman symbol decode plus its bit reader is f = 0.40 of the 1,123.49 ms original, so even an infinitely fast decoder caps at 1/(1 − 0.40) = 1.67×. Move-to-front is another 0.1344 and consumes exactly the decoder's 148,271 output symbols, so the two are chained on chip; that covers about half the run on this profile (the module doc's ≈ 0.63 and ≈ 2.7× ceiling summed the older cProfile Huffman share of 49.6 %). Who does what: the CPU parses each block header, writes the 6 × 147 code lengths and the used-byte map over AXI4-Lite, starts both modules, then runs inverse BWT, RLE4 and MD5. The hardware builds its tables, decodes, and hands each symbol to mtf_cam as one 32-bit AXI-Stream beat, value in TDATA[8:0], type in [11:9] (ADR-0006); platform DMA returns the L-vector.
+
+Done when: the title matches exactly, the body content is fully visible without overflow or
+clipping, the slide uses the "Title and body · Accelerate" layout, and the notes are saved. Reply with a screenshot of
+the slide in edit view, then the STATUS block for S18 (expected: position 19, body image decode_report.png,
+notes_set yes, tracker Accelerate via layout).

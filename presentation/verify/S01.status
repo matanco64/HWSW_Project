@@ -1,0 +1,14 @@
+STATUS S01
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.h53cb298650771a08_2_53#slide=id.h53cb298650771a08_2_53
+position: 2 of 2
+title_as_typed: "Two pure-Python pyperformance workloads, one question: where does the time go, and what would it take to move it to hardware?"
+body: table 4x3
+notes_set: yes (Both workloads ship in pyperformance and)
+tracker: Analyze via layout
+gemini_used: no
+deviations: title wraps to three lines at 32 pt; title box auto-grew to fit
+table font set to Roboto (Slides default for new tables is Arial); layout's empty body placeholder deleted
+Slides preferences changed: automatic capitalization, smart quotes and spelling autocorrect turned off to keep typed text exact
+screenshot: taken

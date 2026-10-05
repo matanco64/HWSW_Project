@@ -1,0 +1,12 @@
+STATUS S03
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.h53cb298650771a08_2_67#slide=id.h53cb298650771a08_2_67
+position: 4 of 4
+title_as_typed: "97.7% of samples sit in advance(); list indexing and float boxing dominate the C frames"
+body: image print_nbody_stock.png
+notes_set: yes (Two profilers, two views. py-spy on)
+tracker: Profile via layout
+gemini_used: no
+deviations: image inserted via staged file + simulated drop (native picker not drivable); sized 5.70 x 3.20 in so it stays above the tracker; empty body placeholder deleted
+screenshot: taken

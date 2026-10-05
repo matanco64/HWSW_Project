@@ -1,0 +1,23 @@
+# Slide S19 (20 of 27)
+
+Layout: "Title and body · Accelerate" (Slide → Apply layout). Insert after slide S18.
+
+Title (exact text, do not shorten or rephrase):
+
+    huffman_engine decodes one symbol per cycle: a barrel shifter, 20 parallel comparators, and six preloaded table sets so a table switch costs zero cycles
+
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\huffman_block_diagram.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
+
+Do not touch the footer tracker: the layout already highlights "Accelerate".
+
+Speaker notes (exact text, paste into the notes pane):
+
+    The only serial dependency is the recurrence: where symbol N+1 starts depends on symbol N's length. So that loop is one cycle: barrel-shift the 64-bit window, compare it against the first-code threshold of all 20 lengths in parallel, priority-encode the shortest match, consume; symbol-table lookup and beat emission pipeline behind the loop. bzip2 switches tables every 50 symbols, so six table register sets are preloaded and the switch is 0-cycle (ADR-0008). Inputs: a 32-bit compressed stream and an 8-bit selector stream; output: 32-bit beats with a 9-bit symbol; target 50 MHz. On the real block: 149,276 cycles for 148,271 symbols, K1 = 1.0068 against a budget of 1.10. The first full-shape run showed 1.5068, an almost-full gate that ignored the same-cycle pop, fixed in one line; un-gating DEFLATE at coverage then exposed an extra-bit-count latching bug the unit tests never reached.
+
+Done when: the title matches exactly, the body content is fully visible without overflow or
+clipping, the slide uses the "Title and body · Accelerate" layout, and the notes are saved. Reply with a screenshot of
+the slide in edit view, then the STATUS block for S19 (expected: position 20, body image huffman_block_diagram.png,
+notes_set yes, tracker Accelerate via layout).

@@ -1,0 +1,12 @@
+STATUS 00c
+result: blocked
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: n/a
+position: 1 of 1
+title_as_typed: n/a
+body: n/a
+notes_set: n/a
+tracker: n/a
+gemini_used: no
+deviations: assets folder not reachable: WSL/UNC path can't be requested by this session and no mapped drive found; file count and missing-name check not performed; native file picker cannot be driven, image inserts will use the extension's direct file upload once the folder is attached
+screenshot: not taken: folder not accessible

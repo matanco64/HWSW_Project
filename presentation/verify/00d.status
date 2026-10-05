@@ -1,0 +1,13 @@
+STATUS 00d
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: n/a
+position: 1 of 1
+title_as_typed: n/a
+body: n/a
+notes_set: n/a
+tracker: n/a
+gemini_used: no
+deviations: layouts as listed in the picker: Title slide, Section header, Blank, Title and body · Accelerate, Title and body · Analyze, Title and body · Optimize, Title and body · Profile, Title and body · Trade-offs
+slide 1 (empty) switched from "Title and body" back to "Title slide" layout so the original layout could be deleted
+screenshot: taken

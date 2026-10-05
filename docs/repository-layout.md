@@ -24,7 +24,7 @@ make_submission.sh                      Verify the deliverables and package them
 prompt.txt                              AI-tool prompt log (course deliverable)
 project_instructions.pdf / .md          Course assignment handout (+ text transcription)  [repo only]
 skills-lock.json                        Pinned sources/hashes of the imported skills  [repo only]
-.claude/                                Claude Code project config: hook wiring + skills (log-prompt,
+.claude/                                Claude Code project config: hook wiring + skills (hw-*,
                                         and a subset of mattpocock/skills: grilling, teach, research, ...)  [repo only]
 benchmarks/
   MANIFEST                              pyperformance custom-benchmark manifest (pyflate, nbody)
@@ -45,7 +45,6 @@ tools/
   runner_common.sh                      The one implementation of every runner stage
   build_wheel.sh                        Builds a crate and installs THAT wheel, recording
                                         the imported path/hash
-  log_prompt_hook.py                    Claude Code hook: auto-appends session prompts to prompt.txt
   hw/                                   Claude Code hooks + status/progress scripts for the HW flow
 hw/                                     Hardware accelerator designs (SystemVerilog) + the stage-gated
                                         HW flow: FLOW.md (definition), PLAN.md (steps),

@@ -1,0 +1,12 @@
+STATUS S02
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.h53cb298650771a08_2_60#slide=id.h53cb298650771a08_2_60
+position: 3 of 3
+title_as_typed: "nbody is 5 bodies, 10 pairs and 20,000 steps of pure-Python float arithmetic"
+body: image nbody_pairs.png
+notes_set: yes (The state is the Sun and)
+tracker: Analyze via layout
+gemini_used: no
+deviations: image inserted via staged file + simulated drop onto the slide (native picker not drivable); image sized 5.70 x 3.20 in, 0.22 in shorter than the body box so it does not cover the tracker; empty body placeholder deleted
+screenshot: taken

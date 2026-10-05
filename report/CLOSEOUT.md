@@ -166,7 +166,7 @@ Not part of the upload (§8 lists only reports, scripts, HW files, prompt.txt), 
 requires a 20–25 min talk + 5–10 min Q&A at a time the staff schedule. Submit first (Gate F),
 then do this; the repo is frozen so nothing here changes the submission.
 
-- [ ] P1 Read `report/defense_guide.md` — the existing talk outline.
+- [x] P1 Read `report/defense_guide.md` — superseded by `presentation/STRATEGY.md` + `storyboard.md` (2026-09-26); stale mtf numbers fixed.
 - [ ] P2 Agree the split: ~12 min software (M) · ~10 min hardware (Y) · 2 min close (B).
 - [ ] P3 Software slides (M): benchmark → flame graph → bottleneck → optimization → results,
       per benchmark; one slide for the Rust tier.
@@ -174,7 +174,7 @@ then do this; the repo is frozen so nothing here changes the submission.
       · cross-module table (`hardware_report.md` §4) · trade-off slide (grape K1, mtf W-sweep,
       huffman storage) · **one honest-limits slide**: no GDS, 50 MHz missed, speedups are
       projections, evidence stages.
-- [ ] P5 Demo plan: which command runs live (D4 candidate) and a fallback recording/screenshot.
+- [x] P5 Demo plan: no live demo; `presentation/assets/chain_cosim.gif` (24.5 s, 2/2 PASS byte-exact `make -C hw/pyflate_accel sim`) on S21; terminal ready for Q&A.
 - [ ] P6 Rehearse once with a timer; trim to 25 min.
 - [ ] P7 Q&A prep — each of you can answer the list below without notes.
 
@@ -193,8 +193,8 @@ then do this; the repo is frozen so nothing here changes the submission.
   `hw/huffman_engine/synth/evidence/`.)
 - Why does the nbody accelerator lose to the 9.53 ms native software? [Y+M] — compute-bound at
   19.46 MHz (127 ms); the win is gated on timing closure, not the interface.
-- Why is the Huffman speedup ~2× at any clock? [Y] — Amdahl-fraction-bound (f ≈ 0.50), not
-  clock-bound.
+- Why is the Huffman speedup ~1.67× at any clock? [Y] — Amdahl-fraction-bound (f ≈ 0.40 on the
+  VM py-spy profile; the earlier cProfile f ≈ 0.50 gave ~2×), not clock-bound.
 - What does "post-CTS" mean and why isn't it silicon? [Y] — placed cells + real clock tree, but
   no detailed routing / GDS; net RC would still move it.
 - Why is it called `mtf_cam` if nothing is content-addressed? [Y] — the decode path reads the
@@ -203,7 +203,7 @@ then do this; the repo is frozen so nothing here changes the submission.
   pyflate: ≈28× over the Python symbol loop, ≈1.3× slower than the Rust kernel (parity at 50 MHz),
   end-to-end tie — the stage is ≈2 % of what remains; BWT sets the floor.
 - Same clock or CDC between huffman and mtf? How tested? [Y] — one shared clock, no CDC
-  (37.6 MHz, mtf-limited); rate difference is cycles/symbol, absorbed by `tready`
+  (37.5 MHz, mtf-limited); rate difference is cycles/symbol, absorbed by `tready`
   back-pressure. Each side verified standalone vs the same beat contract + golden stream, AND
   the chain is co-simulated (`make -C hw/pyflate_accel sim`): byte-exact 336,184 B, 159,303
   cycles, also under 50 % output back-pressure. Live-demo candidate: runs in 30 s.

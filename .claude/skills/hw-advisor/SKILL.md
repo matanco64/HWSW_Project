@@ -30,8 +30,6 @@ Input: `<module> <stage>`. Sources, read in this order:
 5. **Ask before applying.** Present the diffs; apply only those the user accepts. Third-party
    skills (`claude-skill-verilog`, `gf-cocotb`, `tb-best-practices`) are vendored copies — an
    accepted change there is also noted at the top of that SKILL.md as a project overlay.
-6. **Log.** Each applied change is an AI-shaped edit to the process: append to `prompt.txt` via
-   `log-prompt` with source `hw-advisor`, the lesson, and the file changed (course §10).
 
 ## Output
 

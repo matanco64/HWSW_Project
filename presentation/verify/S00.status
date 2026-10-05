@@ -1,0 +1,13 @@
+STATUS S00
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.p#slide=id.p
+position: 1 of 1
+title_as_typed: "Two Python benchmarks, measured end to end: profiling, optimization, and three hardware accelerators"
+body: title-lines 5
+notes_set: yes (Title slide, shown while the staff)
+tracker: none
+gemini_used: no
+deviations: subtitle placeholder resized from 0.87 in to 1.9 in tall so the five lines are not auto-shrunk to 9 pt
+an accidental click on the "Enhance this slide" chip started a Gemini redesign request; cancelled before any change, slide re-verified
+screenshot: taken

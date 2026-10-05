@@ -1,0 +1,23 @@
+# Slide B01 (BACKUP)
+
+Layout: "Title and body · Accelerate" (Slide → Apply layout). Insert at the end of the deck (backup section).
+
+Title (exact text, do not shorten or rephrase):
+
+    grape's step is a fixed 290-operation graph scheduled onto 3 adders and 3 multipliers
+
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\grape_uarch.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
+
+Do not touch the footer tracker: the layout already highlights "Accelerate".
+
+Speaker notes (exact text, paste into the notes pane):
+
+    Datapath: pair i issues at cycle 2i into the shared units. Per pair, the front end subtracts the three coordinates, squares and sums them, takes the square root, multiplies to d3, takes the reciprocal, then forms the magnitude and the six force terms; every one of those is a Python-visible binary64 rounding held in its own register. Per step that is 125 adds, 145 multiplies, 10 square roots and 10 reciprocals, 290 operations, which a greedy list scheduler places on the units as a static reservation table checked by an SVA assertion. Control: the step FSM is IDLE, LATCH, RUN, COMMIT, DONE or ABORT; RUN ends when all 290 ops have retired and ABORT is sampled only at COMMIT. The accumulate sequencer keeps a 5-by-3 busy scoreboard per body component so velocity updates on one lane stay in program order. Timing budget: each pipeline stage was estimated at 8 ns or less against the 20 ns period, which is why the 50 MHz target looked comfortable on paper; the picker path that later set the clock was not in that table.
+
+Done when: the title matches exactly, the body content is fully visible without overflow or
+clipping, the slide uses the "Title and body · Accelerate" layout, and the notes are saved. Reply with a screenshot of
+the slide in edit view, then the STATUS block for B01 (expected: position end of deck, body image grape_uarch.png,
+notes_set yes, tracker Accelerate via layout).

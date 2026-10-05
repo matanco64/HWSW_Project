@@ -1,0 +1,23 @@
+# Slide S02 (3 of 27)
+
+Layout: "Title and body · Analyze" (Slide → Apply layout). Insert after slide S01.
+
+Title (exact text, do not shorten or rephrase):
+
+    nbody is 5 bodies, 10 pairs and 20,000 steps of pure-Python float arithmetic
+
+Body: insert the image `C:\Users\Kogan\HWSW_presentation\assets\nbody_pairs.png` with your direct upload tool.
+Size it to fill the body box: width 9.2 in, or height 3.4 in if that binds first, keeping the
+aspect ratio; place it at x = 0.4 in, y = 1.6 in and centre it horizontally in the body box.
+It must not overlap the title or the footer tracker. No caption, no border, no crop.
+
+Do not touch the footer tracker: the layout already highlights "Analyze".
+
+Speaker notes (exact text, paste into the notes pane):
+
+    The state is the Sun and four gas giants: 35 Python floats in nested lists, a position, a velocity and a mass per body. pairs is a list of ten tuples aliasing those same lists, built once. One timed iteration evaluates the energy, calls advance(0.01, 20000), and evaluates the energy again. Every step visits the same ten pairs, forms dx, dy and dz, computes mag = dt * (dsq ** -1.5) and updates both bodies' velocities in place. Ten pairs times 20,000 steps is 200,000 pair-force evaluations, and between every one of them sits the interpreter. The physics is compact; the machinery around each calculation is what we go looking for.
+
+Done when: the title matches exactly, the body content is fully visible without overflow or
+clipping, the slide uses the "Title and body · Analyze" layout, and the notes are saved. Reply with a screenshot of
+the slide in edit view, then the STATUS block for S02 (expected: position 3, body image nbody_pairs.png,
+notes_set yes, tracker Analyze via layout).

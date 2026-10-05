@@ -1,0 +1,15 @@
+STATUS 00a
+result: done-with-deviation
+deck_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit
+slide_url: https://docs.google.com/presentation/d/1OIEkCFSlG5isjIxzSh0nVtzM_s5oRcR7FqAOvE0aYE8/edit?slide=id.p#slide=id.p
+position: 1 of 1
+title_as_typed: n/a
+body: n/a
+notes_set: n/a
+tracker: n/a
+gemini_used: no
+deviations: layouts remaining: Title slide, Section header, Title and body, Blank
+deck was pre-created by the human as "HWSW Presentation" and renamed to "HWSW project — nbody & pyflate" rather than created via File → New presentation
+title box height set to 1.3 in (not specified) so two 32 pt lines fit; body box starts at y = 1.8 in
+slide 1's layout changed from Title slide to Title and body to produce the requested blank Title-and-body screenshot
+screenshot: taken

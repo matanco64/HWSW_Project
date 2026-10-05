@@ -36,5 +36,4 @@ results/native_counters_20260907/pyflate_*.json export-ignore
 results/vm_release_20260907/counters/*.stdout export-ignore
 results/vm_release_20260907/counters/*.stderr export-ignore
 tools/hw/*_hook.py               export-ignore
-tools/log_prompt_hook.py         export-ignore
 **/__pycache__/                  export-ignore
